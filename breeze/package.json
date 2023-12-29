@@ -1,0 +1,91 @@
+{
+  "name": "@likable-hair/breeze",
+  "description": "Simple plugin that allows BullMQ to be used by AdonisJS",
+  "version": "1.0.0",
+  "main": "build/providers/BullProvider.js",
+  "types": "build/adonis-typings/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "test": "node japaFile.js",
+    "copyfiles": "copyfiles \"templates/**/*.txt\" build",
+    "compile": "tsc",
+    "prebuild": "rimraf ./build",
+    "build": "npm run compile && npm run copyfiles",
+    "lint": "eslint --ignore-path .gitignore",
+    "format": "prettier \"**/*.ts\" --write --ignore-path .gitignore"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "bull",
+    "queue",
+    "adonis",
+    "adonisjs",
+    "adonis-js",
+    "adonis-bull",
+    "adonis-queue"
+  ],
+  "bugs": {
+    "url": "https://github.com/rocketseat/adonis-bull/issues"
+  },
+  "homepage": "https://github.com/rocketseat/adonis-bull#readme",
+  "devDependencies": {
+    "@adonisjs/ace": "^11.0.1",
+    "@adonisjs/application": "^5.1.2",
+    "@adonisjs/core": "^5.1.6",
+    "@adonisjs/fold": "^8.1.2",
+    "@adonisjs/logger": "^4.0.2",
+    "@adonisjs/mrm-preset": "^3.0.0",
+    "@adonisjs/sink": "^5.1.3",
+    "@poppinss/dev-utils": "^1.0.11",
+    "@types/node": "^14.6.1",
+    "@typescript-eslint/eslint-plugin": "^4.1.0",
+    "@typescript-eslint/parser": "^4.1.0",
+    "copyfiles": "^2.3.0",
+    "delay": "^4.3.0",
+    "eslint": "^7.18.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "japa": "^3.1.1",
+    "prettier": "^2.2.1",
+    "reflect-metadata": "^0.1.13",
+    "rimraf": "^3.0.2",
+    "ts-node": "^9.0.0",
+    "typescript": "^3.9.7"
+  },
+  "peerDependencies": {
+    "@adonisjs/core": "^5.0.4-preview-rc"
+  },
+  "dependencies": {
+    "bullmq": "^1.24.5"
+  },
+  "files": [
+    "build/adonis-typings",
+    "build/commands",
+    "build/providers",
+    "build/src",
+    "build/templates",
+    "build/instructions.js",
+    "build/instructions.d.ts"
+  ],
+  "typings": "build/adonis-typings/index.d.ts",
+  "adonisjs": {
+    "instructions": "./build/instructions.js",
+    "types": "@likable-hair/breeze",
+    "providers": [
+      "@likable-hair/breeze"
+    ],
+    "commands": [
+      "@likable-hair/breeze/build/commands"
+    ]
+  }
+}

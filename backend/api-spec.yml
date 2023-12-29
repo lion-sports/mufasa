@@ -1,0 +1,235 @@
+openapi: 3.0.0
+info:
+  title: Weeks API
+  description: Description of weeks API
+  version: 1.0.0
+# servers:
+#   - url: http://api.example.com/v1
+#     description: Optional server description, e.g. Main (production) server
+#   - url: http://staging-api.example.com
+#     description: Optional server description, e.g. Internal staging server for test
+components:
+  schemas:
+    PaginationMeta:
+      type: object
+      properties:
+        total:
+          type: integer
+        perPage:
+          type: number
+        currentPage:
+          type: number
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        rememberMeToken:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Permission:
+      type: object
+      properties:
+        id:
+          type: integer
+        action:
+          type: string
+        resource:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+paths:
+  /auth/login:
+    post:
+      summary: Return a token to put in the authorization header.
+      responses:
+        '200':
+          description: Auth token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  token:
+                    type: string
+                  expires_at:
+                    type: string
+                    format: date-time
+                  expires_in:
+                    type: number
+  /auth/logout:
+    post:
+      summary: Revoke a token for a user.
+      responses:
+        '200':
+          description: Status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  revoked:
+                    type: boolean
+  /users:
+    get:
+      summary: Returns a list of users.
+      responses:
+        '200':
+          description: A JSON array of user names
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+    post:
+      summary: Create a user.
+      responses:
+        '200':
+          description: The new user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      summary: Delete a certain user.
+      responses:
+        '200':
+          description: No response
+  /users/{userId}:
+    get:
+      summary: Returns a certain user.
+      responses:
+        '200':
+          description: The user got.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    put:
+      summary: Update a certain user.
+      responses:
+        '200':
+          description: The user got.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /permissions:
+    get:
+      summary: Returns a paginated list of permissions.
+      responses:
+        '200':
+          description: Paginated results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Permission"
+  /permissions/{permissionId}:
+    get:
+      summary: Returns certain permission.
+      responses:
+        '200':
+          description: The permission.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Permission"
+  /roles:
+    get:
+      summary: Returns a paginated list of roles.
+      responses:
+        '200':
+          description: Paginated results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Role"
+    post:
+      summary: Create a role.
+      responses:
+        '200':
+          description: The new role.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+  /roles/{roleId}:
+    get:
+      summary: Returns certain role.
+      responses:
+        '200':
+          description: The role.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+    put:
+      summary: Update a certain role.
+      responses:
+        '200':
+          description: The updated role.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Role"
+    delete:
+      summary: Delete a certain role.
+      responses:
+        '200':
+          description: No response.
+
+
+
+
