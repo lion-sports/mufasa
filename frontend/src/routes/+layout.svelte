@@ -36,7 +36,7 @@
 </script>
 
 <svelte:head>
-	<title>Lionsport</title>
+	<title>Lion Sport</title>
 </svelte:head>
 
 <slot />

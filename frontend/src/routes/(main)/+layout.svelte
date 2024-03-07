@@ -94,12 +94,12 @@
 			{/if}
 		</svelte:fragment>
 		<svelte:fragment slot="logo" let:sidebarExpanded let:hamburgerVisible>
-			<ApplicationLogo
+			<!-- <ApplicationLogo
 				class="ml-4 mt-4"
 				on:click={handleLogoClick}
 				on:keydown={handleLogoClick}
 				collapsed={!sidebarExpanded && !hamburgerVisible}
-			/>
+			/> -->
 		</svelte:fragment>
 		<svelte:fragment slot="user" let:sidebarExpanded let:hamburgerVisible>
 			<div style:display="flex" style:flex-direction="column" style:height="100%">
