@@ -1,33 +1,34 @@
+import RolesManager from 'App/managers/roles.manager'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import RoleManager from 'App/managers/role.manager'
 
 export default class RolesController {
-  public async index({ request }: HttpContextContract) {
-    const manager = new RoleManager()
-
+  public async index({ params, request }: HttpContextContract) {
+    const manager = new RolesManager()
     return await manager.list({
       data: {
         page: request.input('page'),
         perPage: request.input('perPage'),
-        filtersBuilder: request.input('filtersBuilder')
+        team: {
+          id: params.teamId
+        }
       }
     })
   }
 
   public async store({ request }: HttpContextContract) {
-    const manager = new RoleManager()
-
+    const manager = new RolesManager()
     return await manager.create({
       data: {
-        name: request.input('name'),
-        permissions: request.input('permissions')
+        name: request.body().name,
+        team: request.body().team,
+        cans: request.input('cans'),
+        convocable: request.input('convocable')
       }
     })
   }
 
   public async show({ params }: HttpContextContract) {
-    const manager = new RoleManager()
-
+    const manager = new RolesManager()
     return await manager.get({
       data: {
         id: params.id
@@ -36,23 +37,22 @@ export default class RolesController {
   }
 
   public async update({ request, params }: HttpContextContract) {
-    const manager = new RoleManager()
-
+    const manager = new RolesManager()
     return await manager.update({
       data: {
         id: params.id,
         name: request.input('name'),
-        permissions: request.input('permissions')
+        cans: request.input('cans'),
+        convocable: request.input('convocable') 
       }
     })
   }
 
   public async destroy({ params }: HttpContextContract) {
-    const manager = new RoleManager()
-
+    const manager = new RolesManager()
     return await manager.destroy({
       data: {
-        id: params.id
+        id: params.id,
       }
     })
   }

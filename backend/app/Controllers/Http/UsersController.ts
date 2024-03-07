@@ -8,7 +8,7 @@ export default class UsersController {
       data: {
         page: request.input('page'),
         perPage: request.input('perPage'),
-        filtersBuilder: request.input('filtersBuilder')
+        filters: request.input('filters')
       }
     })
   }
@@ -17,12 +17,10 @@ export default class UsersController {
     const manager = new UsersManager()
     return await manager.create({
       data: {
-        email: request.body().email,
-        firstname: request.body().firstname,
-        lastname: request.body().lastname,
-        password: request.body().password,
-        phoneNumber: request.body().phoneNumber,
-        roleId: request.body().roleId
+        email: request.input('email'),
+        password: request.input('password'),
+        firstname: request.input('firstname'),
+        lastname: request.input('lastname')
       }
     })
   }
@@ -43,21 +41,11 @@ export default class UsersController {
         id: params.id,
         email: request.input('email'),
         password: request.input('password'),
-        lastname: request.input('lastname'),
         firstname: request.input('firstname'),
-        phoneNumber: request.input('phoneNumber'),
-        roleId: request.input('roleId')
+        lastname: request.input('lastname')
       }
     })
   }
 
-  public async destroy({ params }: HttpContextContract) {
-    const manager = new UsersManager()
-
-    return await manager.destroy({
-      data: {
-        id: params.id
-      }
-    })
-  }
+  public async destroy({ }: HttpContextContract) { }
 }

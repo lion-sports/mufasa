@@ -4,9 +4,7 @@
     "./commands",
     "@adonisjs/core/build/commands/index.js",
     "@adonisjs/repl/build/commands",
-    "@adonisjs/lucid/build/commands",
-    "@adonisjs/mail/build/commands",
-    "@likable-hair/breeze/build/commands"
+    "@adonisjs/lucid/build/commands"
   ],
   "exceptionHandlerNamespace": "App/Exceptions/Handler",
   "aliases": {
@@ -18,20 +16,21 @@
   "preloads": [
     "./start/routes",
     "./start/kernel",
-    "./start/limiter"
+    {
+      "file": "./start/validator",
+      "environment": [
+        "console",
+        "repl",
+        "web"
+      ]
+    }
   ],
   "providers": [
     "./providers/AppProvider",
     "@adonisjs/core",
     "@adonisjs/auth",
     "@adonisjs/lucid",
-    "@adonisjs/attachment-lite",
-    "@adonisjs/redis",
-    "@adonisjs/view",
-    "@adonisjs/session",
-    "@adonisjs/mail",
-    "@adonisjs/limiter",
-    "@likable-hair/breeze"
+    "@adonisjs/ally"
   ],
   "aceProviders": [
     "@adonisjs/repl"
@@ -44,23 +43,10 @@
           "tests/functional/**/*.spec(.ts|.js)"
         ],
         "timeout": 60000
-      },
-      {
-        "name": "managers",
-        "files": [
-          "tests/managers/**/*.spec(.ts|.js)"
-        ],
-        "timeout": 60000
       }
     ]
   },
   "testProviders": [
     "@japa/preset-adonis/TestsProvider"
-  ],
-  "metaFiles": [
-    {
-      "pattern": "resources/views/**/*.edge",
-      "reloadServer": false
-    }
   ]
 }

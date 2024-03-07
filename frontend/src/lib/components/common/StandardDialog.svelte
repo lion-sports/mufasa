@@ -1,46 +1,24 @@
 <script lang="ts">
-  export let open: boolean = false,
-    title: string | undefined = undefined,
-    titlePadding: string = "10px",
-    bodyPadding: string = "10px",
-    cardPadding: string | undefined = undefined,
-    footerPadding: string = "10px",
-    width: string | undefined = undefined,
-    height: string | undefined = "auto"
+	export let open: boolean = false,
+		title: string | undefined = undefined,
+		_overlayOpacity: string | undefined = '60%'
 
-  import { Dialog } from "@likable-hair/svelte"
-  import StandardCard from "$lib/components/common/StandardCard.svelte"
-  import Subtitle from "$lib/components/common/Subtitle.svelte";
+	import { Dialog } from '@likable-hair/svelte'
 </script>
 
-<Dialog
-  bind:open={open}
-  overlayOpacity="60%"
->
-  <StandardCard
-    height={height}
-    padding={cardPadding}
-    maxHeight="90vh"
-    width={width}
-  >
-    <div
-      slot="header"
-      style:padding={titlePadding}
-    >
-      <slot name="header">
-        <Subtitle subtitle={title}></Subtitle>
-      </slot>
-    </div>
-    <div
-      style:padding={bodyPadding}
-    >
-      <slot></slot>
-    </div>
-    <div
-      slot="footer"
-      style:padding={footerPadding}
-    >
-      <slot name="footer"></slot>
-    </div>
-  </StandardCard>
+<Dialog bind:open {_overlayOpacity}>
+	<div class="card">
+		{#if !!title}
+			<div class="font-bold text-xl">{title}</div>
+		{/if}
+		<slot />
+	</div>
 </Dialog>
+
+<style>
+	.card {
+		background-color: rgb(var(--global-color-background-300));
+		border-radius: 8px;
+		padding: 12px;
+	}
+</style>

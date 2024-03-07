@@ -21,22 +21,10 @@ export default Env.rules({
   APP_NAME: Env.schema.string(),
   DRIVE_DISK: Env.schema.enum(['local'] as const),
   NODE_ENV: Env.schema.enum(['development', 'production', 'test'] as const),
-  ADMIN_USER_SEED_PASSWORD: Env.schema.string.optional(),
-  FRONTEND_URL: (_key, value) => {
-    if(!value) throw new Error('FRONTEND_URL env variable is missing')
-    else if(!value.startsWith('http')) throw new Error("FRONTEND_URL: bad url");
-    else return value
-  },
-  RESET_PASSWORD_URL: Env.schema.string.optional(),
-  SMTP_HOST: Env.schema.string.optional({ format: 'host' }),
-  SMTP_PORT: Env.schema.number.optional(),
-  SMTP_USERNAME: Env.schema.string.optional(),
-  SMTP_PASSWORD: Env.schema.string.optional(),
-  SESSION_DRIVER: Env.schema.string(),
-  MAILGUN_API_KEY: Env.schema.string(),
-  MAILGUN_DOMAIN: Env.schema.string(),
-  TEST_EMAIL: Env.schema.string.optional(),
-  REDIS_HOST: Env.schema.string(),
-  REDIS_PORT: Env.schema.string(),
-  REDIS_PASSWORD: Env.schema.string.optional()
+  GOOGLE_CLIENT_ID: Env.schema.string(),
+  GOOGLE_IOS_CLIENT_ID: Env.schema.string(),
+  GOOGLE_CLIENT_SECRET: Env.schema.string(),
+  GOOGLE_CALLBACK_URL: Env.schema.string.optional(),
+  TELEGRAM_FIPAV_BOT_TOKEN: Env.schema.string.optional(),
+  PUBLIC_URL: Env.schema.string.optional()
 })

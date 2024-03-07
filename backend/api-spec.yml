@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: Weeks API
-  description: Description of weeks API
+  title: Lionsport API
+  description: Description of lionsport API
   version: 1.0.0
 # servers:
 #   - url: http://api.example.com/v1
@@ -13,7 +13,7 @@ components:
     PaginationMeta:
       type: object
       properties:
-        total:
+        total: 
           type: integer
         perPage:
           type: number
@@ -22,36 +22,133 @@ components:
     User:
       type: object
       properties:
-        id:
+        id: 
           type: integer
         email:
           type: string
-        firstname:
+        name:
           type: string
-        lastname:
+        color:
           type: string
+          nullable: true
+        textColor:
+          type: string
+          nullable: true
         rememberMeToken:
           type: string
           nullable: true
         createdAt:
           type: string
           format: date-time
-        updatedAt:
+        updatedAt: 
           type: string
           format: date-time
-    Permission:
+    Team:
+      type: object
+      properties:
+        id: 
+          type: integer
+        uid:
+          type: string
+          nullable: true
+        name:
+          type: string
+        ownerId:
+          type: integer
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+    Invitation:
+      type: object
+      properties:
+        id: 
+          type: integer
+        invitedByUserId:
+          type: integer
+        invitedUserId:
+          type: integer
+          nullable: true
+        invitedBy:
+          nullable: true
+          $ref: "#/components/schemas/User"
+        invitedEmail:
+          type: string
+        teamId:
+          type: integer
+        team:
+          nullable: true
+          $ref: "#/components/schemas/Team"
+        roleId:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          enum:
+            - pending 
+            - rejected
+            - accepted
+            - discarded
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+    Event:
       type: object
       properties:
         id:
           type: integer
-        action:
+        start:
           type: string
-        resource:
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        teamId:
+          type: integer
+          nullable: true
+        team:
+          nullable: true
+          $ref: "#/components/schemas/Team"
+        frequencyId:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          enum:
+            - confirmed
+            - notConfirmed
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+    EventSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        uid:
+          type: string
+        name:
           type: string
         createdAt:
           type: string
           format: date-time
-        updatedAt:
+        updatedAt: 
           type: string
           format: date-time
     Role:
@@ -61,10 +158,65 @@ components:
           type: integer
         name:
           type: string
+        convocable:
+          type: boolean
+        cans:
+          nullable: true
+          type: object
+        team:
+          nullable: true
+          $ref: "#/components/schemas/Team"
+        teamId:
+          type: integer
         createdAt:
           type: string
           format: date-time
-        updatedAt:
+        updatedAt: 
+          type: string
+          format: date-time
+    Convocation:
+      type: object
+      properties:
+        id:
+          type: integer
+        notes:
+          type: string
+          nullable: true
+        eventId:
+          type: integer
+        teammateId:
+          type: integer
+        confirmationStatus:
+          type: string
+        teamId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+    Teammate:
+      type: object
+      properties:
+        id:
+          type: integer
+        roleId:
+          type: integer
+        teamId:
+          type: integer
+        uid:
+          type: string
+          nullable: true
+        userId: 
+          type: integer
+        alias:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
           type: string
           format: date-time
 
@@ -89,6 +241,78 @@ paths:
                     format: date-time
                   expires_in:
                     type: number
+                  userId:
+                    type: number
+                    nullable: true
+                  refreshToken:
+                    type: string
+                    nullable: true
+                  refreshTokenExpiration:
+                    type: string
+                    format: date-time
+    parameters:
+      - name: email
+        in: query
+        description: The email of the user
+        required: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        description: The password of the user
+        required: true
+        schema:
+          type: string
+  /auth/refreshToken:
+    post:
+      summary: Return a brand new token to put in the authorization header with the refresh token as a parameter.
+      responses:
+        '200':
+          description: Auth token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  token:
+                    type: string
+                  expires_at:
+                    type: string
+                    format: date-time
+                  expires_in:
+                    type: number
+  /auth/signup:
+    post:
+      summary: Signup and create a new user.
+      responses:
+        '200':
+          description: New User.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/User"
+    parameters:
+      - name: email
+        in: query
+        description: The email of the new user
+        required: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        description: The password of the new user
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: The name of the new user
+        required: true
+        schema:
+          type: string
   /auth/logout:
     post:
       summary: Revoke a token for a user.
@@ -110,7 +334,7 @@ paths:
           description: A JSON array of user names
           content:
             application/json:
-              schema:
+              schema: 
                 type: object
                 properties:
                   meta:
@@ -126,13 +350,8 @@ paths:
           description: The new user.
           content:
             application/json:
-              schema:
+              schema: 
                 $ref: "#/components/schemas/User"
-    delete:
-      summary: Delete a certain user.
-      responses:
-        '200':
-          description: No response
   /users/{userId}:
     get:
       summary: Returns a certain user.
@@ -141,7 +360,7 @@ paths:
           description: The user got.
           content:
             application/json:
-              schema:
+              schema: 
                 $ref: "#/components/schemas/User"
     put:
       summary: Update a certain user.
@@ -150,17 +369,26 @@ paths:
           description: The user got.
           content:
             application/json:
-              schema:
+              schema: 
                 $ref: "#/components/schemas/User"
-  /permissions:
-    get:
-      summary: Returns a paginated list of permissions.
+  /teams:
+    post:
+      summary: Create a new team.
       responses:
         '200':
-          description: Paginated results.
+          description: The new team.
           content:
             application/json:
               schema:
+                $ref: "#/components/schemas/Team"
+    get:
+      summary: Returns a list of teams associated to the current user.
+      responses:
+        '200':
+          description: The teams associated to my user.
+          content:
+            application/json:
+              schema: 
                 type: object
                 properties:
                   meta:
@@ -168,26 +396,535 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Permission"
-  /permissions/{permissionId}:
+                      $ref: "#/components/schemas/Team"
+  /teams/{teamId}:
     get:
-      summary: Returns certain permission.
+      summary: Returns a certain team.
       responses:
         '200':
-          description: The permission.
+          description: The team.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Permission"
+                $ref: "#/components/schemas/Team"
+    put:
+      summary: Update a certain team.
+      responses:
+        '200':
+          description: The team updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Team"
+  /teams/{teamId}/removeUser:
+    post:
+      summary: Remove the logged in user from a team.
+      responses:
+        '200':
+          description: No response.
+  /teams/{teamId}/exit:
+    post:
+      summary: Remove a user from a team.
+      responses:
+        '200':
+          description: No response.
+  /teams/{teamId}/updatePreference:
+    post:
+      summary: Update a preference for a team.
+      responses:
+        '200':
+          description: The team updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Team"
+  /teams/absencesInLatestEvents:
+    get:
+      summary: Returns a the absences for the latest events in all participating teams.
+      responses:
+        '200':
+          description: The teams associated to my user.
+          content:
+            application/json:
+              schema: 
+                type: object
+                additionalProperties: 
+                  type: object
+                  properties:
+                    team:
+                      type: object
+                      properties:
+                        id:
+                          type: number
+                        name:
+                          type: string
+                    absences:
+                      type: object
+                      properties:
+                        eventId:
+                          type: number
+                        absencesNumber:
+                          type: number
+                        
+  /teammates/{teammateId}:
+    put:
+      summary: Update a certain teammate.
+      responses:
+        '200':
+          description: The teammate updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Teammate"
+  /invitations/inviteUser:
+    post:
+      summary: Invite a user to a team.
+      responses:
+        '200':
+          description: The invitation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invitation"
+    parameters:
+      - name: user
+        in: query
+        description: The user to invite
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+      - name: team
+        in: query
+        description: The team where the user has been invited
+        required: true
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+      - name: role
+        in: query
+        description: The role the user would be
+        required: false
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+  /invitations/list:
+    get:
+      summary: Get my invitations
+      responses:
+        '200':
+          description: The invitation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invitation"
+  /invitations/accept:
+    post:
+      summary: Accept an invitation
+      responses:
+        '200':
+          description: The accepted invitation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invitation"
+    parameters:
+      - name: invitation
+        in: query
+        description: The invitation to accept
+        required: true
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+  /invitations/reject:
+    post:
+      summary: Reject an invitation
+      responses:
+        '200':
+          description: The rejected invitation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invitation"
+    parameters:
+      - name: invitation
+        in: query
+        description: The invitation to reject
+        required: true
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+  /invitations/discard:
+    post:
+      summary: Discard an invitation
+      responses:
+        '200':
+          description: The discarded invitation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invitation"
+    parameters:
+      - name: invitation
+        in: query
+        description: The invitation to discard
+        required: true
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+  /events:
+    post:
+      summary: Create a new event.
+      responses:
+        '200':
+          description: The new event.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+      parameters:
+        - name: event
+          in: query
+          description: The event to create
+          required: true
+          schema:
+            $ref: "#/components/schemas/Event"
+    get:
+      summary: Get a list of events.
+      responses:
+        '200':
+          description: The events.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+      parameters:
+        - name: filters
+          in: query
+          description: The event to create
+          required: true
+          schema:
+            type: object
+            properties:
+              from: 
+                type: string
+                format: date-time
+              to: 
+                type: string
+                format: date-time
+              team:
+                type: object
+                properties:
+                  id: 
+                    type: integer
+  /events/{eventId}:
+    get:
+      summary: Get an event.
+      responses:
+        '200':
+          description: The event.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+      parameters:
+        - name: eventId
+          in: path
+          description: The id of the event to get
+          required: true
+          schema:
+            type: integer
+    put:
+      summary: Update an event.
+      responses:
+        '200':
+          description: The updated event.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+      parameters:
+        - name: eventId
+          in: path
+          description: The id of the event to update
+          required: true
+          schema:
+            type: integer
+        - name: data
+          in: query
+          description: The data used to update the event
+          required: true
+          schema:
+            $ref: "#/components/schemas/Event"
+    delete:
+      summary: Destroy a new event.
+      responses:
+        '200':
+          description: No response.
+      parameters:
+        - name: eventId
+          in: path
+          description: The id of the event to update
+          required: true
+          schema:
+            type: integer
+  /events/{eventId}/convocate:
+    post:
+      summary: Convocate a teammate in an event.
+      responses:
+        '200':
+          description: The created convocations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Convocation"
+      parameters:
+        - name: eventId
+          in: path
+          description: The event to convocate to
+          required: true
+          schema:
+            type: integer
+        - name: teammates
+          in: query
+          description: The teammates to convocate
+          required: true
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id: 
+                  type: integer
+  /events/{eventId}/unConvocate:
+    post:
+      summary: Delete convocation of a teammate in an event.
+      responses:
+        '200':
+          description: The created convocations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Convocation"
+      parameters:
+        - name: eventId
+          in: path
+          description: The event to un convocate from.
+          required: true
+          schema:
+            type: integer
+        - name: teammates
+          in: query
+          description: The teammates to convocate.
+          required: true
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id: 
+                  type: integer
+  /events/createWithFrequency:
+    post:
+      summary: Create a new event repeating over time.
+      responses:
+        '200':
+          description: The new events.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+    parameters:
+      - name: event
+        in: query
+        description: The event to create
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+            status:
+              type: string
+              enum:
+                - confirmed
+                - notConfirmed
+            team:
+              type: object
+              properties:
+                id:
+                  type: integer
+      - name: rule
+        in: query
+        description: The rule to create the event
+        required: true
+        schema:
+          type: object
+          properties:
+            frequency:
+              type: string
+              enum:
+                - week
+                - month
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+            daysOfWeek:
+              type: array
+              items:
+                type: number
+            daysOfMonth:
+              type: array
+              items:
+                type: number
+  /events/copyWeek:
+    post:
+      summary: Copy the events of a week to another.
+      responses:
+        '200':
+          description: The new events.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+    parameters:
+      - name: fromWeekNumber
+        in: query
+        description: The week number to create from
+        required: true
+        schema:
+          type: integer
+      - name: fromWeekYear
+        in: query
+        description: The week year to create from
+        required: true
+        schema:
+          type: integer
+      - name: toWeekNumber
+        in: query
+        description: The week number to create to
+        required: true
+        schema:
+          type: integer
+      - name: toWeekYear
+        in: query
+        description: The week year to create to
+        required: true
+        schema:
+          type: integer
+      - name: team
+        in: query
+        description: The team to take the event from
+        required: true
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+  /eventSessions:
+    post:
+      summary: Create a new event session.
+      responses:
+        '200':
+          description: The new event session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventSession"
+    get:
+      summary: Returns a list of event sessions associated to the current user.
+      responses:
+        '200':
+          description: The event sessions associated to my user.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/EventSession"
+  /eventSessions/{eventSessionId}:
+    get:
+      summary: Returns a certain event session.
+      responses:
+        '200':
+          description: The event session.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventSession"
+    put:
+      summary: Update an event session.
+      responses:
+        '200':
+          description: The team updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Team"
+    delete:
+      summary: delete a event session.
+      responses:
+        '200':
+          description: No response.
   /roles:
-    get:
-      summary: Returns a paginated list of roles.
+    post:
+      summary: Create a new role.
       responses:
         '200':
-          description: Paginated results.
+          description: The new role.
           content:
             application/json:
               schema:
+                $ref: "#/components/schemas/Role"
+  /teams/{teamId}/roles:
+    get:
+      summary: Returns a list of roles associated to the team.
+      responses:
+        '200':
+          description: The roles associated to the teams.
+          content:
+            application/json:
+              schema: 
                 type: object
                 properties:
                   meta:
@@ -196,18 +933,9 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Role"
-    post:
-      summary: Create a role.
-      responses:
-        '200':
-          description: The new role.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Role"
-  /roles/{roleId}:
+  /roles/{teamId}:
     get:
-      summary: Returns certain role.
+      summary: Returns a certain role.
       responses:
         '200':
           description: The role.
@@ -222,14 +950,25 @@ paths:
           description: The updated role.
           content:
             application/json:
-              schema:
+              schema: 
                 $ref: "#/components/schemas/Role"
-    delete:
-      summary: Delete a certain role.
+  /convocations/{convocationId}/confirm:
+    post:
+      summary: Confirm a convocation.
       responses:
         '200':
-          description: No response.
-
-
-
-
+          description: The new convocation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Convocation"
+  /convocations/{convocationId}/deny:
+    post:
+      summary: Deny a convocation.
+      responses:
+        '200':
+          description: The new convocation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Convocation"

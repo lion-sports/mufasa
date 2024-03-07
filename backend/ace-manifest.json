@@ -514,69 +514,6 @@
           "description": "Drop all custom types (Postgres only)"
         }
       ]
-    },
-    "make:mailer": {
-      "settings": {},
-      "commandPath": "@adonisjs/mail/build/commands/MakeMailer",
-      "commandName": "make:mailer",
-      "description": "Make a new mailer class",
-      "args": [
-        {
-          "type": "string",
-          "propertyName": "name",
-          "name": "name",
-          "required": true,
-          "description": "Name of the mailer class"
-        }
-      ],
-      "aliases": [],
-      "flags": []
-    },
-    "make:job": {
-      "settings": {},
-      "commandPath": "@likable-hair/breeze/build/commands/MakeJob",
-      "commandName": "make:job",
-      "description": "Make a new Bull job",
-      "args": [
-        {
-          "type": "string",
-          "propertyName": "name",
-          "name": "name",
-          "required": true,
-          "description": "Name of the job class"
-        }
-      ],
-      "aliases": [],
-      "flags": []
-    },
-    "bull:exception": {
-      "settings": {},
-      "commandPath": "@likable-hair/breeze/build/commands/MakeException",
-      "commandName": "bull:exception",
-      "description": "Make a Bull exception handle file",
-      "args": [],
-      "aliases": [],
-      "flags": []
-    },
-    "bull:listen": {
-      "settings": {
-        "loadApp": true,
-        "stayAlive": true
-      },
-      "commandPath": "@likable-hair/breeze/build/commands/Listen",
-      "commandName": "bull:listen",
-      "description": "Start the Bull listener",
-      "args": [],
-      "aliases": [],
-      "flags": [
-        {
-          "name": "port",
-          "propertyName": "port",
-          "type": "number",
-          "description": "Run bull's dashboard in the provided port",
-          "alias": "p"
-        }
-      ]
     }
   },
   "aliases": {}

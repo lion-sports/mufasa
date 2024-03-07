@@ -20,6 +20,7 @@ const databaseConfig: DatabaseConfig = {
   |
   */
   connection: Env.get('DB_CONNECTION'),
+
   connections: {
     /*
     |--------------------------------------------------------------------------
@@ -44,15 +45,8 @@ const databaseConfig: DatabaseConfig = {
       migrations: {
         naturalSort: true,
       },
-      seeders: {
-        paths: ['./database/seeders']
-      },
       healthCheck: false,
       debug: false,
-      pool: {
-        min: 0,
-        max: 60,
-      },
     },
     test: {
       client: 'pg',
@@ -65,9 +59,6 @@ const databaseConfig: DatabaseConfig = {
       },
       migrations: {
         naturalSort: true,
-      },
-      seeders: {
-        paths: ['./database/seeders']
       },
       healthCheck: false,
       debug: false,

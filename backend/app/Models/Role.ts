@@ -1,7 +1,13 @@
-import { DateTime } from 'luxon'
-import { column, ManyToMany, manyToMany } from '@ioc:Adonis/Lucid/Orm'
+import Team from 'App/Models/Team';
 import { CamelCaseBaseModel } from './CamelCaseBaseModel'
-import Permission from './Permission'
+import { DateTime } from 'luxon'
+import { BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import type { Action, Resource } from 'App/managers/authorization.manager';
+export type RoleCans = {
+  [resource in Resource]?: {
+    [action in Action]?: boolean
+  }
+}
 
 export default class Role extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -11,19 +17,18 @@ export default class Role extends CamelCaseBaseModel {
   public name: string
 
   @column()
-  public considerGallop: boolean
+  public cans: RoleCans
+  
+  @column()
+  public convocable: boolean
 
   @column()
-  public considerReferent: boolean
+  public teamId: number
 
-  @manyToMany(() => Permission, {
-    pivotTable: 'permission_role',
-    localKey: 'id',
-    pivotForeignKey: 'roleId',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'permissionId'
+  @belongsTo(() => Team, {
+    foreignKey: 'teamId'
   })
-  public permissions: ManyToMany<typeof Permission>
+  public team: BelongsTo<typeof Team>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

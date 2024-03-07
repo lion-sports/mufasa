@@ -83,15 +83,15 @@ declare module '@ioc:Adonis/Addons/Auth' {
     },
     /*
     |--------------------------------------------------------------------------
-    | Web Auth Guard
+    | Refresh Tokens
     |--------------------------------------------------------------------------
     |
-    | Web guard for admin panel 
+    | To generate refresh tokens when requested
     |
     */
-    web: {
-      implementation: SessionGuardContract<'user', 'web'>,
-      config: SessionGuardConfig<'user'>,
+    refresh: {
+      implementation: OATGuardContract<'user', 'refresh'>
+      config: OATGuardConfig<'user'>
     }
   }
 }

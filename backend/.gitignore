@@ -4,7 +4,4 @@ coverage
 .vscode
 .DS_STORE
 .env
-.env.test
 tmp
-public/serve/reports
-public/serve/preferencesAvatars

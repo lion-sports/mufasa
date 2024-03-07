@@ -158,100 +158,107 @@
 </div>
 
 <style>
-  .staff {
-    animation: strike 0.5s 0.5s cubic-bezier(1, 0.25, 1, 1) both;
-    bottom: 15vh;
-    height: 100vh;
-    left: 50%;
-    position: absolute;
-    transform: translate(15%, 0);
-    width: 200px;
-  }
-  .text {
-    animation-name: shake;
-    animation-iteration-count: 20;
-    animation-timing-function: ease;
-    animation-delay: 1s;
-    animation-duration: 0.1s;
-    left: 50%;
-    position: absolute;
-    top: 50%;
-    transform: translate(-100%, -50%);
-    width: 150px;
-  }
-  @media (min-width: 768px) {
-    .text {
-      width: 300px;
-    }
-  }
-  .text * {
-    fill: #000;
-    stroke: #000;
-  }
-  
-  @-moz-keyframes strike {
-    from {
-      transform: translate(15%, -100%);
-    }
-  }
-  @-webkit-keyframes strike {
-    from {
-      transform: translate(15%, -100%);
-    }
-  }
-  @-o-keyframes strike {
-    from {
-      transform: translate(15%, -100%);
-    }
-  }
-  @keyframes strike {
-    from {
-      transform: translate(15%, -100%);
-    }
-  }
-  @-moz-keyframes shake {
-    0%, 50%, 100% {
-      transform: translate(-100%, -50%);
-    }
-    25% {
-      transform: translate(-102%, -52%);
-    }
-    75% {
-      transform: translate(-98%, -48%);
-    }
-  }
-  @-webkit-keyframes shake {
-    0%, 50%, 100% {
-      transform: translate(-100%, -50%);
-    }
-    25% {
-      transform: translate(-102%, -52%);
-    }
-    75% {
-      transform: translate(-98%, -48%);
-    }
-  }
-  @-o-keyframes shake {
-    0%, 50%, 100% {
-      transform: translate(-100%, -50%);
-    }
-    25% {
-      transform: translate(-102%, -52%);
-    }
-    75% {
-      transform: translate(-98%, -48%);
-    }
-  }
-  @keyframes shake {
-    0%, 50%, 100% {
-      transform: translate(-100%, -50%);
-    }
-    25% {
-      transform: translate(-102%, -52%);
-    }
-    75% {
-      transform: translate(-98%, -48%);
-    }
-  }
+	.staff {
+		animation: strike 0.5s 0.5s cubic-bezier(1, 0.25, 1, 1) both;
+		bottom: 15vh;
+		height: 100vh;
+		left: 50%;
+		position: absolute;
+		transform: translate(15%, 0);
+		width: 200px;
+	}
+	.text {
+		animation-name: shake;
+		animation-iteration-count: 20;
+		animation-timing-function: ease;
+		animation-delay: 1s;
+		animation-duration: 0.1s;
+		left: 50%;
+		position: absolute;
+		top: 50%;
+		transform: translate(-100%, -50%);
+		width: 150px;
+	}
+	@media (min-width: 768px) {
+		.text {
+			width: 300px;
+		}
+	}
+	.text * {
+		fill: #000;
+		stroke: #000;
+	}
 
+	@-moz-keyframes strike {
+		from {
+			transform: translate(15%, -100%);
+		}
+	}
+	@-webkit-keyframes strike {
+		from {
+			transform: translate(15%, -100%);
+		}
+	}
+	@-o-keyframes strike {
+		from {
+			transform: translate(15%, -100%);
+		}
+	}
+	@keyframes strike {
+		from {
+			transform: translate(15%, -100%);
+		}
+	}
+	@-moz-keyframes shake {
+		0%,
+		50%,
+		100% {
+			transform: translate(-100%, -50%);
+		}
+		25% {
+			transform: translate(-102%, -52%);
+		}
+		75% {
+			transform: translate(-98%, -48%);
+		}
+	}
+	@-webkit-keyframes shake {
+		0%,
+		50%,
+		100% {
+			transform: translate(-100%, -50%);
+		}
+		25% {
+			transform: translate(-102%, -52%);
+		}
+		75% {
+			transform: translate(-98%, -48%);
+		}
+	}
+	@-o-keyframes shake {
+		0%,
+		50%,
+		100% {
+			transform: translate(-100%, -50%);
+		}
+		25% {
+			transform: translate(-102%, -52%);
+		}
+		75% {
+			transform: translate(-98%, -48%);
+		}
+	}
+	@keyframes shake {
+		0%,
+		50%,
+		100% {
+			transform: translate(-100%, -50%);
+		}
+		25% {
+			transform: translate(-102%, -52%);
+		}
+		75% {
+			transform: translate(-98%, -48%);
+		}
+	}
 </style>

@@ -1,6 +1,6 @@
 import { test } from '@japa/runner'
+import User from 'App/Models/User'
 import { UserFactory } from 'Database/factories'
-import Mail from '@ioc:Adonis/Addons/Mail'
 
 test.group('Auth', () => {
   test('return a token for a user', async ({ client }) => {
@@ -21,6 +21,20 @@ test.group('Auth', () => {
     await user.delete()
   })
 
+  test('signup the user', async ({ client, assert }) => {
+    const response = await client.post('/auth/signup').json({
+      email: 'test2@example.com',
+      password: 'passwordtest',
+      firstname: 'some new name',
+      lastname: 'some other new name'
+    })
+
+    assert.equal(response.status(), 200)
+    let users = await User.query().where('email', 'test2@example.com')
+    assert.lengthOf(users, 1)
+    await User.query().delete()
+  })
+
   test('revoke a token for a user', async ({ client }) => {
     const user = await UserFactory
       .merge({
@@ -37,24 +51,31 @@ test.group('Auth', () => {
     await user.delete()
   })
 
-  test('reset password email', async ({ client, assert }) => {
-    const mailer = Mail.fake()
-
+  test('login with refresh token', async ({ client, assert }) => {
     const user = await UserFactory
       .merge({
-        email: 'test3@example.com',
+        email: 'test2@example.com',
         password: 'passwordtest'
       })
       .create()
 
-    await client.post('/auth/sendResetPassword').json({
-      email: 'test3@example.com'
+    let response = await client.post('/auth/login').json({
+      email: 'test2@example.com',
+      password: 'passwordtest',
+      generateRefresh: true
     })
 
-    assert.isTrue(mailer.exists((mail) => {
-      return mail.subject === 'Reset password'
-    }))
+    let data = response.body()
+    let refreshToken = data.refreshToken
 
-    Mail.restore()
+    response = await client.post('/auth/refreshToken').headers({
+      'Authorization': 'Bearer ' + refreshToken
+    })
+
+    response.assertAgainstApiSpec()
+    data = response.body()
+
+    assert.isNotEmpty(data.token, "should generate the api token")
+    await user.delete()
   })
 })

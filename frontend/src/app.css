@@ -4,40 +4,153 @@
 @tailwind components;
 @tailwind utilities;
 
-
 body {
-  font-family: Inter;
-  font-weight: 400;
-  font-size: 0.9rem;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  margin: 0px;
-  line-height: 1.5rem;
-  background-color: rgb(var(--global-color-background-100));
-  color: rgb(var(--global-color-contrast-800));
-  caret-color: rgb(var(--global-color-contrast-800));
+	font-family: Inter;
+	font-weight: 400;
+	font-size: 0.9rem;
+	font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+		Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	margin: 0px;
+	line-height: 1.5rem;
+	background-color: rgb(var(--global-color-background-100));
+	color: rgb(var(--global-color-contrast-800));
+	caret-color: rgb(var(--global-color-contrast-800));
 }
 
 hr {
-  border: none;
-  height: 1px;
-  background-color: rgb(var(--global-color-background-300));
+	border: none;
+	height: 1px;
+	background-color: rgb(var(--global-color-background-300));
 }
 
 html {
-  scroll-behavior: smooth;
+	scroll-behavior: smooth;
 }
 
 img {
-  max-width: unset;
+	max-width: unset;
 }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: rgb(var(--global-color-contrast-900));
-  transition: background-color 5000s ease-in-out 0s;
-  box-shadow: inset 0 0 20px 20px rgb(var(--global-color-background-300), .2);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: rgb(var(--global-color-contrast-900));
+	transition: background-color 5000s ease-in-out 0s;
+	box-shadow: inset 0 0 20px 20px rgb(var(--global-color-background-300), 0.2);
+}
+
+:root {
+	--global-color-dark-background-50: 18, 27, 33;
+	--global-color-dark-background-100: 20, 30, 36;
+	--global-color-dark-background-200: 24, 35, 42;
+	--global-color-dark-background-300: 27, 40, 48;
+	--global-color-dark-background-400: 50, 73, 88;
+	--global-color-dark-background-500: 72, 106, 127;
+	--global-color-dark-background-600: 95, 138, 165;
+	--global-color-dark-background-700: 134, 167, 187;
+	--global-color-dark-background-800: 177, 198, 211;
+	--global-color-dark-background-900: 216, 226, 233;
+	--global-color-dark-background-950: 235, 241, 244;
+
+	--global-color-dark-contrast-50: 112, 121, 138;
+	--global-color-dark-contrast-100: 156, 163, 175;
+	--global-color-dark-contrast-200: 170, 176, 187;
+	--global-color-dark-contrast-300: 182, 187, 196;
+	--global-color-dark-contrast-400: 193, 197, 205;
+	--global-color-dark-contrast-500: 204, 208, 214;
+	--global-color-dark-contrast-600: 213, 216, 221;
+	--global-color-dark-contrast-700: 224, 226, 230;
+	--global-color-dark-contrast-800: 232, 234, 237;
+	--global-color-dark-contrast-900: 241, 242, 244;
+	--global-color-dark-contrast-950: 247, 247, 248;
+
+	--global-color-dark-grey-50: 227, 227, 227;
+	--global-color-dark-grey-100: 217, 217, 217;
+	--global-color-dark-grey-200: 194, 194, 194;
+	--global-color-dark-grey-300: 171, 171, 171;
+	--global-color-dark-grey-400: 150, 150, 150;
+	--global-color-dark-grey-500: 128, 128, 128;
+	--global-color-dark-grey-600: 105, 105, 105;
+	--global-color-dark-grey-700: 82, 82, 82;
+	--global-color-dark-grey-800: 61, 61, 61;
+	--global-color-dark-grey-900: 38, 38, 38;
+	--global-color-dark-grey-950: 28, 28, 28;
+
+	--global-color-dark-primary-50: 114, 193, 230;
+	--global-color-dark-primary-100: 103, 184, 224;
+	--global-color-dark-primary-200: 85, 170, 214;
+	--global-color-dark-primary-300: 66, 156, 204;
+	--global-color-dark-primary-400: 53, 140, 194;
+	--global-color-dark-primary-500: 41, 125, 183;
+	--global-color-dark-primary-600: 32, 111, 173;
+	--global-color-dark-primary-700: 26, 97, 163;
+	--global-color-dark-primary-800: 20, 83, 153;
+	--global-color-dark-primary-900: 14, 69, 143;
+	--global-color-dark-primary-950: 10, 59, 134;
+
+	--global-color-dark-secondary-50: 232, 252, 251;
+	--global-color-dark-secondary-100: 214, 250, 247;
+	--global-color-dark-secondary-200: 168, 245, 239;
+	--global-color-dark-secondary-300: 127, 240, 231;
+	--global-color-dark-secondary-400: 86, 236, 223;
+	--global-color-dark-secondary-500: 40, 231, 215;
+	--global-color-dark-secondary-600: 23, 202, 188;
+	--global-color-dark-secondary-700: 17, 151, 140;
+	--global-color-dark-secondary-800: 11, 101, 93;
+	--global-color-dark-secondary-900: 6, 50, 47;
+	--global-color-dark-secondary-950: 3, 27, 25;
+
+	--global-color-dark-error-50: 253, 231, 231;
+	--global-color-dark-error-100: 252, 212, 212;
+	--global-color-dark-error-200: 249, 170, 170;
+	--global-color-dark-error-300: 245, 122, 122;
+	--global-color-dark-error-400: 242, 80, 80;
+	--global-color-dark-error-500: 238, 37, 37;
+	--global-color-dark-error-600: 211, 16, 16;
+	--global-color-dark-error-700: 156, 12, 12;
+	--global-color-dark-error-800: 104, 8, 8;
+	--global-color-dark-error-900: 52, 4, 4;
+	--global-color-dark-error-950: 28, 2, 2;
+
+	--global-color-dark-warning-50: 253, 247, 237;
+	--global-color-dark-warning-100: 251, 238, 219;
+	--global-color-dark-warning-200: 246, 220, 178;
+	--global-color-dark-warning-300: 241, 203, 141;
+	--global-color-dark-warning-400: 237, 186, 105;
+	--global-color-dark-warning-500: 232, 168, 64;
+	--global-color-dark-warning-600: 227, 151, 27;
+	--global-color-dark-warning-700: 169, 112, 20;
+	--global-color-dark-warning-800: 114, 75, 14;
+	--global-color-dark-warning-900: 55, 36, 7;
+	--global-color-dark-warning-950: 27, 18, 3;
+
+	--global-color-light-primary-50: 114, 193, 230;
+	--global-color-light-primary-100: 103, 184, 224;
+	--global-color-light-primary-200: 85, 170, 214;
+	--global-color-light-primary-300: 66, 156, 204;
+	--global-color-light-primary-400: 53, 140, 194;
+	--global-color-light-primary-500: 41, 125, 183;
+	--global-color-light-primary-600: 32, 111, 173;
+	--global-color-light-primary-700: 26, 97, 163;
+	--global-color-light-primary-800: 20, 83, 153;
+	--global-color-light-primary-900: 14, 69, 143;
+	--global-color-light-primary-950: 10, 59, 134;
+
+	--global-color-light-secondary-50: 232, 252, 251;
+	--global-color-light-secondary-100: 214, 250, 247;
+	--global-color-light-secondary-200: 168, 245, 239;
+	--global-color-light-secondary-300: 127, 240, 231;
+	--global-color-light-secondary-400: 86, 236, 223;
+	--global-color-light-secondary-500: 40, 231, 215;
+	--global-color-light-secondary-600: 23, 202, 188;
+	--global-color-light-secondary-700: 17, 151, 140;
+	--global-color-light-secondary-800: 11, 101, 93;
+	--global-color-light-secondary-900: 6, 50, 47;
+	--global-color-light-secondary-950: 3, 27, 25;
+
+	--global-color-success: 64, 118, 30;
+
+	--global-color-warning: 191, 167, 33;
 }

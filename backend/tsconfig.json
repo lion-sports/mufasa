@@ -9,10 +9,8 @@
   ],
   "compilerOptions": {
     "outDir": "build",
-    "rootDir": ".",
+    "rootDir": "./",
     "sourceMap": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
     "paths": {
       "App/*": [
         "./app/*"
@@ -33,13 +31,7 @@
       "@japa/preset-adonis/build/adonis-typings",
       "@adonisjs/auth",
       "@adonisjs/lucid",
-      "@adonisjs/attachment-lite",
-      "@adonisjs/redis",
-      "@adonisjs/view",
-      "@adonisjs/session",
-      "@adonisjs/mail",
-      "@adonisjs/limiter",
-      "@likable-hair/breeze"
+      "@adonisjs/ally"
     ]
   }
 }

@@ -1,4 +1,3 @@
-import UserModel from 'App/Models/User';
 import { test } from '@japa/runner'
 import { assert } from 'chai'
 import { UserFactory } from 'Database/factories'
@@ -6,25 +5,23 @@ import { UserFactory } from 'Database/factories'
 test.group('Users', (group) => {
   let loggedInUser
 
-  group.setup(() => {
-    loggedInUser = UserFactory.apply('system').create()
+  group.setup(async () => {
+    loggedInUser = await UserFactory.create()
   })
 
   test('get a paginated list of existing users', async ({ client }) => {
     await UserFactory.create()
     const response = await client.get('/users').loginAs(loggedInUser)
-    const users = response.body().data
 
     response.assertAgainstApiSpec()
-    assert.isTrue(users.length > 2, "should have some users in the list")
   })
 
   test('create a new user', async ({ client }) => {
     const response = await client.post('/users').json({
       email: 'someemail@email.com',
       password: 'some_secret_password',
-      firstname: 'Pipo',
-      lastname: 'Pluto'
+      firstname: 'some name',
+      lastname: 'some lastname'
     }).loginAs(loggedInUser)
 
     response.assertAgainstApiSpec()
@@ -32,17 +29,23 @@ test.group('Users', (group) => {
     assert.hasAnyKeys(user, ['id'], 'should have the id key')
   })
 
-  test('cannot create a system user', async ({ client }) => {
+  test('search for a user by email', async ({ client }) => {
     await client.post('/users').json({
-      email: 'trying_system@email.com',
+      email: 'someemail@email.com',
       password: 'some_secret_password',
-      firstname: 'Pipo',
-      lastname: 'Pluto',
-      system: true
+      firstname: 'some name',
+      lastname: 'some lastname'
     }).loginAs(loggedInUser)
 
-    let user = await UserModel.query().where('email', 'trying_system@email.com').first()
-    assert.isFalse(user?.system, 'should have the system false')
+    let response = await client.get('/users').qs({
+      filters: {
+        email: 'someemail@email.com'
+      }
+    }).loginAs(loggedInUser)
+
+    let users = response.body()
+    assert.equal(users.data.length, 1, "should find only one user with this email")
+    assert.equal(users.data[0].email, 'someemail@email.com', "should find the right user")
   })
 
   test('get a user', async ({client}) => {
@@ -52,14 +55,6 @@ test.group('Users', (group) => {
     response.assertAgainstApiSpec()
     const user = response.body()
     assert.equal(newUser.id, user.id, "should return the correct user")
-  })
-
-  test('delete a user', async ({ client }) => {
-    const newUser = await UserFactory.create()
-    await client.delete('/users/' + newUser.id).loginAs(loggedInUser)
-
-    let user = await UserModel.query().where('id', newUser.id).first()
-    assert.notExists(user?.id, "should delete the correct user")
   })
 
   test('update an existing user', async ({ client }) => {

@@ -2,10 +2,8 @@ import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 import { string } from '@ioc:Adonis/Core/Helpers'
 import { SimplePaginatorMetaKeys } from '@ioc:Adonis/Lucid/Database'
 import { LucidModel } from '@ioc:Adonis/Lucid/Orm'
-import { createHash } from 'crypto'
-import { base64 } from '@poppinss/utils/build/helpers'
-
-process.setMaxListeners(100)
+import FipavBot from 'App/Telegram/fipav.bot'
+import TelegramBot from 'node-telegram-bot-api'
 
 export default class AppProvider {
   constructor(protected app: ApplicationContract) {}
@@ -15,68 +13,42 @@ export default class AppProvider {
   }
 
   public async boot() {
-    // const { default: Bull } = await import('@ioc:Breeze')
+    // IoC container is ready
+    const { default: Env } = await import('@ioc:Adonis/Core/Env')
+    const { default: Application } = await import('@ioc:Adonis/Core/Application')
 
-    // Bull.add(new GenerateReportFiles().key, {}, {
-    //   repeat: {
-    //     every: Env.get('GENERATE_REPORTS_EVERY_MS') || 30000,
-    //   }
-    // })
+    if(Application.environment == 'web') {
+      const token = Env.get('TELEGRAM_FIPAV_BOT_TOKEN')
+      const publicUrl = Env.get('PUBLIC_URL')
+  
+      if(!!publicUrl && !!token) {
+        const { default: Route } = await import('@ioc:Adonis/Core/Route')
+  
+        let fipavBot = new FipavBot({
+          token,
+          webHookUrl: `${publicUrl}/bot${token}`
+        })
+  
+        Route.post(`/bot${token}`, ({ request, response }) => {
+          // @ts-ignore
+          let update: TelegramBot.Update = request.body()
+  
+          fipavBot.bot.processUpdate(update)
+          response.send(200)
+        })
+      } else if(!!token) {
+        new FipavBot({ token })
+      } else {
+        console.warn('missing telegram bot token')
+      }
+    }
+
   }
 
   public async ready() {
     const Db = this.app.container.use('Adonis/Lucid/Database')
     const Orm = this.app.container.use('Adonis/Lucid/Orm')
 
-    if (this.app.environment === 'web' || this.app.environment === 'test') {
-      let { default: Ws } = await import('../app/services/Ws')
-      let { default: Database } = await import('@ioc:Adonis/Lucid/Database')
-
-      Ws.boot()
-
-      Ws.io.use(async (socket, next) => {
-        let token: string | undefined = socket.handshake.auth.token
-        if (!token) {
-          next(new Error('token not present'))
-          return
-        }
-
-        let parts = token.split('.')
-
-        if (parts.length !== 2) {
-          next(new Error('token not valid'))
-          return
-        }
-
-        const tokenId = base64.urlDecode(parts[0], undefined, true)
-        if (!tokenId) {
-          next(new Error('token not valid'))
-          return
-        }
-
-        if (parts[1].length !== 60) {
-          next(new Error('token not valid'))
-          return
-        }
-
-        let tokenValue: string = createHash('sha256').update(parts[1]).digest('hex')
-
-        let tokenRow = await Database
-          .query()
-          .from('api_tokens')
-          .where('id', tokenId)
-          .first()
-
-        if (!tokenRow || tokenRow.token !== tokenValue) {
-          next(new Error("not authorized"))
-          return
-        }
-
-        next()
-      })
-    }
-
-    // @ts-ignore
     class CamelCaseNameStrategy extends Orm.SnakeCaseNamingStrategy {
       public tableName(model: LucidModel) {
         return string.pluralize(string.snakeCase(model.name))
@@ -104,7 +76,9 @@ export default class AppProvider {
         }
       }
     }
-  
+    
+    // Orm.ModelPaginator.namingStrategy = new CamelCaseNameStrategy()
+    // Orm.BaseModel.namingStrategy = new CamelCaseNameStrategy()
     Db.SimplePaginator.namingStrategy = new CamelCaseNameStrategy()
   }
 

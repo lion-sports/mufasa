@@ -1,29 +1,20 @@
 <script lang="ts">
-  import StandardCheckbox from "$lib/components/common/StandardCheckbox.svelte";
+	import StandardCheckbox from '$lib/components/common/StandardCheckbox.svelte'
 
-  export let label: string,
-    id: string,
-    value: boolean = false,
-    disabled: boolean = false
+	export let label: string,
+		id: string,
+		value: boolean = false,
+		disabled: boolean = false
 </script>
 
-
 <div class="container">
-  <StandardCheckbox
-    bind:value={value}
-    id={id}
-    on:change
-    disabled={disabled}
-  ></StandardCheckbox>
-  <label
-    style:margin-left="0.7rem"
-    for={id}>{label}
-  </label>
+	<StandardCheckbox bind:value {id} on:change {disabled} />
+	<label style:margin-left="0.7rem" for={id}><slot name="text">{label}</slot></label>
 </div>
 
 <style>
-  .container {
-    display: flex;
-    align-items: center;
-  }
+	.container {
+		display: flex;
+		align-items: center;
+	}
 </style>

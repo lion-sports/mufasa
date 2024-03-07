@@ -20,57 +20,62 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.get('/', ({ response }) => response.redirect('/web'))
-
-Route.group(() => {
-  Route.get('/', ({ response }) => response.redirect('/web/users'))
-  
-  Route.get('/login/', async ({ view }) => {
-    return view.render('auth/login')
-  })
-  Route.get('/login/:error', async ({ view, request }) => {
-    return view.render('auth/login', { error: request.param('error') })
-  })
-
-  Route.get('/jobs', 'Web/JobsController.index').middleware('auth:web')
-
-  Route.get('/users', 'Web/UsersController.index').middleware('auth:web')
-  Route.get('/users/new', 'Web/UsersController.new').middleware('auth:web')
-  Route.get('/users/:id/sendVerificationEmail', 'Web/UsersController.sendVerifyAccountEmail').middleware('auth:web')
-  Route.get('/users/:id/edit', 'Web/UsersController.edit').middleware('auth:web')
-  
-  Route.post('/api/login', 'AuthController.loginWeb')
-  Route.post('/api/logout', 'AuthController.logoutWeb').middleware('auth:web')
-  Route.post('/api/users/store', 'Web/UsersController.store').middleware('auth:web')
-  Route.post('/api/users/:id/update', 'Web/UsersController.update').middleware('auth:web')
-})
-.prefix('/web')
-
-
-
-Route.get('/daemon', () => {
-  return { message: 'running' }
-})
-
 Route.post('/auth/login', 'AuthController.login')
-Route.post('/auth/sendResetPassword', 'AuthController.sendResetPassword').middleware('throttle:resetPassword')
-Route.post('/auth/resetPassword', 'AuthController.resetPassword').middleware('throttle:resetPassword')
+Route.post('/auth/refreshToken', 'AuthController.refreshToken')
+Route.post('/auth/signup', 'AuthController.signup')
 Route.post('/auth/logout', 'AuthController.logout').middleware('auth:api')
 Route.get('/auth/me', 'AuthController.me').middleware('auth:api')
+Route.get('/auth/google/redirect', 'AuthController.googleRedirect')
+Route.get('/auth/google/callback', 'AuthController.googleCallback')
+
+Route.post('/auth/google/loginWithIosGoogleToken', 'AuthController.loginWithIosGoogleToken')
+
+Route.get('/teams/absencesInLatestEvents', 'TeamsController.absencesInLatestEvents').middleware('auth:api')
+Route.resource('teams', 'TeamsController')
+  .only(['index', 'store', 'update', 'show', 'destroy'])
+  .middleware({
+    '*': ['auth:api']
+  })
+Route.post('/teams/:id/removeUser', 'TeamsController.removeUser').middleware('auth:api')
+Route.post('/teams/:id/exit', 'TeamsController.exit').middleware('auth:api')
+Route.post('/teams/:id/updatePreference', 'TeamsController.updatePreference').middleware('auth:api')
+
+Route.get('/teammates/mostAbsenceForTeammates', 'TeammatesController.mostAbsenceForTeammates').middleware('auth:api')
+Route.put('/teammates/:id', 'TeammatesController.update').middleware('auth:api')
+
+Route.post('/roles', 'RolesController.store').middleware('auth:api')
+Route.get('/teams/:teamId/roles', 'RolesController.index').middleware('auth:api')
+Route.put('/roles/:id', 'RolesController.update').middleware('auth:api')
+Route.delete('/roles/:id', 'RolesController.destroy').middleware('auth:api')
+Route.get('/roles/:id', 'RolesController.show').middleware('auth:api')
+  
 Route.resource('users', 'UsersController')
+  .only([ 'index', 'store', 'update', 'show', 'destroy' ])
+  .middleware({
+    '*': ['auth:api']
+  })
+
+Route.post('/invitations/inviteUser', 'InvitationsController.inviteUser').middleware('auth:api')
+Route.get('/invitations/list', 'InvitationsController.list').middleware('auth:api')
+Route.post('/invitations/accept', 'InvitationsController.accept').middleware('auth:api')
+Route.post('/invitations/reject', 'InvitationsController.reject').middleware('auth:api')
+Route.post('/invitations/discard', 'InvitationsController.discard').middleware('auth:api')
+
+Route.post('/events', 'EventsController.store').middleware('auth:api')
+Route.post('/events/createWithFrequency', 'EventsController.createWithFrequency').middleware('auth:api')
+Route.post('/events/copyWeek', 'EventsController.copyWeek').middleware('auth:api')
+Route.get('/events', 'EventsController.index').middleware('auth:api')
+Route.put('/events/:id', 'EventsController.update').middleware('auth:api')
+Route.delete('/events/:id', 'EventsController.destroy').middleware('auth:api')
+Route.get('/events/:id', 'EventsController.show').middleware('auth:api')
+Route.post('/events/:id/convocate', 'EventsController.convocate').middleware('auth:api')
+Route.post('/events/:id/unConvocate', 'EventsController.unConvocate').middleware('auth:api')
+
+Route.resource('eventSessions', 'EventSessionsController')
   .only(['index', 'store', 'update', 'show', 'destroy'])
   .middleware({
     '*': ['auth:api']
   })
 
-Route.resource('permissions', 'PermissionsController')
-  .only(['index', 'show'])
-  .middleware({
-    '*': ['auth:api']
-  })
-
-Route.resource('roles', 'RolesController')
-  .only(['index', 'store', 'update', 'show', 'destroy'])
-  .middleware({
-    '*': ['auth:api']
-  })
+Route.post('/convocations/:id/confirm', 'ConvocationsController.confirm').middleware('auth:api')
+Route.post('/convocations/:id/deny', 'ConvocationsController.deny').middleware('auth:api')

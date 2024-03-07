@@ -7,8 +7,7 @@ export const plugins: Config['plugins'] = [
     openApi: {
       schemas: ['api-spec.yml'],
     },
-  }),
-  //runFailedTests(),
+  }), 
   apiClient()
 ]
 export const reporters: Config['reporters'] = [specReporter()]
@@ -16,7 +15,7 @@ export const reporters: Config['reporters'] = [specReporter()]
 export const runnerHooks: Required<Pick<Config, 'setup' | 'teardown'>> = {
   setup: [
     () => TestUtils.ace().loadCommands(),
-    () => TestUtils.db().migrate()
+    () => TestUtils.db().migrate(),
   ],
   teardown: [],
 }
