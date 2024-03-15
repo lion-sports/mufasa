@@ -74,7 +74,7 @@
 			{/each}
 		{:else}
 			Nessun  team trovato, 
-			<a href="/teams/new">creane il tuo</a>
+			<a href="/teams/new">crea il tuo</a>
 		{/if}
 	</div>
 </div>
