@@ -60,7 +60,7 @@
 		</div>
 	{/each}
 {:else if !!invitations && invitations.length == 0}
-	Ops, nessun invito
+	Non ci sono allenamenti in programma per te
 {/if}
 
 <style>

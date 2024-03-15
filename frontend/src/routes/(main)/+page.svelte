@@ -35,7 +35,7 @@
 	})
 </script>
 
-<PageTitle title={`Bevenuto ${$user?.firstname} 👋`} />
+<PageTitle title={`Bevenuto ${$user?.firstname} 👋 su Lion Sports`} />
 <div class="font-bold mt-4">Prossimi appuntamenti</div>
 <div style:margin-top="10px">
 	{#if loadingEvents}
@@ -60,7 +60,7 @@
   </div>
 </div>
 <div class="bg-[rgb(var(--global-color-background-300))] p-4 flex flex-col gap-3 rounded-md mt-4">
-  <div class="text-xl font-bold">Assenze per giocatrice</div>
+  <div class="text-xl font-bold">Assenze per giocatori</div>
   <MostAbsentTeammates
     data={data.mostAbsenceForTeammate}
   ></MostAbsentTeammates>

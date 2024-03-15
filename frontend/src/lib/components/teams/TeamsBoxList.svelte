@@ -73,8 +73,8 @@
 				</div>
 			{/each}
 		{:else}
-			Ops, ancora nessun team,
-			<a href="/teams/new">Creane uno</a>
+			Nessun  team trovato, 
+			<a href="/teams/new">creane il tuo</a>
 		{/if}
 	</div>
 </div>
