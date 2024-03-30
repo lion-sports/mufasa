@@ -105,7 +105,7 @@
 		</svelte:fragment>
 		<svelte:fragment slot="logo" let:sidebarExpanded let:hamburgerVisible>
 			<ApplicationLogo
-				class="mt-4 {sidebarExpanded || hamburgerVisible ? 'ml-4' : ''}"
+				class="mt-4 {sidebarExpanded || hamburgerVisible ? 'ml-4' : 'ml-1'}"
 				on:click={handleLogoClick}
 				on:keydown={handleLogoClick}
 				collapsed={!sidebarExpanded && !hamburgerVisible}
