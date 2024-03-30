@@ -1,9 +1,9 @@
 import { CreateUserValidator, UpdateUserValidator } from 'App/Validators/users'
 import { validator } from "@ioc:Adonis/Core/Validator"
-import UserModel from 'App/Models/User';
-
-import type User from 'App/Models/User'
+import User from 'App/Models/User';
 import { ModelObject } from '@ioc:Adonis/Lucid/Orm';
+import { Context, withTransaction, withUser } from './base.manager';
+import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database';
 
 export type CreateParams = {
   data: {
@@ -12,7 +12,7 @@ export type CreateParams = {
     firstname: string,
     lastname: string
   },
-  context?: {}
+  context?: Context
 }
 
 export type UpdateParams = {
@@ -23,7 +23,7 @@ export type UpdateParams = {
     firstname?: string,
     lastname?: string
   },
-  context?: {}
+  context?: Context
 }
 
 export type ListParams = {
@@ -31,28 +31,36 @@ export type ListParams = {
     page?: number,
     perPage?: number,
     filters?: {
-      [key: string]: any
+      email?: string
     }
   },
-  context?: {}
+  context?: Context
 }
 
 export type GetParams = {
   data: {
     id: number
   },
-  context?: {}
+  context?: Context
 }
 
+
+// TODO add authorization manager
 class UsersManager {
+
   constructor() {
   }
 
+  @withTransaction
+  @withUser
   public async list(params: ListParams): Promise<{data: ModelObject[], meta: any}> {
+    const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User 
+
     if(!params.data.page) params.data.page = 1
     if(!params.data.perPage) params.data.perPage = 100
 
-    let query = UserModel.query()
+    let query = User.query({ client: trx })
 
     if(!!params.data.filters) {
       if (!!params.data.filters.email)
@@ -61,27 +69,41 @@ class UsersManager {
 
     const results = await query.paginate(params.data.page, params.data.perPage)
     return results.toJSON()
-  } 
+  }
 
+  // TODO review signup logics
+  @withTransaction
   public async create(params: CreateParams): Promise<User> {
+    const trx = params.context?.trx as TransactionClientContract
+
     await validator.validate({
       schema: new CreateUserValidator().schema,
       data: params.data
     })
 
-    return await UserModel.firstOrCreate({
+    return await User.firstOrCreate({
       email: params.data.email
     }, {
       ...params.data,
       name: params.data.firstname + ' ' + params.data.lastname
+    }, {
+      client: trx
     })
   }
 
   public async get(params: GetParams): Promise<User | null> {
-    return await UserModel.find(params.data.id)
+    const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User 
+
+    return await User.find(params.data.id, { client: trx })
   }
 
+  @withTransaction
+  @withUser
   public async update(params: UpdateParams): Promise<User> {
+    const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User 
+
     const id = params.data.id
     delete params.data.id
 
@@ -90,12 +112,12 @@ class UsersManager {
       data: params.data
     })
 
-    let user = await UserModel.findOrFail(id)
-    user.merge({
+    let updatedUser = await User.findOrFail(id, { client: trx })
+    updatedUser.merge({
       email: params.data.email,
       password: params.data.password
     })
-    return await user.save()
+    return await updatedUser.save()
   }
 }
 

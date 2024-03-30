@@ -1,19 +1,11 @@
-import Database, { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import UserModel from 'App/Models/User'
-import ConvocationModel from 'App/Models/Convocation'
-import type Convocation from 'App/Models/Convocation'
+import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
+import Convocation from 'App/Models/Convocation'
 import AuthorizationManager from './authorization.manager'
-import HttpContext from '@ioc:Adonis/Core/HttpContext'
 import { ConvocateValidator } from 'App/Validators/convocations'
 import { validator } from "@ioc:Adonis/Core/Validator"
 import { DateTime } from 'luxon'
-
-export type Context = {
-  user?: {
-    id: number
-  },
-  trx?: TransactionClientContract
-}
+import { Context, withTransaction, withUser } from './base.manager'
+import User from 'App/Models/User'
 
 export type ConvocateParams = {
   data: {
@@ -60,12 +52,11 @@ export default class ConvocationsManager {
   constructor() {
   }
 
+  @withTransaction
+  @withUser
   public async convocate(params: ConvocateParams): Promise<Convocation[]> {
-    const user = await this._getUserFromContext(params.context)
-    if (!user) throw new Error('user must be defined to convocate to an event')
-
-    let trx = params.context?.trx
-    if (!trx) trx = await Database.transaction()
+    const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User 
 
     try {
       await AuthorizationManager.canOrFail({
@@ -97,7 +88,7 @@ export default class ConvocationsManager {
       }[] = []
 
       for(let i = 0; i < params.data.teammates.length; i+=1) {
-        let existingConvocation = await ConvocationModel.query({
+        let existingConvocation = await Convocation.query({
           client: trx
         }).where('teammateId', params.data.teammates[i].id)
         .where('eventId', params.data.event.id)
@@ -113,11 +104,11 @@ export default class ConvocationsManager {
         }
       }
 
-      let convocations = await ConvocationModel.createMany(convocationToInsert, {
+      let convocations = await Convocation.createMany(convocationToInsert, {
         client: trx
       })
 
-      let results = await ConvocationModel.query({
+      let results = await Convocation.query({
           client: trx
         }).whereIn('id', convocations.map(c => c.id))
         .preload('teammate', builder => {
@@ -134,177 +125,144 @@ export default class ConvocationsManager {
     }
   }
 
+  @withTransaction
+  @withUser
   public async unConvocate(params: UnConvocateParams): Promise<Convocation[]> {
-    const user = await this._getUserFromContext(params.context)
-    if (!user) throw new Error('user must be defined to unconvocate from an event')
+    const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User 
 
-    let trx = params.context?.trx
-    if (!trx) trx = await Database.transaction()
-
-    try {
-      await AuthorizationManager.canOrFail({
-        data: {
-          actor: user,
-          action: 'convocate',
-          resource: 'Event',
-          entities: {
-            event: {
-              id: params.data.event.id
-            }
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'convocate',
+        resource: 'Event',
+        entities: {
+          event: {
+            id: params.data.event.id
           }
-        },
-        context: {
-          trx: trx
         }
-      })
-
-      await validator.validate({
-        schema: new ConvocateValidator().schema,
-        data: params.data
-      })
-
-      let convocationsToDelete = await ConvocationModel.query({
-        client: trx
-      }).where('eventId', params.data.event.id)
-      .whereIn('teammateId', params.data.teammates.map(tm => tm.id))
-
-      for(let i = 0; i < convocationsToDelete.length; i+=1) {
-        await convocationsToDelete[i].delete()
+      },
+      context: {
+        trx
       }
+    })
 
-      let convocations = await ConvocationModel.query({
-        client: trx
-      }).whereHas('event', builder => {
-        builder.where('events.id', params.data.event.id)
-      })
+    await validator.validate({
+      schema: new ConvocateValidator().schema,
+      data: params.data
+    })
 
-      if (!params.context?.trx) await trx.commit()
-      return convocations
-    } catch (error) {
-      if (!params.context?.trx) await trx.rollback()
-      throw error
+    let convocationsToDelete = await Convocation.query({
+      client: trx
+    }).where('eventId', params.data.event.id)
+    .whereIn('teammateId', params.data.teammates.map(tm => tm.id))
+
+    for(let i = 0; i < convocationsToDelete.length; i+=1) {
+      await convocationsToDelete[i].delete()
     }
+
+    let convocations = await Convocation.query({
+      client: trx
+    }).whereHas('event', builder => {
+      builder.where('events.id', params.data.event.id)
+    })
+
+    return convocations
   }
 
-
+  @withTransaction
+  @withUser
   public async confirm(params: ConfirmParams): Promise<Convocation> {
-    const user = await this._getUserFromContext(params.context)
-    if (!user) throw new Error('user must be defined to confirm convocation')
-    else if (!params.data.convocation && (!params.data.teammate || !params.data.event)) 
+    const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User 
+
+    if (!params.data.convocation && (!params.data.teammate || !params.data.event))
       throw new Error('convocation or teammate and event are not specified')
 
-    let trx = params.context?.trx
-    if (!trx) trx = await Database.transaction()
+    let convocation: Convocation
+    if(!!params.data.convocation) {
+      convocation = await Convocation.query({
+        client: trx
+      })
+      .where('id', params.data.convocation.id)
+      .firstOrFail()
+    } else if(!!params.data.teammate && !!params.data.event) {
+      convocation = await Convocation.query({
+          client: trx
+        })
+        .where('teammateId', params.data.teammate.id)
+        .where('eventId', params.data.event.id)
+        .firstOrFail()
+    } else {
+      throw new Error('params not specified')
+    }
 
-    try {
-      let convocation: Convocation
-      if(!!params.data.convocation) {
-        convocation = await ConvocationModel.query({
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'confirm',
+        resource: 'Convocation',
+        entities: {
+          convocation: convocation
+        }
+      },
+      context: {
+        trx: trx
+      }
+    })
+
+    convocation.confirmationStatus = 'confirmed'
+    convocation.confirmedByUserId = user.id
+    convocation.updateConfirmationAt = DateTime.now()
+    let results = await convocation.save()
+
+    return results
+  }
+
+  @withTransaction
+  @withUser
+  public async deny(params: ConfirmParams): Promise<Convocation> {
+    const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User 
+
+    if (!params.data.convocation && (!params.data.teammate || !params.data.event))
+      throw new Error('convocation or teammate and event are not specified')
+
+    let convocation: Convocation
+    if (!!params.data.convocation) {
+      convocation = await Convocation.query({
           client: trx
         })
         .where('id', params.data.convocation.id)
         .firstOrFail()
-      } else if(!!params.data.teammate && !!params.data.event) {
-        convocation = await ConvocationModel.query({
-            client: trx
-          })
-          .where('teammateId', params.data.teammate.id)
-          .where('eventId', params.data.event.id)
-          .firstOrFail()
-      } else {
-        throw new Error('params not specified')
-      }
-
-      await AuthorizationManager.canOrFail({
-        data: {
-          actor: user,
-          action: 'confirm',
-          resource: 'Convocation',
-          entities: {
-            convocation: convocation
-          }
-        },
-        context: {
-          trx: trx
-        }
-      })
-
-      convocation.confirmationStatus = 'confirmed'
-      convocation.confirmedByUserId = user.id
-      convocation.updateConfirmationAt = DateTime.now()
-      let results = await convocation.save()
-
-      if (!params.context?.trx) await trx.commit()
-      return results
-    } catch (error) {
-      if (!params.context?.trx) await trx.rollback()
-      throw error
-    }
-  }
-
-  public async deny(params: ConfirmParams): Promise<Convocation> {
-    const user = await this._getUserFromContext(params.context)
-    if (!user) throw new Error('user must be defined to confirm convocation')
-    else if (!params.data.convocation && (!params.data.teammate || !params.data.event))
-      throw new Error('convocation or teammate and event are not specified')
-
-    let trx = params.context?.trx
-    if (!trx) trx = await Database.transaction()
-
-    try {
-      let convocation: Convocation
-      if (!!params.data.convocation) {
-        convocation = await ConvocationModel.query({
-            client: trx
-          })
-          .where('id', params.data.convocation.id)
-          .firstOrFail()
-      } else if (!!params.data.teammate && !!params.data.event) {
-        convocation = await ConvocationModel.query({
-            client: trx
-          })
-          .where('teammateId', params.data.teammate.id)
-          .where('eventId', params.data.event.id)
-          .firstOrFail()
-      } else {
-        throw new Error('params not specified')
-      }
-
-      await AuthorizationManager.canOrFail({
-        data: {
-          actor: user,
-          action: 'deny',
-          resource: 'Convocation',
-          entities: {
-            convocation: convocation
-          }
-        },
-        context: {
-          trx: trx
-        }
-      })
-
-      convocation.confirmationStatus = 'denied'
-      convocation.confirmedByUserId = user.id
-      convocation.updateConfirmationAt = DateTime.now()
-      let results = await convocation.save()
-
-      if (!params.context?.trx) await trx.commit()
-      return results
-    } catch (error) {
-      if (!params.context?.trx) await trx.rollback()
-      throw error
-    }
-  }
-
-
-
-  private async _getUserFromContext(context?: Context) {
-    if (!!context?.user) {
-      return await UserModel.query().where('id', context.user.id).first()
+    } else if (!!params.data.teammate && !!params.data.event) {
+      convocation = await Convocation.query({
+          client: trx
+        })
+        .where('teammateId', params.data.teammate.id)
+        .where('eventId', params.data.event.id)
+        .firstOrFail()
     } else {
-      const ctx = HttpContext.get()
-      return ctx?.auth?.user
+      throw new Error('params not specified')
     }
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'deny',
+        resource: 'Convocation',
+        entities: {
+          convocation: convocation
+        }
+      },
+      context: {
+        trx: trx
+      }
+    })
+
+    convocation.confirmationStatus = 'denied'
+    convocation.confirmedByUserId = user.id
+    convocation.updateConfirmationAt = DateTime.now()
+    return await convocation.save()
   }
 }

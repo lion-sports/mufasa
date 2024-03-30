@@ -47,7 +47,7 @@
 	}
 </script>
 
-<PageTitle title="Teams" paddingTop="40px">
+<PageTitle title="Teams">
 	<svelte:fragment slot="append">
 		<OptionMenu
 			options={[
@@ -62,7 +62,7 @@
 	</svelte:fragment>
 </PageTitle>
 
-<div style:margin-top="10px">
+<div>
 	<TeamsBoxList searchable marginTop="20px" teams={data.teams} on:teams-click={handleTeamClick} />
 </div>
 <div class="font-bold mt-4">I miei inviti</div>

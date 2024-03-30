@@ -5,7 +5,7 @@ import TeammateFactory from './TeammateFactory'
 
 export default Factory.define(Team, ({ faker }) => {
     return {
-      name: faker.random.words(3),
+      name: faker.word.words(3),
       notes: faker.company.catchPhraseDescriptor() 
     }
   })
