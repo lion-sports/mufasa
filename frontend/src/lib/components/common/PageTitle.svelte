@@ -19,22 +19,22 @@
 	{#if prependVisible}
 		<div style:margin-right="15px">
 			<slot name="prepend">
-				<div on:click={handleBackClick} on:keypress style:cursor="pointer" class="prepend-button">
+				<button on:click={handleBackClick} on:keypress style:cursor="pointer" class="prepend-button">
 					<div class="back-icon">
 						<Icon name="mdi-arrow-left" click={true} />
 					</div>
 					<span style:margin-left="10px"> Indietro </span>
-				</div>
+				</button>
 			</slot>
 		</div>
 	{/if}
 	<div style:display="flex" style:align-items="center">
 		<div style:font-weight="700" style:font-size="22pt">
 			<slot name="title">
-				<div class="mt-2 ml-2 mb-1 text-4xl font-bold title">
+				<div class="mt-2 mb-1 text-4xl font-bold title">
 					{title}
 				</div>
-				<div class="ml-2 mb-4 text-base font-normal">
+				<div class="mb-4 text-base font-normal">
 					{subtitle}
 				</div>
 			</slot>

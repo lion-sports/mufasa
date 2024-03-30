@@ -86,7 +86,7 @@
 		<svelte:fragment slot="inner-menu" let:hamburgerVisible>
 			{#if !!hamburgerVisible}
 				<ApplicationLogo
-					class="ml-4 mt-4"
+					class="ml-4 mt-2 !h-[45px]"
 					on:click={handleLogoClick}
 					on:keydown={handleLogoClick}
 					collapsed={true}
@@ -105,7 +105,7 @@
 		</svelte:fragment>
 		<svelte:fragment slot="logo" let:sidebarExpanded let:hamburgerVisible>
 			<ApplicationLogo
-				class="ml-4 mt-4"
+				class="mt-4 {sidebarExpanded || hamburgerVisible ? 'ml-4' : ''}"
 				on:click={handleLogoClick}
 				on:keydown={handleLogoClick}
 				collapsed={!sidebarExpanded && !hamburgerVisible}
@@ -126,20 +126,20 @@
 					</div>
 					{#if sidebarExpanded || hamburgerVisible}
 						<div class="mt-3 flex flex-col gap-3 pl-1">
-							<div
-								class="cursor-pointer opacity-60"
+							<button
+								class="cursor-pointer opacity-60 text-left"
 								on:click={handleLogoutClick}
 								on:keydown={handleLogoutClick}
 							>
 								Logout
-							</div>
-							<div
-								class="cursor-pointer opacity-60"
+              </button>
+							<button
+								class="cursor-pointer opacity-60 text-left"
 								on:click={handleDarkThemeClick}
 								on:keydown={handleDarkThemeClick}
 							>
 								{$theme.dark ? 'Tema chiaro' : 'Tema scuro'}
-							</div>
+              </button>
 						</div>
 					{/if}
 				</div>
