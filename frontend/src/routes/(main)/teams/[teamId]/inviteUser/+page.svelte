@@ -89,7 +89,7 @@
 							label: group.name
 						})) || []}
 						bind:values={selectedGroups}
-						placeholder="Ruolo"
+						placeholder="Gruppo"
 					/>
 				</div>
 			{/if}

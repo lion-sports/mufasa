@@ -48,13 +48,13 @@
 		<LabelAndTextfield label="Alias" name="alias" placeholder="Alias" bind:value={alias} />
 	</div>
 	<div>
-		<div>Ruolo</div>
+		<div>Gruppo</div>
 		<div class="mt-2">
 			<StandardAutocomplete
 				items={selectableGroups}
 				bind:values={selectedGroups}
 				on:change={handleGroupChange}
-				placeholder="Ruolo"
+				placeholder="Gruppo"
 			/>
 		</div>
 	</div>

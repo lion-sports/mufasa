@@ -102,8 +102,8 @@
 
 <ConfirmDialog
 	confirmText="Elimina"
-	title="Eliminazione ruolo"
-	description={`Sei sicuro di voler eliminare il ruolo ${deletingGroup?.name}?`}
+	title="Eliminazione grouppo"
+	description={`Sei sicuro di voler eliminare il gruppo ${deletingGroup?.name}?`}
 	bind:open={confirmDialogOpen}
 	on:cancel-click={() => (confirmDialogOpen = false)}
 	on:confirm-click={confirmGroupDeletion}

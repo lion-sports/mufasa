@@ -70,6 +70,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
   protected resource: Resource
   protected auth?: (params: {
     id?: number
+    data: any
     user: User
     method: 'create' | 'update' | 'list' | 'get' | 'destroy'
     context?: Context
@@ -98,6 +99,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
       await this.auth({
         user,
         method: 'list',
+        data: params.data,
         context: {
           user,
           trx,
@@ -145,6 +147,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
       await this.auth({
         user,
         method: 'create',
+        data: params.data,
         context: {
           user,
           trx,
@@ -175,6 +178,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
       await this.auth({
         id: params.data.id,
         user,
+        data: params.data,
         method: 'get',
         context: {
           user,
@@ -209,6 +213,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
       await this.auth({
         id: params.data.id,
         user,
+        data: params.data,
         method: 'update',
         context: {
           user,
@@ -242,6 +247,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
       await this.auth({
         id: params.data.id,
         user,
+        data: params.data,
         method: 'destroy',
         context: {
           user,

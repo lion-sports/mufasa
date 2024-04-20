@@ -77,5 +77,11 @@ Route.resource('eventSessions', 'EventSessionsController')
     '*': ['auth:api']
   })
 
+Route.resource('shirts', 'ShirtsController')
+  .only(['index', 'store', 'update', 'show', 'destroy'])
+  .middleware({
+    '*': ['auth:api']
+  })
+
 Route.post('/convocations/:id/confirm', 'ConvocationsController.confirm').middleware('auth:api')
 Route.post('/convocations/:id/deny', 'ConvocationsController.deny').middleware('auth:api')

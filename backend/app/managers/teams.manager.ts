@@ -151,6 +151,10 @@ export default class TeamsManager {
             id: params.data.id
           }
         }
+      },
+      context: {
+        trx,
+        user
       }
     })
 
@@ -194,7 +198,8 @@ export default class TeamsManager {
         }
       },
       context: {
-        trx
+        trx,
+        user
       }
     })
 

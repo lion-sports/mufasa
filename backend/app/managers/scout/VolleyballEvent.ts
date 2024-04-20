@@ -78,7 +78,7 @@ export type VolleballEventScoreSpec = {
 export type VolleyballEventPlayer = {
   id: number
   name: string
-  jerseyNumber: string
+  shirtNumber: string
 }
 
 export default abstract class VolleyballEvent extends ScoutEvent<VolleyballEventJson, VolleyballSport> {

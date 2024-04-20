@@ -6,6 +6,7 @@ export type ScoutEventJson = {
   _id?: string
   date: Date
   scoutId: number
+  teamId: number
   sport: Sport
 }
 
@@ -22,12 +23,14 @@ export default abstract class ScoutEvent<
   public _id: string | undefined
   public date: Date
   public scoutId: number
+  public teamId: number
 
   constructor()
   constructor(params?: {
     _id?: string,
     date: Date,
     scoutId: number,
+    teamId: number,
     sport: EventSport
   }) {
     if(!!params) {
@@ -47,6 +50,7 @@ export default abstract class ScoutEvent<
       _id: this._id,
       date: this.date,
       scoutId: this.scoutId,
+      teamId: this.teamId,
       sport: this.sport
     }
   }

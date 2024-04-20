@@ -37,7 +37,7 @@
 </script>
 
 {#if CansService.can('Group', 'update')}
-	<PageTitle title="Nuovo ruolo" prependVisible={true} />
+	<PageTitle title="Nuovo gruppo" prependVisible={true} />
 
 	<div style:margin-top="20px">
 		<RoleForm group={role} />

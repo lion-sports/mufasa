@@ -8,6 +8,8 @@ import Convocation from 'App/Models/Convocation'
 import Teammate from 'App/Models/Teammate'
 import Team from 'App/Models/Team'
 import EventSession from 'App/Models/EventSession'
+import Shirt from 'App/Models/Shirt'
+import { Context } from './base.manager'
 
 export type Resource = 
   'Team' |
@@ -16,7 +18,8 @@ export type Resource =
   'Convocation' |
   'EventSession' |
   'Group' |
-  'Teammate'
+  'Teammate' | 
+  'Shirt'
 
 export type Action =
   'update' |
@@ -41,7 +44,8 @@ export type Entities = {
   invitee?: Pick<User, 'email'>
   group?: Pick<Group, 'id'>,
   user?: Pick<User, 'id'>,
-  teammate?: Pick<Teammate, 'id'>
+  teammate?: Pick<Teammate, 'id'>,
+  shirt?: Pick<Shirt, 'id'>
 }
 
 type CanFunction = (params: {
@@ -59,9 +63,7 @@ type CanParameters = {
     action: Action,
     entities: Entities
   },
-  context?: {
-    trx?: TransactionClientContract
-  }
+  context?: Context
 }
 
 export default class AuthorizationManager {
@@ -96,6 +98,12 @@ export default class AuthorizationManager {
       update: AuthorizationManager._canUpdateEvent,
       convocate: AuthorizationManager._canConvocateToEvent,
       destroy: AuthorizationManager._canDestroyEvent
+    },
+    Shirt: {
+      create: AuthorizationManager._canCreateShirt,
+      update: AuthorizationManager._canUpdateShirt,
+      view: AuthorizationManager._canViewShirt,
+      destroy: AuthorizationManager._canDestroyShirt
     },
     Convocation: {
       confirm: AuthorizationManager._canConfirmConvocation,
@@ -469,6 +477,97 @@ export default class AuthorizationManager {
     })
 
     return convocationBelongsToUser.length != 0 || canConfirmOtherConvocations
+  }
+
+  private static async _canCreateShirt(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.teammate?.id) throw new Error('teammate must be defined')
+    let teammateId: number = params.entities.teammate.id
+
+    let teammate = await Teammate.query({
+        client: context?.trx
+      }).where('id', teammateId)
+      .first()
+
+    if (!teammate) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: teammate.teamId },
+      action: 'create',
+      resource: 'Shirt'
+    }, context)
+  }
+
+  private static async _canUpdateShirt(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.shirt?.id) throw new Error('shirt must be defined')
+
+    let shirt = await Shirt.query({
+        client: context?.trx
+      })
+      .where('id', params.entities.shirt.id)
+      .preload('teammate')
+      .first()
+
+    if (!shirt) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: shirt.teammate.teamId },
+      action: 'update',
+      resource: 'Shirt'
+    }, context)
+  }
+
+  private static async _canViewShirt(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.shirt?.id) throw new Error('shirt must be defined')
+
+    let shirt = await Shirt.query({
+        client: context?.trx
+      })
+      .where('id', params.entities.shirt.id)
+      .preload('teammate')
+      .first()
+
+    if (!shirt) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: shirt.teammate.teamId },
+      action: 'view',
+      resource: 'Shirt'
+    }, context)
+  }
+
+  private static async _canDestroyShirt(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.shirt?.id) throw new Error('shirt must be defined')
+
+    let shirt = await Shirt.query({
+      client: context?.trx
+    })
+      .where('id', params.entities.shirt.id)
+      .preload('teammate')
+      .first()
+
+    if (!shirt) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: shirt.teammate.teamId },
+      action: 'destroy',
+      resource: 'Shirt'
+    }, context)
   }
 }
 

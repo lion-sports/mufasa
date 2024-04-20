@@ -141,7 +141,7 @@
 
 <ConfirmDialog
 	confirmText="Elimina"
-	title="Eliminazione ruolo"
+	title="Eliminazione partecipante"
 	description={`Sei sicuro di voler rimuovere ${deletingTeammate?.user?.firstname} ${deletingTeammate?.user?.lastname}?`}
 	bind:open={confirmDialogOpen}
 	on:cancel-click={() => (confirmDialogOpen = false)}
