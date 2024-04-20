@@ -43,7 +43,7 @@
 				.update({
 					id: teammate.id,
 					alias: teammate.alias,
-					roleId: teammate.role?.id
+					groupId: teammate.group?.id
 				})
 				.then(() => {
 					loading = false
@@ -51,11 +51,11 @@
 					if (!!$team) {
 						let tm = $team.teammates.find((tm) => tm.id == parseInt($page.params.teammateId))
 						if (!!tm) {
-							let role = $team.roles?.find((r) => r.id == teammate?.role?.id)
-							if (!!role) {
-								tm.role = { ...role }
+							let group = $team.groups?.find((r) => r.id == teammate?.group?.id)
+							if (!!group) {
+								tm.group = { ...group }
 							} else {
-								tm.role = undefined
+								tm.group = undefined
 							}
 
 							tm.alias = teammate?.alias
@@ -83,7 +83,7 @@
 		{teammate.user.lastname}
 	</div>
 
-	<TeammateForm bind:alias={teammate.alias} bind:role={teammate.role} teamRoles={data.team.roles} />
+	<TeammateForm bind:alias={teammate.alias} bind:group={teammate.group} teamGroups={data.team.groups} />
 	<ConfirmOrCancelButtons
 		on:confirm-click={handleConfirmClick}
 		on:cancel-click={handleCancelClick}

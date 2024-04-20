@@ -1,11 +1,11 @@
 import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import { CreateRoleValidator, UpdateRoleValidator } from 'App/Validators/roles'
+import { CreateGroupValidator, UpdateGroupValidator } from 'App/Validators/groups'
 import { validator } from "@ioc:Adonis/Core/Validator"
-import Role from 'App/Models/Role'
+import Group from 'App/Models/Group'
 import User from 'App/Models/User';
 import { ModelObject } from '@ioc:Adonis/Lucid/Orm';
 import AuthorizationManager from './authorization.manager';
-import type { RoleCans } from 'App/Models/Role';
+import type { GroupCans } from 'App/Models/Group';
 import { withTransaction, type Context, withUser } from './base.manager';
 
 export type CreateParams = {
@@ -15,7 +15,7 @@ export type CreateParams = {
     team: {
       id: number
     },
-    cans: RoleCans
+    cans: GroupCans
   },
   context?: Context
 }
@@ -25,7 +25,7 @@ export type UpdateParams = {
     id: number,
     name?: string,
     convocable?: boolean,
-    cans?: RoleCans
+    cans?: GroupCans
   },
   context?: Context
 }
@@ -55,7 +55,7 @@ export type DestroyParams = {
   context?: Context
 }
 
-export default class RolesManager {
+export default class GroupsManager {
   constructor() {
   }
 
@@ -67,7 +67,7 @@ export default class RolesManager {
 
     if (!params.data.page) params.data.page = 1
     if (!params.data.perPage) params.data.perPage = 100
-    if (!params.data.team.id) throw new Error('can only get roles for a specific team')
+    if (!params.data.team.id) throw new Error('can only get groups for a specific team')
 
     await AuthorizationManager.canOrFail({
       data: {
@@ -81,7 +81,7 @@ export default class RolesManager {
       context: { trx }
     })
 
-    let results = await Role
+    let results = await Group
       .query({ client: trx })
       .where('teamId', params.data.team.id)
       .orderBy('createdAt')
@@ -92,12 +92,12 @@ export default class RolesManager {
 
   @withTransaction
   @withUser
-  public async create(params: CreateParams): Promise<Role> {
+  public async create(params: CreateParams): Promise<Group> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
     await validator.validate({
-      schema: new CreateRoleValidator().schema,
+      schema: new CreateGroupValidator().schema,
       data: {
         ...params.data,
       }
@@ -107,7 +107,7 @@ export default class RolesManager {
       data: {
         actor: user,
         action: 'create',
-        resource: 'Role',
+        resource: 'Group',
         entities: {
           team: params.data.team
         }
@@ -117,7 +117,7 @@ export default class RolesManager {
       }
     })
 
-    return await Role.updateOrCreate({
+    return await Group.updateOrCreate({
       name: params.data.name,
       teamId: params.data.team.id
     }, {
@@ -131,7 +131,7 @@ export default class RolesManager {
 
   @withTransaction
   @withUser
-  public async get(params: GetParams): Promise<Role> {
+  public async get(params: GetParams): Promise<Group> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -139,9 +139,9 @@ export default class RolesManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Role',
+        resource: 'Group',
         entities: {
-          role: {
+          group: {
             id: params.data.id
           }
         }
@@ -149,7 +149,7 @@ export default class RolesManager {
       context: { trx }
     })
 
-    return await Role
+    return await Group
       .query({
         client: params.context?.trx
       })
@@ -160,12 +160,12 @@ export default class RolesManager {
 
   @withTransaction
   @withUser
-  public async update(params: UpdateParams): Promise<Role> {
+  public async update(params: UpdateParams): Promise<Group> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
     await validator.validate({
-      schema: new UpdateRoleValidator().schema,
+      schema: new UpdateGroupValidator().schema,
       data: params.data
     })
 
@@ -173,9 +173,9 @@ export default class RolesManager {
       data: {
         actor: user,
         action: 'update',
-        resource: 'Role',
+        resource: 'Group',
         entities: {
-          role: {
+          group: {
             id: params.data.id
           }
         }
@@ -185,14 +185,14 @@ export default class RolesManager {
       }
     })
 
-    const role = await Role.findOrFail(params.data.id, {
+    const group = await Group.findOrFail(params.data.id, {
       client: trx
     })
 
-    if (!!params.data.name) role.name = params.data.name
-    if (params.data.convocable !== undefined && params.data.convocable !== null) role.convocable = params.data.convocable
+    if (!!params.data.name) group.name = params.data.name
+    if (params.data.convocable !== undefined && params.data.convocable !== null) group.convocable = params.data.convocable
     if (!!params.data.cans) {
-      let existingCans = role.cans
+      let existingCans = group.cans
       for(let [resource, _value] of Object.entries(params.data.cans)) {
         for (let [action, finalValue] of Object.entries(params.data.cans[resource])) {
           if (!existingCans) existingCans = {}
@@ -201,10 +201,10 @@ export default class RolesManager {
         }
       }
 
-      role.cans = existingCans
+      group.cans = existingCans
     }
 
-    return await role.save()
+    return await group.save()
   }
 
   @withTransaction
@@ -217,9 +217,9 @@ export default class RolesManager {
       data: {
         actor: user,
         action: 'destroy',
-        resource: 'Role',
+        resource: 'Group',
         entities: {
-          role: {
+          group: {
             id: params.data.id
           }
         }
@@ -229,10 +229,10 @@ export default class RolesManager {
       }
     })
 
-    const role = await Role.query({ client: trx })
+    const group = await Group.query({ client: trx })
       .where('id', params.data.id)
       .first()
 
-    await role?.delete()
+    await group?.delete()
   }
 }

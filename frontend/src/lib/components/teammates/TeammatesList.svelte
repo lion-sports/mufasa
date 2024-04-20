@@ -6,14 +6,14 @@
 	import { goto } from '$app/navigation'
 	import { createEventDispatcher, type ComponentProps } from 'svelte'
 	import InvitationsService from '$lib/services/invitations/invitations.service'
-	import CansService from '$lib/services/roles/cans.service'
+	import CansService from '$lib/services/groups/cans.service'
 	import { SimpleTable, Icon } from '@likable-hair/svelte'
 	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte'
 
 	let dispatch = createEventDispatcher<{
-		destroy: {}
+		destroy: undefined
 	}>()
 
 	export let teammates: Teammate[] = [],
@@ -36,8 +36,8 @@
 			}
 		},
 		{
-			value: 'role',
-			label: 'Ruolo',
+			value: 'group',
+			label: 'Gruppo',
 			type: {
 				key: 'custom'
 			}
@@ -50,7 +50,7 @@
 				return (
 					teammate.user.firstname.toLowerCase() + teammate.user.lastname.toLowerCase()
 				).includes(searchText.toLowerCase())
-		  })
+      })
 		: teammates
 
 	function inviteUser(event: any) {
@@ -107,9 +107,9 @@
 <div class="overflow-auto w-full mt-4">
 	<SimpleTable {headers} items={filteredTeammates}>
 		<svelte:fragment slot="custom" let:item let:header>
-			{#if header.value == 'role'}
-				{#if !!item.role?.name}
-					{item.role?.name}
+			{#if header.value == 'group'}
+				{#if !!item.group?.name}
+					{item.group?.name}
 				{:else if !!team.ownerId && item.user.id == team.ownerId}
 					Proprietario
 				{:else}

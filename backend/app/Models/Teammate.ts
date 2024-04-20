@@ -3,7 +3,7 @@ import { DateTime, } from 'luxon'
 import { column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 import User from 'App/Models/User'
 import Team from 'App/Models/Team'
-import Role from 'App/Models/Role'
+import Group from 'App/Models/Group'
 
 export default class Teammate extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -32,12 +32,12 @@ export default class Teammate extends CamelCaseBaseModel {
   public team: BelongsTo<typeof Team>
 
   @column()
-  public roleId: number
+  public groupId: number
 
-  @belongsTo(() => Role, {
-    foreignKey: 'roleId'
+  @belongsTo(() => Group, {
+    foreignKey: 'groupId'
   })
-  public role: BelongsTo<typeof Role>
+  public group: BelongsTo<typeof Group>
   
 
   @column.dateTime({ autoCreate: true })

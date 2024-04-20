@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Team, Teammate } from '$lib/services/teams/teams.service'
 	import type { Event } from '$lib/services/events/events.service'
-	import { DateTime } from 'luxon'
+	import { DateTime, type WeekdayNumbers } from 'luxon'
 	import { onMount, createEventDispatcher, type ComponentProps } from 'svelte'
 	import { goto } from '$app/navigation'
-	import CansService from '$lib/services/roles/cans.service'
+	import CansService from '$lib/services/groups/cans.service'
 	import EventsService from '$lib/services/events/events.service'
 	import qs from 'qs'
 	import { Icon, MediaQuery } from '@likable-hair/svelte'
@@ -154,7 +154,7 @@
 		})
 	}
 
-	function getEventsFromWeekDay(weekday: number): Event[] | undefined {
+	function getEventsFromWeekDay(weekday: WeekdayNumbers): Event[] | undefined {
 		let date = DateTime.fromObject({
 			weekNumber: visibleWeek,
 			weekYear: visibleYear,
@@ -164,7 +164,7 @@
 		return dayGroupedEvents[date.toFormat('yyyyMMdd')]
 	}
 
-	function getWeekdayNameFromIndex(weekday: number): string {
+	function getWeekdayNameFromIndex(weekday: WeekdayNumbers): string {
 		return DateTime.fromObject({
 			weekNumber: visibleWeek,
 			weekYear: visibleYear,
@@ -228,7 +228,7 @@
 		}
 	}
 
-	function handlePlusClick(weekday: number) {
+	function handlePlusClick(weekday: WeekdayNumbers) {
 		let precompiled = DateTime.fromObject({
 			weekNumber: visibleWeek,
 			weekYear: visibleYear,
@@ -241,6 +241,8 @@
 	function isConvocated(event: Event) {
 		return !!teammate && event.convocations.some((c) => !!teammate && c.teammateId == teammate.id)
 	}
+
+  let weekdays: WeekdayNumbers[] = [1, 2, 3, 4, 5, 6, 7]
 </script>
 
 <MediaQuery let:mAndDown>
@@ -268,17 +270,17 @@
 		{/if}
 		<div class="date-list">
 			{#key dayGroupedEvents}
-				{#each [1, 2, 3, 4, 5, 6, 7] as index}
+				{#each weekdays as weekday}
 					<div class="day-container">
-						<div class="day-name">{getWeekdayNameFromIndex(index)}</div>
+						<div class="day-name">{getWeekdayNameFromIndex(weekday)}</div>
 						<div style:flex-grow="1">
 							{#if CansService.can('Event', 'create')}
 								<div>
-									<Icon name="mdi-plus" click on:click={() => handlePlusClick(index)} />
+									<Icon name="mdi-plus" click on:click={() => handlePlusClick(weekday)} />
 								</div>
 							{/if}
-							{#if !!getEventsFromWeekDay(index)}
-								{#each getEventsFromWeekDay(index) || [] as event}
+							{#if !!getEventsFromWeekDay(weekday)}
+								{#each getEventsFromWeekDay(weekday) || [] as event}
 									<div class="event">
 										<div class="event-title">
 											<button on:click={() => handleEventTitleClick(event)} style:cursor="pointer"

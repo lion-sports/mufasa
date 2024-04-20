@@ -1,8 +1,8 @@
-import type { RoleCans } from '$lib/services/roles/roles.service'
+import type { GroupCans } from '$lib/services/groups/groups.service'
 import { writable } from 'svelte/store'
 
 export type TeamCans = {
-	cans: RoleCans
+	cans: GroupCans
 	owner: boolean
 }
 

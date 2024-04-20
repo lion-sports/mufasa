@@ -2,43 +2,43 @@
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
 	import type { ComponentProps } from 'svelte'
 	import StandardAutocomplete from '../common/StandardAutocomplete.svelte'
-	import type { Role } from '$lib/services/roles/roles.service'
+	import type { Group } from '$lib/services/groups/groups.service'
 
 	export let alias: string | undefined,
-		role:
+		group:
 			| {
 					id: number
 					name: string
-			  }
+        }
 			| undefined,
-		teamRoles: Role[] = []
+		teamGroups: Group[] = []
 
-	let selectedRoles: NonNullable<ComponentProps<StandardAutocomplete>['values']> = []
+	let selectedGroups: NonNullable<ComponentProps<StandardAutocomplete>['values']> = []
 
-	$: selectedRoles = !!role
+	$: selectedGroups = !!group
 		? [
 				{
-					value: role.id.toString(),
-					label: role.name
+					value: group.id.toString(),
+					label: group.name
 				}
-		  ]
+      ]
 		: []
 
-	function handleRoleChange() {
-		if (selectedRoles.length > 0 && !!selectedRoles[0].label) {
-			role = {
-				id: parseInt(selectedRoles[0].value),
-				name: selectedRoles[0].label
+	function handleGroupChange() {
+		if (selectedGroups.length > 0 && !!selectedGroups[0].label) {
+			group = {
+				id: parseInt(selectedGroups[0].value),
+				name: selectedGroups[0].label
 			}
-		} else if (selectedRoles.length == 0) {
-			role = undefined
+		} else if (selectedGroups.length == 0) {
+			group = undefined
 		}
 	}
 
-	$: selectableRoles = teamRoles.map((role) => {
+	$: selectableGroups = teamGroups.map((group) => {
 		return {
-			value: role.id.toString(),
-			label: role.name
+			value: group.id.toString(),
+			label: group.name
 		}
 	})
 </script>
@@ -51,9 +51,9 @@
 		<div>Ruolo</div>
 		<div class="mt-2">
 			<StandardAutocomplete
-				items={selectableRoles}
-				bind:values={selectedRoles}
-				on:change={handleRoleChange}
+				items={selectableGroups}
+				bind:values={selectedGroups}
+				on:change={handleGroupChange}
 				placeholder="Ruolo"
 			/>
 		</div>

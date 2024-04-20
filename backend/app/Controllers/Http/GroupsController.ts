@@ -1,9 +1,9 @@
-import RolesManager from 'App/managers/roles.manager'
+import GroupsManager from 'App/managers/groups.manager'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-export default class RolesController {
+export default class GroupsController {
   public async index({ params, request }: HttpContextContract) {
-    const manager = new RolesManager()
+    const manager = new GroupsManager()
     return await manager.list({
       data: {
         page: request.input('page'),
@@ -16,7 +16,7 @@ export default class RolesController {
   }
 
   public async store({ request }: HttpContextContract) {
-    const manager = new RolesManager()
+    const manager = new GroupsManager()
     return await manager.create({
       data: {
         name: request.body().name,
@@ -28,7 +28,7 @@ export default class RolesController {
   }
 
   public async show({ params }: HttpContextContract) {
-    const manager = new RolesManager()
+    const manager = new GroupsManager()
     return await manager.get({
       data: {
         id: params.id
@@ -37,7 +37,7 @@ export default class RolesController {
   }
 
   public async update({ request, params }: HttpContextContract) {
-    const manager = new RolesManager()
+    const manager = new GroupsManager()
     return await manager.update({
       data: {
         id: params.id,
@@ -49,7 +49,7 @@ export default class RolesController {
   }
 
   public async destroy({ params }: HttpContextContract) {
-    const manager = new RolesManager()
+    const manager = new GroupsManager()
     return await manager.destroy({
       data: {
         id: params.id,

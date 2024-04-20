@@ -3,13 +3,14 @@ import { CamelCaseBaseModel } from './CamelCaseBaseModel'
 import { DateTime } from 'luxon'
 import { BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import type { Action, Resource } from 'App/managers/authorization.manager';
-export type RoleCans = {
+
+export type GroupCans = {
   [resource in Resource]?: {
     [action in Action]?: boolean
   }
 }
 
-export default class Role extends CamelCaseBaseModel {
+export default class Group extends CamelCaseBaseModel {
   @column({ isPrimary: true })
   public id: number
 
@@ -17,7 +18,7 @@ export default class Role extends CamelCaseBaseModel {
   public name: string
 
   @column()
-  public cans: RoleCans
+  public cans: GroupCans
   
   @column()
   public convocable: boolean

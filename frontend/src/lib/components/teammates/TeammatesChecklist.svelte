@@ -3,16 +3,16 @@
 	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
 	import { Icon } from '@likable-hair/svelte'
 	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
-	import RoleMultipleSelectorChip from '$lib/components/roles/RoleMultipleSelectorChip.svelte'
-	import type { Role } from '$lib/services/roles/roles.service'
+	import GroupMultipleSelectorChip from '$lib/components/groups/GroupMultipleSelectorChip.svelte'
+	import type { Group } from '$lib/services/groups/groups.service'
 	import type { ComponentProps } from 'svelte'
 
 	export let teammates: Teammate[] = [],
 		team: { id: number } | undefined = undefined,
 		searchable: boolean = false,
 		onlyConvocables: boolean = false,
-		roleFilter: boolean = false,
-		selectableRoles: Role[] = [],
+		groupFilter: boolean = false,
+		selectableGroups: Group[] = [],
 		value: {
 			[key: number]: boolean
 		} = {}
@@ -25,12 +25,12 @@
 					(teammate.alias || teammate.user.firstname + ' ' + teammate.user.lastname)
 						.toLowerCase()
 						.includes(searchText.toLowerCase()))) &&
-			(!onlyConvocables || (!!onlyConvocables && (!teammate.role || teammate.role.convocable))) &&
-			(!selectedRoles ||
-				selectedRoles.length == 0 ||
-				(selectedRoles.length > 0 &&
-					teammate.roleId &&
-					selectedRoles.map((r) => r.value).includes(teammate.roleId?.toString())))
+			(!onlyConvocables || (!!onlyConvocables && (!teammate.group || teammate.group.convocable))) &&
+			(!selectedGroups ||
+				selectedGroups.length == 0 ||
+				(selectedGroups.length > 0 &&
+					teammate.groupId &&
+					selectedGroups.map((r) => r.value).includes(teammate.groupId?.toString())))
 		)
 	})
 
@@ -38,7 +38,7 @@
 		value[teammate.id] = event.target.checked
 	}
 
-	let selectedRoles: ComponentProps<RoleMultipleSelectorChip>['value'] = []
+	let selectedGroups: ComponentProps<GroupMultipleSelectorChip>['value'] = []
 </script>
 
 {#if searchable}
@@ -53,11 +53,11 @@
 	</div>
 {/if}
 
-{#if roleFilter && !!team}
-	<RoleMultipleSelectorChip
+{#if groupFilter && !!team}
+	<GroupMultipleSelectorChip
 		onlyConvocable={true}
-		bind:roles={selectableRoles}
-		bind:value={selectedRoles}
+		bind:groups={selectableGroups}
+		bind:value={selectedGroups}
 	/>
 {/if}
 
@@ -73,7 +73,7 @@
 				<svelte:fragment slot="text">
 					<span>{teammate.alias || teammate.user.firstname + ' ' + teammate.user.lastname}</span>
 					<span style:margin-left="10px" style:font-weight="200" style:font-size="0.9rem"
-						>{teammate.role?.name || ''}</span
+						>{teammate.group?.name || ''}</span
 					>
 				</svelte:fragment>
 			</LabelAndCheckbox>

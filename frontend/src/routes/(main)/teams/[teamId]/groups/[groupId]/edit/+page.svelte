@@ -1,28 +1,28 @@
 <script lang="ts" context="module">
-	import type { Role } from '$lib/services/roles/roles.service'
+	import type { Group } from '$lib/services/groups/groups.service'
 </script>
 
 <script lang="ts">
 	import { page } from '$app/stores'
 	import { onMount } from 'svelte'
-	import RoleService from '$lib/services/roles/roles.service'
-	import CansService from '$lib/services/roles/cans.service'
+	import GroupsService from '$lib/services/groups/groups.service'
+	import CansService from '$lib/services/groups/cans.service'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
-	import RoleForm from '$lib/components/roles/RoleForm.svelte'
+	import GroupForm from '$lib/components/groups/GroupForm.svelte'
 	import ConfirmOrCancelButtons from '$lib/components/common/ConfirmOrCancelButtons.svelte'
 
-	let role: Role
+	let group: Group
 	onMount(async () => {
-		let service = new RoleService({ fetch })
-		role = await service.show({ id: parseInt($page.params.roleId) })
+		let service = new GroupsService({ fetch })
+		group = await service.show({ id: parseInt($page.params.groupId) })
 	})
 
 	let loading = false
 	function handleConfirmClick() {
 		loading = true
 
-		let service = new RoleService({ fetch })
-		service.update(role).then(() => {
+		let service = new GroupsService({ fetch })
+		service.update(group).then(() => {
 			loading = false
 			window.history.back()
 		})
@@ -33,12 +33,12 @@
 	}
 </script>
 
-{#if CansService.can('Role', 'update')}
-	<PageTitle title={role?.name || ''} prependVisible={true} />
+{#if CansService.can('Group', 'update')}
+	<PageTitle title={group?.name || ''} prependVisible={true} />
 
-	{#if !!role}
+	{#if !!group}
 		<div style:margin-top="20px">
-			<RoleForm mode="update" {role} />
+			<GroupForm mode="update" group={group} />
 			<ConfirmOrCancelButtons
 				on:confirm-click={handleConfirmClick}
 				on:cancel-click={handleCancelClick}

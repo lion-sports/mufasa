@@ -1,4 +1,4 @@
-import Role from 'App/Models/Role';
+import Group from 'App/Models/Group';
 import User from 'App/Models/User';
 import Invitation from 'App/Models/Invitation';
 import { DateTime } from 'luxon'
@@ -24,10 +24,10 @@ export default class Team extends CamelCaseBaseModel {
   })
   public teammates: HasMany<typeof Teammate>
 
-  @hasMany(() => Role, {
+  @hasMany(() => Group, {
     foreignKey: 'teamId'
   })
-  public roles: HasMany<typeof Role>
+  public groups: HasMany<typeof Group>
 
   @hasMany(() => Invitation, {
     foreignKey: 'teamId'

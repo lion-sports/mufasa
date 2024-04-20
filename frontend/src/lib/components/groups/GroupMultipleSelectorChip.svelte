@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
 	import type { Chip } from '$lib/components/common/ChipMultipleSelection.svelte'
-	import type { Role } from '$lib/services/roles/roles.service'
+	import type { Group } from '$lib/services/groups/groups.service'
 </script>
 
 <script lang="ts">
@@ -8,19 +8,19 @@
 
 	export let value: Chip[],
 		onlyConvocable: boolean = false,
-		roles: Role[]
+		groups: Group[]
 
 	let filteredChips: Chip[]
 
-	$: filteredChips = !!roles
-		? roles
-				.filter((role) => {
-					return !onlyConvocable || (onlyConvocable && role.convocable)
+	$: filteredChips = !!groups
+		? groups
+				.filter((group) => {
+					return !onlyConvocable || (onlyConvocable && group.convocable)
 				})
-				.map((role): Chip => {
+				.map((group): Chip => {
 					return {
-						value: role.id.toString(),
-						label: role.name
+						value: group.id.toString(),
+						label: group.name
 					}
 				})
 		: []

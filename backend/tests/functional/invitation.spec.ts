@@ -1,9 +1,10 @@
-import TeammateModel from 'App/Models/Teammate';
+import Teammate from 'App/Models/Teammate';
 import TeamsManager from 'App/managers/teams.manager';
-import type User from 'App/Models/User'
-import type Team from 'App/Models/Team'
+import User from 'App/Models/User'
+import Team from 'App/Models/Team'
 import { test } from '@japa/runner'
 import { TeamFactory, UserFactory } from 'Database/factories'
+import GroupFactory from 'Database/factories/GroupFactory';
 
 test.group('Invitations', (group) => {
   let loggedInUser: User
@@ -107,7 +108,7 @@ test.group('Invitations', (group) => {
     response.assertAgainstApiSpec()
     assert.equal(invitation.status, 'accepted', 'invitation should be accepted')
 
-    let teammate = await TeammateModel.query()
+    let teammate = await Teammate.query()
       .where('teamId', team.id)
       .where('userId', invitedUser.id)
 
@@ -120,7 +121,7 @@ test.group('Invitations', (group) => {
       }
     }).loginAs(invitedUser)
 
-    teammate = await TeammateModel.query()
+    teammate = await Teammate.query()
       .where('teamId', team.id)
       .where('userId', invitedUser.id)
 
@@ -179,6 +180,8 @@ test.group('Invitations', (group) => {
 
   test('remove a user from a team', async ({ client, assert }) => {
     let invitedUser = await UserFactory.create()
+    let group = await GroupFactory.create()
+    await group.related('team').associate(team)
 
     const inviteUserResponse = await client.post('/invitations/inviteUser').json({
       user: {
@@ -186,10 +189,15 @@ test.group('Invitations', (group) => {
       },
       team: {
         id: team.id
+      },
+      group: {
+        id: group.id
       }
     }).loginAs(loggedInUser)
 
     const invitationToAccept = inviteUserResponse.body()
+
+    assert.equal(invitationToAccept.groupId, group.id, 'invitation must have the group id')
 
     await client.post('/invitations/accept').json({
       invitation: {
@@ -203,7 +211,7 @@ test.group('Invitations', (group) => {
       },
     }).loginAs(loggedInUser)
 
-    let teammate = await TeammateModel.query()
+    let teammate = await Teammate.query()
       .where('teamId', team.id)
       .where('userId', invitedUser.id)
 
@@ -232,7 +240,7 @@ test.group('Invitations', (group) => {
 
     await client.post(`/teams/${team.id}/exit`).loginAs(invitedUser)
 
-    let teammate = await TeammateModel.query()
+    let teammate = await Teammate.query()
       .where('teamId', team.id)
       .where('userId', invitedUser.id)
 
@@ -259,7 +267,7 @@ test.group('Invitations', (group) => {
       }
     }).loginAs(invitedUser)
 
-    let teammate = await TeammateModel.query()
+    let teammate = await Teammate.query()
       .where('teamId', team.id)
       .where('userId', invitedUser.id)
       .firstOrFail()

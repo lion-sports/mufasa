@@ -62,6 +62,7 @@
     "@adonisjs/repl": "^3.1.11",
     "google-auth-library": "^8.7.0",
     "luxon": "^2.4.0",
+    "mongodb": "^6.5.0",
     "node-telegram-bot-api": "^0.60.0",
     "pg": "^8.7.3",
     "phc-argon2": "^1.1.3",

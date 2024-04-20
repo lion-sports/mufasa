@@ -1,7 +1,6 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
-import { browser } from '$app/environment'
 
-export type Role = {
+export type Group = {
 	id: number
 	name: string
 	convocable: boolean
@@ -10,18 +9,18 @@ export type Role = {
 	updatedAt: Date
 }
 
-export type PaginatedRoles = {
-	data: Role[]
+export type PaginatedGroups = {
+	data: Group[]
 	meta: PaginationData
 }
 
-export const resources = ['Team', 'Invitation', 'Event', 'Convocation', 'EventSession', 'Role']
-export type Resource = 'Team' | 'Invitation' | 'Event' | 'Convocation' | 'EventSession' | 'Role'
+export const resources = ['Team', 'Invitation', 'Event', 'Convocation', 'EventSession', 'Group']
+export type Resource = 'Team' | 'Invitation' | 'Event' | 'Convocation' | 'EventSession' | 'Group'
 
 export const actionsForResources: { [key: string]: string[] } = {
 	Team: ['update', 'invite', 'removeUser', 'destroy'],
 	Event: ['create', 'update', 'destroy', 'convocate'],
-	Role: ['update'],
+	Group: ['update'],
 	Convocation: ['confirm', 'deny']
 }
 
@@ -39,18 +38,18 @@ export type Action =
 	| 'deny'
 	| 'convocate'
 
-export type RoleCans = {
+export type GroupCans = {
 	[key: string]: {
 		[key: string]: boolean
 	}
 }
 
-export default class RolesService extends FetchBasedService {
-	public async create(params: { name?: string; convocable?: boolean; cans?: any }): Promise<Role> {
+export default class GroupsService extends FetchBasedService {
+	public async create(params: { name?: string; convocable?: boolean; cans?: any }): Promise<Group> {
 		if (!params.name) throw new Error('name must be defined')
 
 		let response = await this.client.post({
-			url: '/roles',
+			url: '/groups',
 			body: params
 		})
 
@@ -63,13 +62,13 @@ export default class RolesService extends FetchBasedService {
 		team: {
 			id: number
 		}
-	}): Promise<PaginatedRoles> {
+	}): Promise<PaginatedGroups> {
 		if (!params.team || !params.team.id) throw new Error('team must be defined')
 		if (!params.page) params.page = 1
 		if (!params.perPage) params.perPage = 300
 
 		let response = await this.client.get({
-			url: `/teams/${params.team.id}/roles`,
+			url: `/teams/${params.team.id}/groups`,
 			params: {
 				page: params.page,
 				perPage: params.perPage,
@@ -82,9 +81,9 @@ export default class RolesService extends FetchBasedService {
 		return response
 	}
 
-	public async show(params: { id: number }): Promise<Role> {
+	public async show(params: { id: number }): Promise<Group> {
 		let response = await this.client.get({
-			url: '/roles/' + params.id
+			url: '/groups/' + params.id
 		})
 
 		return response
@@ -94,10 +93,10 @@ export default class RolesService extends FetchBasedService {
 		id: number
 		name?: string
 		convocable?: boolean
-		cans?: RoleCans
-	}): Promise<Role> {
+		cans?: GroupCans
+	}): Promise<Group> {
 		let response = await this.client.put({
-			url: '/roles/' + params.id,
+			url: '/groups/' + params.id,
 			body: params
 		})
 
@@ -106,7 +105,7 @@ export default class RolesService extends FetchBasedService {
 
 	public async destroy(params: { id: number }): Promise<void> {
 		let response = await this.client.delete({
-			url: '/roles/' + params.id
+			url: '/groups/' + params.id
 		})
 
 		return response
@@ -125,7 +124,7 @@ export default class RolesService extends FetchBasedService {
 			Event: 'Eventi',
 			Convocation: 'Convocazioni',
 			EventSession: 'Sessioni',
-			Role: 'Ruoli'
+			Group: 'Gruppi'
 		}
 		return translationMapping[resource]
 	}

@@ -7,7 +7,7 @@ export default class InvitationsController {
 
     const user = request.input('user')
     const team = request.input('team')
-    const role = request.input('role')
+    const group = request.input('group')
 
     return await manager.inviteUser({
       data: {
@@ -17,7 +17,7 @@ export default class InvitationsController {
         team: {
           id: team.id
         },
-        role: role
+        group: group
       }
     })
   }

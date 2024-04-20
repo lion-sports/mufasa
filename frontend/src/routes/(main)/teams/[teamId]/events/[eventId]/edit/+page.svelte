@@ -6,7 +6,7 @@
 	import { page } from '$app/stores'
 	import { onMount } from 'svelte'
 	import EventsService from '$lib/services/events/events.service'
-	import CansService from '$lib/services/roles/cans.service'
+	import CansService from '$lib/services/groups/cans.service'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import EventForm from '$lib/components/events/EventForm.svelte'
 	import ConfirmOrCancelButtons from '$lib/components/common/ConfirmOrCancelButtons.svelte'

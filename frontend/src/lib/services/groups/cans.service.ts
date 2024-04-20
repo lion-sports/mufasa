@@ -1,4 +1,4 @@
-import type { Resource, Action } from './roles.service'
+import type { Resource, Action } from './groups.service'
 import teamCans from '$lib/stores/teams/teamsCans'
 import { get } from 'svelte/store'
 

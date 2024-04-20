@@ -1,22 +1,22 @@
 <script lang="ts" context="module">
-	import type { RoleCans } from '$lib/services/roles/roles.service'
+	import type { GroupCans } from '$lib/services/groups/groups.service'
 
-	export type Role = {
+	export type Group = {
 		name?: string
 		convocable?: boolean
 		team?: { id: number }
-		cans?: RoleCans
+		cans?: GroupCans
 	}
 </script>
 
 <script lang="ts">
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
-	import RolesService, { resources } from '$lib/services/roles/roles.service'
+	import GroupsService, { resources } from '$lib/services/groups/groups.service'
 	import { Icon } from '@likable-hair/svelte'
 	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
 	import { slide } from 'svelte/transition'
 
-	export let role: Role = {
+	export let group: Group = {
 			name: undefined
 		},
 		mode: 'create' | 'update' = 'create',
@@ -28,25 +28,25 @@
 	let closureStatus: { [key: string]: boolean } = {}
 
 	function getActions(resource: string) {
-		return RolesService.getActionsForResource(resource)
+		return GroupsService.getActionsForResource(resource)
 	}
 
 	function translateAction(action: string) {
-		return RolesService.translateActions(action)
+		return GroupsService.translateActions(action)
 	}
 
 	function handleCheckChange(resource: string, action: string, event: any) {
 		// @ts-ignore
-		if (!role.cans) role.cans = {}
+		if (!group.cans) group.cans = {}
 		// @ts-ignore
-		if (!role.cans[resource]) role.cans[resource] = {}
+		if (!group.cans[resource]) group.cans[resource] = {}
 		// @ts-ignore
-		role.cans[resource][action] = event.target.checked
+		group.cans[resource][action] = event.target.checked
 	}
 </script>
 
 <form style:padding style:margin style:width style:height>
-	<LabelAndTextfield label="Nome" name="name" bind:value={role.name} />
+	<LabelAndTextfield label="Nome" name="name" bind:value={group.name} />
 	<div class="font-bold mt-4">Poteri</div>
 	<div class="resources-container">
 		{#each resources as resource}
@@ -57,7 +57,7 @@
 						type="button"
 						on:click={() => (closureStatus[resource] = !closureStatus[resource])}
 					>
-						<div class="resource-title">{RolesService.translateResource(resource)}</div>
+						<div class="resource-title">{GroupsService.translateResource(resource)}</div>
 						<div class="expand-icon" class:reverse={closureStatus[resource]}>
 							<Icon name="mdi-menu-down" />
 						</div>
@@ -67,8 +67,8 @@
 							{#each getActions(resource) as action}
 								<div style:margin-top="10px">
 									<LabelAndCheckbox
-										value={!!role.cans && !!role.cans[resource]
-											? role.cans[resource][action]
+										value={!!group.cans && !!group.cans[resource]
+											? group.cans[resource][action]
 											: false}
 										label={translateAction(action)}
 										id={`${resource}-${action}`}
@@ -83,7 +83,7 @@
 		{/each}
 	</div>
 	<div class="convocable-flag">
-		<LabelAndCheckbox label="Convocabile" bind:value={role.convocable} id="convocable" />
+		<LabelAndCheckbox label="Convocabile" bind:value={group.convocable} id="convocable" />
 	</div>
 </form>
 

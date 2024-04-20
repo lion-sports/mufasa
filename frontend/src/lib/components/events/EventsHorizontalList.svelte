@@ -6,7 +6,7 @@
 	import { goto } from '$app/navigation'
 	import { DateTime } from 'luxon'
 	import qs from 'qs'
-	import CansService from '$lib/services/roles/cans.service'
+	import CansService from '$lib/services/groups/cans.service'
 	import { Icon } from '@likable-hair/svelte'
 
 	export let events: Event[] = [],

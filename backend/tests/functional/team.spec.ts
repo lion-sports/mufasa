@@ -1,7 +1,6 @@
-import UserModel from 'App/Models/User'
+import User from 'App/Models/User'
 import TeamsManager from 'App/managers/teams.manager';
-import type User from 'App/Models/User'
-import type Team from 'App/Models/Team'
+import Team from 'App/Models/Team'
 import { test } from '@japa/runner'
 import { TeamFactory } from 'Database/factories'
 
@@ -52,7 +51,7 @@ test.group('Teams', (group) => {
 
   test('get a team', async ({ client, assert }) => {
     const team = await TeamFactory.with('owner').with('teammateUsers').create()
-    const user = await UserModel.query().whereHas('teams', (builder) => builder.where('teams.id', team.id)).firstOrFail()
+    const user = await User.query().whereHas('teams', (builder) => builder.where('teams.id', team.id)).firstOrFail()
     const response = await client.get('/teams/' + team.id).loginAs(user)
 
     response.assertAgainstApiSpec()

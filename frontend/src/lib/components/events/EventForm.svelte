@@ -17,7 +17,7 @@
 	import LabelAndTextarea from '$lib/components/common/LabelAndTextarea.svelte'
 	import TeammatesChecklist from '$lib/components/teammates/TeammatesChecklist.svelte'
 	import CollapsableSection from '$lib/components/common/CollapsableSection.svelte'
-	import type { Role } from '$lib/services/roles/roles.service'
+	import type { Group } from '$lib/services/groups/groups.service'
 
 	export let event: Event = {},
 		convocations: {
@@ -29,7 +29,7 @@
 		width: string | undefined = undefined,
 		height: string | undefined = undefined,
 		teammates: Teammate[] | undefined = undefined,
-		roles: Role[] = []
+		groups: Group[] = []
 
 	let date: Date | undefined = event.start,
 		startTime: string,
@@ -56,7 +56,7 @@
 	function selectAll() {
 		if (!!teammates) {
 			convocations = {}
-			for (let i = 0; i < teammates.filter((t) => !t.role || t.role.convocable).length; i += 1) {
+			for (let i = 0; i < teammates.filter((t) => !t.group || t.group.convocable).length; i += 1) {
 				convocations[teammates[i].id] = true
 			}
 		}
@@ -180,7 +180,7 @@
 				<TeammatesChecklist
 					bind:value={convocations}
 					bind:teammates
-					bind:selectableRoles={roles}
+					bind:selectableGroups={groups}
 					onlyConvocables={true}
 				/>
 			</CollapsableSection>

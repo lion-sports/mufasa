@@ -6,7 +6,7 @@
 	import event from '$lib/stores/events/eventShow'
 	import team from '$lib/stores/teams/teamsShow'
 	import { Icon } from '@likable-hair/svelte'
-	import CansService from '$lib/services/roles/cans.service'
+	import CansService from '$lib/services/groups/cans.service'
 
 	function handleConfirmOrDeny(e: CustomEvent<{ convocation: Convocation }>) {
 		if (!!$event) {
@@ -49,7 +49,7 @@
 				return (
 					!!$event &&
 					!$event.convocations.map((c) => c.teammateId).includes(tm.id) &&
-					(tm.role === undefined || tm.role === null || tm.role?.convocable)
+					(tm.group === undefined || tm.group === null || tm.group?.convocable)
 				)
 		})
 		: []

@@ -84,7 +84,7 @@ components:
         team:
           nullable: true
           $ref: "#/components/schemas/Team"
-        roleId:
+        groupId:
           type: integer
           nullable: true
         status:
@@ -151,7 +151,7 @@ components:
         updatedAt: 
           type: string
           format: date-time
-    Role:
+    Group:
       type: object
       properties:
         id:
@@ -201,7 +201,7 @@ components:
       properties:
         id:
           type: integer
-        roleId:
+        groupId:
           type: integer
         teamId:
           type: integer
@@ -505,9 +505,9 @@ paths:
           properties:
             id:
               type: integer
-      - name: role
+      - name: group
         in: query
-        description: The role the user would be
+        description: The group the user would be
         required: false
         schema:
           type: object
@@ -906,22 +906,22 @@ paths:
       responses:
         '200':
           description: No response.
-  /roles:
+  /groups:
     post:
-      summary: Create a new role.
+      summary: Create a new group.
       responses:
         '200':
-          description: The new role.
+          description: The new group.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Role"
-  /teams/{teamId}/roles:
+                $ref: "#/components/schemas/Group"
+  /teams/{teamId}/groups:
     get:
-      summary: Returns a list of roles associated to the team.
+      summary: Returns a list of groups associated to the team.
       responses:
         '200':
-          description: The roles associated to the teams.
+          description: The groups associated to the teams.
           content:
             application/json:
               schema: 
@@ -932,26 +932,26 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Role"
-  /roles/{teamId}:
+                      $ref: "#/components/schemas/Group"
+  /groups/{teamId}:
     get:
-      summary: Returns a certain role.
+      summary: Returns a certain group.
       responses:
         '200':
-          description: The role.
+          description: The group.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Role"
+                $ref: "#/components/schemas/Group"
     put:
-      summary: Update a certain role.
+      summary: Update a certain group.
       responses:
         '200':
-          description: The updated role.
+          description: The updated group.
           content:
             application/json:
               schema: 
-                $ref: "#/components/schemas/Role"
+                $ref: "#/components/schemas/Group"
   /convocations/{convocationId}/confirm:
     post:
       summary: Confirm a convocation.

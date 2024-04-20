@@ -3,7 +3,7 @@ import type { Teammate } from '$lib/services/teams/teams.service'
 
 export default class TeammatesService extends FetchBasedService {
 
-	public async update(params: { id: number; alias?: string; roleId?: number }): Promise<Teammate> {
+	public async update(params: { id: number; alias?: string; groupId?: number }): Promise<Teammate> {
 		let response = await this.client.put({
 			url: '/teammates/' + params.id,
 			body: params

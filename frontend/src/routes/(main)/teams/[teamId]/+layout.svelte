@@ -5,7 +5,7 @@
 	import { goto } from '$app/navigation'
 	import team from '$lib/stores/teams/teamsShow'
 	import teamCans from '$lib/stores/teams/teamsCans'
-	import CansService from '$lib/services/roles/cans.service'
+	import CansService from '$lib/services/groups/cans.service'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import StandardTabSwitcher from '$lib/components/common/StandardTabSwitcher.svelte'
 	import OptionMenu from '$lib/components/common/OptionMenu.svelte'
@@ -23,7 +23,7 @@
 	})
 
 	$teamCans = {
-		cans: currentTeammates?.role?.cans,
+		cans: currentTeammates?.group?.cans,
 		owner: !!$user && $team.ownerId == $user?.id
 	}
 
@@ -85,10 +85,10 @@
 		}
 	]
 
-	if (CansService.can('Role', 'update'))
+	if (CansService.can('Group', 'update'))
 		tabs.push({
-			name: 'roles',
-			label: 'Ruoli'
+			name: 'groups',
+			label: 'Gruppi'
 		})
 
 	tabs.push({
@@ -121,8 +121,8 @@
 			goto(`/teams/${$team?.id}/general`, { replaceState: true })
 		} else if (selectedTab == 'teammates') {
 			goto(`/teams/${$team?.id}/teammates`, { replaceState: true })
-		} else if (selectedTab == 'roles') {
-			goto(`/teams/${$team?.id}/roles`, { replaceState: true })
+		} else if (selectedTab == 'groups') {
+			goto(`/teams/${$team?.id}/groups`, { replaceState: true })
 		} else if (selectedTab == 'calendar') {
 			goto(`/teams/${$team?.id}/calendar`, { replaceState: true })
 		} else if (selectedTab == 'weeks') {
@@ -138,8 +138,8 @@
 		$page.url.href.includes('teammates')
 	) {
 		selectedTab = 'teammates'
-	} else if ($page.url.href.endsWith('roles')) {
-		selectedTab = 'roles'
+	} else if ($page.url.href.endsWith('groups')) {
+		selectedTab = 'groups'
 	} else if ($page.url.href.endsWith('calendar')) {
 		selectedTab = 'calendar'
 	} else if ($page.url.href.endsWith('weeks')) {
@@ -162,8 +162,8 @@
 	}
 
 	$: headerHidden =
-		$page.url.pathname.endsWith('/roles/new') ||
-		/\/roles\/\d+\/edit$/.test($page.url.pathname) ||
+		$page.url.pathname.endsWith('/groups/new') ||
+		/\/groups\/\d+\/edit$/.test($page.url.pathname) ||
 		$page.url.pathname.endsWith('/events/new') ||
 		/\/events\/\d+\//.test($page.url.pathname)
 </script>

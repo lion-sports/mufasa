@@ -42,10 +42,10 @@
 			<div class="invitation-info-container">
 				<div class="team-name">{invitation.team.name}</div>
 				<div style:margin-top="10px">
-					{#if !!invitation.role}
+					{#if !!invitation.group}
 						{invitation.invitedBy.firstname}
 						{invitation.invitedBy.lastname} ti ha invitato al team come
-						<span style:color="rgb(var(--global-color-primary-500))">{invitation.role.name}</span>
+						<span style:color="rgb(var(--global-color-primary-500))">{invitation.group.name}</span>
 					{:else}
 						{invitation.invitedBy.firstname} {invitation.invitedBy.lastname} ti ha invitato al team
 					{/if}

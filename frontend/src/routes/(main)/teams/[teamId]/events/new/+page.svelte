@@ -3,7 +3,7 @@
 	import user from '$lib/stores/auth/user'
 	import { page } from '$app/stores'
 	import EventService from '$lib/services/events/events.service'
-	import CansService from '$lib/services/roles/cans.service'
+	import CansService from '$lib/services/groups/cans.service'
 	import TeamsService from '$lib/services/teams/teams.service'
 	import team from '$lib/stores/teams/teamsShow'
 	import teamCans from '$lib/stores/teams/teamsCans'
@@ -30,7 +30,7 @@
 			})
 
 			$teamCans = {
-				cans: currentTeammates?.role?.cans,
+				cans: currentTeammates?.group?.cans,
 				owner: !!$user && $team.ownerId == $user.id
 			}
 		}
@@ -101,7 +101,7 @@
 	<PageTitle title="Nuovo evento" prependVisible={true} />
 
 	<div style:margin-top="20px">
-		<EventForm bind:event teammates={$team?.teammates} bind:convocations roles={$team?.roles} />
+		<EventForm bind:event teammates={$team?.teammates} bind:convocations groups={$team?.groups} />
 		<ConfirmOrCancelButtons
 			confirmDisable={confirmDisabled}
 			{loading}

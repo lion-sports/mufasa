@@ -581,11 +581,8 @@ export default class EventsManager {
         builder.preload('teammate', builder => {
           builder
             .preload('user')
-            .preload('role')
+            .preload('group')
         })
-        // .join('teammates', 'convocations.teammateId', 'teammates.id')
-        // .join('users', 'teammates.userId', 'users.id')
-        // .orderByRaw(`COALESCE( NULLIF(teammates.alias,''),NULL), users.name`)
       })
       .preload('createdBy')
       .preload('frequency')

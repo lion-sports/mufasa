@@ -5,7 +5,7 @@
 	import InvitationsService, {
 		type Invitation
 	} from '$lib/services/invitations/invitations.service'
-	import CansService from '$lib/services/roles/cans.service'
+	import CansService from '$lib/services/groups/cans.service'
 	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
 	import { Icon, MediaQuery } from '@likable-hair/svelte'
@@ -25,7 +25,7 @@
 	}
 
 	let userInvited: boolean = false
-	let selectedRoles: NonNullable<ComponentProps<StandardAutocomplete>['values']>
+	let selectedGroups: NonNullable<ComponentProps<StandardAutocomplete>['values']>
 	function inviteUser(user: any) {
 		if (!!$team) {
 			let service = new InvitationsService({ fetch })
@@ -33,9 +33,9 @@
 				.inviteUser({
 					team: { id: $team.id },
 					user: { email: user.email },
-					role:
-						!!selectedRoles && !!selectedRoles.length
-							? { id: parseInt(selectedRoles[0].value) }
+					group:
+						!!selectedGroups && !!selectedGroups.length
+							? { id: parseInt(selectedGroups[0].value) }
 							: undefined
 				})
 				.then((result) => {
@@ -84,11 +84,11 @@
 			{#if !!$team}
 				<div style:margin-left={mAndDown ? '0px' : '10px'}>
 					<StandardAutocomplete
-						items={data.team.roles?.map((role) => ({
-							value: role.id.toString(),
-							label: role.name
+						items={data.team.groups?.map((group) => ({
+							value: group.id.toString(),
+							label: group.name
 						})) || []}
-						bind:values={selectedRoles}
+						bind:values={selectedGroups}
 						placeholder="Ruolo"
 					/>
 				</div>

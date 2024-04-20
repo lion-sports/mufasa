@@ -43,7 +43,7 @@ export type AddUserParams = {
     user: {
       id: number
     },
-    role?: {
+    group?: {
       id: number
     }
   },
@@ -95,7 +95,7 @@ export default class TeamsManager {
       .preload('teammates', (teammateQuery) => {
         teammateQuery.preload('user')
       })
-      .preload('roles')
+      .preload('groups')
       .paginate(params.data.page, params.data.perPage)
 
     const results = await query
@@ -159,18 +159,18 @@ export default class TeamsManager {
         client: trx
       })
       .preload('teammates', (teammateQuery) => {
-        teammateQuery.preload('user').preload('role')
+        teammateQuery.preload('user').preload('group')
       })
       .preload('owner')
-      .preload('roles', (rolesBuilder) => {
-        rolesBuilder.orderBy('roles.createdAt')
+      .preload('groups', (groupsBuilder) => {
+        groupsBuilder.orderBy('groups.createdAt')
       })
       .preload('invitations', (invitationBuilder) => {
         invitationBuilder
           .where('status', 'pending')
           .preload('invitedBy')
           .preload('invite')
-          .preload('role')
+          .preload('group')
       })
       .where('id', params.data.id)
       .firstOrFail()
@@ -276,7 +276,7 @@ export default class TeamsManager {
 
     await team.related('teammateUsers').attach({
       [params.data.user.id]: {
-        roleId: params.data.role?.id,
+        groupId: params.data.group?.id,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       }

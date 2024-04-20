@@ -43,11 +43,11 @@ Route.post('/teams/:id/updatePreference', 'TeamsController.updatePreference').mi
 Route.get('/teammates/mostAbsenceForTeammates', 'TeammatesController.mostAbsenceForTeammates').middleware('auth:api')
 Route.put('/teammates/:id', 'TeammatesController.update').middleware('auth:api')
 
-Route.post('/roles', 'RolesController.store').middleware('auth:api')
-Route.get('/teams/:teamId/roles', 'RolesController.index').middleware('auth:api')
-Route.put('/roles/:id', 'RolesController.update').middleware('auth:api')
-Route.delete('/roles/:id', 'RolesController.destroy').middleware('auth:api')
-Route.get('/roles/:id', 'RolesController.show').middleware('auth:api')
+Route.post('/groups', 'GroupsController.store').middleware('auth:api')
+Route.get('/teams/:teamId/groups', 'GroupsController.index').middleware('auth:api')
+Route.put('/groups/:id', 'GroupsController.update').middleware('auth:api')
+Route.delete('/groups/:id', 'GroupsController.destroy').middleware('auth:api')
+Route.get('/groups/:id', 'GroupsController.show').middleware('auth:api')
   
 Route.resource('users', 'UsersController')
   .only([ 'index', 'store', 'update', 'show', 'destroy' ])

@@ -1,11 +1,11 @@
 <script lang="ts" context="module">
-	import type { Role } from '$lib/services/roles/roles.service'
+	import type { Group } from '$lib/services/groups/groups.service'
 	import type { Team } from '$lib/services/teams/teams.service'
 </script>
 
 <script lang="ts">
 	import { goto } from '$app/navigation'
-	import RolesService from '$lib/services/roles/roles.service'
+	import GroupsService from '$lib/services/groups/groups.service'
 	import { createEventDispatcher, type ComponentProps } from 'svelte'
 	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
@@ -13,10 +13,10 @@
 	import { SimpleTable, Icon } from '@likable-hair/svelte'
 
 	let dispatch = createEventDispatcher<{
-		destroy: {}
+		destroy: undefined
 	}>()
 
-	export let roles: Role[] = [],
+	export let groups: Group[] = [],
 		team: Team | undefined = undefined,
 		searchable: boolean = false
 
@@ -31,38 +31,38 @@
 	]
 
 	let searchText: string
-	$: filteredRoles = !!searchText
-		? roles.filter((role) => {
-				return role.name.toLowerCase().includes(searchText.toLowerCase())
-		  })
-		: roles
+	$: filteredGroups = !!searchText
+		? groups.filter((group) => {
+				return group.name.toLowerCase().includes(searchText.toLowerCase())
+      })
+		: groups
 
-	function goToNewRole(event: any) {
+	function goToNewGroup(event: any) {
 		if (!!team) {
-			goto(`/teams/${team.id}/roles/new`)
+			goto(`/teams/${team.id}/groups/new`)
 		}
 	}
 
-	function goToEdit(role: any) {
-		if (!!team && !!role.id) {
-			goto(`/teams/${team.id}/roles/${role.id}/edit`)
+	function goToEdit(group: any) {
+		if (!!team && !!group.id) {
+			goto(`/teams/${team.id}/groups/${group.id}/edit`)
 		}
 	}
 
-	let confirmDialogOpen: boolean, deletingRole: Role | undefined
-	function handleDeleteClick(role: any) {
-		deletingRole = role
+	let confirmDialogOpen: boolean, deletingGroup: Group | undefined
+	function handleDeleteClick(group: any) {
+		deletingGroup = group
 		confirmDialogOpen = true
 	}
 
-	function confirmRoleDeletion() {
+	function confirmGroupDeletion() {
 		confirmDialogOpen = false
 
-		if (!!deletingRole) {
-			let service = new RolesService({ fetch })
+		if (!!deletingGroup) {
+			let service = new GroupsService({ fetch })
 			service
 				.destroy({
-					id: deletingRole.id
+					id: deletingGroup.id
 				})
 				.then(() => {
 					dispatch('destroy')
@@ -81,12 +81,12 @@
 			</svelte:fragment>
 		</StandardTextfield>
 		<div style:margin-left="10px">
-			<StandardButton on:click={goToNewRole}>Nuovo</StandardButton>
+			<StandardButton on:click={goToNewGroup}>Nuovo</StandardButton>
 		</div>
 	</div>
 {/if}
 
-<SimpleTable {headers} items={filteredRoles}>
+<SimpleTable {headers} items={filteredGroups}>
 	<div style:display="flex" style:justify-content="end" slot="rowActions" let:item>
 		<div style:margin-right="10px">
 			<Icon name="mdi-pencil" click on:click={() => goToEdit(item)} />
@@ -103,8 +103,8 @@
 <ConfirmDialog
 	confirmText="Elimina"
 	title="Eliminazione ruolo"
-	description={`Sei sicuro di voler eliminare il ruolo ${deletingRole?.name}?`}
+	description={`Sei sicuro di voler eliminare il ruolo ${deletingGroup?.name}?`}
 	bind:open={confirmDialogOpen}
 	on:cancel-click={() => (confirmDialogOpen = false)}
-	on:confirm-click={confirmRoleDeletion}
+	on:confirm-click={confirmGroupDeletion}
 />

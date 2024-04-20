@@ -4,7 +4,7 @@ import Invitation from 'App/Models/Invitation'
 import User from 'App/Models/User'
 import TeamsManager from './teams.manager'
 import Team from 'App/Models/Team'
-import Role from 'App/Models/Role'
+import Group from 'App/Models/Group'
 import AuthorizationManager from './authorization.manager';
 import { Context, withTransaction, withUser } from './base.manager';
 
@@ -16,7 +16,7 @@ export type InviteUserParams = {
     team: {
       id: number
     },
-    role?: {
+    group?: {
       id: number
     }
   },
@@ -70,10 +70,10 @@ export default class InvitationsManager {
       .where('id', params.data.team.id)
       .firstOrFail()
 
-    let role
-    if(!!params.data.role?.id) {
-      role = await Role.query({ client: trx })
-        .where('id', params.data.role.id)
+    let group: Group | undefined = undefined
+    if(!!params.data.group?.id) {
+      group = await Group.query({ client: trx })
+        .where('id', params.data.group.id)
         .firstOrFail()
     }
     
@@ -126,13 +126,16 @@ export default class InvitationsManager {
     await invitation.save()
 
     if (!!invitedUser) await invitation.related('invite').associate(invitedUser)
-    if (!!role) await invitation.related('role').associate(role)
+    if (!!group) {
+      invitation.groupId = group.id
+      await invitation.related('group').associate(group)
+    }
     await invitation.related('invitedBy').associate(user)
     await invitation.related('team').associate(team)
 
     if (!!invitation.invitedByUserId) await invitation.load('invitedBy')
     if (!!invitation.teamId) await invitation.load('team')
-    if (!!invitation.roleId) await invitation.load('role')
+    if (!!invitation.groupId) await invitation.load('group')
     return invitation
   }
 
@@ -148,7 +151,7 @@ export default class InvitationsManager {
       .where('status', 'pending')
       .preload('invitedBy')
       .preload('team')
-      .preload('role')
+      .preload('group')
   }
 
   @withTransaction
@@ -188,8 +191,8 @@ export default class InvitationsManager {
         team: {
           id: invitation.teamId
         },
-        role: {
-          id: invitation.roleId
+        group: {
+          id: invitation.groupId
         }
       },
       context: {

@@ -1,6 +1,5 @@
 <script lang="ts" context="module">
 	import type { Team, Teammate } from '$lib/services/teams/teams.service'
-	import type { DateStat } from '@likable-hair/svelte/dist/components/simple/dates/utils'
 	import type { Event } from '$lib/services/events/events.service'
 </script>
 
@@ -8,7 +7,7 @@
 	import { DateTime } from 'luxon'
 	import { onMount } from 'svelte'
 	import { goto } from '$app/navigation'
-	import CansService from '$lib/services/roles/cans.service'
+	import CansService from '$lib/services/groups/cans.service'
 	import qs from 'qs'
 	import { Button, Calendar, Icon, MediaQuery } from '@likable-hair/svelte'
 	import { createEventDispatcher } from 'svelte'
@@ -71,7 +70,10 @@
 			visibleMonth += 1
 		}
 
-		dispatch('nextMonth')
+		dispatch('nextMonth', {
+      month: visibleMonth,
+      year: visibleYear
+    })
 	}
 
 	function previousMonth() {
@@ -82,10 +84,17 @@
 			visibleMonth -= 1
 		}
 
-		dispatch('previousMonth')
+		dispatch('previousMonth', {
+      month: visibleMonth,
+      year: visibleYear
+    })
 	}
 
-	function handleDayClick(dayStat: DateStat) {
+	function handleDayClick(dayStat: {
+    dayOfMonth: number,
+    month: number,
+    year: number
+  }) {
 		let selection = DateTime.now().set({
 			day: dayStat.dayOfMonth,
 			month: dayStat.month + 1,
@@ -94,7 +103,11 @@
 		selectedDate = selection.toJSDate()
 	}
 
-	function handlePlusClick(dayStat: DateStat) {
+	function handlePlusClick(dayStat: {
+    dayOfMonth: number,
+    month: number,
+    year: number
+  }) {
 		if (!!team) {
 			let date = DateTime.now()
 				.set({
@@ -173,6 +186,7 @@
 				style:border-color="rgb(var(--global-color-background-300))"
 				on:click={() => handleDayClick(dayStat)}
 				on:keypress={() => handleDayClick(dayStat)}
+        role="presentation"
 			>
 				{#if !mAndDown}
 					<div>

@@ -114,7 +114,7 @@ export default class ConvocationsManager {
         .preload('teammate', builder => {
           builder
             .preload('user')
-            .preload('role')
+            .preload('group')
         })
 
       if (!params.context?.trx) await trx.commit()
