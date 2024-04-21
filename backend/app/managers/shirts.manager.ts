@@ -1,5 +1,5 @@
 import Shirt from "App/Models/Shirt";
-import BaseManager, { Context, withTransaction, withUser } from "./base.manager";
+import { Context, withTransaction, withUser } from "./base.manager";
 import { CreateShirtValidator, UpdateShirtValidator } from "App/Validators/shirts";
 import { validator } from "@ioc:Adonis/Core/Validator"
 import User from "App/Models/User";

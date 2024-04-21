@@ -219,6 +219,30 @@ components:
         updatedAt: 
           type: string
           format: date-time
+    Shirt:
+      type: object
+      properties:
+        id:
+          type: integer
+        teammateId:
+          type: integer
+        number:
+          type: integer
+        name:
+          type: string
+          nullable: true
+        primaryColor:
+          type: string
+          nullable: true
+        secondaryColor:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
 
 paths:
   /auth/login:
@@ -903,6 +927,56 @@ paths:
                 $ref: "#/components/schemas/Team"
     delete:
       summary: delete a event session.
+      responses:
+        '200':
+          description: No response.
+  /shirts:
+    post:
+      summary: Create a new shirt.
+      responses:
+        '200':
+          description: The new shirt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shirt"
+    get:
+      summary: Returns a list of shirts associated to the teammates that the user can view.
+      responses:
+        '200':
+          description: The shirts visible to my user.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Shirt"
+  /shirts/{shirtId}:
+    get:
+      summary: Returns a certain shirt.
+      responses:
+        '200':
+          description: The shirt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shirt"
+    put:
+      summary: Update a shirt.
+      responses:
+        '200':
+          description: The shirt updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Shirt"
+    delete:
+      summary: delete a shirt.
       responses:
         '200':
           description: No response.
