@@ -1,7 +1,7 @@
 import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-export default class UpdateGroupValidator {
+export default class UpdateShirtValidator {
   constructor(protected ctx?: HttpContextContract) { }
 
   public schema = schema.create({

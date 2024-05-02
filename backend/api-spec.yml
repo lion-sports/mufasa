@@ -243,6 +243,29 @@ components:
         updatedAt: 
           type: string
           format: date-time
+    Scout:
+      type: object
+      properties:
+        id:
+          type: integer
+        sport:
+          type: string
+          enum:
+            - volleyball
+            - basketball
+        name:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        eventId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
 
 paths:
   /auth/login:
@@ -977,6 +1000,56 @@ paths:
                 $ref: "#/components/schemas/Shirt"
     delete:
       summary: delete a shirt.
+      responses:
+        '200':
+          description: No response.
+  /scouts:
+    post:
+      summary: Create a new scout.
+      responses:
+        '200':
+          description: The new scout.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scout"
+    get:
+      summary: Returns a list of scouts associated to the events that the user can view.
+      responses:
+        '200':
+          description: The scouts visible to my user.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Scout"
+  /scouts/{scoutId}:
+    get:
+      summary: Returns a certain scout.
+      responses:
+        '200':
+          description: The scout.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scout"
+    put:
+      summary: Update a scout.
+      responses:
+        '200':
+          description: The scout updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Scout"
+    delete:
+      summary: delete a scout.
       responses:
         '200':
           description: No response.

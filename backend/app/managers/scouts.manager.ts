@@ -1,13 +1,14 @@
-import Shirt from "App/Models/Shirt";
 import { Context, withTransaction, withUser } from "./base.manager";
-import { CreateShirtValidator, UpdateShirtValidator } from "App/Validators/shirts";
 import { validator } from "@ioc:Adonis/Core/Validator"
 import User from "App/Models/User";
 import AuthorizationManager from "./authorization.manager";
 import FilterModifierApplier, { Modifier } from "App/Services/FilterModifierApplier";
 import { ModelObject } from "@ioc:Adonis/Lucid/Orm";
+import Scout, { Sport } from "App/Models/Scout";
+import { DateTime } from "luxon";
+import { CreateScoutValidator, UpdateScoutValidator } from "App/Validators/scouts";
 
-export default class ShirtManager {
+export default class ScoutsManager {
   @withTransaction
   @withUser
   public async list(params: {
@@ -28,21 +29,19 @@ export default class ShirtManager {
     if (!params.data.page) params.data.page = 1
     if (!params.data.perPage) params.data.perPage = 100
 
-    let query = Shirt.query({
+    let query = Scout.query({
         client: trx,
       })
-      .select('shirts.*')
-      .preload('teammate')
-      .join('teammates', 'teammates.id', 'shirts.teammateId')
-      .join('teams', 'teammates.teamId', 'teams.id')
+      .select('scouts.*')
+      .preload('event')
+      .join('events', 'events.id', 'scouts.eventId')
+      .join('teams', 'events.teamId', 'teams.id')
       .whereIn('teams.id', b => {
         b.select('teams2.id')
           .from('teams as teams2')
           .join('teammates as teammates2', 'teammates2.teamId', 'teams2.id')
           .where('teammates2.userId', user.id)
       })
-      
-    
 
     if (!!params.data.filtersBuilder) {
       let filtersApplier = new FilterModifierApplier()
@@ -62,25 +61,24 @@ export default class ShirtManager {
   @withUser
   public async create(params: {
     data: {
-      number: number
+      sport: Sport
       name?: string
-      primaryColor?: string
-      secondaryColor?: string
-      teammateId: number
+      startedAt?: DateTime,
+      eventId: number
     },
     context?: Context
-  }): Promise<Shirt> {
+  }): Promise<Scout> {
     let trx = params.context?.trx
     let user = params.context?.user as User
 
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'create',
-        resource: 'Shirt',
+        action: 'manage',
+        resource: 'Scout',
         entities: {
-          teammate: {
-            id: params.data.teammateId
+          event: {
+            id: params.data.eventId
           }
         }
       },
@@ -90,14 +88,12 @@ export default class ShirtManager {
     })
 
     let validatedData = await validator.validate({
-      schema: new CreateShirtValidator().schema,
+      schema: new CreateScoutValidator().schema,
       data: params.data
     })
 
-    let shirt = await Shirt.create(validatedData, { client: trx })
-
-    await shirt.load('teammate')
-    return shirt
+    let scout = await Scout.create(validatedData, { client: trx })
+    return scout
   }
 
   @withTransaction
@@ -107,7 +103,7 @@ export default class ShirtManager {
       id: number
     }
     context?: Context
-  }): Promise<Shirt> {
+  }): Promise<Scout> {
     let trx = params.context?.trx
     let user = params.context?.user as User
 
@@ -115,9 +111,9 @@ export default class ShirtManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Shirt',
+        resource: 'Scout',
         entities: {
-          shirt: {
+          scout: {
             id: params.data.id
           }
         }
@@ -127,12 +123,12 @@ export default class ShirtManager {
       }
     })
 
-    let shirt = await Shirt
+    let scout = await Scout
       .query({ client: trx })
       .where('id', params.data.id)
       .firstOrFail()
 
-    return shirt
+    return scout
   }
 
   @withTransaction
@@ -140,24 +136,23 @@ export default class ShirtManager {
   public async update(params: {
     data: {
       id: number
-      number?: number
+      sport?: Sport
       name?: string
-      primaryColor?: string
-      secondaryColor?: string
-      teammateId?: number
+      startedAt?: DateTime,
+      eventId?: number
     },
     context?: Context
-  }): Promise<Shirt> {
+  }): Promise<Scout> {
     let trx = params.context?.trx
     let user = params.context?.user as User
 
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'Shirt',
+        action: 'manage',
+        resource: 'Scout',
         entities: {
-          shirt: {
+          scout: {
             id: params.data.id
           }
         }
@@ -168,17 +163,17 @@ export default class ShirtManager {
     })
 
     let validatedData = await validator.validate({
-      schema: new UpdateShirtValidator().schema,
+      schema: new UpdateScoutValidator().schema,
       data: params.data
     })
 
-    let shirt = await Shirt
+    let scout = await Scout
       .findOrFail(params.data.id, { client: trx })
 
-    shirt.merge(validatedData)
-    await shirt.save()
+    scout.merge(validatedData)
+    await scout.save()
 
-    return shirt
+    return scout
   }
 
   @withTransaction
@@ -195,10 +190,10 @@ export default class ShirtManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'destroy',
-        resource: 'Shirt',
+        action: 'manage',
+        resource: 'Scout',
         entities: {
-          shirt: {
+          scout: {
             id: params.data.id
           }
         }
@@ -208,6 +203,8 @@ export default class ShirtManager {
       }
     })
 
-    await Shirt.query({ client: trx }).where('id', params.data.id).del()
+    await Scout.query({ client: trx })
+      .where('id', params.data.id)
+      .del()
   }
 }

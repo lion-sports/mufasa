@@ -10,6 +10,7 @@ import Team from 'App/Models/Team'
 import EventSession from 'App/Models/EventSession'
 import Shirt from 'App/Models/Shirt'
 import { Context } from './base.manager'
+import Scout from 'App/Models/Scout'
 
 export type Resource = 
   'Team' |
@@ -19,7 +20,8 @@ export type Resource =
   'EventSession' |
   'Group' |
   'Teammate' | 
-  'Shirt'
+  'Shirt' |
+  'Scout'
 
 export type Action =
   'update' |
@@ -33,7 +35,8 @@ export type Action =
   'discard' |
   'convocate' |
   'confirm' |
-  'deny'
+  'deny' |
+  'manage'
 
 export type Entities = {
   team?: Pick<Team, 'id'>,
@@ -45,7 +48,8 @@ export type Entities = {
   group?: Pick<Group, 'id'>,
   user?: Pick<User, 'id'>,
   teammate?: Pick<Teammate, 'id'>,
-  shirt?: Pick<Shirt, 'id'>
+  shirt?: Pick<Shirt, 'id'>,
+  scout?: Pick<Scout, 'id'>
 }
 
 type CanFunction = (params: {
@@ -104,6 +108,10 @@ export default class AuthorizationManager {
       update: AuthorizationManager._canUpdateShirt,
       view: AuthorizationManager._canViewShirt,
       destroy: AuthorizationManager._canDestroyShirt
+    },
+    Scout: {
+      manage: AuthorizationManager._canManageScout,
+      view: AuthorizationManager._canViewScout
     },
     Convocation: {
       confirm: AuthorizationManager._canConfirmConvocation,
@@ -567,6 +575,65 @@ export default class AuthorizationManager {
       team: { id: shirt.teammate.teamId },
       action: 'destroy',
       resource: 'Shirt'
+    }, context)
+  }
+
+  private static async _canManageScout(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.event?.id && !params.entities.scout?.id) throw new Error('scout or event id must be defined')
+
+    let teamId: number | undefined = undefined
+    if(!!params.entities.event?.id) {
+      let event = await Event.query({
+        client: context?.trx
+      })
+      .where('id', params.entities.event.id)
+      .first()
+      
+      teamId = event?.teamId
+    } else if(!!params.entities.scout?.id) {
+      let scout = await Scout.query({
+          client: context?.trx
+        })
+        .preload('event')
+        .where('id', params.entities.scout.id)
+        .first()
+
+      teamId = scout?.event.teamId
+    }
+
+    if (!teamId) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: teamId },
+      action: 'manage',
+      resource: 'Scout'
+    }, context)
+  }
+
+  private static async _canViewScout(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.scout?.id) throw new Error('scout must be defined')
+
+    let scout = await Scout.query({
+        client: context?.trx
+      })
+      .where('id', params.entities.scout.id)
+      .preload('event')
+      .first()
+
+    if (!scout) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: scout.event.teamId },
+      action: 'view',
+      resource: 'Scout'
     }, context)
   }
 }

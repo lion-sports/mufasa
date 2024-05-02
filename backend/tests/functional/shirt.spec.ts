@@ -1,10 +1,10 @@
 import User from 'App/Models/User'
-import TeamsManager from 'App/managers/teams.manager';
 import Team from 'App/Models/Team'
 import { test } from '@japa/runner'
 import { TeamFactory } from 'Database/factories'
 import Teammate from 'App/Models/Teammate';
 import TeammateFactory from 'Database/factories/TeammateFactory';
+import Shirt from 'App/Models/Shirt';
 
 test.group('Shirts', (group) => {
   let loggedInUser: User
@@ -37,68 +37,80 @@ test.group('Shirts', (group) => {
     assert.equal(shirt.name, 'il numero uno', 'should have the right name')
   })
 
-  // test('get a paginated list of mine existing teams', async ({ client, assert }) => {
-  //   const response = await client.get('/teams').qs({
-  //     page: 1,
-  //     perPage: 200
-  //   }).loginAs(loggedInUser)
-  //   response.assertAgainstApiSpec()
-  //   let teams = response.body()
+  test('get a paginated list of mine existing shirts', async ({ client, assert }) => {
+    await client.post('/shirts').json({
+      number: 2,
+      name: 'il numero due',
+      primaryColor: '#fff',
+      secondaryColor: '#000',
+      teammateId: teammate.id
+    }).loginAs(loggedInUser)
 
-  //   assert.equal(teams.meta.perPage, 200, "should use the right pagination")
-  //   assert.equal(teams.meta.total, teams.data.length, "should return the right rows")
-  // })
+    const response = await client.get('/shirts').qs({
+      page: 1,
+      perPage: 200
+    }).loginAs(loggedInUser)
 
-  // test('get a team', async ({ client, assert }) => {
-  //   const team = await TeamFactory.with('owner').with('teammateUsers').create()
-  //   const user = await User.query().whereHas('teams', (builder) => builder.where('teams.id', team.id)).firstOrFail()
-  //   const response = await client.get('/teams/' + team.id).loginAs(user)
+    response.assertAgainstApiSpec()
+    let paginatedShirt = response.body()
 
-  //   response.assertAgainstApiSpec()
-  //   const teamResponse = response.body()
-  //   assert.equal(teamResponse.id, team.id, "should return the correct team")
-  // })
+    assert.equal(paginatedShirt.meta.perPage, 200, "should use the right pagination")
+    assert.equal(paginatedShirt.meta.total, paginatedShirt.data.length, "should return the right rows")
+  })
 
-  // test('update an existing team', async ({ client, assert }) => {
-  //   const response = await client.put('/teams/' + team.id).json({
-  //     name: 'il nuovo nome'
-  //   }).loginAs(loggedInUser)
+  test('get a shirt', async ({ client, assert }) => {
+    let createShirtResponse = await client.post('/shirts').json({
+      number: 3,
+      name: 'il numero tre',
+      primaryColor: '#fff',
+      secondaryColor: '#000',
+      teammateId: teammate.id
+    }).loginAs(loggedInUser)
 
-  //   response.assertAgainstApiSpec()
-  //   const teamResponse = response.body()
-  //   assert.equal(teamResponse.id, team.id, "should update the correct team")
-  //   assert.equal(teamResponse.name, 'il nuovo nome', "should update the team")
-  // })
+    let shirt = createShirtResponse.body()
+    const response = await client.get('/shirts/' + shirt.id).loginAs(loggedInUser)
 
-  // test('update a preference of an existing team', async ({ client, assert }) => {
-  //   let response = await client.post('/teams/' + team.id + '/updatePreference').json({
-  //     preference: 'confirmPresenceByDefault',
-  //     value: true
-  //   }).loginAs(loggedInUser)
+    response.assertAgainstApiSpec()
+    const shirtResponse = response.body()
+    assert.equal(shirtResponse.id, shirt.id, "should return the correct shirt")
+  })
 
-  //   response.assertAgainstApiSpec()
-  //   const teamResponse = response.body()
-  //   assert.equal(teamResponse.id, team.id, "should update the correct team")
-  //   assert.equal(teamResponse.preferences.confirmPresenceByDefault, true, "should update the team preference")
+  test('update an existing shirt', async ({ client, assert }) => {
+    let createShirtResponse = await client.post('/shirts').json({
+      number: 4,
+      name: 'il numero quarto',
+      primaryColor: '#fff',
+      secondaryColor: '#000',
+      teammateId: teammate.id
+    }).loginAs(loggedInUser)
 
-  //   let error = false
-  //   try {
-  //     response = await client.post('/teams/' + team.id + '/updatePreference').json({
-  //       preference: 'pippo',
-  //       value: true
-  //     }).loginAs(loggedInUser)
-  //   } catch {
-  //     error = true
-  //   }
+    let shirt = createShirtResponse.body()
+    const response = await client.put('/shirts/' + shirt.id).json({
+      name: 'il nuovo numero quarto'
+    }).loginAs(loggedInUser)
 
-  //   assert.isTrue(error, 'unknow preference should not be set')
-  // })
+    response.assertAgainstApiSpec()
+    const shirtResponse = response.body()
+    assert.equal(shirtResponse.id, shirt.id, "should update the correct shirt")
+    assert.equal(shirtResponse.name, 'il nuovo numero quarto', "should update the shirt")
+  })
 
-  // test('get absences in latest events', async ({ client }) => {
-  //   let response = await client.get('/teams/absencesInLatestEvents').qs({
-  //     forLastEvents: 10
-  //   }).loginAs(loggedInUser)
+  test('destroy an existing shirt', async ({ client, assert }) => {
+    let createShirtResponse = await client.post('/shirts').json({
+      number: 5,
+      name: 'il numero quinto',
+      primaryColor: '#fff',
+      secondaryColor: '#000',
+      teammateId: teammate.id 
+    }).loginAs(loggedInUser)
 
-  //   response.assertAgainstApiSpec()
-  // })
+    let shirt = createShirtResponse.body()
+    await client.delete('/shirts/' + shirt.id).loginAs(loggedInUser)
+
+    let shirtFromDatabase = await Shirt.query()
+      .where('id', shirt.id)
+      .first()
+
+    assert.notExists(shirtFromDatabase, 'should have destroyed the shirt')
+  })
 })
