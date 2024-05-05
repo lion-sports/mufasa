@@ -266,6 +266,49 @@ components:
         updatedAt: 
           type: string
           format: date-time
+    Player:
+      type: object
+      properties:
+        id:
+          type: integer
+        convocationId:
+          type: number
+          nullable: true
+        scoutId:
+          type: number
+          nullable: false
+        teammateId:
+          type: number
+          nullable: true
+        aliases:
+          type: array
+          nullable: true
+          items:
+            type: string
+            nullable: true
+        shirtId:
+          type: number
+          nullable: true
+        shirtNumber:
+          type: number
+          nullable: true
+        shirtPrimaryColor:
+          type: string
+          nullable: true
+        shirtSecondaryColor:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+        eventId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
 
 paths:
   /auth/login:
@@ -1000,6 +1043,56 @@ paths:
                 $ref: "#/components/schemas/Shirt"
     delete:
       summary: delete a shirt.
+      responses:
+        '200':
+          description: No response.
+  /players:
+    post:
+      summary: Create a new player.
+      responses:
+        '200':
+          description: The new player.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+    get:
+      summary: Returns a list of players associated to the scouts that the user can view.
+      responses:
+        '200':
+          description: The players visible to my user.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Player"
+  /players/{playerId}:
+    get:
+      summary: Returns a certain player.
+      responses:
+        '200':
+          description: The player.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+    put:
+      summary: Update a player.
+      responses:
+        '200':
+          description: The player updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Player"
+    delete:
+      summary: delete a player.
       responses:
         '200':
           description: No response.

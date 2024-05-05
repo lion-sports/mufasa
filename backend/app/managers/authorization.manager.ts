@@ -21,7 +21,8 @@ export type Resource =
   'Group' |
   'Teammate' | 
   'Shirt' |
-  'Scout'
+  'Scout' |
+  'Player'
 
 export type Action =
   'update' |
