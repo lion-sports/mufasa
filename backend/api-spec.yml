@@ -266,6 +266,34 @@ components:
         updatedAt: 
           type: string
           format: date-time
+    ScoringSystem:
+      type: object
+      properties:
+        id:
+          type: integer
+        sport:
+          type: string
+          enum:
+            - volleyball
+            - basketball
+        name:
+          type: string
+        public:
+          type: boolean
+        createdByUserId:
+          type: number
+        createdForTeamId:
+          type: integer
+          nullable: true
+        config:
+          type: object
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
     Player:
       type: object
       properties:
@@ -1143,6 +1171,56 @@ paths:
                 $ref: "#/components/schemas/Scout"
     delete:
       summary: delete a scout.
+      responses:
+        '200':
+          description: No response.
+  /scoringSystems:
+    post:
+      summary: Create a new scoring system.
+      responses:
+        '200':
+          description: The new scoring system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoringSystem"
+    get:
+      summary: Returns a list of scoring systems that the user can view.
+      responses:
+        '200':
+          description: The scoring systems visible to my user.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ScoringSystem"
+  /scoringSystems/{scoringSystemId}:
+    get:
+      summary: Returns a certain scoring system.
+      responses:
+        '200':
+          description: The scoring system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoringSystem"
+    put:
+      summary: Update a scoring system.
+      responses:
+        '200':
+          description: The scoring system updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ScoringSystem"
+    delete:
+      summary: delete a scoring system.
       responses:
         '200':
           description: No response.

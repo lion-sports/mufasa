@@ -11,6 +11,7 @@ import EventSession from 'App/Models/EventSession'
 import Shirt from 'App/Models/Shirt'
 import { Context } from './base.manager'
 import Scout from 'App/Models/Scout'
+import ScoringSystem from 'App/Models/ScoringSystem'
 
 export type Resource = 
   'Team' |
@@ -22,7 +23,8 @@ export type Resource =
   'Teammate' | 
   'Shirt' |
   'Scout' |
-  'Player'
+  'Player' |
+  'ScoringSystem'
 
 export type Action =
   'update' |
@@ -50,7 +52,8 @@ export type Entities = {
   user?: Pick<User, 'id'>,
   teammate?: Pick<Teammate, 'id'>,
   shirt?: Pick<Shirt, 'id'>,
-  scout?: Pick<Scout, 'id'>
+  scout?: Pick<Scout, 'id'>,
+  scoringSystem?: Pick<ScoringSystem, 'id'>
 }
 
 type CanFunction = (params: {
@@ -113,6 +116,11 @@ export default class AuthorizationManager {
     Scout: {
       manage: AuthorizationManager._canManageScout,
       view: AuthorizationManager._canViewScout
+    },
+    ScoringSystem: {
+      view: AuthorizationManager._canViewScoringSystem,
+      manage: AuthorizationManager._canManageScoringSystem,
+      create: AuthorizationManager._canCreateScoringSystem
     },
     Convocation: {
       confirm: AuthorizationManager._canConfirmConvocation,
@@ -634,6 +642,66 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: scout.event.teamId },
       action: 'view',
+      resource: 'Scout'
+    }, context)
+  }
+
+  private static async _canViewScoringSystem(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.scoringSystem?.id) throw new Error('scoring system must be defined')
+
+    let scoringSystem = await ScoringSystem.query({
+        client: context?.trx
+      })
+      .where('id', params.entities.scoringSystem.id)
+      .first()
+
+    if (!scoringSystem) return false
+    if (scoringSystem.createdByUserId == params.actor.id) return true
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: scoringSystem.createdForTeamId },
+      action: 'view',
+      resource: 'Scout'
+    }, context)
+  }
+
+  private static async _canManageScoringSystem(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.scoringSystem?.id) throw new Error('scoring system must be defined')
+
+    let scoringSystem = await ScoringSystem.query({
+      client: context?.trx
+    })
+      .where('id', params.entities.scoringSystem.id)
+      .first()
+
+    if (!scoringSystem) return false
+    if (scoringSystem.createdByUserId == params.actor.id) return true
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: scoringSystem.createdForTeamId },
+      action: 'manage',
+      resource: 'Scout'
+    }, context)
+  }
+
+  private static async _canCreateScoringSystem(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.team?.id) throw new Error('team id must be defined')
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: params.entities.team.id },
+      action: 'manage',
       resource: 'Scout'
     }, context)
   }

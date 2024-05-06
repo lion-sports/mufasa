@@ -107,5 +107,11 @@ Route.resource('players', 'PlayersController')
     '*': ['auth:api']
   })
 
+Route.resource('scoringSystems', 'ScoringSystemsController')
+  .only(['index', 'store', 'update', 'show', 'destroy'])
+  .middleware({
+    '*': ['auth:api']
+  })
+
 Route.post('/convocations/:id/confirm', 'ConvocationsController.confirm').middleware('auth:api')
 Route.post('/convocations/:id/deny', 'ConvocationsController.deny').middleware('auth:api')
