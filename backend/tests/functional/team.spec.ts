@@ -29,12 +29,14 @@ test.group('Teams', (group) => {
     const response = await client.post('/teams').json({
       name: 'Il mio team',
       notes: `# Come si struttura il mio team`,
+      sport: 'volleyball'
     }).loginAs(loggedInUser)
 
 
     const team = response.body()
     response.assertAgainstApiSpec()
     assert.equal(team.name, 'Il mio team', 'should have the right name')
+    assert.equal(team.sport, 'volleyball', 'should have the right sport')
   })
 
   test('get a paginated list of mine existing teams', async ({ client, assert }) => {

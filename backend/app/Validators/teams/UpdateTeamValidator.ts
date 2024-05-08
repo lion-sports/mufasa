@@ -1,14 +1,16 @@
 import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { SPORTS } from 'App/Models/Scout'
 
 export default class UserValidator {
   constructor(protected ctx?: HttpContextContract) { }
 
   public schema = schema.create({
-    name: schema.string.nullableAndOptional([
+    name: schema.string.optional([
       rules.maxLength(255)
     ]),
     notes: schema.string.nullableAndOptional(),
+    sport: schema.enum.nullableAndOptional(SPORTS)
   })
 
   public messages: CustomMessages = {}

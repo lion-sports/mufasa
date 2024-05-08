@@ -5,6 +5,7 @@ import { DateTime } from 'luxon'
 import { CamelCaseBaseModel } from './CamelCaseBaseModel';
 import { BelongsTo, belongsTo, column, hasMany, HasMany, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
 import Teammate from './Teammate'
+import { Sport } from './Scout';
 
 export default class Team extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -17,7 +18,10 @@ export default class Team extends CamelCaseBaseModel {
   public name: string
 
   @column()
-  public notes: string
+  public notes?: string | null
+
+  @column()
+  public sport?: Sport | null
 
   @hasMany(() => Teammate, {
     foreignKey: 'teamId'
