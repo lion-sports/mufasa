@@ -1,29 +1,11 @@
 import User from 'App/Models/User';
-import Teammate from 'App/Models/Teammate';
+import Teammate, { Role } from 'App/Models/Teammate';
 import Database, { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
 import { UpdateTeammateValidator } from 'App/Validators/teammates'
 import { validator } from "@ioc:Adonis/Core/Validator"
 import AuthorizationManager from './authorization.manager'
 import Team from 'App/Models/Team';
 import { Context, withTransaction, withUser } from './base.manager';
-
-export type SetGroupParams = {
-  data: {
-    group: {
-      id: number
-    }
-  },
-  context?: Context
-}
-
-export type UpdateParams = {
-  data: {
-    id: number,
-    alias?: string,
-    groupId?: number
-  },
-  context?: Context
-}
 
 export type AbsencesForTeammates = {
   team: {
@@ -48,7 +30,16 @@ export default class TeammatesManager {
 
   @withTransaction
   @withUser
-  public async update(params: UpdateParams): Promise<Teammate> {
+  public async update(params: {
+    data: {
+      id: number,
+      alias?: string,
+      groupId?: number,
+      defaultRole?: Role,
+      availableRoles?: Role[]
+    },
+    context?: Context
+  }): Promise<Teammate> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -79,7 +70,9 @@ export default class TeammatesManager {
 
     teammate.merge({
       alias: params.data.alias,
-      groupId: params.data.groupId
+      groupId: params.data.groupId,
+      defaultRole: params.data.defaultRole,
+      availableRoles: params.data.availableRoles
     })
 
     return await teammate.save()

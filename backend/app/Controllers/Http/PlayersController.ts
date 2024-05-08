@@ -22,7 +22,8 @@ export default class PlayersController {
         convocationId: request.input('convocationId'),
         teammateId: request.input('teammateId'),
         aliases: request.input('aliases'),
-        shirtId: request.input('shirtId')
+        shirtId: request.input('shirtId'),
+        role: request.input('role')
       }
     })
   }
@@ -42,7 +43,8 @@ export default class PlayersController {
       data: {
         id: params.id,
         aliases: request.input('aliases'),
-        shirtId: request.input('shirtId')
+        shirtId: request.input('shirtId'),
+        role: request.input('role')
       }
     })
   }

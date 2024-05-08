@@ -7,7 +7,7 @@ import { ModelAttributes, ModelObject } from "@ioc:Adonis/Lucid/Orm";
 import Scout from "App/Models/Scout";
 import Player from "App/Models/Player";
 import { CreatePlayerValidator, UpdatePlayerValidator } from "App/Validators/players";
-import Teammate from "App/Models/Teammate";
+import Teammate, { Role } from "App/Models/Teammate";
 import Convocation from "App/Models/Convocation";
 import Shirt from "App/Models/Shirt";
 
@@ -74,6 +74,7 @@ export default class PlayersManager {
       teammateId: number
       aliases: string[]
       shirtId: number
+      role: Role
     },
     context?: Context
   }): Promise<Player> {
@@ -133,12 +134,13 @@ export default class PlayersManager {
     let player = await Player.create({
       scoutId: scout.id,
       teammateId: teammate.id,
-      convocationId: params.data.convocationId,
-      aliases: params.data.aliases || [teammate.alias],
+      convocationId: validatedData.convocationId,
+      aliases: validatedData.aliases || [teammate.alias],
       shirtId: shirt?.id,
       shirtNumber: shirt?.number,
       shirtPrimaryColor: shirt?.primaryColor,
-      shirtSecondaryColor: shirt?.secondaryColor
+      shirtSecondaryColor: shirt?.secondaryColor,
+      role: validatedData.role
     }, { client: trx })
 
     return player
@@ -187,8 +189,9 @@ export default class PlayersManager {
   public async update(params: {
     data: {
       id: number
-      aliases?: string[],
+      aliases?: string[]
       shirtId?: number
+      role?: Role
     },
     context?: Context
   }): Promise<Player> {
@@ -220,7 +223,8 @@ export default class PlayersManager {
     })
 
     let playerData: Partial<ModelAttributes<Player>> = {
-      aliases: validatedData.aliases
+      aliases: validatedData.aliases,
+      role: validatedData.role
     }
 
     if(!!validatedData.shirtId) {

@@ -8,7 +8,9 @@ export default class TeammatesController {
       data: {
         id: params.id,
         alias: request.input('alias'),
-        groupId: request.input('groupId'),
+        defaultRole: request.input('defaultRole'),
+        availableRoles: request.input('availableRoles'),
+        groupId: request.input('groupId')
       }
     })
   }

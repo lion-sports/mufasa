@@ -1,5 +1,6 @@
 import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { ROLES } from 'App/Models/Teammate'
 
 export default class UpdatePlayerValidator {
   constructor(protected ctx?: HttpContextContract) { }
@@ -9,6 +10,7 @@ export default class UpdatePlayerValidator {
       rules.maxLength(255)
     ])),
     shirtId: schema.number.optional(),
+    role: schema.enum.optional(ROLES)
   })
 
   public messages: CustomMessages = {}

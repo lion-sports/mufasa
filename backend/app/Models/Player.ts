@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { belongsTo, BelongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Shirt from './Shirt'
 import Convocation from './Convocation'
-import Teammate from './Teammate'
+import Teammate, { Role } from './Teammate'
 import Scout from './Scout'
 
 export default class Player extends CamelCaseBaseModel {
@@ -36,6 +36,9 @@ export default class Player extends CamelCaseBaseModel {
 
   @column()
   public aliases: string[]
+
+  @column()
+  public role: Role
 
   @column()
   public shirtId: number

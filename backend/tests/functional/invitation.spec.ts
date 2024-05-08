@@ -273,12 +273,16 @@ test.group('Invitations', (group) => {
       .firstOrFail()
 
     let response = await client.put(`/teammates/${teammate.id}`).json({
-      alias: 'alias'
+      alias: 'alias',
+      defaultRole: 'setter',
+      availableRoles: ['setter', 'outsideHitter']
     }).loginAs(loggedInUser)
 
     response.assertAgainstApiSpec()
     await teammate.refresh()
 
     assert.equal(teammate.alias, 'alias', 'should have update alias')
+    assert.equal(teammate.defaultRole, 'setter', 'should have update the default role')
+    assert.equal(teammate.availableRoles.length, 2, 'should have update the available roles')
   })
 })
