@@ -23,6 +23,7 @@ export default class ScoutsController {
         name: request.input('name'),
         startedAt: request.input('startedAt'),
         eventId: request.input('eventId'),
+        scoringSystemId: request.input('scoringSystemId')
       }
     })
   }
@@ -45,6 +46,7 @@ export default class ScoutsController {
         name: request.input('name'),
         startedAt: request.input('startedAt'),
         eventId: request.input('eventId'),
+        scoringSystemId: request.input('scoringSystemId')
       }
     })
   }

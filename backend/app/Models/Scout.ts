@@ -1,7 +1,9 @@
 import { CamelCaseBaseModel } from './CamelCaseBaseModel'
 import { DateTime } from 'luxon'
-import { belongsTo, BelongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import { belongsTo, BelongsTo, hasMany, HasMany, column } from '@ioc:Adonis/Lucid/Orm'
 import Event from 'App/Models/Event'
+import Player from './Player'
+import ScoringSystem from './ScoringSystem'
 
 export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
@@ -26,6 +28,19 @@ export default class Scout extends CamelCaseBaseModel {
     foreignKey: 'eventId'
   })
   public event: BelongsTo<typeof Event>
+
+  @hasMany(() => Player, {
+    foreignKey: 'scoutId'
+  })
+  declare players: HasMany<typeof Player>
+
+  @column()
+  public scoringSystemId: number
+
+  @belongsTo(() => ScoringSystem, {
+    foreignKey: 'scoringSystemId'
+  })
+  public scoringSystem: BelongsTo<typeof ScoringSystem>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

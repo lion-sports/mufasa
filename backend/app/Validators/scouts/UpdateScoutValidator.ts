@@ -10,7 +10,8 @@ export default class UpdateScoutValidator {
     sport: schema.enum.optional(SPORTS),
     name: schema.string.optional(),
     startedAt: schema.date.optional(),
-    eventId: schema.number.optional()
+    eventId: schema.number.optional(),
+    scoringSystemId: schema.number.optional()
   })
 
   public messages: CustomMessages = {}

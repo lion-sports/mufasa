@@ -12,7 +12,7 @@ export default class CreatePlayerValidator {
     aliases: schema.array.optional().members(schema.string([
       rules.maxLength(255)
     ])),
-    role: schema.enum(ROLES),
+    role: schema.enum.optional(ROLES),
     shirtId: schema.number.optional(),
   })
 

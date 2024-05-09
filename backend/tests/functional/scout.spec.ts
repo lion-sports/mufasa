@@ -21,25 +21,58 @@ test.group('Scouts', (group) => {
 
     teammate = await TeammateFactory.with('user').create()
     teammate.teamId = team.id
+    teammate.defaultRole = 'setter'
     await teammate.save()
 
     event = await EventFactory.create()
     event.teamId = team.id
     await event.save()
+
+    await event.related('convocations').create({
+      teammateId: teammate.id
+    })
   })
 
   test('create a new scout', async ({ client, assert }) => {
+    const scoringSystemResponse = await client.post('/scoringSystems').json({
+      public: false,
+      name: 'Prova',
+      sport: 'volleyball',
+      config: {
+        set: {
+          mode: 'winSet',
+          winSets: 3
+        },
+        points: {
+          mode: 'winPoints',
+          totalPoints: 25,
+          hasAdvantages: true
+        },
+        tieBreak: {
+          mode: 'winPoints',
+          winPoints: 25,
+          hasAdvantages: true
+        }
+      },
+      createdForTeamId: team.id
+    }).loginAs(loggedInUser)
+
+    let scoringSystem = scoringSystemResponse.body()
+
     const response = await client.post('/scouts').json({
       sport: 'volleyball',
       name: 'Nome dello scout',
       startedAt: new Date(),
-      eventId: event.id
+      eventId: event.id,
+      scoringSystemId: scoringSystem.id
     }).loginAs(loggedInUser)
-
 
     const scout = response.body()
     response.assertAgainstApiSpec()
     assert.equal(scout.name, 'Nome dello scout', 'should have the right name')
+    assert.equal(scout.scoringSystemId, scoringSystem.id, 'should have the scoring system')
+    assert.equal(scout.players.length, 1, 'should have created a player with the convocation')
+    assert.equal(scout.players[0].role, teammate.defaultRole, 'should have created the players with the right role')
   })
 
   test('get a paginated list of mine existing scouts', async ({ client, assert }) => {

@@ -5,8 +5,10 @@ import AuthorizationManager from "./authorization.manager";
 import FilterModifierApplier, { Modifier } from "App/Services/FilterModifierApplier";
 import { ModelObject } from "@ioc:Adonis/Lucid/Orm";
 import Scout, { Sport } from "App/Models/Scout";
+import Event from "App/Models/Event";
 import { DateTime } from "luxon";
 import { CreateScoutValidator, UpdateScoutValidator } from "App/Validators/scouts";
+import PlayersManager from "./players.manager";
 
 export default class ScoutsManager {
   @withTransaction
@@ -34,6 +36,7 @@ export default class ScoutsManager {
       })
       .select('scouts.*')
       .preload('event')
+      .preload('players')
       .join('events', 'events.id', 'scouts.eventId')
       .join('teams', 'events.teamId', 'teams.id')
       .whereIn('teams.id', b => {
@@ -64,7 +67,8 @@ export default class ScoutsManager {
       sport: Sport
       name?: string
       startedAt?: DateTime,
-      eventId: number
+      eventId: number,
+      scoringSystemId?: number
     },
     context?: Context
   }): Promise<Scout> {
@@ -93,6 +97,31 @@ export default class ScoutsManager {
     })
 
     let scout = await Scout.create(validatedData, { client: trx })
+
+    let event = await Event.query({ client: trx })
+      .where('id', scout.eventId)
+      .preload('convocations', b => b.preload('teammate', tb => tb.preload('shirts')))
+      .firstOrFail()
+
+    let playerManager = new PlayersManager()
+    for(let i = 0; i < event.convocations.length; i += 1) {
+      const convocation = event.convocations[i]
+
+      await playerManager.create({
+        data: {
+          scoutId: scout.id,
+          convocationId: convocation.id,
+          shirtId: convocation.teammate.shirts[0]?.id
+        },
+        context: {
+          trx,
+          user
+        }
+      })
+    }
+
+    if(!!scout.scoringSystemId) await scout.load('scoringSystem')
+    await scout.load('players')
     return scout
   }
 
@@ -125,6 +154,9 @@ export default class ScoutsManager {
 
     let scout = await Scout
       .query({ client: trx })
+      .preload('event')
+      .preload('players')
+      .preload('scoringSystem')
       .where('id', params.data.id)
       .firstOrFail()
 
@@ -139,7 +171,8 @@ export default class ScoutsManager {
       sport?: Sport
       name?: string
       startedAt?: DateTime,
-      eventId?: number
+      eventId?: number,
+      scoringSystemId?: number
     },
     context?: Context
   }): Promise<Scout> {
@@ -173,6 +206,8 @@ export default class ScoutsManager {
     scout.merge(validatedData)
     await scout.save()
 
+    if (!!scout.scoringSystemId) await scout.load('scoringSystem')
+    await scout.load('players')
     return scout
   }
 

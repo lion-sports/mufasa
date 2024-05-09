@@ -1,9 +1,10 @@
 import { CamelCaseBaseModel } from './CamelCaseBaseModel'
 import { DateTime, } from 'luxon'
-import { column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
+import { column, belongsTo, hasMany, HasMany, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 import User from 'App/Models/User'
 import Team from 'App/Models/Team'
 import Group from 'App/Models/Group'
+import Shirt from './Shirt'
 
 export const VOLLEYBALL_ROLES = ['setter', 'outsideHitter', 'oppositeHitter', 'middleBlocker', 'libero'] as const
 export const BASKETBALL_ROLES = ['pointGuard', 'shootingGuard', 'smallForward', 'powerForward', 'center'] as const
@@ -46,6 +47,11 @@ export default class Teammate extends CamelCaseBaseModel {
     foreignKey: 'teamId'
   })
   public team: BelongsTo<typeof Team>
+
+  @hasMany(() => Shirt, {
+    foreignKey: 'teammateId'
+  })
+  declare shirts: HasMany<typeof Shirt>
 
   @column()
   public groupId: number

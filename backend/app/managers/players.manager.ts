@@ -71,10 +71,10 @@ export default class PlayersManager {
     data: {
       scoutId: number
       convocationId: number
-      teammateId: number
-      aliases: string[]
-      shirtId: number
-      role: Role
+      teammateId?: number
+      aliases?: string[]
+      shirtId?: number
+      role?: Role
     },
     context?: Context
   }): Promise<Player> {
@@ -140,7 +140,7 @@ export default class PlayersManager {
       shirtNumber: shirt?.number,
       shirtPrimaryColor: shirt?.primaryColor,
       shirtSecondaryColor: shirt?.secondaryColor,
-      role: validatedData.role
+      role: validatedData.role || teammate.defaultRole
     }, { client: trx })
 
     return player
