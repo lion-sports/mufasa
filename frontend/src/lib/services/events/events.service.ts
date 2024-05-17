@@ -2,6 +2,7 @@ import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Team } from '$lib/services/teams/teams.service'
 import type { User } from '../auth/auth.service'
 import type { Convocation } from '$lib/services/convocations/convocations.service'
+import type { Scout } from '../scouts/scouts.service'
 
 export type Event = {
 	id: number
@@ -14,6 +15,7 @@ export type Event = {
 	teamId: number
 	team: Team
 	convocations: Convocation[]
+  scouts: Scout[]
 	createdAt: Date
 	updatedAt: Date
 	createdBy: User

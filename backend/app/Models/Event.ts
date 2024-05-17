@@ -5,6 +5,7 @@ import Frequency from 'App/Models/Frequency'
 import Team from 'App/Models/Team'
 import User from 'App/Models/User'
 import Convocation from 'App/Models/Convocation'
+import Scout from './Scout'
 
 export default class Event extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -54,6 +55,10 @@ export default class Event extends CamelCaseBaseModel {
   })
   public convocations: HasMany<typeof Convocation>
 
+  @hasMany(() => Scout, {
+    foreignKey: 'eventId'
+  })
+  public scouts: HasMany<typeof Scout>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

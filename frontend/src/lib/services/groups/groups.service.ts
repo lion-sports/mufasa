@@ -14,29 +14,42 @@ export type PaginatedGroups = {
 	meta: PaginationData
 }
 
-export const resources = ['Team', 'Invitation', 'Event', 'Convocation', 'EventSession', 'Group']
-export type Resource = 'Team' | 'Invitation' | 'Event' | 'Convocation' | 'EventSession' | 'Group'
+export const resources = [
+  'Team', 
+  'Invitation', 
+  'Event', 
+  'Convocation', 
+  'EventSession', 
+  'Group',
+  'Shirt',
+  'Scout'
+] as const
+export type Resource = typeof resources[number]
 
-export const actionsForResources: { [key: string]: string[] } = {
+export const actionsForResources: { [key: string]: Action[] } = {
 	Team: ['update', 'invite', 'removeUser', 'destroy'],
+  Teammate: ['update'],
 	Event: ['create', 'update', 'destroy', 'convocate'],
 	Group: ['update'],
-	Convocation: ['confirm', 'deny']
+	Convocation: ['confirm', 'deny'],
+  Shirt: ['create', 'update', 'view', 'destroy'],
+  Scout: ['manage', 'view'],
 }
 
 export type Action =
-	| 'update'
-	| 'destroy'
-	| 'create'
-	| 'view'
-	| 'invite'
-	| 'removeUser'
-	| 'accept'
-	| 'reject'
-	| 'discard'
-	| 'confirm'
-	| 'deny'
-	| 'convocate'
+  'update' |
+  'destroy' |
+  'create' |
+  'view' |
+  'invite' |
+  'removeUser' |
+  'accept' |
+  'reject' |
+  'discard' |
+  'convocate' |
+  'confirm' |
+  'deny' |
+  'manage'
 
 export type GroupCans = {
 	[key: string]: {
@@ -124,7 +137,11 @@ export default class GroupsService extends FetchBasedService {
 			Event: 'Eventi',
 			Convocation: 'Convocazioni',
 			EventSession: 'Sessioni',
-			Group: 'Gruppi'
+			Group: 'Gruppi',
+      Teammate: 'Membro',
+      Scout: 'Scout',
+      ScoringSystem: 'Sistemi di punteggio',
+      Shirt: 'Maglie'
 		}
 		return translationMapping[resource]
 	}
@@ -144,7 +161,8 @@ export default class GroupsService extends FetchBasedService {
 			discard: 'Annullare',
 			confirm: 'Confermare',
 			deny: 'Non confermare',
-			convocate: 'Convocare'
+			convocate: 'Convocare',
+      manage: 'Gestire'
 		}
 		return translationMapping[action]
 	}

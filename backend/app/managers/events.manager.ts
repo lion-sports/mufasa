@@ -570,7 +570,7 @@ export default class EventsManager {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
-    return await Event.query({ client: trx })
+    let event = await Event.query({ client: trx })
       .where('events.id', params.data.id)
       .whereHas('team', teamBuilder => {
         teamBuilder.whereHas('teammateUsers', userBuilder => {
@@ -588,6 +588,29 @@ export default class EventsManager {
       .preload('frequency')
       .preload('team')
       .firstOrFail()
+
+    let canViewScout = await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'view',
+        resource: 'Scout',
+        entities: {
+          team: {
+            id: event.teamId
+          }
+        }
+      },
+      context: {
+        trx,
+        user
+      }
+    })
+
+    if(canViewScout) {
+      await event.load('scouts')
+    }
+
+    return event
   }
 
   private _getDaysBetweenDates(from: DateTime, to: DateTime): number {

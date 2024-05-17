@@ -4,7 +4,9 @@
 		showTitleAndDescription: boolean = true,
 		src: string | undefined,
 		avatarTextColor: string | undefined = undefined,
-		cursor: string = 'pointer'
+		cursor: string = 'pointer',
+    width: string | undefined = '40px',
+    height: string | undefined = '40px'
 
 	import { DescriptiveAvatar, Avatar, MediaQuery } from '@likable-hair/svelte'
 </script>
@@ -16,8 +18,6 @@
 			title={showTitleAndDescription ? username : undefined}
 			description={showTitleAndDescription ? description : undefined}
 			src={src || ''}
-			width={mAndUp ? undefined : '30px'}
-			height={mAndUp ? undefined : '30px'}
 			on:click
 		>
 			<div slot="avatar">
@@ -25,10 +25,10 @@
 					<Avatar {src} />
 				{:else}
 					<div
-						style:width={'40px'}
-						style:height={'40px'}
+						style:width="var(--avatar-width)"
+						style:height="var(--avatar-height)"
 						style:background-color="rgb(var(--global-color-contrast-400))"
-						style:font-size={mAndUp ? '1.2rem' : '1rem'}
+						style:font-size="var(--user-avatar-font-size, 1.2rem)"
 						style:font-weight="700"
 						style:display="flex"
 						style:justify-content="center"

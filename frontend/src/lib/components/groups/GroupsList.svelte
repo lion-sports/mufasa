@@ -73,7 +73,7 @@
 
 {#if searchable}
 	<div style:max-width="100%" style:width="400px" style:margin-bottom="0px" style:display="flex">
-		<StandardTextfield bind:value={searchText} placeholder="Cerca ruoli ...">
+		<StandardTextfield bind:value={searchText} placeholder="Cerca gruppi ...">
 			<svelte:fragment slot="prepend-inner">
 				<div style:margin-right="10px">
 					<Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />

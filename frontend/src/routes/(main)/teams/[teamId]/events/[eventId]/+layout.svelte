@@ -41,13 +41,26 @@
 	tabs = [
 		{
 			name: 'general',
-			label: 'Generale'
+			label: 'Generale',
+      icon: 'mdi-text'
 		},
 		{
 			name: 'convocations',
-			label: 'Convocazioni'
+			label: 'Convocazioni',
+      icon: 'mdi-list-status'
 		}
 	]
+
+  if(CansService.can('Scout', 'manage')) {
+    tabs = [
+      ...tabs,
+      {
+        name: 'scouts',
+        label: 'Scout',
+        icon: 'mdi-chart-timeline-variant'
+      }
+    ]
+  }
 
 	function handleOptionClick(ev: any) {
 		if (ev.detail?.element?.name == 'update')
@@ -78,14 +91,18 @@
 			goto(`/teams/${data.event.teamId}/events/${data.event.id}/general`, { replaceState: true })
 		} else if (selectedTab == 'convocations') {
 			goto(`/teams/${data.event.teamId}/events/${data.event.id}/convocations`, { replaceState: true })
-		}
+		} else if(selectedTab == 'scouts') {
+      goto(`/teams/${data.event.teamId}/events/${data.event.id}/scouts`, { replaceState: true })
+    }
 	}
 
 	$: if ($page.url.href.endsWith('general')) {
 		selectedTab = 'general'
 	} else if ($page.url.href.endsWith('convocations')) {
 		selectedTab = 'convocations'
-	}
+	} else if($page.url.href.endsWith('scouts')) {
+    selectedTab = 'scouts'
+  }
 
 	$: headerHidden = $page.url.pathname.endsWith('/edit')
 </script>

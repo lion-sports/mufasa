@@ -17,15 +17,7 @@
 
 	export let data: LayoutData
 	$team = data.team
-
-	let currentTeammates = $team.teammates.find((teammate) => {
-		return !!$user && teammate.userId == $user?.id
-	})
-
-	$teamCans = {
-		cans: currentTeammates?.group?.cans,
-		owner: !!$user && $team.ownerId == $user?.id
-	}
+	$teamCans = data.teamCans
 
 	let selectedTab: string = 'general',
 		options: ComponentProps<OptionMenu>['options'] = [],
@@ -77,28 +69,33 @@
 	tabs = [
 		{
 			name: 'general',
-			label: 'Generale'
+			label: 'Generale',
+      icon: 'mdi-text'
 		},
 		{
 			name: 'teammates',
-			label: 'Partecipanti'
+			label: 'Partecipanti',
+      icon: 'mdi-account'
 		}
 	]
 
 	if (CansService.can('Group', 'update'))
 		tabs.push({
 			name: 'groups',
-			label: 'Gruppi'
+			label: 'Gruppi',
+      icon: 'mdi-account-multiple'
 		})
 
 	tabs.push({
 		name: 'calendar',
-		label: 'Calendario'
+		label: 'Calendario',
+    icon: 'mdi-calendar'
 	})
 
 	tabs.push({
 		name: 'weeks',
-		label: 'Settimane'
+		label: 'Settimane',
+    icon: 'mdi-clock'
 	})
 
 	function handleOptionClick(

@@ -358,8 +358,8 @@ export default class AuthorizationManager {
     return await Helpers.userCanInTeam({
       user: params.actor,
       team: { id: teammate.teamId },
-      action: 'create',
-      resource: 'Event'
+      action: 'update',
+      resource: 'Teammate'
     }, context)
   }
 
@@ -627,20 +627,28 @@ export default class AuthorizationManager {
     params: { actor: User, entities: Entities },
     context?: { trx?: TransactionClientContract }
   ): Promise<boolean> {
-    if (!params.entities.scout?.id) throw new Error('scout must be defined')
+    if (!params.entities.scout?.id && !params.entities.team?.id) throw new Error('scout or team must be defined')
 
-    let scout = await Scout.query({
-        client: context?.trx
-      })
-      .where('id', params.entities.scout.id)
-      .preload('event')
-      .first()
+    let teamId: number | undefined = undefined
 
-    if (!scout) return false
+    if(!!params.entities.scout) {
+      let scout = await Scout.query({
+          client: context?.trx
+        })
+        .where('id', params.entities.scout.id)
+        .preload('event')
+        .first()
+
+      teamId = scout?.event.teamId
+    } else if(!!params.entities.team) {
+      teamId = params.entities.team.id
+    }
+
+    if (!teamId) return false
 
     return await Helpers.userCanInTeam({
       user: params.actor,
-      team: { id: scout.event.teamId },
+      team: { id: teamId },
       action: 'view',
       resource: 'Scout'
     }, context)
