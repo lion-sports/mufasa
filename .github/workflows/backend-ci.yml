@@ -81,7 +81,9 @@ jobs:
           PG_USER: postgres
           REDIS_HOST: localhost
           REDIS_PORT: 6379
-          TEST_EMAIL: system@likablehair.it
+          ENV GOOGLE_CLIENT_ID: clientId
+          ENV GOOGLE_CLIENT_SECRET: clientSecret
+          ENV GOOGLE_CALLBACK_URL: http://localhost:3333/auth/google/callback
 
   docker:
     runs-on: ubuntu-latest
