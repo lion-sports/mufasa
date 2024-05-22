@@ -84,6 +84,9 @@ jobs:
           GOOGLE_CLIENT_ID: clientId
           GOOGLE_CLIENT_SECRET: clientSecret
           GOOGLE_CALLBACK_URL: http://localhost:3333/auth/google/callback
+          GOOGLE_IOS_FRONTEND_CALLBACK_URL: mufasa://authorization
+          PUBLIC_URL: http://localhost:3333
+          TELEGRAM_FIPAV_BOT_TOKEN: telegram_token
 
   docker:
     runs-on: ubuntu-latest
