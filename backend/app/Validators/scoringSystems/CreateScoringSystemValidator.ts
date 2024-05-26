@@ -10,7 +10,7 @@ export default class CreateScoringSystemValidator {
     name: schema.string(),
     sport: schema.enum(SPORTS),
     config: schema.object().anyMembers(),
-    createdForTeamId: schema.number()
+    createdForTeamId: schema.number.optional()
   })
 
   public messages: CustomMessages = {}

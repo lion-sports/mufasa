@@ -3,7 +3,7 @@
 		value: string
 		label?: string
 		data?: any
-	}
+	};
 </script>
 
 <script lang="ts">
@@ -23,7 +23,8 @@
 	{maxWidth}
 	{multiple}
 	{placeholder}
-	height="fit-content"
 	{items}
+  --autocomplete-min-height="44px"
+  height="60px"
 	on:change
 />

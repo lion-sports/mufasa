@@ -28,6 +28,7 @@ export type ScoringSystemConfig = {
 }
 
 export type ScoringSystem = {
+  id: number
   name: string
   public: boolean
   sport: Sport
@@ -50,7 +51,7 @@ export default class ScoringSystemsService extends FetchBasedService {
     name: string
     public: boolean
     sport: Sport
-    createdForTeamId: number
+    createdForTeamId?: number
     config: ScoringSystemConfig
   }): Promise<ScoringSystem> {
     let response = await this.client.post({
@@ -88,10 +89,10 @@ export default class ScoringSystemsService extends FetchBasedService {
 
   public async update(params: { 
     id: number
-    name: string
-    public: boolean
-    sport: Sport
-    config: ScoringSystemConfig
+    name?: string
+    public?: boolean
+    sport?: Sport
+    config?: ScoringSystemConfig
   }): Promise<ScoringSystem> {
     let response = await this.client.put({
       url: '/scoringSystems/' + params.id,

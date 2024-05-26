@@ -4,6 +4,7 @@
   import ScoringSystemsService, { type ScoringSystem } from '$lib/services/scoringSystems/scoringSystems.service'
 	import { DateTime } from 'luxon'
 	import type { ComponentProps } from 'svelte'
+	import StandardCheckbox from '../common/StandardCheckbox.svelte'
 
 	export let filters: ComponentProps<PaginatedTable>['filters'] = [
 			{
@@ -17,9 +18,14 @@
 		],
 		headers: ComponentProps<PaginatedTable>['headers'] = [
 			{
-				value: 'description',
-				label: 'Description',
+				value: 'name',
+				label: 'Nome',
 				type: { key: 'number' }
+			},
+      {
+				value: 'public',
+				label: 'Pubblico',
+				type: { key: 'custom' }
 			}
 		],
 		scoringSystems: ScoringSystem[] = [],
@@ -85,10 +91,8 @@
 	</div>
 
 	<div slot="custom" let:item let:header>
-		{#if header.value == 'updatedAt'}
-			<span>
-				{DateTime.fromISO(item.updatedAt).toLocaleString()}
-			</span>
+		{#if header.value == 'public'}
+			<StandardCheckbox disabled id={"public-"+item.id} value={item.public}></StandardCheckbox>
 		{/if}
 	</div>
 </PaginatedTable>

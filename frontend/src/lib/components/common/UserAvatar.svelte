@@ -4,9 +4,7 @@
 		showTitleAndDescription: boolean = true,
 		src: string | undefined,
 		avatarTextColor: string | undefined = undefined,
-		cursor: string = 'pointer',
-    width: string | undefined = '40px',
-    height: string | undefined = '40px'
+		cursor: string = 'pointer'
 
 	import { DescriptiveAvatar, Avatar, MediaQuery } from '@likable-hair/svelte'
 </script>
@@ -25,8 +23,8 @@
 					<Avatar {src} />
 				{:else}
 					<div
-						style:width="var(--avatar-width)"
-						style:height="var(--avatar-height)"
+						style:width="var(--avatar-width, 40px)"
+						style:height="var(--avatar-height, 40px)"
 						style:background-color="rgb(var(--global-color-contrast-400))"
 						style:font-size="var(--user-avatar-font-size, 1.2rem)"
 						style:font-weight="700"

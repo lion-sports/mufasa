@@ -36,7 +36,7 @@ export default class ScoringSystemsManager {
       .preload('createdByUser')
       .preload('createdForTeam')
       .select('scoring_systems.*')
-      .join('teams', 'scoring_systems.createdForTeamId', 'teams.id')
+      .leftJoin('teams', 'scoring_systems.createdForTeamId', 'teams.id')
       .whereIn('teams.id', b => {
         b.select('teams2.id')
           .from('teams as teams2')
@@ -54,7 +54,9 @@ export default class ScoringSystemsManager {
       query.orderBy(params.data.order)
     }
 
+    console.log(query.toSQL())
     const results = await query.paginate(params.data.page, params.data.perPage)
+
 
     return results.toJSON()
   }
@@ -103,7 +105,7 @@ export default class ScoringSystemsManager {
     }, { client: trx })
 
     await scout.load('createdByUser')
-    await scout.load('createdForTeam')
+    if(!!scout.createdForTeamId) await scout.load('createdForTeam')
     return scout
   }
 

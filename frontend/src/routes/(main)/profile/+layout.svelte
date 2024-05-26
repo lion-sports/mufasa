@@ -20,26 +20,32 @@
   $: if ($page.url.href.endsWith('scoringSystems')) {
 		selectedTab = 'scoringSystems'
 	}
+
+  $: headerHidden =
+		$page.url.pathname.endsWith('/scoringSystems/create') ||
+		/\/scoringSystems\/\d+\/edit$/.test($page.url.pathname)
 </script>
 
-<div class="flex justify-center items-center flex-col">
-  <UserAvatar
-    username={$user?.firstname + ' ' + $user?.lastname}
-    description={$user?.email}
-    src={$user?.avatarUrl}
-    showTitleAndDescription={false}
-    --avatar-width="166px"
-    --avatar-height="166px"
-    --user-avatar-font-size="3rem"
-  />
-  <div class="mt-4 text-4xl font-bold">
-    {$user?.firstname + ' ' + $user?.lastname}
+{#if !headerHidden}
+  <div class="flex justify-center items-center flex-col">
+    <UserAvatar
+      username={$user?.firstname + ' ' + $user?.lastname}
+      description={$user?.email}
+      src={$user?.avatarUrl}
+      showTitleAndDescription={false}
+      --avatar-width="166px"
+      --avatar-height="166px"
+      --user-avatar-font-size="3rem"
+    />
+    <div class="mt-4 text-4xl font-bold">
+      {$user?.firstname + ' ' + $user?.lastname}
+    </div>
   </div>
-</div>
 
-<StandardTabSwitcher
-  tabs={tabs}
-  selected={selectedTab}
-></StandardTabSwitcher>
+  <StandardTabSwitcher
+    tabs={tabs}
+    selected={selectedTab}
+  ></StandardTabSwitcher>
+{/if}
 
 <slot></slot>

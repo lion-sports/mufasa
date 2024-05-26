@@ -101,7 +101,6 @@
 	function handleOptionClick(
 		event: CustomEvent<{ element: NonNullable<ComponentProps<OptionMenu>['options']>[0] }>
 	) {
-		console.log(event.detail)
 		if (event.detail?.element?.name == 'edit' && !!$team) {
 			goto('/teams/' + $team.id + '/edit')
 		} else if (event.detail?.element?.name == 'inviteUser' && !!$team) {
