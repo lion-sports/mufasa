@@ -10,12 +10,8 @@ COPY --chown=node:node ./package*.json ./
 RUN npm ci
 COPY --chown=node:node . .
 
-FROM dependencies AS build
-RUN ADAPTER=node npm run build
+RUN chmod +x docker-entrypoint.sh
 
-FROM base AS production
-COPY --chown=node:node ./package*.json .
-RUN npm ci --omit dev
-COPY --chown=node:node --from=build /home/node/app/build .
+ENTRYPOINT [ "/home/node/app/docker-entrypoint.sh" ]
 
-CMD ["node", "."]
+CMD ["node", "/home/node/app/build"]
