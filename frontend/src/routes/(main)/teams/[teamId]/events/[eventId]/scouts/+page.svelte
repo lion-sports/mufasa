@@ -8,7 +8,9 @@
 </script>
 
 <div class="flex justify-end mb-2">
-  <StandardButton>
+  <StandardButton
+    href={`/teams/${data.team.id}/events/${data.event.id}/scouts/create`}
+  >
     <Icon name="mdi-plus"></Icon>
     Aggiungi scout
   </StandardButton>

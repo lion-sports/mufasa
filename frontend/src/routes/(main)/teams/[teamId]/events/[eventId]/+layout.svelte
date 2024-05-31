@@ -104,7 +104,9 @@
     selectedTab = 'scouts'
   }
 
-	$: headerHidden = $page.url.pathname.endsWith('/edit')
+	$: headerHidden = $page.url.pathname.endsWith('/edit') ||
+    $page.url.pathname.endsWith('/scouts/create') ||
+    /\/scouts\/\d+\/studio$/.test($page.url.pathname)
 </script>
 
 {#if !!$event}

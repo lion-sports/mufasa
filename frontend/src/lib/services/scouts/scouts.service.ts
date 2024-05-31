@@ -1,5 +1,6 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Event } from '../events/events.service'
+import type { ScoringSystem } from '../scoringSystems/scoringSystems.service'
 
 export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
@@ -10,6 +11,7 @@ export type Scout = {
   name: string
   startedAt: Date
   eventId: number
+  scoringSystem: ScoringSystem
   scoringSystemId: number
   event: Event
   createdAt: Date

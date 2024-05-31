@@ -204,4 +204,99 @@
       </div>
     {/if}
   {/if}
+
+  <div class="font-bold mt-6">Tie break</div>
+  <div>
+    <LabelAndCheckbox
+      value={!!scoringSystem.config?.tieBreak}
+      id="has-tie-break"
+      label="Ha tie break"
+      on:change={(e) => {
+        // @ts-ignore
+        let checked = e.target.checked
+        if(checked) {
+          if(!scoringSystem.config) scoringSystem.config = {}
+          scoringSystem.config.tieBreak = {}
+        } else {
+          if(!!scoringSystem.config) scoringSystem.config.tieBreak = undefined
+        }
+      }}
+    ></LabelAndCheckbox>
+  </div>
+
+  {#if !!scoringSystem.config?.tieBreak}
+    <div class="mt-2">
+      <ButtonGroup
+        buttons={[
+          { 
+            value: 'totalPoints', 
+            label: 'Punti totali', 
+            icon: 'mdi-trending-neutral',
+            description: 'Si giocano un numero di punti totali prestabiliti.'
+          },
+          { 
+            value: 'winPoints', 
+            label: 'Punti per vincere', 
+            icon: 'mdi-trending-up',
+            description: 'Per vincere occorre fare un numero di punti precisi.'
+          },
+        ]}
+        bind:selectedButton={scoringSystem.config.tieBreak.mode}
+        let:button
+      >
+        <div class="flex gap-4 text-left items-center">
+          <div class="text-4xl">
+            <Icon name={button.icon}></Icon>
+          </div>
+          <div>
+            <div class="text-2xl">
+              {button.label}
+            </div>
+            <div class="mt-2 font-light">
+              {button.description}
+            </div>
+          </div>
+        </div>
+      </ButtonGroup>
+
+      {#if scoringSystem.config?.tieBreak?.mode == 'totalPoints'}
+        <div class="mt-4">
+          <LabelAndTextfield
+            label="Numero punti da giocare"
+            name="total-points"
+            type="number"
+            bind:value={scoringSystem.config.tieBreak.totalPoints}
+          ></LabelAndTextfield>
+        </div>
+      {:else if scoringSystem.config?.tieBreak?.mode == 'winPoints'}
+        <div class="mt-4 flex flex-col gap-4">
+          <div>
+            <LabelAndTextfield
+              label="Numero punti per vincere"
+              name="win-points"
+              type="number"
+              bind:value={scoringSystem.config.tieBreak.winPoints}
+            ></LabelAndTextfield>
+          </div>
+          <div>
+            <LabelAndCheckbox
+              bind:value={scoringSystem.config.tieBreak.hasAdvantages}
+              id="has-advantages"
+              label="Ha i vantaggi"
+            ></LabelAndCheckbox>
+          </div>
+          {#if scoringSystem.config.tieBreak.hasAdvantages}
+            <div>
+              <LabelAndTextfield
+                label="Punti limite"
+                name="points-limit"
+                type="number"
+                bind:value={scoringSystem.config.tieBreak.pointsLimit}
+              ></LabelAndTextfield>
+            </div>
+          {/if}
+        </div>
+      {/if}
+    </div>
+  {/if}
 </div>
