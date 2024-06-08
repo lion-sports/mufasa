@@ -10,7 +10,8 @@ export default class UpdatePlayerValidator {
       rules.maxLength(255)
     ])),
     shirtId: schema.number.optional(),
-    role: schema.enum.optional(ROLES)
+    role: schema.enum.optional(ROLES),
+    isOpponent: schema.boolean.optional()
   })
 
   public messages: CustomMessages = {}

@@ -57,6 +57,9 @@ export default class Player extends CamelCaseBaseModel {
   @column()
   public shirtSecondaryColor?: string | null
 
+  @column()
+  public isOpponent: boolean
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

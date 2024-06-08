@@ -5,9 +5,9 @@ export const load = (async ({ fetch, params, parent }) => {
   let parentData = await parent()
 
   let scoutService = new ScoutsService({ fetch, token: parentData.token })
-  let scout = await scoutService.show({ id: Number(params.scoutId) })
+  let studio = await scoutService.studio({ id: Number(params.scoutId) })
 
   return {
-    scout
+    studio
   };
 }) satisfies PageLoad;

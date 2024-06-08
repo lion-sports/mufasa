@@ -109,7 +109,6 @@
 
 	function denyConvocation(convocation: Convocation) {
 		loading = true
-		console.log(convocation, 'ConvocationList')
 
 		let service = new ConvocationsService({ fetch })
 		service

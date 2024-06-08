@@ -9,6 +9,11 @@ import Event from "App/Models/Event";
 import { DateTime } from "luxon";
 import { CreateScoutValidator, UpdateScoutValidator } from "App/Validators/scouts";
 import PlayersManager from "./players.manager";
+import { ScoutInfoGeneral } from "App/Models/ScoutInfo";
+
+export type ScoutStudio = {
+  scout: Scout
+}
 
 export default class ScoutsManager {
   @withTransaction
@@ -68,7 +73,10 @@ export default class ScoutsManager {
       name?: string
       startedAt?: DateTime,
       eventId: number,
-      scoringSystemId?: number
+      scoringSystemId?: number,
+      scoutInfo?: {
+        general: ScoutInfoGeneral
+      }
     },
     context?: Context
   }): Promise<Scout> {
@@ -95,6 +103,9 @@ export default class ScoutsManager {
       schema: new CreateScoutValidator().schema,
       data: params.data
     })
+    
+    let scoutInfo = validatedData.scoutInfo
+    delete validatedData.scoutInfo
 
     let scout = await Scout.create(validatedData, { client: trx })
 
@@ -102,6 +113,12 @@ export default class ScoutsManager {
       .where('id', scout.eventId)
       .preload('convocations', b => b.preload('teammate', tb => tb.preload('shirts')))
       .firstOrFail()
+
+    await scout.related('scoutInfo').create({
+      general: scoutInfo?.general || {}
+    }, {
+      client: trx
+    })
 
     let playerManager = new PlayersManager()
     for(let i = 0; i < event.convocations.length; i += 1) {
@@ -122,7 +139,78 @@ export default class ScoutsManager {
 
     if(!!scout.scoringSystemId) await scout.load('scoringSystem')
     await scout.load('players')
+    await scout.load('scoutInfo')
     return scout
+  }
+
+  @withTransaction
+  @withUser
+  public async importTeammates(params: {
+    data: {
+      id: number
+    },
+    context?: Context
+  }): Promise<{
+    success: boolean
+  }> {
+    let trx = params.context?.trx
+    let user = params.context?.user as User
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'view',
+        resource: 'Scout',
+        entities: {
+          scout: {
+            id: params.data.id
+          }
+        }
+      },
+      context: {
+        trx
+      }
+    })
+
+    let scout = await Scout.query({ client: trx })
+      .where('id', params.data.id)
+      .preload('event', b => 
+        b.preload('convocations', b2 => 
+          b2.preload('teammate', b3 => 
+            b3.preload('shirts')
+          )
+        )
+      )
+      .preload('players')
+      .firstOrFail()
+
+    for(let i = 0; i < scout.event.convocations.length; i += 1) {
+      let convocation = scout.event.convocations[i]
+
+      if(scout.players.some((p) => p.convocationId == convocation.id))
+        continue
+      else if(scout.players.some((p) => p.teammateId == convocation.teammateId)) {
+        let player = scout.players.find((p) => p.teammateId == convocation.teammateId)!
+        
+        player.convocationId = convocation.id
+        player.save()
+      } else {
+        const playerManager = new PlayersManager()
+        await playerManager.create({
+          data: {
+            scoutId: scout.id,
+            convocationId: convocation.id,
+            shirtId: convocation.teammate.shirts[0]?.id
+          },
+          context: {
+            trx,
+            user
+          }
+        })
+      }
+    }
+
+    return { success: true }
   }
 
   @withTransaction
@@ -154,8 +242,15 @@ export default class ScoutsManager {
 
     let scout = await Scout
       .query({ client: trx })
-      .preload('event')
-      .preload('players')
+      .preload('event', e => 
+        e.preload('team')
+      )
+      .preload('players', b => b
+        .preload('convocation')
+        .preload('shirt')
+        .preload('teammate', b => b.preload('user'))
+      )
+      .preload('scoutInfo')
       .preload('scoringSystem')
       .where('id', params.data.id)
       .firstOrFail()
@@ -172,7 +267,10 @@ export default class ScoutsManager {
       name?: string
       startedAt?: DateTime,
       eventId?: number,
-      scoringSystemId?: number
+      scoringSystemId?: number,
+      scoutInfo?: {
+        general: ScoutInfoGeneral
+      }
     },
     context?: Context
   }): Promise<Scout> {
@@ -200,14 +298,26 @@ export default class ScoutsManager {
       data: params.data
     })
 
+    let scoutInfo = validatedData.scoutInfo
+    delete validatedData.scoutInfo
+
     let scout = await Scout
       .findOrFail(params.data.id, { client: trx })
 
     scout.merge(validatedData)
     await scout.save()
 
+    if(!!scoutInfo) {
+      await scout.related('scoutInfo').updateOrCreate({}, {
+        general: params.data.scoutInfo?.general || {}
+      }, {
+        client: trx
+      })
+    }
+
     if (!!scout.scoringSystemId) await scout.load('scoringSystem')
     await scout.load('players')
+    await scout.load('scoutInfo')
     return scout
   }
 
@@ -241,5 +351,46 @@ export default class ScoutsManager {
     await Scout.query({ client: trx })
       .where('id', params.data.id)
       .del()
+  }
+
+  @withTransaction
+  @withUser
+  public async studio(params: {
+    data: {
+      id: number
+    }
+    context?: Context
+  }): Promise<ScoutStudio> {
+    let trx = params.context?.trx
+    let user = params.context?.user as User
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'view',
+        resource: 'Scout',
+        entities: {
+          scout: {
+            id: params.data.id
+          }
+        }
+      },
+      context: {
+        trx
+      }
+    })
+
+    let scout = await this.get({
+      data: {
+        id: params.data.id
+      },
+      context: {
+        user, trx
+      }
+    })
+
+    return {
+      scout
+    }
   }
 }

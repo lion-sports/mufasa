@@ -95,6 +95,7 @@ Route.resource('shirts', 'ShirtsController')
     '*': ['auth:api']
   })
 
+Route.get('/scouts/:id/studio', 'ScoutsController.studio').middleware('auth:api')
 Route.resource('scouts', 'ScoutsController')
   .only(['index', 'store', 'update', 'show', 'destroy'])
   .middleware({

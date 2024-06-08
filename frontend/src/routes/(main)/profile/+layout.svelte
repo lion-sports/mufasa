@@ -32,14 +32,13 @@
       username={$user?.firstname + ' ' + $user?.lastname}
       description={$user?.email}
       src={$user?.avatarUrl}
-      showTitleAndDescription={false}
       --avatar-width="166px"
       --avatar-height="166px"
-      --user-avatar-font-size="3rem"
+      --descriptive-avatar-title-font-size="2rem"
+      --descriptive-avatar-text-gap="12px"
+      --descriptive-avatar-image-gap="16px"
+      direction="column"
     />
-    <div class="mt-4 text-4xl font-bold">
-      {$user?.firstname + ' ' + $user?.lastname}
-    </div>
   </div>
 
   <StandardTabSwitcher

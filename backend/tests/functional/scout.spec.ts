@@ -64,7 +64,14 @@ test.group('Scouts', (group) => {
       name: 'Nome dello scout',
       startedAt: new Date(),
       eventId: event.id,
-      scoringSystemId: scoringSystem.id
+      scoringSystemId: scoringSystem.id,
+      scoutInfo: {
+        general: {
+          opponent: {
+            name: 'Il nome avversario'
+          }
+        }
+      }
     }).loginAs(loggedInUser)
 
     const scout = response.body()
@@ -73,6 +80,8 @@ test.group('Scouts', (group) => {
     assert.equal(scout.scoringSystemId, scoringSystem.id, 'should have the scoring system')
     assert.equal(scout.players.length, 1, 'should have created a player with the convocation')
     assert.equal(scout.players[0].role, teammate.defaultRole, 'should have created the players with the right role')
+    assert.exists(scout.scoutInfo, 'should have created a row of scout info')
+    assert.equal(scout.scoutInfo.general.opponent.name, 'Il nome avversario', 'shoud have set the opponent name')
   })
 
   test('get a paginated list of mine existing scouts', async ({ client, assert }) => {
@@ -121,13 +130,22 @@ test.group('Scouts', (group) => {
 
     let scout = createScoutResponse.body()
     const response = await client.put('/scouts/' + scout.id).json({
-      name: 'il nuovo nome dello scout'
+      name: 'il nuovo nome dello scout',
+      scoutInfo: {
+        general: {
+          opponent: {
+            name: 'nome nuovo'
+          }
+        }
+      }
     }).loginAs(loggedInUser)
 
     response.assertAgainstApiSpec()
     const scoutResponse = response.body()
     assert.equal(scoutResponse.id, scout.id, "should update the correct scout")
     assert.equal(scoutResponse.name, 'il nuovo nome dello scout', "should update the scout")
+    assert.exists(scoutResponse.scoutInfo, 'should have the row of scout info')
+    assert.equal(scoutResponse.scoutInfo.general.opponent.name, 'nome nuovo', 'shoud have set the opponent name')
   })
 
   test('destroy an existing scout', async ({ client, assert }) => {

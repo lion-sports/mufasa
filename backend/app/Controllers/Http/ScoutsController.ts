@@ -23,7 +23,8 @@ export default class ScoutsController {
         name: request.input('name'),
         startedAt: request.input('startedAt'),
         eventId: request.input('eventId'),
-        scoringSystemId: request.input('scoringSystemId')
+        scoringSystemId: request.input('scoringSystemId'),
+        scoutInfo: request.input('scoutInfo')
       }
     })
   }
@@ -46,7 +47,8 @@ export default class ScoutsController {
         name: request.input('name'),
         startedAt: request.input('startedAt'),
         eventId: request.input('eventId'),
-        scoringSystemId: request.input('scoringSystemId')
+        scoringSystemId: request.input('scoringSystemId'),
+        scoutInfo: request.input('scoutInfo')
       }
     })
   }
@@ -54,6 +56,15 @@ export default class ScoutsController {
   public async destroy({ params }: HttpContextContract) {
     const manager = new ScoutsManager()
     return await manager.destroy({
+      data: {
+        id: params.id
+      }
+    })
+  }
+
+  public async studio({ params }: HttpContextContract) {
+    const manager = new ScoutsManager()
+    return await manager.studio({
       data: {
         id: params.id
       }

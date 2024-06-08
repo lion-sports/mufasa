@@ -10,7 +10,14 @@ export default class CreateScoutValidator {
     name: schema.string(),
     startedAt: schema.date.optional(),
     eventId: schema.number(),
-    scoringSystemId: schema.number.optional()
+    scoringSystemId: schema.number.optional(),
+    scoutInfo: schema.object.optional().members({
+      general: schema.object().members({
+        opponent: schema.object.optional().members({
+          name: schema.string.optional()
+        })
+      })
+    })
   })
 
   public messages: CustomMessages = {}

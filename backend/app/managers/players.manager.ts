@@ -75,6 +75,7 @@ export default class PlayersManager {
       aliases?: string[]
       shirtId?: number
       role?: Role
+      opponent?: boolean
     },
     context?: Context
   }): Promise<Player> {
@@ -140,7 +141,8 @@ export default class PlayersManager {
       shirtNumber: shirt?.number,
       shirtPrimaryColor: shirt?.primaryColor,
       shirtSecondaryColor: shirt?.secondaryColor,
-      role: validatedData.role || teammate.defaultRole
+      role: validatedData.role || teammate.defaultRole,
+      isOpponent: validatedData.isOpponent
     }, { client: trx })
 
     return player
@@ -192,6 +194,7 @@ export default class PlayersManager {
       aliases?: string[]
       shirtId?: number
       role?: Role
+      isOpponent: boolean
     },
     context?: Context
   }): Promise<Player> {

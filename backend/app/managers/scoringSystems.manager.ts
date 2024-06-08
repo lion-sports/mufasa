@@ -54,7 +54,6 @@ export default class ScoringSystemsManager {
       query.orderBy(params.data.order)
     }
 
-    console.log(query.toSQL())
     const results = await query.paginate(params.data.page, params.data.perPage)
 
 

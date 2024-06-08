@@ -14,6 +14,7 @@ export default class CreatePlayerValidator {
     ])),
     role: schema.enum.optional(ROLES),
     shirtId: schema.number.optional(),
+    isOpponent: schema.boolean.optional()
   })
 
   public messages: CustomMessages = {}

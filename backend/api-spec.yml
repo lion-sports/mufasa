@@ -260,6 +260,20 @@ components:
           format: date-time
         eventId:
           type: integer
+        scoutInfo:
+          nullable: true
+          type: object
+          properties:
+            general:
+              type: object
+              properties:
+                opponent: 
+                  type: object
+                  nullable: true
+                  properties:
+                    name: 
+                      type: string
+                      nullable: true
         createdAt:
           type: string
           format: date-time
