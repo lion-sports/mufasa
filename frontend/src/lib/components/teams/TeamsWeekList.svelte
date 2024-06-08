@@ -24,7 +24,8 @@
 		selectedEvents: Event[] = [],
 		visibleYear: number = DateTime.now().get('year'),
 		visibleWeek: number = DateTime.now().get('weekNumber'),
-		events: Event[] = []
+		events: Event[] = [],
+    reloadEvents: boolean = false
 
 	let importFromYear = visibleYear,
 		importFromWeek = visibleWeek
@@ -84,6 +85,11 @@
 			visibleYear: visibleYear
 		})
 	}
+
+  $: if(reloadEvents) {
+    loadEvents(visibleWeek, visibleYear)
+    reloadEvents = false
+  }
 </script>
 
 {#if !!events}

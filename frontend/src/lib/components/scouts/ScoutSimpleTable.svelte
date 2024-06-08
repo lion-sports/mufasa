@@ -24,4 +24,7 @@
 	<div slot="custom" let:header let:item>
     <slot name="custom" {header} {item}></slot>
 	</div>
+  <div slot="rowActions" let:item>
+    <slot name="rowActions" {item}></slot>
+  </div>
 </SimpleTable>

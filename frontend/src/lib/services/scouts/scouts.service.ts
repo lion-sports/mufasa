@@ -61,10 +61,21 @@ export default class ScoutsService extends FetchBasedService {
       url: '/scouts/' + params.id
     })
 
+    response.startedAt = new Date(response.startedAt)
+    response.createdAt = new Date(response.createdAt)
+    response.updatedAt = new Date(response.updatedAt)
+
     return response
   }
 
-  public async update(params: { id: number; name?: string; notes?: string }): Promise<Scout> {
+  public async update(params: { 
+    id: number; 
+    sport?: Sport
+    name?: string
+    startedAt?: Date
+    eventId?: number
+    scoringSystemId?: number
+  }): Promise<Scout> {
     let response = await this.client.put({
       url: '/scouts/' + params.id,
       body: params

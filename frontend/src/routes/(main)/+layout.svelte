@@ -73,82 +73,89 @@
 	else selectedIndex = options.findIndex((o) => o.name == 'home')
 
 	let drawerOpened: boolean
+
+  let sidebarVisible: boolean = true
+  $: sidebarVisible = !/\/teams\/\d+\/events\/\d+\/scouts\/\d+\/studio$/.test($page.url.pathname)
 </script>
 
 <main>
-	<UnstableDividedSideBarLayout
-		{options}
-		on:menu-select={handleMenuClick}
-		bind:drawerOpened
-		bind:selectedIndex
-		expandOn="hover"
-	>
-		<svelte:fragment slot="inner-menu" let:hamburgerVisible>
-			{#if !!hamburgerVisible}
-				<ApplicationLogo
-					class="ml-4 mt-2 !h-[45px]"
-					on:click={handleLogoClick}
-					on:keydown={handleLogoClick}
-					collapsed={true}
-				/>
-			{:else}
-				<div class="w-full flex justify-center">
-					<GlobalSearchTextField
-						--global-search-text-field-width="200px"
-						--global-search-text-field-border-radius="5px"
-						--global-search-text-field-ring-color="transparent"
-						--global-search-text-field-hover-ring-color="transparent"
-						--global-search-text-field-background-color="rgb(var(--global-color-background-200))"
-					/>
-				</div>
-			{/if}
-		</svelte:fragment>
-		<svelte:fragment slot="logo" let:sidebarExpanded let:hamburgerVisible>
-			<ApplicationLogo
-				class="mt-4 {sidebarExpanded || hamburgerVisible ? 'ml-4' : 'ml-1'}"
-				on:click={handleLogoClick}
-				on:keydown={handleLogoClick}
-				collapsed={!sidebarExpanded && !hamburgerVisible}
-			/>
-		</svelte:fragment>
-		<svelte:fragment slot="user" let:sidebarExpanded let:hamburgerVisible>
-			<div style:display="flex" style:flex-direction="column" style:height="100%">
-				<div style:flex-grow="1" />
-				<div class="profile-container" class:collapsed={!sidebarExpanded && !hamburgerVisible}>
-					<div style:margin-bottom="20px">
-						<UserAvatar
-							username={$user?.firstname + ' ' + $user?.lastname}
-							description={$user?.email}
-							src={$user?.avatarUrl}
-							showTitleAndDescription={sidebarExpanded || hamburgerVisible}
-							on:click={handleProfileClick}
-						/>
-					</div>
-					{#if sidebarExpanded || hamburgerVisible}
-						<div class="mt-3 flex flex-col gap-3 pl-1">
-							<button
-								class="cursor-pointer opacity-60 text-left"
-								on:click={handleLogoutClick}
-								on:keydown={handleLogoutClick}
-							>
-								Logout
-              </button>
-							<button
-								class="cursor-pointer opacity-60 text-left"
-								on:click={handleDarkThemeClick}
-								on:keydown={handleDarkThemeClick}
-							>
-								{$theme.dark ? 'Tema chiaro' : 'Tema scuro'}
-              </button>
-						</div>
-					{/if}
-				</div>
-			</div>
-		</svelte:fragment>
-		<svelte:fragment>
-			<slot />
-		</svelte:fragment>
-	</UnstableDividedSideBarLayout>
+  {#if sidebarVisible}
+    <UnstableDividedSideBarLayout
+      {options}
+      on:menu-select={handleMenuClick}
+      bind:drawerOpened
+      bind:selectedIndex
+      expandOn="hover"
+    >
+      <svelte:fragment slot="inner-menu" let:hamburgerVisible>
+        {#if !!hamburgerVisible}
+          <ApplicationLogo
+            class="ml-4 mt-2 !h-[45px]"
+            on:click={handleLogoClick}
+            on:keydown={handleLogoClick}
+            collapsed={true}
+          />
+        {:else}
+          <div class="w-full flex justify-center">
+            <GlobalSearchTextField
+              --global-search-text-field-width="200px"
+              --global-search-text-field-border-radius="5px"
+              --global-search-text-field-ring-color="transparent"
+              --global-search-text-field-hover-ring-color="transparent"
+              --global-search-text-field-background-color="rgb(var(--global-color-background-200))"
+            />
+          </div>
+        {/if}
+      </svelte:fragment>
+      <svelte:fragment slot="logo" let:sidebarExpanded let:hamburgerVisible>
+        <ApplicationLogo
+          class="mt-4 {sidebarExpanded || hamburgerVisible ? 'ml-4' : 'ml-1'}"
+          on:click={handleLogoClick}
+          on:keydown={handleLogoClick}
+          collapsed={!sidebarExpanded && !hamburgerVisible}
+        />
+      </svelte:fragment>
+      <svelte:fragment slot="user" let:sidebarExpanded let:hamburgerVisible>
+        <div style:display="flex" style:flex-direction="column" style:height="100%">
+          <div style:flex-grow="1" />
+          <div class="profile-container" class:collapsed={!sidebarExpanded && !hamburgerVisible}>
+            <div style:margin-bottom="20px">
+              <UserAvatar
+                username={$user?.firstname + ' ' + $user?.lastname}
+                description={$user?.email}
+                src={$user?.avatarUrl}
+                showTitleAndDescription={sidebarExpanded || hamburgerVisible}
+                on:click={handleProfileClick}
+              />
+            </div>
+            {#if sidebarExpanded || hamburgerVisible}
+              <div class="mt-3 flex flex-col gap-3 pl-1">
+                <button
+                  class="cursor-pointer opacity-60 text-left"
+                  on:click={handleLogoutClick}
+                  on:keydown={handleLogoutClick}
+                >
+                  Logout
+                </button>
+                <button
+                  class="cursor-pointer opacity-60 text-left"
+                  on:click={handleDarkThemeClick}
+                  on:keydown={handleDarkThemeClick}
+                >
+                  {$theme.dark ? 'Tema chiaro' : 'Tema scuro'}
+                </button>
+              </div>
+            {/if}
+          </div>
+        </div>
+      </svelte:fragment>
+      <svelte:fragment>
+        <slot />
+      </svelte:fragment>
+    </UnstableDividedSideBarLayout>
+  {:else}
+    <slot />
+  {/if}
 </main>
 
 <style>
