@@ -1,25 +1,13 @@
-<script lang="ts" context="module">
-	import type { GroupCans } from '$lib/services/groups/groups.service'
-
-	export type Group = {
-		name?: string
-		convocable?: boolean
-		team?: { id: number }
-		cans?: GroupCans
-	}
-</script>
-
 <script lang="ts">
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
-	import GroupsService, { resources } from '$lib/services/groups/groups.service'
+	import GroupsService, { RESOURCES, type Group, type Resource } from '$lib/services/groups/groups.service'
 	import { Icon } from '@likable-hair/svelte'
 	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
 	import { slide } from 'svelte/transition'
 
-	export let group: Group = {
+	export let group: DeepPartial<Group> = {
 			name: undefined
 		},
-		mode: 'create' | 'update' = 'create',
 		padding: string | undefined = undefined,
 		margin: string | undefined = undefined,
 		width: string | undefined = undefined,
@@ -27,7 +15,7 @@
 
 	let closureStatus: { [key: string]: boolean } = {}
 
-	function getActions(resource: string) {
+	function getActions(resource: Resource) {
 		return GroupsService.getActionsForResource(resource)
 	}
 
@@ -49,7 +37,7 @@
 	<LabelAndTextfield label="Nome" name="name" bind:value={group.name} />
 	<div class="font-bold mt-4">Poteri</div>
 	<div class="resources-container">
-		{#each resources as resource}
+		{#each RESOURCES as resource}
 			{#if !!getActions(resource)}
 				<div class="resource">
 					<button
@@ -68,6 +56,7 @@
 								<div style:margin-top="10px">
 									<LabelAndCheckbox
 										value={!!group.cans && !!group.cans[resource]
+                      // @ts-ignore
 											? group.cans[resource][action]
 											: false}
 										label={translateAction(action)}

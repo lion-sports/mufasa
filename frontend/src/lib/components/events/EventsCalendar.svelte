@@ -7,7 +7,7 @@
 	import { DateTime } from 'luxon'
 	import { onMount } from 'svelte'
 	import { goto } from '$app/navigation'
-	import CansService from '$lib/services/groups/cans.service'
+
 	import qs from 'qs'
 	import { Button, Calendar, Icon, MediaQuery } from '@likable-hair/svelte'
 	import { createEventDispatcher } from 'svelte'
@@ -29,7 +29,8 @@
 		selectedEvents: Event[] = [],
 		events: Event[],
 		visibleMonth: number = DateTime.now().get('month') - 1,
-		visibleYear: number = DateTime.now().get('year')
+		visibleYear: number = DateTime.now().get('year'),
+    canCreate: boolean = false
 
 	let dayGroupedEvents: {
 		[key: string]: Event[] | undefined
@@ -210,7 +211,7 @@
 							<div style:margin-left="5px" style:font-size=".8rem">and more</div>
 						{/if}
 					</div>
-					{#if CansService.can('Event', 'create') && !!team}
+					{#if canCreate && !!team}
 						<div class="add-new">
 							<Button
 								buttonType="icon"

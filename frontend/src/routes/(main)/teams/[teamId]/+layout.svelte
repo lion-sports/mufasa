@@ -1,11 +1,8 @@
 <script lang="ts">
-	import user from '$lib/stores/auth/user'
 	import { page } from '$app/stores'
 	import type { ComponentProps } from 'svelte'
 	import { goto } from '$app/navigation'
 	import team from '$lib/stores/teams/teamsShow'
-	import teamCans from '$lib/stores/teams/teamsCans'
-	import CansService from '$lib/services/groups/cans.service'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import StandardTabSwitcher from '$lib/components/common/StandardTabSwitcher.svelte'
 	import OptionMenu from '$lib/components/common/OptionMenu.svelte'
@@ -16,8 +13,7 @@
 	import { slide } from 'svelte/transition'
 
 	export let data: LayoutData
-	$team = data.team
-	$teamCans = data.teamCans
+	$: $team = data.team
 
 	let selectedTab: string = 'general',
 		options: ComponentProps<OptionMenu>['options'] = [],
@@ -25,28 +21,28 @@
 
 	options = []
 
-	if (CansService.can('Team', 'update'))
+	if (data.groupedPermissions.team.update)
 		options.push({
 			name: 'edit',
 			title: 'Modifica',
 			icon: 'mdi-pencil'
 		})
 
-	if (CansService.can('Team', 'invite'))
+	if (data.groupedPermissions.team.invite)
 		options.push({
 			name: 'inviteUser',
 			title: 'Invita utente',
 			icon: 'mdi-account-plus'
 		})
 
-	if (CansService.can('Event', 'create'))
+	if (data.groupedPermissions.event.create)
 		options.push({
 			name: 'addEvent',
 			title: 'Aggiungi evento',
 			icon: 'mdi-calendar-plus'
 		})
 
-	if (CansService.can('Team', 'destroy'))
+	if (data.groupedPermissions.team.destroy)
 		options.push({
 			name: 'delete',
 			title: 'Elimina',
@@ -56,7 +52,7 @@
 			}
 		})
 
-	if (!$teamCans.owner)
+	if (!data.isOwner)
 		options.push({
 			name: 'exit',
 			title: 'Esci dal team',
@@ -79,7 +75,7 @@
 		}
 	]
 
-	if (CansService.can('Group', 'update'))
+	if (data.groupedPermissions.group.update)
 		tabs.push({
 			name: 'groups',
 			label: 'Gruppi',
@@ -161,7 +157,9 @@
 		$page.url.pathname.endsWith('/groups/new') ||
 		/\/groups\/\d+\/edit$/.test($page.url.pathname) ||
 		$page.url.pathname.endsWith('/events/new') ||
-		/\/events\/\d+\//.test($page.url.pathname)
+		/\/events\/\d+\//.test($page.url.pathname) ||
+    /\/teammates\/\d+\/edit$/.test($page.url.pathname) ||
+    /\/teammates\/\d+\/shirts.*$/.test($page.url.pathname)
 </script>
 
 {#if !!$team}

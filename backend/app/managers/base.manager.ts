@@ -63,11 +63,24 @@ export type DestroyParams = {
 //#endregion
 
 //#region BaseManager
-class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData> {
+class BaseManager<
+  Model extends LucidModel, 
+  ClassResource extends Resource, 
+  CreateData, 
+  UpdateData = CreateData
+> {
   constructor() { }
 
   protected model: Model
-  protected resource: Resource
+  protected resource: ClassResource
+  protected actions: {
+    list: Action<ClassResource>
+    create: Action<ClassResource>
+    get: Action<ClassResource>
+    update: Action<ClassResource>
+    destroy: Action<ClassResource>
+  }
+
   protected auth?: (params: {
     id?: number
     data: any
@@ -106,7 +119,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
           ...params.context,
         },
       })
-    else await this._withAuth('view', params.context)
+    else await this._withAuth(this.resource, this.actions['list'], params.context)
 
     if (!params.data.page) params.data.page = 1
     if (!params.data.perPage) params.data.perPage = 100
@@ -154,7 +167,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
           ...params.context,
         },
       })
-    else await this._withAuth('create', params.context)
+    else await this._withAuth(this.resource, this.actions['create'], params.context)
 
     if (!!this.validate) await this.validate({ data: params.data, method: 'create' })
 
@@ -186,7 +199,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
           ...params.context,
         },
       })
-    else await this._withAuth('view', params.context)
+    else await this._withAuth(this.resource, this.actions['get'], params.context)
 
     let query = this.model.query({ client: trx }).where('id', params.data.id)
 
@@ -221,7 +234,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
           ...params.context,
         },
       })
-    else await this._withAuth('update', params.context)
+    else await this._withAuth(this.resource, this.actions['update'], params.context)
 
     if (!!this.validate) await this.validate({ data: params.data, method: 'update' })
 
@@ -255,12 +268,12 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
           ...params.context,
         },
       })
-    else await this._withAuth('destroy', params.context)
+    else await this._withAuth(this.resource, this.actions['destroy'], params.context)
 
     await this.model.query({ client: trx }).where('id', params.data.id).del()
   }
 
-  protected async _withAuth(action: Action, context?: Context) {
+  protected async _withAuth<R extends Resource>(resource: R, action: Action<R>, context?: Context) {
     if (!context) throw new Error('context must be defined')
     let user = context.user as User
     if (!user) throw new Error('user must be defined')
@@ -269,7 +282,7 @@ class BaseManager<Model extends LucidModel, CreateData, UpdateData = CreateData>
       data: {
         actor: user,
         action: action,
-        resource: this.resource,
+        resource: resource,
         entities: {},
       },
       context: {
@@ -284,7 +297,7 @@ export default BaseManager
 //#endregion
 
 //#region Decorators
-function withUser(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+function withUser(_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
   if (typeof descriptor.value != 'function')
     throw new Error('withUser decorator can only be used on functions')
 
@@ -310,7 +323,7 @@ function withUser(target: any, propertyKey: string, descriptor: PropertyDescript
   }
 }
 
-function withTransaction(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+function withTransaction(_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value
   descriptor.value = async function (...args: any[]) {
     let trx = args[0]?.context?.trx
@@ -334,8 +347,8 @@ function withTransaction(target: any, propertyKey: string, descriptor: PropertyD
   }
 }
 
-function withAuth(resource: Resource, action: Action, entities?: any) {
-  function withAuthDecorator(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+function withAuth<R extends Resource>(resource: R, action: Action<R>, entities?: any) {
+  function withAuthDecorator(_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value
     descriptor.value = async function (...args: any[]) {
       let user = args[0]?.context?.user

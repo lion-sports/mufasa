@@ -6,7 +6,6 @@
 	import { goto } from '$app/navigation'
 	import { DateTime } from 'luxon'
 	import qs from 'qs'
-	import CansService from '$lib/services/groups/cans.service'
 	import { Icon } from '@likable-hair/svelte'
 	import type { Teammate } from '$lib/services/teams/teams.service'
 
@@ -14,7 +13,8 @@
 		team: { id: number } | undefined = undefined,
 		teammate: Teammate | undefined = undefined,
 		precompiledDate: DateTime | undefined = undefined,
-		showTeamName: boolean = false
+		showTeamName: boolean = false,
+    canCreate: boolean = false
 
 	function formattedTime(event: Event) {
 		let fromTime: string = DateTime.fromJSDate(event.start)
@@ -98,7 +98,7 @@
 				{/if}
       </button>
 		{/each}
-		{#if !!team && CansService.can('Event', 'create')}
+		{#if !!team && canCreate}
 			<div class="plus-container">
 				<Icon name="mdi-plus" click on:click={handlePlusClick} />
 			</div>

@@ -6,7 +6,7 @@ import type { Action, Resource } from 'App/managers/authorization.manager';
 
 export type GroupCans = {
   [resource in Resource]?: {
-    [action in Action]?: boolean
+    [action in Action<resource>]?: boolean
   }
 }
 

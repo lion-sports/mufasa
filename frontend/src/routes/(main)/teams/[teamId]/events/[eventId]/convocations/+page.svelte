@@ -6,7 +6,9 @@
 	import event from '$lib/stores/events/eventShow'
 	import team from '$lib/stores/teams/teamsShow'
 	import { Icon } from '@likable-hair/svelte'
-	import CansService from '$lib/services/groups/cans.service'
+  import type { PageData } from './$types'
+
+  export let data: PageData
 
 	function handleConfirmOrDeny(e: CustomEvent<{ convocation: Convocation }>) {
 		if (!!$event) {
@@ -59,13 +61,16 @@
 	<ConvocationList
 		convocations={$event?.convocations}
 		team={$team}
+    canConfirm={data.groupedPermissions.convocation.confirm}
+    canDeny={data.groupedPermissions.convocation.deny}
+    canConvocate={data.groupedPermissions.event.convocate}
 		on:confirm={handleConfirmOrDeny}
 		on:deny={handleConfirmOrDeny}
 		on:unConvocate={handleUnConvocate}
 	/>
 </div>
 
-{#if CansService.can('Event', 'convocate')}
+{#if data.groupedPermissions.event.convocate}
 	<div
 		style:margin-top="20px"
 		style:width="100%"

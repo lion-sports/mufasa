@@ -7,7 +7,6 @@
 	import UserAvatar from '$lib/components/common/UserAvatar.svelte'
 	import StandardChip from '$lib/components/common/StandardChip.svelte'
 	import { Icon, CircularLoader, MediaQuery, HorizontalStackedProgress } from '@likable-hair/svelte'
-	import CansService from '$lib/services/groups/cans.service'
 	import { createEventDispatcher, type ComponentProps } from 'svelte'
 	import ConvocationsService from '$lib/services/convocations/convocations.service'
 	import Divider from '$lib/components/common/Divider.svelte'
@@ -15,6 +14,13 @@
 	import GroupMultipleSelectorChip from '$lib/components/groups/GroupMultipleSelectorChip.svelte'
 	import type { Group } from '$lib/services/groups/groups.service'
 	import OptionSelector from '$lib/components/common/OptionSelector.svelte'
+
+  export let convocations: Convocation[] = [],
+		team: { id: number } | undefined,
+		groups: Group[] = [],
+    canConfirm: boolean = false,
+    canConvocate: boolean = false,
+    canDeny: boolean = false
 
 	let dispatch = createEventDispatcher<{
 		confirm: {
@@ -35,7 +41,7 @@
 	$: if (!!editingConvocation) {
 		editConvocationsOptions = []
 		if (
-			CansService.can('Convocation', 'confirm') ||
+			canConfirm ||
 			editingConvocation.teammate.userId == $user?.id
 		) {
 			editConvocationsOptions.push({
@@ -46,7 +52,7 @@
 		}
 
 		if (
-			CansService.can('Convocation', 'confirm') ||
+			canDeny ||
 			editingConvocation.teammate.userId == $user?.id
 		) {
 			editConvocationsOptions.push({
@@ -56,7 +62,7 @@
 			})
 		}
 
-		if (CansService.can('Event', 'convocate')) {
+		if (canConvocate) {
 			editConvocationsOptions.push({
 				label: 'Elimina',
 				name: 'delete',
@@ -76,10 +82,6 @@
 			convocationDetailDialogOpen = false
 		}
 	}
-
-	export let convocations: Convocation[] = [],
-		team: { id: number } | undefined,
-		groups: Group[] = []
 
 	function translateConfirmationStatus(confirmationStatus: string | undefined) {
 		if (!confirmationStatus) return 'Non specificato'
@@ -230,20 +232,20 @@
 									</StandardChip>
 								</div>
 							</div>
-							{#if convocation.teammate.userId == $user?.id || CansService.can('Convocation', 'confirm') || CansService.can('Convocation', 'deny')}
+							{#if convocation.teammate.userId == $user?.id || canConfirm || canDeny}
 								<div class="confirm-button-container">
 									{#if !loading}
-										{#if CansService.can('Convocation', 'confirm') || convocation.teammate.userId == $user?.id}
+										{#if canConfirm || convocation.teammate.userId == $user?.id}
 											<Icon
 												name="mdi-check"
 												click
 												on:click={() => confirmConvocation(convocation)}
 											/>
 										{/if}
-										{#if CansService.can('Convocation', 'deny') || convocation.teammate.userId == $user?.id}
+										{#if canDeny || convocation.teammate.userId == $user?.id}
 											<Icon name="mdi-close" click on:click={() => denyConvocation(convocation)} />
 										{/if}
-										{#if CansService.can('Event', 'convocate')}
+										{#if canConvocate}
 											<Icon name="mdi-delete" click on:click={() => unConvocate(convocation)} />
 										{/if}
 									{:else}

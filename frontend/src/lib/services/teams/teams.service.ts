@@ -2,6 +2,8 @@ import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { User } from '../auth/auth.service'
 import type { Group } from '../groups/groups.service'
 import type { Invitation } from '../invitations/invitations.service'
+import type { Role } from '../scouts/scouts.service'
+import type { Shirt } from '../shirts/shirts.service'
 
 export type Teammate = {
 	id: number
@@ -12,6 +14,9 @@ export type Teammate = {
 	userId: number
 	user: User
 	alias?: string
+  shirts: Shirt[]
+  defaultRole: Role
+  availableRoles: Role[]
 	createdAt: Date
 	updatedAt: Date
 }

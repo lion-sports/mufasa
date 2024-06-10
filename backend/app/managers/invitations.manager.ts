@@ -81,7 +81,7 @@ export default class InvitationsManager {
       data: {
         actor: user,
         action: 'invite',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: {
             id: params.data.team.id
@@ -170,7 +170,7 @@ export default class InvitationsManager {
       data: {
         actor: user,
         action: 'accept',
-        resource: 'Invitation',
+        resource: 'invitation',
         entities: {
           invitation: invitation,
           invitee: user
@@ -221,7 +221,7 @@ export default class InvitationsManager {
       data: {
         actor: user,
         action: 'reject',
-        resource: 'Invitation',
+        resource: 'invitation',
         entities: {
           invitation: invitation,
           invitee: user
@@ -251,7 +251,7 @@ export default class InvitationsManager {
       data: {
         actor: user,
         action: 'discard',
-        resource: 'Invitation',
+        resource: 'invitation',
         entities: {
           invitation: invitation,
         }

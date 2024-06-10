@@ -20,7 +20,7 @@
 			{
 				value: 'name',
 				label: 'Nome',
-				type: { key: 'number' }
+				type: { key: 'string' }
 			},
       {
 				value: 'public',

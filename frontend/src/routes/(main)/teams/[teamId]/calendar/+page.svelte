@@ -8,5 +8,5 @@
 </script>
 
 {#if !!$team}
-	<TeamsCalendarWithSidebar team={$team} teammate={$teammate} events={data.events} />
+	<TeamsCalendarWithSidebar team={$team} teammate={$teammate} events={data.events} canCreate={data.groupedPermissions.event.create} />
 {/if}

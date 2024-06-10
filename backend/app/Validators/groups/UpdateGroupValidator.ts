@@ -9,6 +9,7 @@ export default class UpdateGroupValidator {
     name: schema.string.nullableAndOptional([
       rules.maxLength(255)
     ]),
+    cans: schema.object.optional().anyMembers()
   })
 
   public messages: CustomMessages = {}

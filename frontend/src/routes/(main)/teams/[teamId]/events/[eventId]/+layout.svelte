@@ -4,7 +4,6 @@
 	import { goto } from '$app/navigation'
 	import EventService from '$lib/services/events/events.service'
 	import event from '$lib/stores/events/eventShow'
-	import CansService from '$lib/services/groups/cans.service'
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import StandardTabSwitcher from '$lib/components/common/StandardTabSwitcher.svelte'
@@ -21,14 +20,14 @@
 
 	options = []
 
-	if (CansService.can('Event', 'update'))
+	if (data.groupedPermissions.event.update)
 		options.push({
 			name: 'update',
 			title: 'Modifica',
 			icon: 'mdi-pencil'
 		})
 
-	if (CansService.can('Event', 'destroy'))
+	if (data.groupedPermissions.event.destroy)
 		options.push({
 			name: 'destroy',
 			title: 'Elimina',
@@ -51,7 +50,7 @@
 		}
 	]
 
-  if(CansService.can('Scout', 'manage')) {
+  if(data.groupedPermissions.scout.view) {
     tabs = [
       ...tabs,
       {

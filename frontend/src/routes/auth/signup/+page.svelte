@@ -59,7 +59,7 @@
 				<div style:color="rgb(var(--global-color-contrast-500), .5)" style:margin-bottom="15px">
 					L'utente è stato creato con successo, ora puoi eseguire il login.
 				</div>
-				<LinkButton on:click={() => goto('/auth/Login')}>Log in</LinkButton>
+				<LinkButton href="/auth/Login">Log in</LinkButton>
 			</div>
 		{:else if userNotCreated}
 			<div

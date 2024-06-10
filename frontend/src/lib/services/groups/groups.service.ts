@@ -4,7 +4,7 @@ export type Group = {
 	id: number
 	name: string
 	convocable: boolean
-	cans?: any
+	cans?: DeepPartial<GroupedPermissions>
 	createdAt: Date
 	updatedAt: Date
 }
@@ -14,48 +14,107 @@ export type PaginatedGroups = {
 	meta: PaginationData
 }
 
-export const resources = [
-  'Team', 
-  'Invitation', 
-  'Event', 
-  'Convocation', 
-  'EventSession', 
-  'Group',
-  'Shirt',
-  'Scout'
-] as const
-export type Resource = typeof resources[number]
-
-export const actionsForResources: { [key: string]: Action[] } = {
-	Team: ['update', 'invite', 'removeUser', 'destroy'],
-  Teammate: ['update'],
-	Event: ['create', 'update', 'destroy', 'convocate'],
-	Group: ['update'],
-	Convocation: ['confirm', 'deny'],
-  Shirt: ['create', 'update', 'view', 'destroy'],
-  Scout: ['manage', 'view'],
+export type GroupedPermissions<Type = boolean> = {
+  team: {
+    update: Type,
+    destroy: Type,
+    view: Type,
+    invite: Type,
+    removeUser: Type,
+  },
+  teammate: {
+    update: Type,
+  },
+  invitation: {
+    accept: Type,
+    reject: Type,
+    discard: Type,
+  },
+  group: {
+    create: Type,
+    update: Type,
+    destroy: Type,
+    view: Type,
+  },
+  event: {
+    create: Type,
+    update: Type,
+    convocate: Type,
+    destroy: Type,
+  },
+  shirt: {
+    create: Type,
+    update: Type,
+    view: Type,
+    destroy: Type,
+  },
+  scout: {
+    manage: Type,
+    view: Type,
+  },
+  scoringSystem: {
+    view: Type,
+    manage: Type,
+    create: Type,
+  },
+  convocation: {
+    confirm: Type,
+    deny: Type,
+  }
 }
 
-export type Action =
-  'update' |
-  'destroy' |
-  'create' |
-  'view' |
-  'invite' |
-  'removeUser' |
-  'accept' |
-  'reject' |
-  'discard' |
-  'convocate' |
-  'confirm' |
-  'deny' |
-  'manage'
-
-export type GroupCans = {
-	[key: string]: {
-		[key: string]: boolean
-	}
+const EMPTY_GROUPED_PERMISSIONS: GroupedPermissions = {
+  team: {
+    update: false,
+    destroy: false,
+    view: false,
+    invite: false,
+    removeUser: false,
+  },
+  teammate: {
+    update: false,
+  },
+  invitation: {
+    accept: false,
+    reject: false,
+    discard: false,
+  },
+  group: {
+    create: false,
+    update: false,
+    destroy: false,
+    view: false,
+  },
+  event: {
+    create: false,
+    update: false,
+    convocate: false,
+    destroy: false,
+  },
+  shirt: {
+    create: false,
+    update: false,
+    view: false,
+    destroy: false,
+  },
+  scout: {
+    manage: false,
+    view: false,
+  },
+  scoringSystem: {
+    view: false,
+    manage: false,
+    create: false,
+  },
+  convocation: {
+    confirm: false,
+    deny: false,
+  }
 }
+
+export type Resource = keyof GroupedPermissions
+export type Action<R extends Resource> = keyof GroupedPermissions[R]
+export const RESOURCES = Object.keys(EMPTY_GROUPED_PERMISSIONS) as Resource[]
 
 export default class GroupsService extends FetchBasedService {
 	public async create(params: { name?: string; convocable?: boolean; cans?: any }): Promise<Group> {
@@ -106,7 +165,7 @@ export default class GroupsService extends FetchBasedService {
 		id: number
 		name?: string
 		convocable?: boolean
-		cans?: GroupCans
+    cans?: DeepPartial<GroupedPermissions>
 	}): Promise<Group> {
 		let response = await this.client.put({
 			url: '/groups/' + params.id,
@@ -124,24 +183,21 @@ export default class GroupsService extends FetchBasedService {
 		return response
 	}
 
-	public static getActionsForResource(resource: string): string[] {
-		return actionsForResources[resource]
+	public static getActionsForResource(resource: Resource): string[] {
+		return Object.keys(EMPTY_GROUPED_PERMISSIONS[resource])
 	}
 
-	public static translateResource(resource: string): string {
-		let translationMapping: {
-			[key: string]: string
-		} = {
-			Team: 'Team',
-			Invitation: 'Inviti',
-			Event: 'Eventi',
-			Convocation: 'Convocazioni',
-			EventSession: 'Sessioni',
-			Group: 'Gruppi',
-      Teammate: 'Membro',
-      Scout: 'Scout',
-      ScoringSystem: 'Sistemi di punteggio',
-      Shirt: 'Maglie'
+	public static translateResource(resource: Resource): string {
+		let translationMapping: Record<Resource, string> = {
+			team: 'Team',
+			invitation: 'Inviti',
+			event: 'Eventi',
+			convocation: 'Convocazioni',
+			group: 'Gruppi',
+      teammate: 'Membro',
+      scout: 'Scout',
+      scoringSystem: 'Sistemi di punteggio',
+      shirt: 'Maglie'
 		}
 		return translationMapping[resource]
 	}
@@ -166,4 +222,24 @@ export default class GroupsService extends FetchBasedService {
 		}
 		return translationMapping[action]
 	}
+
+  public static getGroupedPermissions(params: { 
+    owner: boolean,
+    group?: {
+      cans?: DeepPartial<GroupedPermissions>
+    }
+  }): GroupedPermissions {
+    let basePermissions = {
+      ...EMPTY_GROUPED_PERMISSIONS
+    }
+
+    for(const resource of Object.keys(basePermissions) as Resource[]) {
+      for(const action of Object.keys(basePermissions[resource]) as (Action<typeof resource>)[]) {
+        // @ts-ignore
+        basePermissions[resource][action] = !!params.owner || !!params.group?.cans?.[resource]?.[action]
+      }
+    }
+
+    return basePermissions
+  }
 }

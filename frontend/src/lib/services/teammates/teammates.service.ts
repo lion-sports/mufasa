@@ -1,10 +1,16 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Teammate } from '$lib/services/teams/teams.service'
 import type { User } from '../auth/auth.service';
-import type { Player } from '../scouts/scouts.service';
+import type { Player, Role } from '../scouts/scouts.service';
 
 export default class TeammatesService extends FetchBasedService {
-	public async update(params: { id: number; alias?: string; groupId?: number }): Promise<Teammate> {
+	public async update(params: { 
+    id: number
+    alias?: string
+    groupId?: number
+    defaultRole?: Role
+    availableRoles?: Role[]
+  }): Promise<Teammate> {
 		let response = await this.client.put({
 			url: '/teammates/' + params.id,
 			body: params

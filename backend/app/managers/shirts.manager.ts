@@ -77,7 +77,7 @@ export default class ShirtManager {
       data: {
         actor: user,
         action: 'create',
-        resource: 'Shirt',
+        resource: 'shirt',
         entities: {
           teammate: {
             id: params.data.teammateId
@@ -115,7 +115,7 @@ export default class ShirtManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Shirt',
+        resource: 'shirt',
         entities: {
           shirt: {
             id: params.data.id
@@ -155,7 +155,7 @@ export default class ShirtManager {
       data: {
         actor: user,
         action: 'update',
-        resource: 'Shirt',
+        resource: 'shirt',
         entities: {
           shirt: {
             id: params.data.id
@@ -196,7 +196,7 @@ export default class ShirtManager {
       data: {
         actor: user,
         action: 'destroy',
-        resource: 'Shirt',
+        resource: 'shirt',
         entities: {
           shirt: {
             id: params.data.id

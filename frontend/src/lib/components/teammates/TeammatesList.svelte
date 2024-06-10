@@ -6,7 +6,6 @@
 	import { goto } from '$app/navigation'
 	import { createEventDispatcher, type ComponentProps } from 'svelte'
 	import InvitationsService from '$lib/services/invitations/invitations.service'
-	import CansService from '$lib/services/groups/cans.service'
 	import { SimpleTable, Icon } from '@likable-hair/svelte'
 	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
@@ -18,7 +17,10 @@
 
 	export let teammates: Teammate[] = [],
 		team: Pick<Team, 'id' | 'ownerId'>,
-		searchable: boolean = false
+		searchable: boolean = false,
+    canInvite: boolean = false,
+    canUpdateTeam: boolean = false,
+    canRemoveTeammate: boolean = false
 
 	let headers: ComponentProps<SimpleTable>['headers'] = [
 		{
@@ -49,7 +51,9 @@
 		? teammates.filter((teammate) => {
 				return (
 					teammate.user.firstname.toLowerCase() + teammate.user.lastname.toLowerCase()
-				).includes(searchText.toLowerCase())
+				).includes(searchText.toLowerCase()) || (
+          !!teammate.alias && teammate.alias.toLowerCase().includes(searchText.toLowerCase())
+        )
       })
 		: teammates
 
@@ -96,7 +100,7 @@
 			</svelte:fragment>
 		</StandardTextfield>
 		<div style:flex-grow="1" />
-		{#if CansService.can('Team', 'invite')}
+		{#if canInvite}
 			<div style:margin-left="10px">
 				<StandardButton on:click={inviteUser}>Invita</StandardButton>
 			</div>
@@ -122,12 +126,12 @@
 			{/if}
 		</svelte:fragment>
 		<div style:display="flex" style:justify-content="end" slot="rowActions" let:item>
-			{#if CansService.can('Team', 'update')}
+			{#if canUpdateTeam}
 				<span style:margin-right="10px">
 					<Icon name="mdi-pencil" click on:click={() => handleEditClick(item)} />
 				</span>
 			{/if}
-			{#if ((!!team.ownerId && item.user.id != team.ownerId) || !team.ownerId) && CansService.can('Team', 'removeUser')}
+			{#if ((!!team.ownerId && item.user.id != team.ownerId) || !team.ownerId) && canRemoveTeammate}
 				<Icon
 					name="mdi-delete"
 					click

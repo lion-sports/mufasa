@@ -162,7 +162,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'create',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           team: params.data.team
         }
@@ -230,7 +230,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'create',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           team: params.data.event.team
         }
@@ -382,7 +382,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'create',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           team: params.data.team
         }
@@ -459,7 +459,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'update',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           event: params.data 
         }
@@ -526,7 +526,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'destroy',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           event: params.data
         }
@@ -593,7 +593,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           team: {
             id: event.teamId
@@ -601,8 +601,7 @@ export default class EventsManager {
         }
       },
       context: {
-        trx,
-        user
+        trx
       }
     })
 

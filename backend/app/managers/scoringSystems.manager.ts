@@ -85,7 +85,7 @@ export default class ScoringSystemsManager {
         data: {
           actor: user,
           action: 'create',
-          resource: 'ScoringSystem',
+          resource: 'scoringSystem',
           entities: {
             team: {
               id: params.data.createdForTeamId
@@ -123,7 +123,7 @@ export default class ScoringSystemsManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'ScoringSystem',
+        resource: 'scoringSystem',
         entities: {
           scoringSystem: {
             id: params.data.id
@@ -164,7 +164,7 @@ export default class ScoringSystemsManager {
       data: {
         actor: user,
         action: 'manage',
-        resource: 'ScoringSystem',
+        resource: 'scoringSystem',
         entities: {
           scoringSystem: {
             id: params.data.id
@@ -206,7 +206,7 @@ export default class ScoringSystemsManager {
       data: {
         actor: user,
         action: 'manage',
-        resource: 'ScoringSystem',
+        resource: 'scoringSystem',
         entities: {
           scoringSystem: {
             id: params.data.id

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import GroupsService from '$lib/services/groups/groups.service'
 	import { page } from '$app/stores'
-	import { goto } from '$app/navigation'
-	import CansService from '$lib/services/groups/cans.service'
+	import { goto, invalidate } from '$app/navigation'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import ConfirmOrCancelButtons from '$lib/components/common/ConfirmOrCancelButtons.svelte'
 	import RoleForm from '$lib/components/groups/GroupForm.svelte'
@@ -24,10 +23,8 @@
 		loading = true
 		await service.create(role)
 
-		let teamsService = new TeamsService({ fetch })
-		$team = await teamsService.show({ id: Number($page.params.teamId) })
-
 		loading = false
+    await invalidate('teams:[teamId]')
 		goto(`/teams/${role.team.id}/groups`)
 	}
 
@@ -36,17 +33,13 @@
 	}
 </script>
 
-{#if CansService.can('Group', 'update')}
-	<PageTitle title="Nuovo gruppo" prependVisible={true} />
+<PageTitle title="Nuovo gruppo" prependVisible={true} />
 
-	<div style:margin-top="20px">
-		<RoleForm group={role} />
-		<ConfirmOrCancelButtons
-			on:cancel-click={handleCancel}
-			on:confirm-click={handleSubmit}
-			{loading}
-		/>
-	</div>
-{:else}
-	Non puoi accedere a questa pagina :(
-{/if}
+<div style:margin-top="20px">
+  <RoleForm group={role} />
+  <ConfirmOrCancelButtons
+    on:cancel-click={handleCancel}
+    on:confirm-click={handleSubmit}
+    {loading}
+  />
+</div>

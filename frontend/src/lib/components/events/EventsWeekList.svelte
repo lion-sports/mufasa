@@ -4,7 +4,6 @@
 	import { DateTime, type WeekdayNumbers } from 'luxon'
 	import { onMount, createEventDispatcher, type ComponentProps } from 'svelte'
 	import { goto } from '$app/navigation'
-	import CansService from '$lib/services/groups/cans.service'
 	import EventsService from '$lib/services/events/events.service'
 	import qs from 'qs'
 	import { Icon, MediaQuery } from '@likable-hair/svelte'
@@ -18,7 +17,10 @@
 		selectedEvents: Event[] = [],
 		events: Event[],
 		visibleYear: number = DateTime.now().get('year'),
-		visibleWeek: number = DateTime.now().get('weekNumber')
+		visibleWeek: number = DateTime.now().get('weekNumber'),
+    canUpdate: boolean = false,
+    canDestroy: boolean = false,
+    canCreate: boolean = false
 
 	let dispatch = createEventDispatcher<{
 		nextWeek: {
@@ -39,7 +41,7 @@
 	onMount(() => {
 		groupEventByDate()
 
-		if (CansService.can('Event', 'update')) {
+		if (canUpdate) {
 			options.push({
 				name: 'edit',
 				title: 'Modifica',
@@ -53,7 +55,7 @@
 			icon: 'mdi-eye'
 		})
 
-		if (CansService.can('Event', 'destroy')) {
+		if (canDestroy) {
 			options.push({
 				name: 'destroy',
 				title: 'Elimina',
@@ -274,7 +276,7 @@
 					<div class="day-container">
 						<div class="day-name">{getWeekdayNameFromIndex(weekday)}</div>
 						<div style:flex-grow="1">
-							{#if CansService.can('Event', 'create')}
+							{#if canCreate}
 								<div>
 									<Icon name="mdi-plus" click on:click={() => handlePlusClick(weekday)} />
 								</div>

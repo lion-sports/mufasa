@@ -87,7 +87,7 @@ export default class ScoutsManager {
       data: {
         actor: user,
         action: 'manage',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           event: {
             id: params.data.eventId
@@ -160,7 +160,7 @@ export default class ScoutsManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           scout: {
             id: params.data.id
@@ -228,7 +228,7 @@ export default class ScoutsManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           scout: {
             id: params.data.id
@@ -244,11 +244,16 @@ export default class ScoutsManager {
       .query({ client: trx })
       .preload('event', e => 
         e.preload('team')
+          .preload('convocations', b => 
+            b.preload('teammate', b => 
+              b.preload('user')
+            )
+          )
       )
       .preload('players', b => b
         .preload('convocation')
         .preload('shirt')
-        .preload('teammate', b => b.preload('user'))
+        .preload('teammate', b => b.preload('user').preload('shirts'))
       )
       .preload('scoutInfo')
       .preload('scoringSystem')
@@ -281,7 +286,7 @@ export default class ScoutsManager {
       data: {
         actor: user,
         action: 'manage',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           scout: {
             id: params.data.id
@@ -336,7 +341,7 @@ export default class ScoutsManager {
       data: {
         actor: user,
         action: 'manage',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           scout: {
             id: params.data.id
@@ -368,7 +373,7 @@ export default class ScoutsManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           scout: {
             id: params.data.id

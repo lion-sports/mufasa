@@ -9,37 +9,60 @@ import Teammate from 'App/Models/Teammate'
 import Team from 'App/Models/Team'
 import EventSession from 'App/Models/EventSession'
 import Shirt from 'App/Models/Shirt'
-import { Context } from './base.manager'
 import Scout from 'App/Models/Scout'
 import ScoringSystem from 'App/Models/ScoringSystem'
 
-export type Resource = 
-  'Team' |
-  'Invitation' |
-  'Event' |
-  'Convocation' |
-  'EventSession' |
-  'Group' |
-  'Teammate' | 
-  'Shirt' |
-  'Scout' |
-  'Player' |
-  'ScoringSystem'
+export type GroupedPermissions<Type = boolean> = {
+  team: {
+    update: Type,
+    destroy: Type,
+    view: Type,
+    invite: Type,
+    removeUser: Type,
+  },
+  teammate: {
+    update: Type,
+  },
+  invitation: {
+    accept: Type,
+    reject: Type,
+    discard: Type,
+  },
+  group: {
+    create: Type,
+    update: Type,
+    destroy: Type,
+    view: Type,
+  },
+  event: {
+    create: Type,
+    update: Type,
+    convocate: Type,
+    destroy: Type,
+  },
+  shirt: {
+    create: Type,
+    update: Type,
+    view: Type,
+    destroy: Type,
+  },
+  scout: {
+    manage: Type,
+    view: Type,
+  },
+  scoringSystem: {
+    view: Type,
+    manage: Type,
+    create: Type,
+  },
+  convocation: {
+    confirm: Type,
+    deny: Type,
+  }
+}
 
-export type Action =
-  'update' |
-  'destroy' |
-  'create' |
-  'view' |
-  'invite' |
-  'removeUser' |
-  'accept' |
-  'reject' |
-  'discard' |
-  'convocate' |
-  'confirm' |
-  'deny' |
-  'manage'
+export type Resource = keyof GroupedPermissions
+export type Action<R extends Resource> = keyof GroupedPermissions[R]
 
 export type Entities = {
   team?: Pick<Team, 'id'>,
@@ -64,65 +87,55 @@ type CanFunction = (params: {
 }) => Promise<boolean>
 
 
-type CanParameters = {
-  data: {
-    actor: User,
-    resource: Resource,
-    action: Action,
-    entities: Entities
-  },
-  context?: Context
-}
-
 export default class AuthorizationManager {
   static mapper: {
     [resource in Resource]?: {
-      [action in Action]?: CanFunction
+      [action in Action<resource>]?: CanFunction
     }
   } = {
-    Team: {
+    team: {
       update: AuthorizationManager._canUpdateTeam,
       destroy: AuthorizationManager._canDestroyTeam,
       view: AuthorizationManager._canViewTeam,
       invite: AuthorizationManager._canInviteToTeam,
       removeUser: AuthorizationManager._canRemoveUserFromTeam
     },
-    Teammate: {
+    teammate: {
       update: AuthorizationManager._canUpdateTeammate
     },
-    Invitation: {
+    invitation: {
       accept: AuthorizationManager._canAcceptInvitation,
       reject: AuthorizationManager._canRejectInvitation,
       discard: AuthorizationManager._canDiscardInvitation,
     },
-    Group: {
+    group: {
       create: AuthorizationManager._canUpdateTeam,
       update: AuthorizationManager._canUpdateGroup,
       destroy: AuthorizationManager._canUpdateGroup,
       view: AuthorizationManager._canViewGroup,
     },
-    Event: {
+    event: {
       create: AuthorizationManager._canCreateEvent,
       update: AuthorizationManager._canUpdateEvent,
       convocate: AuthorizationManager._canConvocateToEvent,
       destroy: AuthorizationManager._canDestroyEvent
     },
-    Shirt: {
+    shirt: {
       create: AuthorizationManager._canCreateShirt,
       update: AuthorizationManager._canUpdateShirt,
       view: AuthorizationManager._canViewShirt,
       destroy: AuthorizationManager._canDestroyShirt
     },
-    Scout: {
+    scout: {
       manage: AuthorizationManager._canManageScout,
       view: AuthorizationManager._canViewScout
     },
-    ScoringSystem: {
+    scoringSystem: {
       view: AuthorizationManager._canViewScoringSystem,
       manage: AuthorizationManager._canManageScoringSystem,
       create: AuthorizationManager._canCreateScoringSystem
     },
-    Convocation: {
+    convocation: {
       confirm: AuthorizationManager._canConfirmConvocation,
       deny: AuthorizationManager._canDenyConvocation
     }
@@ -130,8 +143,18 @@ export default class AuthorizationManager {
 
   constructor() { }
 
-  public static async can(
-    { data, context }: CanParameters
+  public static async can<R extends Resource>(
+    { data, context }: {
+      data: {
+        actor: User
+        entities: Entities,
+        resource: R,
+        action: Action<R>
+      },
+      context?: {
+        trx?: TransactionClientContract
+      }
+    }
   ) {
     let canFunction = this.mapper[data.resource]?.[data.action] ?? AuthorizationManager._generalCanFunction
     return await canFunction({
@@ -139,9 +162,22 @@ export default class AuthorizationManager {
     }, context)
   }
 
-  public static async canOrFail(params: CanParameters): Promise<boolean> {
+  public static async canOrFail<R extends Resource>(params: {
+    data: {
+      actor: User
+      entities: Entities,
+      resource: R,
+      action: Action<R>
+    },
+    context?: {
+      trx?: TransactionClientContract
+    }
+  }): Promise<boolean> {
     let results = await AuthorizationManager.can(params)
-    if (!this.mapper[params.data.resource]?.[params.data.action] || !results) throw new Error(`cannot ${params.data.action} on resource ${params.data.resource} with current user`)
+    if (!this.mapper[params.data.resource]?.[params.data.action] || !results)
+      throw new Error(
+        `cannot ${params.data.action.toString()} on resource ${params.data.resource} with current user`
+      )
     else return true
   }
 
@@ -163,7 +199,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: teamId },
       action: 'update',
-      resource: 'Team'
+      resource: 'team'
     }, context)
 
     return userCanUpdateTeam
@@ -182,7 +218,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: teamId },
       action: 'removeUser',
-      resource: 'Team'
+      resource: 'team'
     }, context)
 
     return (userCanRemoveUser || params.actor.id == userId)
@@ -230,7 +266,7 @@ export default class AuthorizationManager {
     const userCanInvite = await Helpers.userCanInTeam({
       user: params.actor,
       team: {id: teamId},
-      resource: 'Team',
+      resource: 'team',
       action: 'invite'
     }, context)
 
@@ -320,7 +356,7 @@ export default class AuthorizationManager {
         .where(teamsBuilder => {
           teamsBuilder
             .whereHas('groups', groupsBuilder => {
-              groupsBuilder.whereRaw("cast(groups.cans->'Event'->>'create' as BOOLEAN) = true")
+              groupsBuilder.whereRaw("cast(groups.cans->'event'->>'create' as BOOLEAN) = true")
             })
             .orWhere('ownerId', params.actor.id)
         })
@@ -340,7 +376,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: teamId },
       action: 'create',
-      resource: 'Event'
+      resource: 'event'
     }, context)
   }
 
@@ -359,7 +395,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: teammate.teamId },
       action: 'update',
-      resource: 'Teammate'
+      resource: 'teammate'
     }, context)
   }
 
@@ -382,7 +418,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: event.teamId },
       action: 'update',
-      resource: 'Event'
+      resource: 'event'
     }, context)
   }
 
@@ -405,7 +441,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: event.teamId },
       action: 'destroy',
-      resource: 'Event'
+      resource: 'event'
     }, context)
   }
 
@@ -428,7 +464,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: event.teamId },
       action: 'convocate',
-      resource: 'Event'
+      resource: 'event'
     }, context)
   }
 
@@ -458,7 +494,7 @@ export default class AuthorizationManager {
         id: convocation.event.teamId
       },
       action: 'confirm',
-      resource: 'Convocation'
+      resource: 'convocation'
     })
 
     return convocationBelongsToUser.length != 0 || canConfirmOtherConvocations
@@ -490,7 +526,7 @@ export default class AuthorizationManager {
         id: convocation.event.teamId
       },
       action: 'deny',
-      resource: 'Convocation'
+      resource: 'convocation'
     })
 
     return convocationBelongsToUser.length != 0 || canConfirmOtherConvocations
@@ -514,7 +550,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: teammate.teamId },
       action: 'create',
-      resource: 'Shirt'
+      resource: 'shirt'
     }, context)
   }
 
@@ -537,7 +573,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: shirt.teammate.teamId },
       action: 'update',
-      resource: 'Shirt'
+      resource: 'shirt'
     }, context)
   }
 
@@ -560,7 +596,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: shirt.teammate.teamId },
       action: 'view',
-      resource: 'Shirt'
+      resource: 'shirt'
     }, context)
   }
 
@@ -583,7 +619,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: shirt.teammate.teamId },
       action: 'destroy',
-      resource: 'Shirt'
+      resource: 'shirt'
     }, context)
   }
 
@@ -619,7 +655,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: teamId },
       action: 'manage',
-      resource: 'Scout'
+      resource: 'scout'
     }, context)
   }
 
@@ -650,7 +686,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: teamId },
       action: 'view',
-      resource: 'Scout'
+      resource: 'scout'
     }, context)
   }
 
@@ -673,7 +709,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: scoringSystem.createdForTeamId },
       action: 'view',
-      resource: 'Scout'
+      resource: 'scout'
     }, context)
   }
 
@@ -696,7 +732,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: scoringSystem.createdForTeamId },
       action: 'manage',
-      resource: 'Scout'
+      resource: 'scout'
     }, context)
   }
 
@@ -710,19 +746,19 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: params.entities.team.id },
       action: 'manage',
-      resource: 'Scout'
+      resource: 'scout'
     }, context)
   }
 }
 
 
 class Helpers {
-  public static async userCanInTeam(
+  public static async userCanInTeam<R extends Resource>(
     params: { 
-      user: User, 
-      team: { id: number } 
-      action: Action,
-      resource: Resource
+      user: User
+      team: { id: number }
+      resource: R
+      action: Action<R>
     },
     context?: { trx?: TransactionClientContract }
   ): Promise<boolean> {
@@ -736,7 +772,7 @@ class Helpers {
             .whereHas('groups', groupsBuilder => {
               groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
                 resource: params.resource,
-                action: params.action
+                action: params.action.toString()
               })
             })
             .orWhere('ownerId', params.user.id)

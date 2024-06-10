@@ -54,7 +54,7 @@ export default class TeammatesManager {
       data: {
         actor: user,
         action: 'update',
-        resource: 'Teammate',
+        resource: 'teammate',
         entities: {
           teammate: {
             id: params.data.id

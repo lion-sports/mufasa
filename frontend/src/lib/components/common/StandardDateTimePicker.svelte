@@ -4,7 +4,6 @@
 	import StandardTimePicker from './StandardTimePicker.svelte'
 
 	export let value: Date = new Date(),
-		label: string | undefined = '',
 		name: string
 
 	let time: string | undefined
@@ -34,10 +33,10 @@
 
 <div class="container">
 	<div style:width="100%">
-		<StandardDatepicker {label} {name} bind:value />
+		<StandardDatepicker bind:value />
 	</div>
 	<div style:width="100%">
-		<StandardTimePicker label="" name={name + '-time'} value={time} on:change={handleTimeChange} />
+		<StandardTimePicker name={name + '-time'} value={time} on:change={handleTimeChange} />
 	</div>
 </div>
 

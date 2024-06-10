@@ -86,7 +86,7 @@ export default class PlayersManager {
       data: {
         actor: user,
         action: 'manage',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           scout: {
             id: params.data.scoutId
@@ -171,7 +171,7 @@ export default class PlayersManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           scout: {
             id: player.scout.id
@@ -194,7 +194,7 @@ export default class PlayersManager {
       aliases?: string[]
       shirtId?: number
       role?: Role
-      isOpponent: boolean
+      isOpponent?: boolean
     },
     context?: Context
   }): Promise<Player> {
@@ -208,7 +208,7 @@ export default class PlayersManager {
       data: {
         actor: user,
         action: 'manage',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           scout: {
             id: player.scoutId
@@ -268,7 +268,7 @@ export default class PlayersManager {
       data: {
         actor: user,
         action: 'manage',
-        resource: 'Scout',
+        resource: 'scout',
         entities: {
           scout: {
             id: player.scoutId

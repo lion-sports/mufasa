@@ -10,7 +10,8 @@ export default class CreateGroupValidator {
     ]),
     team: schema.object().members({
       id: schema.number()
-    })
+    }),
+    cans: schema.object.optional().anyMembers()
   })
 
   public messages: CustomMessages = {}

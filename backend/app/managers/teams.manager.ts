@@ -101,7 +101,7 @@ export default class TeamsManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: {
             id: params.data.id
@@ -109,8 +109,7 @@ export default class TeamsManager {
         }
       },
       context: {
-        trx,
-        user
+        trx
       }
     })
 
@@ -154,7 +153,7 @@ export default class TeamsManager {
       data: {
         actor: user,
         action: 'update',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: {
             id: params.data.id
@@ -162,8 +161,7 @@ export default class TeamsManager {
         }
       },
       context: {
-        trx,
-        user
+        trx
       }
     })
 
@@ -197,7 +195,7 @@ export default class TeamsManager {
       data: {
         actor: user,
         action: 'update',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: {
             id: params.data.id
@@ -294,7 +292,7 @@ export default class TeamsManager {
       data: {
         actor: user,
         action: 'removeUser',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: {
             id: params.data.team.id
@@ -340,7 +338,7 @@ export default class TeamsManager {
       data: {
         actor: user,
         action: 'destroy',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: {
             id: params.data.id

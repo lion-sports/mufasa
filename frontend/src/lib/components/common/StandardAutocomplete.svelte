@@ -10,6 +10,7 @@
 	export let items: Item[],
 		width: string = '100%',
 		maxWidth: string = '100%',
+    height: string | undefined = "60px",
 		multiple: boolean = false,
 		placeholder: string | undefined = undefined,
 		values: Item[]
@@ -25,6 +26,6 @@
 	{placeholder}
 	{items}
   --autocomplete-min-height="44px"
-  height="60px"
+  {height}
 	on:change
 />

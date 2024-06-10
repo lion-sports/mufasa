@@ -2,7 +2,7 @@
 	import StandardTextfield from './StandardTextfield.svelte'
 
 	export let value: string = '',
-		name: string
+		name: string;
 </script>
 
 <StandardTextfield

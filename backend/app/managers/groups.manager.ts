@@ -73,7 +73,7 @@ export default class GroupsManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: params.data.team
         }
@@ -107,7 +107,7 @@ export default class GroupsManager {
       data: {
         actor: user,
         action: 'create',
-        resource: 'Group',
+        resource: 'group',
         entities: {
           team: params.data.team
         }
@@ -139,7 +139,7 @@ export default class GroupsManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Group',
+        resource: 'group',
         entities: {
           group: {
             id: params.data.id
@@ -173,7 +173,7 @@ export default class GroupsManager {
       data: {
         actor: user,
         action: 'update',
-        resource: 'Group',
+        resource: 'group',
         entities: {
           group: {
             id: params.data.id
@@ -217,7 +217,7 @@ export default class GroupsManager {
       data: {
         actor: user,
         action: 'destroy',
-        resource: 'Group',
+        resource: 'group',
         entities: {
           group: {
             id: params.data.id

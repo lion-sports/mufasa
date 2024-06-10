@@ -5,4 +5,4 @@
 		id: string
 </script>
 
-<Checkbox bind:value {id} backgroundColor="trasparent" {disabled} on:change />
+<Checkbox bind:value {id} {disabled} on:change />

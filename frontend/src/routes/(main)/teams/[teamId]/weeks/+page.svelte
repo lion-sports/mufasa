@@ -35,6 +35,9 @@
 		bind:visibleWeek
 		bind:visibleYear
     bind:reloadEvents
+    canCreate={data.groupedPermissions.event.create}
+    canUpdate={data.groupedPermissions.event.update}
+    canDestroy={data.groupedPermissions.event.destroy}
 		on:nextWeek={handleWeekChange}
 		on:previousWeek={handleWeekChange}
 		on:focusToday={handleWeekChange}

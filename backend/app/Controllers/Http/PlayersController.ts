@@ -44,7 +44,8 @@ export default class PlayersController {
         id: params.id,
         aliases: request.input('aliases'),
         shirtId: request.input('shirtId'),
-        role: request.input('role')
+        role: request.input('role'),
+        isOpponent: request.input('isOpponent')
       }
     })
   }
