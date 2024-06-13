@@ -162,7 +162,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'create',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           team: params.data.team
         }
@@ -230,7 +230,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'create',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           team: params.data.event.team
         }
@@ -382,7 +382,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'create',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           team: params.data.team
         }
@@ -459,7 +459,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'update',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           event: params.data 
         }
@@ -526,7 +526,7 @@ export default class EventsManager {
       data: {
         actor: user,
         action: 'destroy',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           event: params.data
         }
@@ -570,7 +570,7 @@ export default class EventsManager {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
-    return await Event.query({ client: trx })
+    let event = await Event.query({ client: trx })
       .where('events.id', params.data.id)
       .whereHas('team', teamBuilder => {
         teamBuilder.whereHas('teammateUsers', userBuilder => {
@@ -581,16 +581,35 @@ export default class EventsManager {
         builder.preload('teammate', builder => {
           builder
             .preload('user')
-            .preload('role')
+            .preload('group')
         })
-        // .join('teammates', 'convocations.teammateId', 'teammates.id')
-        // .join('users', 'teammates.userId', 'users.id')
-        // .orderByRaw(`COALESCE( NULLIF(teammates.alias,''),NULL), users.name`)
       })
       .preload('createdBy')
       .preload('frequency')
       .preload('team')
       .firstOrFail()
+
+    let canViewScout = await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'view',
+        resource: 'scout',
+        entities: {
+          team: {
+            id: event.teamId
+          }
+        }
+      },
+      context: {
+        trx
+      }
+    })
+
+    if(canViewScout) {
+      await event.load('scouts')
+    }
+
+    return event
   }
 
   private _getDaysBetweenDates(from: DateTime, to: DateTime): number {

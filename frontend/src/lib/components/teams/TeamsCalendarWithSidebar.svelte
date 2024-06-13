@@ -8,7 +8,8 @@
 
 	export let team: Team,
 		teammate: Teammate | undefined = undefined,
-		events: Event[] = []
+		events: Event[] = [],
+    canCreate: boolean = false
 
 	let selectedDate: Date | undefined,
 		selectedEvents: Event[] = []
@@ -25,7 +26,7 @@
 <MediaQuery let:mAndDown>
 	{#if team}
 		<div class="calendar-container">
-			<TeamsCalendar bind:selectedDate bind:selectedEvents bind:events {team} {teammate} />
+			<TeamsCalendar bind:selectedDate bind:selectedEvents bind:events {team} {teammate} {canCreate} />
 			{#if !mAndDown}
 				<div class="event-drawer" class:opened={!!selectedDate} class:closed={!selectedDate}>
 					<div class="title-container">
@@ -42,6 +43,7 @@
 							events={selectedEvents}
 							{team}
 							{teammate}
+              {canCreate}
 						/>
 					</div>
 				</div>
@@ -59,6 +61,7 @@
 				events={selectedEvents}
 				{team}
 				{teammate}
+        {canCreate}
 			/>
 		{/if}
 	{/if}

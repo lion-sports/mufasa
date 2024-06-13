@@ -1,14 +1,9 @@
 <script lang="ts">
-	import user from '$lib/stores/auth/user'
 	import { page } from '$app/stores'
 	import type { ComponentProps } from 'svelte'
 	import { goto } from '$app/navigation'
 	import EventService from '$lib/services/events/events.service'
-	import TeamsService from '$lib/services/teams/teams.service'
 	import event from '$lib/stores/events/eventShow'
-	import team from '$lib/stores/teams/teamsShow'
-	import teamCans from '$lib/stores/teams/teamsCans'
-	import CansService from '$lib/services/roles/cans.service'
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import StandardTabSwitcher from '$lib/components/common/StandardTabSwitcher.svelte'
@@ -25,14 +20,14 @@
 
 	options = []
 
-	if (CansService.can('Event', 'update'))
+	if (data.groupedPermissions.event.update)
 		options.push({
 			name: 'update',
 			title: 'Modifica',
 			icon: 'mdi-pencil'
 		})
 
-	if (CansService.can('Event', 'destroy'))
+	if (data.groupedPermissions.event.destroy)
 		options.push({
 			name: 'destroy',
 			title: 'Elimina',
@@ -45,13 +40,26 @@
 	tabs = [
 		{
 			name: 'general',
-			label: 'Generale'
+			label: 'Generale',
+      icon: 'mdi-text'
 		},
 		{
 			name: 'convocations',
-			label: 'Convocazioni'
+			label: 'Convocazioni',
+      icon: 'mdi-list-status'
 		}
 	]
+
+  if(data.groupedPermissions.scout.view) {
+    tabs = [
+      ...tabs,
+      {
+        name: 'scouts',
+        label: 'Scout',
+        icon: 'mdi-chart-timeline-variant'
+      }
+    ]
+  }
 
 	function handleOptionClick(ev: any) {
 		if (ev.detail?.element?.name == 'update')
@@ -82,16 +90,22 @@
 			goto(`/teams/${data.event.teamId}/events/${data.event.id}/general`, { replaceState: true })
 		} else if (selectedTab == 'convocations') {
 			goto(`/teams/${data.event.teamId}/events/${data.event.id}/convocations`, { replaceState: true })
-		}
+		} else if(selectedTab == 'scouts') {
+      goto(`/teams/${data.event.teamId}/events/${data.event.id}/scouts`, { replaceState: true })
+    }
 	}
 
 	$: if ($page.url.href.endsWith('general')) {
 		selectedTab = 'general'
 	} else if ($page.url.href.endsWith('convocations')) {
 		selectedTab = 'convocations'
-	}
+	} else if($page.url.href.endsWith('scouts')) {
+    selectedTab = 'scouts'
+  }
 
-	$: headerHidden = $page.url.pathname.endsWith('/edit')
+	$: headerHidden = $page.url.pathname.endsWith('/edit') ||
+    $page.url.pathname.endsWith('/scouts/create') ||
+    /\/scouts\/\d+\/studio$/.test($page.url.pathname)
 </script>
 
 {#if !!$event}

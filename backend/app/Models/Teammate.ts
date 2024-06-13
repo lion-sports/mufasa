@@ -1,9 +1,20 @@
 import { CamelCaseBaseModel } from './CamelCaseBaseModel'
 import { DateTime, } from 'luxon'
-import { column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
+import { column, belongsTo, hasMany, HasMany, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 import User from 'App/Models/User'
 import Team from 'App/Models/Team'
-import Role from 'App/Models/Role'
+import Group from 'App/Models/Group'
+import Shirt from './Shirt'
+
+export const VOLLEYBALL_ROLES = ['setter', 'outsideHitter', 'oppositeHitter', 'middleBlocker', 'libero'] as const
+export const BASKETBALL_ROLES = ['pointGuard', 'shootingGuard', 'smallForward', 'powerForward', 'center'] as const
+export const ROLES = [
+  ...VOLLEYBALL_ROLES,
+  ...BASKETBALL_ROLES
+]
+export type VolleyballRole = typeof VOLLEYBALL_ROLES[number]
+export type BasketballRole = typeof BASKETBALL_ROLES[number]
+export type Role = typeof ROLES[number]
 
 export default class Teammate extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -14,6 +25,12 @@ export default class Teammate extends CamelCaseBaseModel {
 
   @column()
   public alias: string
+
+  @column()
+  public defaultRole: Role
+
+  @column()
+  public availableRoles: Role[]
 
   @column()
   public userId: number
@@ -31,14 +48,18 @@ export default class Teammate extends CamelCaseBaseModel {
   })
   public team: BelongsTo<typeof Team>
 
-  @column()
-  public roleId: number
-
-  @belongsTo(() => Role, {
-    foreignKey: 'roleId'
+  @hasMany(() => Shirt, {
+    foreignKey: 'teammateId'
   })
-  public role: BelongsTo<typeof Role>
-  
+  declare shirts: HasMany<typeof Shirt>
+
+  @column()
+  public groupId: number
+
+  @belongsTo(() => Group, {
+    foreignKey: 'groupId'
+  })
+  public group: BelongsTo<typeof Group>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

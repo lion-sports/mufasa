@@ -63,7 +63,7 @@ export default class ConvocationsManager {
         data: {
           actor: user,
           action: 'convocate',
-          resource: 'Event',
+          resource: 'event',
           entities: {
             event: {
               id: params.data.event.id
@@ -114,7 +114,7 @@ export default class ConvocationsManager {
         .preload('teammate', builder => {
           builder
             .preload('user')
-            .preload('role')
+            .preload('group')
         })
 
       if (!params.context?.trx) await trx.commit()
@@ -135,7 +135,7 @@ export default class ConvocationsManager {
       data: {
         actor: user,
         action: 'convocate',
-        resource: 'Event',
+        resource: 'event',
         entities: {
           event: {
             id: params.data.event.id
@@ -201,7 +201,7 @@ export default class ConvocationsManager {
       data: {
         actor: user,
         action: 'confirm',
-        resource: 'Convocation',
+        resource: 'convocation',
         entities: {
           convocation: convocation
         }
@@ -250,7 +250,7 @@ export default class ConvocationsManager {
       data: {
         actor: user,
         action: 'deny',
-        resource: 'Convocation',
+        resource: 'convocation',
         entities: {
           convocation: convocation
         }

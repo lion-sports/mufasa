@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { belongsTo, BelongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import User from 'App/Models/User'
 import Team from 'App/Models/Team'
-import Role from 'App/Models/Role'
+import Group from 'App/Models/Group'
 
 export default class Invitation extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -34,12 +34,12 @@ export default class Invitation extends CamelCaseBaseModel {
   public team: BelongsTo<typeof Team>
 
   @column()
-  public roleId: number
+  public groupId: number
 
-  @belongsTo(() => Role, {
-    foreignKey: 'roleId'
+  @belongsTo(() => Group, {
+    foreignKey: 'groupId'
   })
-  public role: BelongsTo<typeof Role>
+  public group: BelongsTo<typeof Group>
 
   @column()
   public status: 'pending' | 'rejected' | 'accepted' | 'discarded'

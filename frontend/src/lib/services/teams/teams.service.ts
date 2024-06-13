@@ -1,17 +1,22 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { User } from '../auth/auth.service'
-import type { Role } from '../roles/roles.service'
+import type { Group } from '../groups/groups.service'
 import type { Invitation } from '../invitations/invitations.service'
+import type { Role } from '../scouts/scouts.service'
+import type { Shirt } from '../shirts/shirts.service'
 
 export type Teammate = {
 	id: number
-	roleId?: number
-	role?: Role
+	groupId?: number
+	group?: Group
 	teamId: number
 	uid?: string
 	userId: number
 	user: User
 	alias?: string
+  shirts: Shirt[]
+  defaultRole: Role
+  availableRoles: Role[]
 	createdAt: Date
 	updatedAt: Date
 }
@@ -24,7 +29,7 @@ export type Team = {
 	invitations?: Invitation[]
 	owner?: User
 	teammates: Teammate[]
-	roles?: Role[]
+	groups?: Group[]
 	createdAt: Date
 	updatedAt: Date
 }

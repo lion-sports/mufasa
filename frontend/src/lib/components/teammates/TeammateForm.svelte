@@ -2,60 +2,87 @@
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
 	import type { ComponentProps } from 'svelte'
 	import StandardAutocomplete from '../common/StandardAutocomplete.svelte'
-	import type { Role } from '$lib/services/roles/roles.service'
+	import type { Group } from '$lib/services/groups/groups.service'
+  import ScoutRoleAutocomplete from '$lib/components/scouts/ScoutRoleAutocomplete.svelte';
+	import type { Role } from '$lib/services/scouts/scouts.service'
 
 	export let alias: string | undefined,
-		role:
+		group:
 			| {
 					id: number
 					name: string
-			  }
+        }
 			| undefined,
-		teamRoles: Role[] = []
+		teamGroups: Group[] = [],
+    defaultRole: Role | undefined = undefined,
+    availableRoles: Role[] = []
 
-	let selectedRoles: NonNullable<ComponentProps<StandardAutocomplete>['values']> = []
+	let selectedGroups: NonNullable<ComponentProps<StandardAutocomplete>['values']> = []
 
-	$: selectedRoles = !!role
+	$: selectedGroups = !!group
 		? [
 				{
-					value: role.id.toString(),
-					label: role.name
+					value: group.id.toString(),
+					label: group.name
 				}
-		  ]
+      ]
 		: []
 
-	function handleRoleChange() {
-		if (selectedRoles.length > 0 && !!selectedRoles[0].label) {
-			role = {
-				id: parseInt(selectedRoles[0].value),
-				name: selectedRoles[0].label
+	function handleGroupChange() {
+		if (selectedGroups.length > 0 && !!selectedGroups[0].label) {
+			group = {
+				id: parseInt(selectedGroups[0].value),
+				name: selectedGroups[0].label
 			}
-		} else if (selectedRoles.length == 0) {
-			role = undefined
+		} else if (selectedGroups.length == 0) {
+			group = undefined
 		}
 	}
 
-	$: selectableRoles = teamRoles.map((role) => {
+	$: selectableGroups = teamGroups.map((group) => {
 		return {
-			value: role.id.toString(),
-			label: role.name
+			value: group.id.toString(),
+			label: group.name
 		}
 	})
+
+  let selectedDefaultRole: Role[] = []
+  $: selectedDefaultRole = !!defaultRole ? [defaultRole] : []
 </script>
 
-<div class="flex gap-4">
+<div class="flex flex-wrap gap-4">
 	<div>
 		<LabelAndTextfield label="Alias" name="alias" placeholder="Alias" bind:value={alias} />
 	</div>
 	<div>
-		<div>Ruolo</div>
+		<div>Gruppo</div>
 		<div class="mt-2">
 			<StandardAutocomplete
-				items={selectableRoles}
-				bind:values={selectedRoles}
-				on:change={handleRoleChange}
-				placeholder="Ruolo"
+				items={selectableGroups}
+				bind:values={selectedGroups}
+				on:change={handleGroupChange}
+				placeholder="Gruppo"
 			/>
 		</div>
 	</div>
+  <div>
+    <div>Ruolo di default</div>
+    <div class="mt-2">
+      <ScoutRoleAutocomplete
+        bind:values={selectedDefaultRole}
+        on:change={() => {
+          defaultRole = !!selectedDefaultRole && selectedDefaultRole.length > 0 ? selectedDefaultRole[0] : undefined
+        }}
+      ></ScoutRoleAutocomplete>
+    </div>
+  </div>
+  <div>
+    <div>Ruoli disponibili</div>
+    <div class="mt-2">
+      <ScoutRoleAutocomplete
+        bind:values={availableRoles}
+        multiple
+      ></ScoutRoleAutocomplete>
+    </div>
+  </div>
 </div>

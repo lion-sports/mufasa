@@ -7,14 +7,20 @@
 	import UserAvatar from '$lib/components/common/UserAvatar.svelte'
 	import StandardChip from '$lib/components/common/StandardChip.svelte'
 	import { Icon, CircularLoader, MediaQuery, HorizontalStackedProgress } from '@likable-hair/svelte'
-	import CansService from '$lib/services/roles/cans.service'
 	import { createEventDispatcher, type ComponentProps } from 'svelte'
 	import ConvocationsService from '$lib/services/convocations/convocations.service'
 	import Divider from '$lib/components/common/Divider.svelte'
 	import StandardDialog from '$lib/components/common/StandardDialog.svelte'
-	import RoleMultipleSelectorChip from '$lib/components/roles/RoleMultipleSelectorChip.svelte'
-	import type { Role } from '$lib/services/roles/roles.service'
+	import GroupMultipleSelectorChip from '$lib/components/groups/GroupMultipleSelectorChip.svelte'
+	import type { Group } from '$lib/services/groups/groups.service'
 	import OptionSelector from '$lib/components/common/OptionSelector.svelte'
+
+  export let convocations: Convocation[] = [],
+		team: { id: number } | undefined,
+		groups: Group[] = [],
+    canConfirm: boolean = false,
+    canConvocate: boolean = false,
+    canDeny: boolean = false
 
 	let dispatch = createEventDispatcher<{
 		confirm: {
@@ -35,7 +41,7 @@
 	$: if (!!editingConvocation) {
 		editConvocationsOptions = []
 		if (
-			CansService.can('Convocation', 'confirm') ||
+			canConfirm ||
 			editingConvocation.teammate.userId == $user?.id
 		) {
 			editConvocationsOptions.push({
@@ -46,7 +52,7 @@
 		}
 
 		if (
-			CansService.can('Convocation', 'confirm') ||
+			canDeny ||
 			editingConvocation.teammate.userId == $user?.id
 		) {
 			editConvocationsOptions.push({
@@ -56,7 +62,7 @@
 			})
 		}
 
-		if (CansService.can('Event', 'convocate')) {
+		if (canConvocate) {
 			editConvocationsOptions.push({
 				label: 'Elimina',
 				name: 'delete',
@@ -76,10 +82,6 @@
 			convocationDetailDialogOpen = false
 		}
 	}
-
-	export let convocations: Convocation[] = [],
-		team: { id: number } | undefined,
-		roles: Role[] = []
 
 	function translateConfirmationStatus(confirmationStatus: string | undefined) {
 		if (!confirmationStatus) return 'Non specificato'
@@ -109,7 +111,6 @@
 
 	function denyConvocation(convocation: Convocation) {
 		loading = true
-		console.log(convocation, 'ConvocationList')
 
 		let service = new ConvocationsService({ fetch })
 		service
@@ -154,12 +155,12 @@
 		convocationDetailDialogOpen = true
 	}
 
-	let selectedRoles: ComponentProps<RoleMultipleSelectorChip>['value'] = []
+	let selectedGroups: ComponentProps<GroupMultipleSelectorChip>['value'] = []
 
 	$: filteredConvocations = convocations.filter((c) => {
-		if (!selectedRoles || selectedRoles.length == 0) return true
-		else if (!!c.teammate.roleId)
-			return selectedRoles.map((chip) => chip.value).includes(c.teammate.roleId?.toString())
+		if (!selectedGroups || selectedGroups.length == 0) return true
+		else if (!!c.teammate.groupId)
+			return selectedGroups.map((chip) => chip.value).includes(c.teammate.groupId?.toString())
 		else return false
 	})
 </script>
@@ -191,7 +192,7 @@
 		<div>
 			{#if !!team}
 				<div style:margin-top="10px" style:margin-bottom="20px">
-					<RoleMultipleSelectorChip {roles} bind:value={selectedRoles} onlyConvocable={true} />
+					<GroupMultipleSelectorChip groups={groups} bind:value={selectedGroups} onlyConvocable={true} />
 				</div>
 			{/if}
 
@@ -207,8 +208,8 @@
 											convocation.teammate.user.firstname +
 												' ' +
 												convocation.teammate.user.lastname}
-										description={!!convocation.teammate.role
-											? convocation.teammate.role.name
+										description={!!convocation.teammate.group
+											? convocation.teammate.group.name
 											: undefined}
 									/>
 								</div>
@@ -231,20 +232,20 @@
 									</StandardChip>
 								</div>
 							</div>
-							{#if convocation.teammate.userId == $user?.id || CansService.can('Convocation', 'confirm') || CansService.can('Convocation', 'deny')}
+							{#if convocation.teammate.userId == $user?.id || canConfirm || canDeny}
 								<div class="confirm-button-container">
 									{#if !loading}
-										{#if CansService.can('Convocation', 'confirm') || convocation.teammate.userId == $user?.id}
+										{#if canConfirm || convocation.teammate.userId == $user?.id}
 											<Icon
 												name="mdi-check"
 												click
 												on:click={() => confirmConvocation(convocation)}
 											/>
 										{/if}
-										{#if CansService.can('Convocation', 'deny') || convocation.teammate.userId == $user?.id}
+										{#if canDeny || convocation.teammate.userId == $user?.id}
 											<Icon name="mdi-close" click on:click={() => denyConvocation(convocation)} />
 										{/if}
-										{#if CansService.can('Event', 'convocate')}
+										{#if canConvocate}
 											<Icon name="mdi-delete" click on:click={() => unConvocate(convocation)} />
 										{/if}
 									{:else}
@@ -266,8 +267,8 @@
 								src={convocation.teammate.user.avatarUrl}
 								username={convocation.teammate.alias ||
 									convocation.teammate.user.firstname + ' ' + convocation.teammate.user.lastname}
-								description={!!convocation.teammate.role
-									? convocation.teammate.role.name
+								description={!!convocation.teammate.group
+									? convocation.teammate.group.name
 									: undefined}
 							/>
 							<div class="status-container">

@@ -7,7 +7,7 @@
 
 	export let data: PageData
 
-	let visibleWeek: number, visibleYear: number
+	let visibleWeek: number, visibleYear: number, reloadEvents: boolean
 
 	onMount(() => {
 		let visibleYearCached = localStorage.getItem('teams:weeks:visibleYear')
@@ -17,6 +17,8 @@
 			visibleYear = parseInt(visibleYearCached)
 		if (visibleWeekCached !== undefined && visibleWeekCached !== null)
 			visibleWeek = parseInt(visibleWeekCached)
+
+    reloadEvents = true
 	})
 
 	function handleWeekChange(e: CustomEvent<{ visibleYear: number; visibleWeek: number }>) {
@@ -32,6 +34,10 @@
 		events={data.events}
 		bind:visibleWeek
 		bind:visibleYear
+    bind:reloadEvents
+    canCreate={data.groupedPermissions.event.create}
+    canUpdate={data.groupedPermissions.event.update}
+    canDestroy={data.groupedPermissions.event.destroy}
 		on:nextWeek={handleWeekChange}
 		on:previousWeek={handleWeekChange}
 		on:focusToday={handleWeekChange}

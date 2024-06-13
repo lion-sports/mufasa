@@ -1,10 +1,8 @@
-import ConvocationModel from 'App/Models/Convocation';
-import TeammateModel from 'App/Models/Teammate';
+import Convocation from 'App/Models/Convocation';
+import Teammate from 'App/Models/Teammate';
 import { DateTime } from 'luxon';
-import UserModel from 'App/Models/User'
-import type User from 'App/Models/User'
-import type Team from 'App/Models/Team'
-import type Teammate from 'App/Models/Teammate'
+import User from 'App/Models/User'
+import Team from 'App/Models/Team'
 import { test } from '@japa/runner'
 import { TeamFactory, UserFactory } from 'Database/factories'
 import EventModel from 'App/Models/Event';
@@ -18,12 +16,12 @@ test.group('Events', (group) => {
   group.setup(async () => {
     team = await TeamFactory.with('owner').with('teammateUsers').create()
 
-    teammateToConvocate = await TeammateModel.create({
+    teammateToConvocate = await Teammate.create({
       userId: (await UserFactory.create()).id,
       teamId: team.id
     })
 
-    loggedInUser = await UserModel.query().whereHas('teams', builder => {
+    loggedInUser = await User.query().whereHas('teams', builder => {
       builder.where('teams.id', team.id)
     }).firstOrFail()
 
@@ -98,7 +96,7 @@ test.group('Events', (group) => {
     response.assertAgainstApiSpec()
     assert.equal(event.name, 'Evento con convocazioni', 'should create the right event')
 
-    const convocation = await ConvocationModel.query()
+    const convocation = await Convocation.query()
       .where('eventId', event.id)
       .where('teammateId', teammateToConvocate.id)
       .first()
@@ -163,7 +161,7 @@ test.group('Events', (group) => {
   test('not get a list of other team events', async ({ client, assert }) => {
     let externalTeam = await TeamFactory.with('owner').with('teammateUsers').create()
 
-    let externalLoggedInUser = await UserModel.query().whereHas('teams', builder => {
+    let externalLoggedInUser = await User.query().whereHas('teams', builder => {
       builder.where('teams.id', externalTeam.id)
     }).firstOrFail()
 

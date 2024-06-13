@@ -15,7 +15,8 @@
 		selectedEvents: Event[] = [],
 		visibleMonth: number = DateTime.now().get('month') - 1,
 		visibleYear: number = DateTime.now().get('year'),
-		events: Event[] = []
+		events: Event[] = [],
+    canCreate: boolean = false
 
 	function loadEvents() {
 		let service = new EventsService({ fetch })
@@ -65,6 +66,7 @@
 	bind:selectedEvents
 	bind:visibleMonth
 	bind:visibleYear
+  bind:canCreate
 	on:nextMonth={loadEvents}
 	on:previousMonth={loadEvents}
 />

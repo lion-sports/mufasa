@@ -1,11 +1,8 @@
 <script lang="ts">
-	import user from '$lib/stores/auth/user'
 	import { page } from '$app/stores'
 	import type { ComponentProps } from 'svelte'
 	import { goto } from '$app/navigation'
 	import team from '$lib/stores/teams/teamsShow'
-	import teamCans from '$lib/stores/teams/teamsCans'
-	import CansService from '$lib/services/roles/cans.service'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import StandardTabSwitcher from '$lib/components/common/StandardTabSwitcher.svelte'
 	import OptionMenu from '$lib/components/common/OptionMenu.svelte'
@@ -16,16 +13,7 @@
 	import { slide } from 'svelte/transition'
 
 	export let data: LayoutData
-	$team = data.team
-
-	let currentTeammates = $team.teammates.find((teammate) => {
-		return !!$user && teammate.userId == $user?.id
-	})
-
-	$teamCans = {
-		cans: currentTeammates?.role?.cans,
-		owner: !!$user && $team.ownerId == $user?.id
-	}
+	$: $team = data.team
 
 	let selectedTab: string = 'general',
 		options: ComponentProps<OptionMenu>['options'] = [],
@@ -33,28 +21,28 @@
 
 	options = []
 
-	if (CansService.can('Team', 'update'))
+	if (data.groupedPermissions.team.update)
 		options.push({
 			name: 'edit',
 			title: 'Modifica',
 			icon: 'mdi-pencil'
 		})
 
-	if (CansService.can('Team', 'invite'))
+	if (data.groupedPermissions.team.invite)
 		options.push({
 			name: 'inviteUser',
 			title: 'Invita utente',
 			icon: 'mdi-account-plus'
 		})
 
-	if (CansService.can('Event', 'create'))
+	if (data.groupedPermissions.event.create)
 		options.push({
 			name: 'addEvent',
 			title: 'Aggiungi evento',
 			icon: 'mdi-calendar-plus'
 		})
 
-	if (CansService.can('Team', 'destroy'))
+	if (data.groupedPermissions.team.destroy)
 		options.push({
 			name: 'delete',
 			title: 'Elimina',
@@ -64,7 +52,7 @@
 			}
 		})
 
-	if (!$teamCans.owner)
+	if (!data.isOwner)
 		options.push({
 			name: 'exit',
 			title: 'Esci dal team',
@@ -77,34 +65,38 @@
 	tabs = [
 		{
 			name: 'general',
-			label: 'Generale'
+			label: 'Generale',
+      icon: 'mdi-text'
 		},
 		{
 			name: 'teammates',
-			label: 'Partecipanti'
+			label: 'Partecipanti',
+      icon: 'mdi-account'
 		}
 	]
 
-	if (CansService.can('Role', 'update'))
+	if (data.groupedPermissions.group.update)
 		tabs.push({
-			name: 'roles',
-			label: 'Ruoli'
+			name: 'groups',
+			label: 'Gruppi',
+      icon: 'mdi-account-multiple'
 		})
 
 	tabs.push({
 		name: 'calendar',
-		label: 'Calendario'
+		label: 'Calendario',
+    icon: 'mdi-calendar'
 	})
 
 	tabs.push({
 		name: 'weeks',
-		label: 'Settimane'
+		label: 'Settimane',
+    icon: 'mdi-clock'
 	})
 
 	function handleOptionClick(
 		event: CustomEvent<{ element: NonNullable<ComponentProps<OptionMenu>['options']>[0] }>
 	) {
-		console.log(event.detail)
 		if (event.detail?.element?.name == 'edit' && !!$team) {
 			goto('/teams/' + $team.id + '/edit')
 		} else if (event.detail?.element?.name == 'inviteUser' && !!$team) {
@@ -121,8 +113,8 @@
 			goto(`/teams/${$team?.id}/general`, { replaceState: true })
 		} else if (selectedTab == 'teammates') {
 			goto(`/teams/${$team?.id}/teammates`, { replaceState: true })
-		} else if (selectedTab == 'roles') {
-			goto(`/teams/${$team?.id}/roles`, { replaceState: true })
+		} else if (selectedTab == 'groups') {
+			goto(`/teams/${$team?.id}/groups`, { replaceState: true })
 		} else if (selectedTab == 'calendar') {
 			goto(`/teams/${$team?.id}/calendar`, { replaceState: true })
 		} else if (selectedTab == 'weeks') {
@@ -138,8 +130,8 @@
 		$page.url.href.includes('teammates')
 	) {
 		selectedTab = 'teammates'
-	} else if ($page.url.href.endsWith('roles')) {
-		selectedTab = 'roles'
+	} else if ($page.url.href.endsWith('groups')) {
+		selectedTab = 'groups'
 	} else if ($page.url.href.endsWith('calendar')) {
 		selectedTab = 'calendar'
 	} else if ($page.url.href.endsWith('weeks')) {
@@ -162,10 +154,12 @@
 	}
 
 	$: headerHidden =
-		$page.url.pathname.endsWith('/roles/new') ||
-		/\/roles\/\d+\/edit$/.test($page.url.pathname) ||
+		$page.url.pathname.endsWith('/groups/new') ||
+		/\/groups\/\d+\/edit$/.test($page.url.pathname) ||
 		$page.url.pathname.endsWith('/events/new') ||
-		/\/events\/\d+\//.test($page.url.pathname)
+		/\/events\/\d+\//.test($page.url.pathname) ||
+    /\/teammates\/\d+\/edit$/.test($page.url.pathname) ||
+    /\/teammates\/\d+\/shirts.*$/.test($page.url.pathname)
 </script>
 
 {#if !!$team}

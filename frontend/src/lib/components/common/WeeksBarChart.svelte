@@ -36,23 +36,6 @@
 		lineWidth: number = 1
 
 	$: gridColor = 'rgb(' + (background || '200, 200, 200') + ', .3)'
-
-	function formatter(value: any, index: any, values: any) {
-		if (value > 0) {
-			value = value.toString()
-			value = value.split(/(?=(?:...)*$)/)
-			value = value.join(',')
-			return value
-		} else {
-			value = ''
-			return value
-		}
-	}
-
-  function displayDatalabels(context: any) {
-    return false
-    return context.dataset.data[context.dataIndex] > 1 // or >= 1 or ...
-  }
 </script>
 
 <Bar
@@ -65,9 +48,6 @@
 			legend: {
 				display: showLegend
 			},
-			datalabels: {
-				display: displayDatalabels
-			}
 		},
 		interaction: {
 			intersect: false

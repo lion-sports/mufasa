@@ -31,8 +31,8 @@
 			}
 		},
 		{
-			value: 'role',
-			label: 'Ruolo',
+			value: 'group',
+			label: 'Gruppo',
 			type: {
 				key: 'custom'
 			}
@@ -70,9 +70,9 @@
 				{item.status}
 			{:else if header.value == 'invitedBy'}
 				{item.invitedBy.email}
-			{:else if header.value == 'role'}
-				{#if !!item.role?.name}
-					{item.role?.name}
+			{:else if header.value == 'group'}
+				{#if !!item.group?.name}
+					{item.group?.name}
 				{:else}
 					Nessuno
 				{/if}

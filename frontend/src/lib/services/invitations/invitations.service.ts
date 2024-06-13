@@ -2,7 +2,7 @@ import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import { browser } from '$app/environment'
 import type { User } from '../auth/auth.service'
 import type { Team } from '$lib/services/teams/teams.service'
-import type { Role } from '$lib/services/roles/roles.service'
+import type { Group } from '$lib/services/groups/groups.service'
 
 export type Invitation = {
 	id: number
@@ -10,7 +10,7 @@ export type Invitation = {
 	invitedUser?: User
 	invitedEmail: string
 	team: Team
-	role?: Role
+	group?: Group
 }
 
 export default class InvitationsService extends FetchBasedService {
@@ -23,7 +23,7 @@ export default class InvitationsService extends FetchBasedService {
 	public async inviteUser(params: {
 		team: { id: number }
 		user: { email: string }
-		role?: { id: number }
+		group?: { id: number }
 	}): Promise<Invitation> {
 		if (!browser) throw new Error('only available in browser')
 

@@ -12,7 +12,8 @@
 		selectedEvents: Event[] = [],
 		events: Event[],
 		visibleMonth: number = DateTime.now().get('month') - 1,
-		visibleYear: number = DateTime.now().get('year')
+		visibleYear: number = DateTime.now().get('year'),
+    canCreate: boolean = false
 
 	import EventsCalendar from '$lib/components/events/EventsCalendar.svelte'
 </script>
@@ -26,6 +27,7 @@
 		bind:events
 		bind:visibleMonth
 		bind:visibleYear
+    bind:canCreate
 		on:nextMonth
 		on:previousMonth
 	/>

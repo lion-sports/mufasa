@@ -1,5 +1,6 @@
 import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { SPORTS } from 'App/Models/Scout'
 
 export default class TeamValidator {
   constructor(protected ctx?: HttpContextContract) {}
@@ -11,7 +12,8 @@ export default class TeamValidator {
     notes: schema.string.nullableAndOptional(),
     owner: schema.object().members({
       id: schema.number()
-    })
+    }),
+    sport: schema.enum.nullableAndOptional(SPORTS)
   })
 
   public messages: CustomMessages = {}

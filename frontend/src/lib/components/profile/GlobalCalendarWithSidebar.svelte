@@ -8,7 +8,8 @@
 	import EventsList from '$lib/components/events/EventsList.svelte'
 	import GlobalCalendar from './GlobalCalendar.svelte'
 
-	export let events: Event[] = []
+	export let events: Event[] = [],
+    canCreate: boolean = false
 
 	let selectedDate: Date | undefined,
 		selectedEvents: Event[] = []
@@ -24,7 +25,7 @@
 
 <MediaQuery let:mAndDown>
 	<div class="calendar-container">
-		<GlobalCalendar bind:selectedDate bind:selectedEvents bind:events />
+		<GlobalCalendar bind:selectedDate bind:selectedEvents bind:events bind:canCreate />
 		{#if !mAndDown}
 			<div class="event-drawer" class:opened={!!selectedDate} class:closed={!selectedDate}>
 				<div class="title-container">
@@ -40,6 +41,7 @@
 						precompiledDate={selectedDate ? DateTime.fromJSDate(selectedDate) : undefined}
 						events={selectedEvents}
 						showTeamName
+            bind:canCreate
 					/>
 				</div>
 			</div>

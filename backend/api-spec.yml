@@ -84,7 +84,7 @@ components:
         team:
           nullable: true
           $ref: "#/components/schemas/Team"
-        roleId:
+        groupId:
           type: integer
           nullable: true
         status:
@@ -151,7 +151,7 @@ components:
         updatedAt: 
           type: string
           format: date-time
-    Role:
+    Group:
       type: object
       properties:
         id:
@@ -201,7 +201,7 @@ components:
       properties:
         id:
           type: integer
-        roleId:
+        groupId:
           type: integer
         teamId:
           type: integer
@@ -213,6 +213,138 @@ components:
         alias:
           type: string
           nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+    Shirt:
+      type: object
+      properties:
+        id:
+          type: integer
+        teammateId:
+          type: integer
+        number:
+          type: integer
+        name:
+          type: string
+          nullable: true
+        primaryColor:
+          type: string
+          nullable: true
+        secondaryColor:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+    Scout:
+      type: object
+      properties:
+        id:
+          type: integer
+        sport:
+          type: string
+          enum:
+            - volleyball
+            - basketball
+        name:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        eventId:
+          type: integer
+        scoutInfo:
+          nullable: true
+          type: object
+          properties:
+            general:
+              type: object
+              properties:
+                opponent: 
+                  type: object
+                  nullable: true
+                  properties:
+                    name: 
+                      type: string
+                      nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+    ScoringSystem:
+      type: object
+      properties:
+        id:
+          type: integer
+        sport:
+          type: string
+          enum:
+            - volleyball
+            - basketball
+        name:
+          type: string
+        public:
+          type: boolean
+        createdByUserId:
+          type: number
+        createdForTeamId:
+          type: integer
+          nullable: true
+        config:
+          type: object
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+    Player:
+      type: object
+      properties:
+        id:
+          type: integer
+        convocationId:
+          type: number
+          nullable: true
+        scoutId:
+          type: number
+          nullable: false
+        teammateId:
+          type: number
+          nullable: true
+        aliases:
+          type: array
+          nullable: true
+          items:
+            type: string
+            nullable: true
+        shirtId:
+          type: number
+          nullable: true
+        shirtNumber:
+          type: number
+          nullable: true
+        shirtPrimaryColor:
+          type: string
+          nullable: true
+        shirtSecondaryColor:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+        eventId:
+          type: integer
         createdAt:
           type: string
           format: date-time
@@ -505,9 +637,9 @@ paths:
           properties:
             id:
               type: integer
-      - name: role
+      - name: group
         in: query
-        description: The role the user would be
+        description: The group the user would be
         required: false
         schema:
           type: object
@@ -906,22 +1038,21 @@ paths:
       responses:
         '200':
           description: No response.
-  /roles:
+  /shirts:
     post:
-      summary: Create a new role.
+      summary: Create a new shirt.
       responses:
         '200':
-          description: The new role.
+          description: The new shirt.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Role"
-  /teams/{teamId}/roles:
+                $ref: "#/components/schemas/Shirt"
     get:
-      summary: Returns a list of roles associated to the team.
+      summary: Returns a list of shirts associated to the teammates that the user can view.
       responses:
         '200':
-          description: The roles associated to the teams.
+          description: The shirts visible to my user.
           content:
             application/json:
               schema: 
@@ -932,26 +1063,227 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Role"
-  /roles/{teamId}:
+                      $ref: "#/components/schemas/Shirt"
+  /shirts/{shirtId}:
     get:
-      summary: Returns a certain role.
+      summary: Returns a certain shirt.
       responses:
         '200':
-          description: The role.
+          description: The shirt.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Role"
+                $ref: "#/components/schemas/Shirt"
     put:
-      summary: Update a certain role.
+      summary: Update a shirt.
       responses:
         '200':
-          description: The updated role.
+          description: The shirt updated.
           content:
             application/json:
               schema: 
-                $ref: "#/components/schemas/Role"
+                $ref: "#/components/schemas/Shirt"
+    delete:
+      summary: delete a shirt.
+      responses:
+        '200':
+          description: No response.
+  /players:
+    post:
+      summary: Create a new player.
+      responses:
+        '200':
+          description: The new player.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+    get:
+      summary: Returns a list of players associated to the scouts that the user can view.
+      responses:
+        '200':
+          description: The players visible to my user.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Player"
+  /players/{playerId}:
+    get:
+      summary: Returns a certain player.
+      responses:
+        '200':
+          description: The player.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+    put:
+      summary: Update a player.
+      responses:
+        '200':
+          description: The player updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Player"
+    delete:
+      summary: delete a player.
+      responses:
+        '200':
+          description: No response.
+  /scouts:
+    post:
+      summary: Create a new scout.
+      responses:
+        '200':
+          description: The new scout.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scout"
+    get:
+      summary: Returns a list of scouts associated to the events that the user can view.
+      responses:
+        '200':
+          description: The scouts visible to my user.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Scout"
+  /scouts/{scoutId}:
+    get:
+      summary: Returns a certain scout.
+      responses:
+        '200':
+          description: The scout.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scout"
+    put:
+      summary: Update a scout.
+      responses:
+        '200':
+          description: The scout updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Scout"
+    delete:
+      summary: delete a scout.
+      responses:
+        '200':
+          description: No response.
+  /scoringSystems:
+    post:
+      summary: Create a new scoring system.
+      responses:
+        '200':
+          description: The new scoring system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoringSystem"
+    get:
+      summary: Returns a list of scoring systems that the user can view.
+      responses:
+        '200':
+          description: The scoring systems visible to my user.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ScoringSystem"
+  /scoringSystems/{scoringSystemId}:
+    get:
+      summary: Returns a certain scoring system.
+      responses:
+        '200':
+          description: The scoring system.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoringSystem"
+    put:
+      summary: Update a scoring system.
+      responses:
+        '200':
+          description: The scoring system updated.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ScoringSystem"
+    delete:
+      summary: delete a scoring system.
+      responses:
+        '200':
+          description: No response.
+  /groups:
+    post:
+      summary: Create a new group.
+      responses:
+        '200':
+          description: The new group.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+  /teams/{teamId}/groups:
+    get:
+      summary: Returns a list of groups associated to the team.
+      responses:
+        '200':
+          description: The groups associated to the teams.
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Group"
+  /groups/{teamId}:
+    get:
+      summary: Returns a certain group.
+      responses:
+        '200':
+          description: The group.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+    put:
+      summary: Update a certain group.
+      responses:
+        '200':
+          description: The updated group.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Group"
   /convocations/{convocationId}/confirm:
     post:
       summary: Confirm a convocation.

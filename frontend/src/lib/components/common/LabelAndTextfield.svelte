@@ -9,7 +9,7 @@
 	} = {}
 	export { clazz as class }
 
-	export let value: string | undefined = undefined,
+	export let value: string | number | undefined = undefined,
 		label: string | undefined = undefined,
 		placeholder: string = '',
 		name: string,

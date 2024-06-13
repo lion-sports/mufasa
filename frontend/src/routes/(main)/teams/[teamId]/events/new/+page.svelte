@@ -1,12 +1,8 @@
 <script lang="ts">
 	import type { Event } from '$lib/components/events/EventForm.svelte'
-	import user from '$lib/stores/auth/user'
 	import { page } from '$app/stores'
 	import EventService from '$lib/services/events/events.service'
-	import CansService from '$lib/services/roles/cans.service'
-	import TeamsService from '$lib/services/teams/teams.service'
 	import team from '$lib/stores/teams/teamsShow'
-	import teamCans from '$lib/stores/teams/teamsCans'
 	import { onMount } from 'svelte'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import ConfirmOrCancelButtons from '$lib/components/common/ConfirmOrCancelButtons.svelte'
@@ -21,20 +17,6 @@
 		convocations: { [key: number]: boolean } = {}
 
 	onMount(async () => {
-		if (!$team) {
-			let service = new TeamsService({ fetch })
-			$team = await service.show({ id: parseInt($page.params.teamId) })
-
-			let currentTeammates = $team.teammates.find((teammate) => {
-				return !!$user && teammate.userId == $user.id
-			})
-
-			$teamCans = {
-				cans: currentTeammates?.role?.cans,
-				owner: !!$user && $team.ownerId == $user.id
-			}
-		}
-
 		let startParams: string | null = $page.url.searchParams.get('start')
 		if (!!startParams) {
 			event = {
@@ -88,27 +70,17 @@
 	function handleCancel() {
 		window.history.back()
 	}
-
-	let authorized: boolean = false
-	$: if (!!$teamCans) {
-		authorized = CansService.can('Event', 'create')
-	} else {
-		authorized = false
-	}
 </script>
 
-{#if authorized}
-	<PageTitle title="Nuovo evento" prependVisible={true} />
 
-	<div style:margin-top="20px">
-		<EventForm bind:event teammates={$team?.teammates} bind:convocations roles={$team?.roles} />
-		<ConfirmOrCancelButtons
-			confirmDisable={confirmDisabled}
-			{loading}
-			on:confirm-click={handleSubmit}
-			on:cancel-click={handleCancel}
-		/>
-	</div>
-{:else}
-	<div>Non puoi accedere a questa pagina :(</div>
-{/if}
+<PageTitle title="Nuovo evento" prependVisible={true} />
+
+<div style:margin-top="20px">
+  <EventForm bind:event teammates={$team?.teammates} bind:convocations groups={$team?.groups} />
+  <ConfirmOrCancelButtons
+    confirmDisable={confirmDisabled}
+    {loading}
+    on:confirm-click={handleSubmit}
+    on:cancel-click={handleCancel}
+  />
+</div>

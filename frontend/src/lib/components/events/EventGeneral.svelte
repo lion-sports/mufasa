@@ -9,7 +9,7 @@
 	<tr class="field-row">
 		<td class="field-name">Descrizione</td>
 		<td>
-			<div style:white-space="pre-wrap">{event.description}</div>
+			<div style:white-space="pre-wrap">{event.description || ''}</div>
 		</td>
 	</tr>
 	<tr class="field-row">

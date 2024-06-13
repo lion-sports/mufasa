@@ -16,8 +16,9 @@ export default class TeamsController {
     const manager = new TeamsManager()
     return await manager.create({
       data: {
-        name: request.body().name,
-        notes: request.body().notes
+        name: request.input('name'),
+        notes: request.input('notes'),
+        sport: request.input('sport')
       }
     })
   }
@@ -37,7 +38,8 @@ export default class TeamsController {
       data: {
         id: params.id,
         name: request.input('name'),
-        notes: request.input('notes')
+        notes: request.input('notes'),
+        sport: request.input('sport')
       }
     })
   }

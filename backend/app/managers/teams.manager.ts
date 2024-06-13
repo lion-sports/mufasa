@@ -8,69 +8,7 @@ import Teammate from 'App/Models/Teammate';
 import { ModelObject } from '@ioc:Adonis/Lucid/Orm';
 import AuthorizationManager from './authorization.manager';
 import { Context, withTransaction, withUser } from './base.manager';
-
-export type CreateParams = {
-  data: {
-    name: string,
-    notes: string,
-  },
-  context?: Context
-}
-
-export type UpdateParams = {
-  data: {
-    id: number,
-    name?: string,
-    notes?: string,
-  },
-  context?: Context
-}
-
-export type UpdatePreferenceParams = {
-  data: {
-    id: number,
-    preference: string,
-    value: any,
-  },
-  context?: Context
-}
-
-export type AddUserParams = {
-  data: {
-    team: {
-      id: number
-    }
-    user: {
-      id: number
-    },
-    role?: {
-      id: number
-    }
-  },
-  context?: Context
-}
-
-export type ListParams = {
-  data: {
-    page?: number,
-    perPage?: number
-  },
-  context?: Context
-}
-
-export type GetParams = {
-  data: {
-    id: number
-  },
-  context?: Context
-}
-
-export type DestroyParams = {
-  data: {
-    id: number
-  },
-  context?: Context
-}
+import { Sport } from 'App/Models/Scout';
 
 export default class TeamsManager {
   constructor() {
@@ -78,7 +16,13 @@ export default class TeamsManager {
 
   @withTransaction
   @withUser
-  public async list(params: ListParams): Promise<{ data: ModelObject[], meta: any }> {
+  public async list(params: {
+    data: {
+      page?: number,
+      perPage?: number
+    },
+    context?: Context
+  }): Promise<{ data: ModelObject[], meta: any }> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -95,7 +39,7 @@ export default class TeamsManager {
       .preload('teammates', (teammateQuery) => {
         teammateQuery.preload('user')
       })
-      .preload('roles')
+      .preload('groups')
       .paginate(params.data.page, params.data.perPage)
 
     const results = await query
@@ -104,7 +48,14 @@ export default class TeamsManager {
 
   @withTransaction
   @withUser
-  public async create(params: CreateParams): Promise<Team> {
+  public async create(params: {
+    data: {
+      name: string,
+      notes?: string | null,
+      sport?: Sport
+    },
+    context?: Context
+  }): Promise<Team> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -137,7 +88,12 @@ export default class TeamsManager {
 
   @withTransaction
   @withUser
-  public async get(params: GetParams): Promise<ModelObject> {
+  public async get(params: {
+    data: {
+      id: number
+    },
+    context?: Context
+  }): Promise<ModelObject> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -145,48 +101,7 @@ export default class TeamsManager {
       data: {
         actor: user,
         action: 'view',
-        resource: 'Team',
-        entities: {
-          team: {
-            id: params.data.id
-          }
-        }
-      }
-    })
-
-    return await Team
-      .query({
-        client: trx
-      })
-      .preload('teammates', (teammateQuery) => {
-        teammateQuery.preload('user').preload('role')
-      })
-      .preload('owner')
-      .preload('roles', (rolesBuilder) => {
-        rolesBuilder.orderBy('roles.createdAt')
-      })
-      .preload('invitations', (invitationBuilder) => {
-        invitationBuilder
-          .where('status', 'pending')
-          .preload('invitedBy')
-          .preload('invite')
-          .preload('role')
-      })
-      .where('id', params.data.id)
-      .firstOrFail()
-  }
-
-  @withTransaction
-  @withUser
-  public async update(params: UpdateParams): Promise<Team> {
-    const trx = params.context?.trx as TransactionClientContract
-    const user = params.context?.user as User 
-
-    await AuthorizationManager.canOrFail({
-      data: {
-        actor: user,
-        action: 'update',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: {
             id: params.data.id
@@ -198,7 +113,59 @@ export default class TeamsManager {
       }
     })
 
-    await validator.validate({
+    return await Team
+      .query({
+        client: trx
+      })
+      .preload('teammates', (teammateQuery) => {
+        teammateQuery.preload('user').preload('group')
+      })
+      .preload('owner')
+      .preload('groups', (groupsBuilder) => {
+        groupsBuilder.orderBy('groups.createdAt')
+      })
+      .preload('invitations', (invitationBuilder) => {
+        invitationBuilder
+          .where('status', 'pending')
+          .preload('invitedBy')
+          .preload('invite')
+          .preload('group')
+      })
+      .where('id', params.data.id)
+      .firstOrFail()
+  }
+
+  @withTransaction
+  @withUser
+  public async update(params: {
+    data: {
+      id: number,
+      name?: string,
+      notes?: string,
+      sport?: Sport
+    },
+    context?: Context
+  }): Promise<Team> {
+    const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User 
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'update',
+        resource: 'team',
+        entities: {
+          team: {
+            id: params.data.id
+          }
+        }
+      },
+      context: {
+        trx
+      }
+    })
+
+    let validatedData = await validator.validate({
       schema: new UpdateTeamValidator().schema,
       data: params.data
     })
@@ -207,17 +174,20 @@ export default class TeamsManager {
       client: trx
     })
 
-    team.merge({
-      name: params.data.name,
-      notes: params.data.notes
-    })
-
+    team.merge(validatedData)
     return await team.save()
   }
 
   @withTransaction
   @withUser
-  public async updatePreference(params: UpdatePreferenceParams): Promise<Team> {
+  public async updatePreference(params: {
+    data: {
+      id: number,
+      preference: string,
+      value: any,
+    },
+    context?: Context
+  }): Promise<Team> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -225,7 +195,7 @@ export default class TeamsManager {
       data: {
         actor: user,
         action: 'update',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: {
             id: params.data.id
@@ -256,7 +226,20 @@ export default class TeamsManager {
   // TODO check if this method is used
   @withTransaction
   @withUser
-  public async addUser(params: AddUserParams): Promise<void> {
+  public async addUser(params: {
+    data: {
+      team: {
+        id: number
+      }
+      user: {
+        id: number
+      },
+      group?: {
+        id: number
+      }
+    },
+    context?: Context
+  }): Promise<void> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -276,7 +259,7 @@ export default class TeamsManager {
 
     await team.related('teammateUsers').attach({
       [params.data.user.id]: {
-        roleId: params.data.role?.id,
+        groupId: params.data.group?.id,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       }
@@ -285,7 +268,20 @@ export default class TeamsManager {
 
   @withTransaction
   @withUser
-  public async removeUser(params: AddUserParams): Promise<void> {
+  public async removeUser(params: {
+    data: {
+      team: {
+        id: number
+      }
+      user: {
+        id: number
+      },
+      group?: {
+        id: number
+      }
+    },
+    context?: Context
+  }): Promise<void> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -296,7 +292,7 @@ export default class TeamsManager {
       data: {
         actor: user,
         action: 'removeUser',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: {
             id: params.data.team.id
@@ -329,7 +325,12 @@ export default class TeamsManager {
 
   @withTransaction
   @withUser
-  public async destroy(params: DestroyParams): Promise<void> {
+  public async destroy(params: {
+    data: {
+      id: number
+    },
+    context?: Context
+  }): Promise<void> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -337,7 +338,7 @@ export default class TeamsManager {
       data: {
         actor: user,
         action: 'destroy',
-        resource: 'Team',
+        resource: 'team',
         entities: {
           team: {
             id: params.data.id

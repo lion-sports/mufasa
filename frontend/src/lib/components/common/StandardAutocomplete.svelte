@@ -3,13 +3,14 @@
 		value: string
 		label?: string
 		data?: any
-	}
+	};
 </script>
 
 <script lang="ts">
 	export let items: Item[],
 		width: string = '100%',
 		maxWidth: string = '100%',
+    height: string | undefined = "60px",
 		multiple: boolean = false,
 		placeholder: string | undefined = undefined,
 		values: Item[]
@@ -23,7 +24,8 @@
 	{maxWidth}
 	{multiple}
 	{placeholder}
-	height="fit-content"
 	{items}
+  --autocomplete-min-height="44px"
+  {height}
 	on:change
 />

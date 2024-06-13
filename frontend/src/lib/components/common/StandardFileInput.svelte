@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { FileInputList } from '@likable-hair/svelte'
 
-	export let files: File[] = [],
-		height: string = '200px'
+	export let files: File[] = []
 </script>
 
-<FileInputList bind:files {height} />
+<FileInputList bind:files />

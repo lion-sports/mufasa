@@ -24,7 +24,11 @@
 		selectedEvents: Event[] = [],
 		visibleYear: number = DateTime.now().get('year'),
 		visibleWeek: number = DateTime.now().get('weekNumber'),
-		events: Event[] = []
+		events: Event[] = [],
+    reloadEvents: boolean = false,
+    canUpdate: boolean = false,
+    canDestroy: boolean = false,
+    canCreate: boolean = false
 
 	let importFromYear = visibleYear,
 		importFromWeek = visibleWeek
@@ -84,6 +88,11 @@
 			visibleYear: visibleYear
 		})
 	}
+
+  $: if(reloadEvents) {
+    loadEvents(visibleWeek, visibleYear)
+    reloadEvents = false
+  }
 </script>
 
 {#if !!events}
@@ -95,6 +104,9 @@
 		bind:selectedEvents
 		bind:visibleYear
 		bind:visibleWeek
+    bind:canUpdate
+    bind:canDestroy
+    bind:canCreate
 		on:nextWeek={() => loadEvents(visibleWeek, visibleYear)}
 		on:nextWeek
 		on:previousWeek={() => loadEvents(visibleWeek, visibleYear)}

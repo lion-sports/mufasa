@@ -1,43 +1,68 @@
 import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
 
-import UserModel from 'App/Models/User'
-import InvitationModel from 'App/Models/Invitation'
-import RoleModel from 'App/Models/Role'
-import EventModel from 'App/Models/Event'
-import ConvocationModel from 'App/Models/Convocation'
-import TeammateModel from 'App/Models/Teammate'
+import User from 'App/Models/User'
+import Invitation from 'App/Models/Invitation'
+import Group from 'App/Models/Group'
+import Event from 'App/Models/Event'
+import Convocation from 'App/Models/Convocation'
+import Teammate from 'App/Models/Teammate'
+import Team from 'App/Models/Team'
+import EventSession from 'App/Models/EventSession'
+import Shirt from 'App/Models/Shirt'
+import Scout from 'App/Models/Scout'
+import ScoringSystem from 'App/Models/ScoringSystem'
 
-import type User from 'App/Models/User'
-import type Team from 'App/Models/Team'
-import type Invitation from 'App/Models/Invitation'
-import type Event from 'App/Models/Event'
-import type EventSession from 'App/Models/EventSession'
-import type Convocation from 'App/Models/Convocation'
-import type Role from 'App/Models/Role'
-import type Teammate from 'App/Models/Teammate'
+export type GroupedPermissions<Type = boolean> = {
+  team: {
+    update: Type,
+    destroy: Type,
+    view: Type,
+    invite: Type,
+    removeUser: Type,
+  },
+  teammate: {
+    update: Type,
+  },
+  invitation: {
+    accept: Type,
+    reject: Type,
+    discard: Type,
+  },
+  group: {
+    create: Type,
+    update: Type,
+    destroy: Type,
+    view: Type,
+  },
+  event: {
+    create: Type,
+    update: Type,
+    convocate: Type,
+    destroy: Type,
+  },
+  shirt: {
+    create: Type,
+    update: Type,
+    view: Type,
+    destroy: Type,
+  },
+  scout: {
+    manage: Type,
+    view: Type,
+  },
+  scoringSystem: {
+    view: Type,
+    manage: Type,
+    create: Type,
+  },
+  convocation: {
+    confirm: Type,
+    deny: Type,
+  }
+}
 
-export type Resource = 
-  'Team' |
-  'Invitation' |
-  'Event' |
-  'Convocation' |
-  'EventSession' |
-  'Role' |
-  'Teammate'
-
-export type Action =
-  'update' |
-  'destroy' |
-  'create' |
-  'view' |
-  'invite' |
-  'removeUser' |
-  'accept' |
-  'reject' |
-  'discard' |
-  'convocate' |
-  'confirm' |
-  'deny'
+export type Resource = keyof GroupedPermissions
+export type Action<R extends Resource> = keyof GroupedPermissions[R]
 
 export type Entities = {
   team?: Pick<Team, 'id'>,
@@ -46,9 +71,12 @@ export type Entities = {
   eventSession?: Pick<EventSession, 'id'>,
   convocation?: Pick<Convocation, 'id'>,
   invitee?: Pick<User, 'email'>
-  role?: Pick<Role, 'id'>,
+  group?: Pick<Group, 'id'>,
   user?: Pick<User, 'id'>,
-  teammate?: Pick<Teammate, 'id'>
+  teammate?: Pick<Teammate, 'id'>,
+  shirt?: Pick<Shirt, 'id'>,
+  scout?: Pick<Scout, 'id'>,
+  scoringSystem?: Pick<ScoringSystem, 'id'>
 }
 
 type CanFunction = (params: {
@@ -59,52 +87,55 @@ type CanFunction = (params: {
 }) => Promise<boolean>
 
 
-type CanParameters = {
-  data: {
-    actor: User,
-    resource: Resource,
-    action: Action,
-    entities: Entities
-  },
-  context?: {
-    trx?: TransactionClientContract
-  }
-}
-
 export default class AuthorizationManager {
   static mapper: {
     [resource in Resource]?: {
-      [action in Action]?: CanFunction
+      [action in Action<resource>]?: CanFunction
     }
   } = {
-    Team: {
+    team: {
       update: AuthorizationManager._canUpdateTeam,
       destroy: AuthorizationManager._canDestroyTeam,
       view: AuthorizationManager._canViewTeam,
       invite: AuthorizationManager._canInviteToTeam,
       removeUser: AuthorizationManager._canRemoveUserFromTeam
     },
-    Teammate: {
+    teammate: {
       update: AuthorizationManager._canUpdateTeammate
     },
-    Invitation: {
+    invitation: {
       accept: AuthorizationManager._canAcceptInvitation,
       reject: AuthorizationManager._canRejectInvitation,
       discard: AuthorizationManager._canDiscardInvitation,
     },
-    Role: {
+    group: {
       create: AuthorizationManager._canUpdateTeam,
-      update: AuthorizationManager._canUpdateRole,
-      destroy: AuthorizationManager._canUpdateRole,
-      view: AuthorizationManager._canViewRole,
+      update: AuthorizationManager._canUpdateGroup,
+      destroy: AuthorizationManager._canUpdateGroup,
+      view: AuthorizationManager._canViewGroup,
     },
-    Event: {
+    event: {
       create: AuthorizationManager._canCreateEvent,
       update: AuthorizationManager._canUpdateEvent,
       convocate: AuthorizationManager._canConvocateToEvent,
       destroy: AuthorizationManager._canDestroyEvent
     },
-    Convocation: {
+    shirt: {
+      create: AuthorizationManager._canCreateShirt,
+      update: AuthorizationManager._canUpdateShirt,
+      view: AuthorizationManager._canViewShirt,
+      destroy: AuthorizationManager._canDestroyShirt
+    },
+    scout: {
+      manage: AuthorizationManager._canManageScout,
+      view: AuthorizationManager._canViewScout
+    },
+    scoringSystem: {
+      view: AuthorizationManager._canViewScoringSystem,
+      manage: AuthorizationManager._canManageScoringSystem,
+      create: AuthorizationManager._canCreateScoringSystem
+    },
+    convocation: {
       confirm: AuthorizationManager._canConfirmConvocation,
       deny: AuthorizationManager._canDenyConvocation
     }
@@ -112,8 +143,18 @@ export default class AuthorizationManager {
 
   constructor() { }
 
-  public static async can(
-    { data, context }: CanParameters
+  public static async can<R extends Resource>(
+    { data, context }: {
+      data: {
+        actor: User
+        entities: Entities,
+        resource: R,
+        action: Action<R>
+      },
+      context?: {
+        trx?: TransactionClientContract
+      }
+    }
   ) {
     let canFunction = this.mapper[data.resource]?.[data.action] ?? AuthorizationManager._generalCanFunction
     return await canFunction({
@@ -121,9 +162,22 @@ export default class AuthorizationManager {
     }, context)
   }
 
-  public static async canOrFail(params: CanParameters): Promise<boolean> {
+  public static async canOrFail<R extends Resource>(params: {
+    data: {
+      actor: User
+      entities: Entities,
+      resource: R,
+      action: Action<R>
+    },
+    context?: {
+      trx?: TransactionClientContract
+    }
+  }): Promise<boolean> {
     let results = await AuthorizationManager.can(params)
-    if (!this.mapper[params.data.resource]?.[params.data.action] || !results) throw new Error(`cannot ${params.data.action} on resource ${params.data.resource} with current user`)
+    if (!this.mapper[params.data.resource]?.[params.data.action] || !results)
+      throw new Error(
+        `cannot ${params.data.action.toString()} on resource ${params.data.resource} with current user`
+      )
     else return true
   }
 
@@ -145,7 +199,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: teamId },
       action: 'update',
-      resource: 'Team'
+      resource: 'team'
     }, context)
 
     return userCanUpdateTeam
@@ -164,7 +218,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: teamId },
       action: 'removeUser',
-      resource: 'Team'
+      resource: 'team'
     }, context)
 
     return (userCanRemoveUser || params.actor.id == userId)
@@ -177,7 +231,7 @@ export default class AuthorizationManager {
     if (!params.entities.team?.id) throw new Error('team must be defined')
     let teamId: number = params.entities.team.id
 
-    const userBelongs = await UserModel.query({
+    const userBelongs = await User.query({
       client: context?.trx
     }).whereHas('teams', (builder) => {
       builder.where('teams.id', teamId)
@@ -193,7 +247,7 @@ export default class AuthorizationManager {
     if (!params.entities.team?.id) throw new Error('team must be defined')
     let teamId: number = params.entities.team.id
 
-    const userBelongs = await UserModel.query({
+    const userBelongs = await User.query({
       client: context?.trx
     }).whereHas('teams', (builder) => {
       builder.where('teams.id', teamId)
@@ -212,7 +266,7 @@ export default class AuthorizationManager {
     const userCanInvite = await Helpers.userCanInTeam({
       user: params.actor,
       team: {id: teamId},
-      resource: 'Team',
+      resource: 'team',
       action: 'invite'
     }, context)
 
@@ -226,8 +280,8 @@ export default class AuthorizationManager {
     if (!params.entities.invitation?.id) throw new Error('invitation must be defined')
     let invitationId: number = params.entities.invitation.id
 
-    const invitationBelogs = await InvitationModel.query({ client: context?.trx })
-      .whereIn('invitedEmail', UserModel.query({ client: context?.trx })
+    const invitationBelogs = await Invitation.query({ client: context?.trx })
+      .whereIn('invitedEmail', User.query({ client: context?.trx })
         .select('email')
         .where('id', params.actor.id)
       )
@@ -243,8 +297,8 @@ export default class AuthorizationManager {
     if (!params.entities.invitation?.id) throw new Error('invitation must be defined')
     let invitationId: number = params.entities.invitation.id
 
-    const invitationBelogs = await InvitationModel.query({ client: context?.trx })
-      .whereIn('invitedEmail', UserModel.query({ client: context?.trx })
+    const invitationBelogs = await Invitation.query({ client: context?.trx })
+      .whereIn('invitedEmail', User.query({ client: context?.trx })
         .select('email')
         .where('id', params.actor.id)
       )
@@ -260,7 +314,7 @@ export default class AuthorizationManager {
     if (!params.entities.invitation?.id) throw new Error('invitation must be defined')
     let invitationId: number = params.entities.invitation.id
 
-    const invitationBelogs = await InvitationModel.query()
+    const invitationBelogs = await Invitation.query()
       .whereHas('invitedBy', inviteBuilder => {
         inviteBuilder.where('users.id', params.actor.id)
       })
@@ -269,40 +323,40 @@ export default class AuthorizationManager {
     return invitationBelogs.length != 0
   }
 
-  private static async _canViewRole(
+  private static async _canViewGroup(
     params: { actor: User, entities: Entities },
     context?: { trx?: TransactionClientContract }
   ): Promise<boolean> {
-    if (!params.entities.role?.id) throw new Error('role must be defined')
-    let roleId: number = params.entities.role.id
+    if (!params.entities.group?.id) throw new Error('group must be defined')
+    let groupId: number = params.entities.group.id
 
-    const userBelongs = await UserModel.query({
+    const userBelongs = await User.query({
       client: context?.trx
     }).whereHas('teams', (builder) => {
-      builder.whereHas('roles', rolesBuilder => {
-        rolesBuilder.where('roles.id', roleId)
+      builder.whereHas('groups', groupsBuilder => {
+        groupsBuilder.where('groups.id', groupId)
       })
     }).where('users.id', params.actor.id)
 
     return userBelongs.length != 0
   }
 
-  private static async _canUpdateRole(
+  private static async _canUpdateGroup(
     params: { actor: User, entities: Entities },
     context?: { trx?: TransactionClientContract }
   ): Promise<boolean> {
-    if (!params.entities.role?.id) throw new Error('role must be defined')
-    let roleId: number = params.entities.role.id
+    if (!params.entities.group?.id) throw new Error('group must be defined')
+    let groupId: number = params.entities.group.id
 
-    const userBelongs = await UserModel.query({
+    const userBelongs = await User.query({
       client: context?.trx
     }).whereHas('teams', (builder) => {
       builder
-        .whereIn('teams.id', RoleModel.query().select('teamId').where('roles.id', roleId))
+        .whereIn('teams.id', Group.query().select('teamId').where('groups.id', groupId))
         .where(teamsBuilder => {
           teamsBuilder
-            .whereHas('roles', rolesBuilder => {
-              rolesBuilder.whereRaw("cast(roles.cans->'Event'->>'create' as BOOLEAN) = true")
+            .whereHas('groups', groupsBuilder => {
+              groupsBuilder.whereRaw("cast(groups.cans->'event'->>'create' as BOOLEAN) = true")
             })
             .orWhere('ownerId', params.actor.id)
         })
@@ -322,7 +376,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: teamId },
       action: 'create',
-      resource: 'Event'
+      resource: 'event'
     }, context)
   }
 
@@ -333,15 +387,15 @@ export default class AuthorizationManager {
     if (!params.entities.teammate?.id) throw new Error('teammate must be defined')
     let teammateId: number = params.entities.teammate.id
 
-    let teammate = await TeammateModel.query({ client: context?.trx })
+    let teammate = await Teammate.query({ client: context?.trx })
       .where('id', teammateId)
       .firstOrFail()
 
     return await Helpers.userCanInTeam({
       user: params.actor,
       team: { id: teammate.teamId },
-      action: 'create',
-      resource: 'Event'
+      action: 'update',
+      resource: 'teammate'
     }, context)
   }
 
@@ -352,7 +406,7 @@ export default class AuthorizationManager {
     if (!params.entities.event?.id) throw new Error('event must be defined')
     let eventId: number = params.entities.event.id
 
-    let results = await EventModel.query({
+    let results = await Event.query({
       client: context?.trx
     }).where('id', eventId).first()
 
@@ -364,7 +418,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: event.teamId },
       action: 'update',
-      resource: 'Event'
+      resource: 'event'
     }, context)
   }
 
@@ -375,7 +429,7 @@ export default class AuthorizationManager {
     if (!params.entities.event?.id) throw new Error('event must be defined')
     let eventId: number = params.entities.event.id
 
-    let results = await EventModel.query({
+    let results = await Event.query({
       client: context?.trx
     }).where('id', eventId).first()
 
@@ -387,7 +441,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: event.teamId },
       action: 'destroy',
-      resource: 'Event'
+      resource: 'event'
     }, context)
   }
 
@@ -398,7 +452,7 @@ export default class AuthorizationManager {
     if (!params.entities.event?.id) throw new Error('event must be defined')
     let eventId: number = params.entities.event.id
 
-    let results = await EventModel.query({
+    let results = await Event.query({
       client: context?.trx
     }).where('id', eventId).first()
 
@@ -410,7 +464,7 @@ export default class AuthorizationManager {
       user: params.actor,
       team: { id: event.teamId },
       action: 'convocate',
-      resource: 'Event'
+      resource: 'event'
     }, context)
   }
 
@@ -421,13 +475,13 @@ export default class AuthorizationManager {
     if(!params.entities.convocation?.id) throw new Error('convocation must be defined')
     let convocationId: number = params.entities.convocation.id
 
-    let convocationBelongsToUser = await ConvocationModel.query({ client: context?.trx })
+    let convocationBelongsToUser = await Convocation.query({ client: context?.trx })
       .where('id', convocationId)
       .whereHas('teammate', teammateBuilder => {
         teammateBuilder.where('userId', params.actor.id)
       })
 
-    let convocation = await ConvocationModel.query({client: context?.trx})
+    let convocation = await Convocation.query({client: context?.trx})
       .where('id', convocationId)
       .preload('event')
       .first()
@@ -440,7 +494,7 @@ export default class AuthorizationManager {
         id: convocation.event.teamId
       },
       action: 'confirm',
-      resource: 'Convocation'
+      resource: 'convocation'
     })
 
     return convocationBelongsToUser.length != 0 || canConfirmOtherConvocations
@@ -453,13 +507,13 @@ export default class AuthorizationManager {
     if (!params.entities.convocation?.id) throw new Error('convocation must be defined')
     let convocationId: number = params.entities.convocation.id
 
-    let convocationBelongsToUser = await ConvocationModel.query({ client: context?.trx })
+    let convocationBelongsToUser = await Convocation.query({ client: context?.trx })
       .where('id', convocationId)
       .whereHas('teammate', teammateBuilder => {
         teammateBuilder.where('userId', params.actor.id)
       })
 
-    let convocation = await ConvocationModel.query({ client: context?.trx })
+    let convocation = await Convocation.query({ client: context?.trx })
       .where('id', convocationId)
       .preload('event')
       .first()
@@ -472,41 +526,259 @@ export default class AuthorizationManager {
         id: convocation.event.teamId
       },
       action: 'deny',
-      resource: 'Convocation'
+      resource: 'convocation'
     })
 
     return convocationBelongsToUser.length != 0 || canConfirmOtherConvocations
+  }
+
+  private static async _canCreateShirt(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.teammate?.id) throw new Error('teammate must be defined')
+    let teammateId: number = params.entities.teammate.id
+
+    let teammate = await Teammate.query({
+        client: context?.trx
+      }).where('id', teammateId)
+      .first()
+
+    if (!teammate) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: teammate.teamId },
+      action: 'create',
+      resource: 'shirt'
+    }, context)
+  }
+
+  private static async _canUpdateShirt(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.shirt?.id) throw new Error('shirt must be defined')
+
+    let shirt = await Shirt.query({
+        client: context?.trx
+      })
+      .where('id', params.entities.shirt.id)
+      .preload('teammate')
+      .first()
+
+    if (!shirt) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: shirt.teammate.teamId },
+      action: 'update',
+      resource: 'shirt'
+    }, context)
+  }
+
+  private static async _canViewShirt(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.shirt?.id) throw new Error('shirt must be defined')
+
+    let shirt = await Shirt.query({
+        client: context?.trx
+      })
+      .where('id', params.entities.shirt.id)
+      .preload('teammate')
+      .first()
+
+    if (!shirt) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: shirt.teammate.teamId },
+      action: 'view',
+      resource: 'shirt'
+    }, context)
+  }
+
+  private static async _canDestroyShirt(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.shirt?.id) throw new Error('shirt must be defined')
+
+    let shirt = await Shirt.query({
+      client: context?.trx
+    })
+      .where('id', params.entities.shirt.id)
+      .preload('teammate')
+      .first()
+
+    if (!shirt) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: shirt.teammate.teamId },
+      action: 'destroy',
+      resource: 'shirt'
+    }, context)
+  }
+
+  private static async _canManageScout(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.event?.id && !params.entities.scout?.id) throw new Error('scout or event id must be defined')
+
+    let teamId: number | undefined = undefined
+    if(!!params.entities.event?.id) {
+      let event = await Event.query({
+        client: context?.trx
+      })
+      .where('id', params.entities.event.id)
+      .first()
+      
+      teamId = event?.teamId
+    } else if(!!params.entities.scout?.id) {
+      let scout = await Scout.query({
+          client: context?.trx
+        })
+        .preload('event')
+        .where('id', params.entities.scout.id)
+        .first()
+
+      teamId = scout?.event.teamId
+    }
+
+    if (!teamId) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: teamId },
+      action: 'manage',
+      resource: 'scout'
+    }, context)
+  }
+
+  private static async _canViewScout(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.scout?.id && !params.entities.team?.id) throw new Error('scout or team must be defined')
+
+    let teamId: number | undefined = undefined
+
+    if(!!params.entities.scout) {
+      let scout = await Scout.query({
+          client: context?.trx
+        })
+        .where('id', params.entities.scout.id)
+        .preload('event')
+        .first()
+
+      teamId = scout?.event.teamId
+    } else if(!!params.entities.team) {
+      teamId = params.entities.team.id
+    }
+
+    if (!teamId) return false
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: teamId },
+      action: 'view',
+      resource: 'scout'
+    }, context)
+  }
+
+  private static async _canViewScoringSystem(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.scoringSystem?.id) throw new Error('scoring system must be defined')
+
+    let scoringSystem = await ScoringSystem.query({
+        client: context?.trx
+      })
+      .where('id', params.entities.scoringSystem.id)
+      .first()
+
+    if (!scoringSystem) return false
+    if (scoringSystem.createdByUserId == params.actor.id) return true
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: scoringSystem.createdForTeamId },
+      action: 'view',
+      resource: 'scout'
+    }, context)
+  }
+
+  private static async _canManageScoringSystem(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.scoringSystem?.id) throw new Error('scoring system must be defined')
+
+    let scoringSystem = await ScoringSystem.query({
+      client: context?.trx
+    })
+      .where('id', params.entities.scoringSystem.id)
+      .first()
+
+    if (!scoringSystem) return false
+    if (scoringSystem.createdByUserId == params.actor.id) return true
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: scoringSystem.createdForTeamId },
+      action: 'manage',
+      resource: 'scout'
+    }, context)
+  }
+
+  private static async _canCreateScoringSystem(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.team?.id) throw new Error('team id must be defined')
+
+    return await Helpers.userCanInTeam({
+      user: params.actor,
+      team: { id: params.entities.team.id },
+      action: 'manage',
+      resource: 'scout'
+    }, context)
   }
 }
 
 
 class Helpers {
-  public static async userCanInTeam(
+  public static async userCanInTeam<R extends Resource>(
     params: { 
-      user: User, 
-      team: { id: number } 
-      action: Action,
-      resource: Resource
+      user: User
+      team: { id: number }
+      resource: R
+      action: Action<R>
     },
     context?: { trx?: TransactionClientContract }
   ): Promise<boolean> {
-    const userHasRole = await UserModel.query({
+    const userHasGroup = await User.query({
       client: context?.trx
     }).whereHas('teams', (builder) => {
       builder
         .where('teams.id', params.team.id)
         .where(teamsBuilder => {
           teamsBuilder
-            .whereHas('roles', rolesBuilder => {
-              rolesBuilder.whereRaw("cast(roles.cans->:resource->>:action as BOOLEAN) = true", {
+            .whereHas('groups', groupsBuilder => {
+              groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
                 resource: params.resource,
-                action: params.action
+                action: params.action.toString()
               })
             })
             .orWhere('ownerId', params.user.id)
         })
     }).where('users.id', params.user.id)
 
-    return userHasRole.length != 0
+    return userHasGroup.length != 0
   }
 }
