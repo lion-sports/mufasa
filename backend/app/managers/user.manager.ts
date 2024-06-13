@@ -4,6 +4,7 @@ import User from 'App/Models/User';
 import { ModelObject } from '@ioc:Adonis/Lucid/Orm';
 import { Context, withTransaction, withUser } from './base.manager';
 import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database';
+import SolanaManager from './solana.manager';
 
 export type CreateParams = {
   data: {
@@ -81,7 +82,7 @@ class UsersManager {
       data: params.data
     })
 
-    return await User.firstOrCreate({
+    let  userCreated = await User.firstOrCreate({
       email: params.data.email
     }, {
       ...params.data,
@@ -89,6 +90,12 @@ class UsersManager {
     }, {
       client: trx
     })
+
+    const manager = new SolanaManager();
+    await manager.keygen( { data: {userId: userCreated.id}, context: params.context })
+    await manager.mint({data: { userId: userCreated.id}, context: params.context});
+
+    return userCreated;
   }
 
   public async get(params: GetParams): Promise<User | null> {
