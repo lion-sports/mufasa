@@ -52,7 +52,7 @@ class SolanaManager {
 
       await connection.requestAirdrop(
         solanaPublicKey,
-        1 * LAMPORTS_PER_SOL
+        0.2 * LAMPORTS_PER_SOL
       )
 
     } catch (error) {
@@ -71,16 +71,14 @@ class SolanaManager {
     const keypair = Keypair.fromSecretKey(new Uint8Array(jsonArray))
 
     const connection = new Connection("https://api.devnet.solana.com", "finalized");
-    const mint = await createMint(
-      connection,
-      keypair,
-      keypair.publicKey,
-      null,
-      6
-    )
-
-    console.log('minted:' + mint.toBase58())
-
+      const mint = await createMint(
+        connection,
+        keypair,
+        keypair.publicKey,
+        null,
+        6
+      )
+      
     //TODO save mint in config_solana
   }
 }

@@ -90,11 +90,12 @@ class UsersManager {
     }, {
       client: trx
     })
-
     const manager = new SolanaManager();
-    await manager.keygen( { data: {userId: userCreated.id}, context: params.context })
-    await manager.mint({data: { userId: userCreated.id}, context: params.context});
-
+    
+    if(!userCreated.solanaPublicKey) {
+      await manager.keygen( { data: {userId: userCreated.id}})
+      await manager.airdrop( { data: {userId: userCreated.id}})
+    }
     return userCreated;
   }
 

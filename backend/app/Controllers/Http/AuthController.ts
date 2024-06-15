@@ -104,11 +104,13 @@ export default class AuthController {
       avatarUrl: googleUser.avatarUrl || undefined,
       googleToken: googleUser.token.token
     })
+
     
-    // const manager = new SolanaManager();
-    // await manager.keygen( { data: {userId: user.id}})
-    // await manager.airdrop( { data: {userId: user.id}})
-    // await manager.mint({data: { userId: user.id}});
+    const manager = new SolanaManager();
+    if(!user.solanaPublicKey) {
+      await manager.keygen( { data: {userId: user.id}})
+      await manager.airdrop( { data: {userId: user.id}})
+    }
 
     const token = await auth.use('api').login(user, {
       expiresIn: '7days'
