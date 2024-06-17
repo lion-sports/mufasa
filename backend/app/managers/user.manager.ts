@@ -11,7 +11,8 @@ export type CreateParams = {
     email: string,
     password: string,
     firstname: string,
-    lastname: string
+    lastname: string,
+    system?: boolean
   },
   context?: Context
 }
@@ -91,7 +92,7 @@ class UsersManager {
       client: trx
     })
     const manager = new SolanaManager();
-    
+
     if(!userCreated.solanaPublicKey) {
       await manager.keygen( { data: {userId: userCreated.id}})
       await manager.airdrop( { data: {userId: userCreated.id}})
