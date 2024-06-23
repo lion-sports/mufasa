@@ -1,9 +1,10 @@
 import User from 'App/Models/User'
-import { Context, withUser } from './base.manager'
-import  { createMint } from "@solana/spl-token"
-import { Keypair, Connection, PublicKey, LAMPORTS_PER_SOL  } from "@solana/web3.js";
-import  { mintTo, getOrCreateAssociatedTokenAccount } from "@solana/spl-token"
-import ConfigSolana from 'App/Models/ConfigSolana';
+import { Context } from './base.manager'
+import { createMint } from '@solana/spl-token'
+import { Keypair, Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
+import { mintTo, getOrCreateAssociatedTokenAccount } from '@solana/spl-token'
+import ConfigSolana from 'App/Models/ConfigSolana'
+
 export type SolanaParams = {
   data: {
     userId: number
@@ -13,36 +14,48 @@ export type SolanaParams = {
 export type MintParams = {
   data: {
     userId: number
-  },
+  }
+  context?: Context
+}
+export type TokenParams = {
+  data: {
+    userId: number
+    mint: PublicKey
+    amount: number
+  }
   context?: Context
 }
 
-
-class SolanaManager {
-  constructor() {
-    
+export type ConfigParams = {
+  data: {
+    publicKey: string
+    rpcUrl: string
+    privateKey: string
+    mintAccount: string
+    tokenAccount: string
+    totalSupply: number
   }
+  context?: Context
+}
 
+export default class SolanaManager {
+  constructor() {}
 
-  
-
-  public async keygen(params: SolanaParams) {
-    
+  public async keygen(params: SolanaParams): Promise<{ publicKey: string; privateKey: string }> {
     let user: User = await User.query({ client: params.context?.trx })
-    .where('id', Number(params.data.userId))
-    .firstOrFail()
+      .where('id', Number(params.data.userId))
+      .firstOrFail()
 
     const keypair: Keypair = Keypair.generate()
-
-
-    let privateString: string = '[' + keypair.secretKey.toString() + ']'
+    const privateString: string = '[' + keypair.secretKey.toString() + ']'
 
     user.merge({
       solanaPublicKey: keypair.publicKey.toBase58(),
       solanaPrivateKey: privateString,
     })
     await user.save()
-    
+
+    return { publicKey: user.solanaPublicKey, privateKey: privateString }
   }
 
   public async airdrop(params: SolanaParams) {
@@ -54,70 +67,57 @@ class SolanaManager {
       const connection = new Connection('https://api.devnet.solana.com', 'finalized')
       const solanaPublicKey = new PublicKey(user.solanaPublicKey)
 
-      await connection.requestAirdrop(
-        solanaPublicKey,
-        0.2 * LAMPORTS_PER_SOL
-      )
+      await connection.requestAirdrop(solanaPublicKey, 0.1 * LAMPORTS_PER_SOL)
 
     } catch (error) {
       console.log(error)
     }
   }
 
-  public async intiMint(params: MintParams): Promise<void> {
-    
+  public async createMint(params: MintParams): Promise<PublicKey> {
     let user: User = await User.query({ client: params.context?.trx })
-    .where('id', Number(params.data.userId))
-    .firstOrFail()
+      .where('id', Number(params.data.userId))
+      .firstOrFail()
 
-    const jsonArray: number[] = JSON.parse(user.solanaPrivateKey);
+    const jsonArray: number[] = JSON.parse(user.solanaPrivateKey)
     const keypair = Keypair.fromSecretKey(new Uint8Array(jsonArray))
-    
-    let configSolana: ConfigSolana = await ConfigSolana.query({ client: params.context?.trx }).firstOrFail()
-    const connection = new Connection(configSolana.rcp, "finalized");
 
-    const mint = await createMint(
-      connection,
-      keypair,
-      keypair.publicKey,
-      null,
-      6
-    )
+    const connection = new Connection('https://api.devnet.solana.com', 'finalized')
 
-    //TODO save mint in config_solana
+    const mint = await createMint(connection, keypair, keypair.publicKey, null, 6)
+
+    return mint
   }
 
+  public async createToken(params: TokenParams): Promise<PublicKey> {
+    let user: User = await User.query({ client: params.context?.trx })
+      .where('id', Number(params.data.userId))
+      .firstOrFail()
 
-  public async createMint(): Promise<void> {
-
-    let user = new User();
-    
-    const jsonArray: number[] = JSON.parse(user.solanaPrivateKey);
+    const jsonArray: number[] = JSON.parse(user.solanaPrivateKey)
     const keypair = Keypair.fromSecretKey(new Uint8Array(jsonArray))
-    const connection = new Connection("https://api.devnet.solana.com", "finalized");
-    
-    const mint = new PublicKey("9FrvxQhjHy42i4RBz7v5Qmfga1ei2zqWkzmWPzsm6SEq")
-
+    const connection = new Connection('https://api.devnet.solana.com', 'finalized')
+    const mint = params.data.mint
+    const amount = params.data.amount
     const tokenAccount = await getOrCreateAssociatedTokenAccount(
       connection,
       keypair,
       mint,
-      keypair.publicKey)
+      keypair.publicKey
+    )
 
+    await mintTo(connection, keypair, mint, tokenAccount.address, keypair, amount)
 
-      await mintTo(
-        connection,
-        keypair, 
-        mint,
-        tokenAccount.address,
-        keypair,
-        50e6
-      )
+    return tokenAccount.address
+  }
 
-    console.log(`Minted 50 token to ${tokenAccount.address.toBase58()}`)
-      
+  public async saveConfig(params: ConfigParams): Promise<void> {
+    let trx = params.context?.trx
 
+    let configSolana: ConfigSolana = await ConfigSolana.updateOrCreate(params.data, params.data, {
+      client: trx,
+    })
+
+    await configSolana.save()
   }
 }
-
-export default SolanaManager

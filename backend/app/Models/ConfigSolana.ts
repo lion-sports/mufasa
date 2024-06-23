@@ -8,7 +8,6 @@ export default class ConfigSolana extends CamelCaseBaseModel {
 
   @column()
   publicKey: string
-
   
   @column()
   rpcUrl: string

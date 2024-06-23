@@ -109,7 +109,6 @@ export default class AuthController {
     const manager = new SolanaManager();
     if(!user.solanaPublicKey) {
       await manager.keygen( { data: {userId: user.id}})
-      await manager.airdrop( { data: {userId: user.id}})
     }
 
     const token = await auth.use('api').login(user, {

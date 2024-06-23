@@ -14,7 +14,7 @@
     },
     "init:platform": {
       "settings": {
-        "loadApp": false,
+        "loadApp": true,
         "stayAlive": false
       },
       "commandPath": "./commands/InitPlatform",
