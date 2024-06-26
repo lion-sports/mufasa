@@ -40,7 +40,8 @@ export type ListParams = {
 
 export type GetParams = {
   data: {
-    id: number
+    id: number,
+    username?: string
   }
   context?: Context
 }
@@ -70,7 +71,7 @@ class UsersManager {
 
   // TODO review signup logics
   @withTransaction
-  public async create(params: CreateParams): Promise<User> {
+public async create(params: CreateParams): Promise<User> {
     const trx = params.context?.trx as TransactionClientContract
 
     await validator.validate({
@@ -100,7 +101,13 @@ class UsersManager {
 
   public async get(params: GetParams): Promise<User | null> {
     const trx = params.context?.trx as TransactionClientContract
-    const user = params.context?.user as User
+    let user = params.context?.user as User
+    
+    let userByUsername: User
+    if(!!params.data.username) {
+      userByUsername = await User.query({client: trx}).where('username', params.data.username).firstOrFail()
+      return userByUsername
+    }
 
     return await User.find(params.data.id, { client: trx })
   }
