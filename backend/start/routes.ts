@@ -118,4 +118,4 @@ Route.post('/convocations/:id/confirm', 'ConvocationsController.confirm').middle
 Route.post('/convocations/:id/deny', 'ConvocationsController.deny').middleware('auth:api')
 
 
-Route.post('/solana/getReward', 'SolanaController.getReward')
+Route.post('/solana/rewardLionToken', 'SolanaController.rewardLionToken')

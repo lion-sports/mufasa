@@ -2,7 +2,7 @@ import { column } from "@ioc:Adonis/Lucid/Orm";
 import { CamelCaseBaseModel } from "./CamelCaseBaseModel";
 import { DateTime } from "luxon";
 
-export default class ConfigSolana extends CamelCaseBaseModel {
+export default class SolanaConfig extends CamelCaseBaseModel {
   @column({isPrimary: true})
   public id: number
 
@@ -13,7 +13,7 @@ export default class ConfigSolana extends CamelCaseBaseModel {
   rpcUrl: string
 
   @column()
-  privateKey: string
+privateKey: string
   
   @column()
   mintAccount: string
