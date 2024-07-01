@@ -3,6 +3,10 @@ import { CamelCaseBaseModel } from "./CamelCaseBaseModel";
 import { DateTime } from "luxon";
 
 export default class SolanaConfig extends CamelCaseBaseModel {
+
+  static get table () {
+    return 'solana_config'
+  }
   @column({isPrimary: true})
   public id: number
 
