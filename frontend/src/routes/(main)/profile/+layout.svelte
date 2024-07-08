@@ -31,6 +31,7 @@
     <UserAvatar
       username={$user?.firstname + ' ' + $user?.lastname}
       description={$user?.email}
+      solanaPublicKey={$user?.solanaPublicKey}
       src={$user?.avatarUrl}
       --avatar-width="166px"
       --avatar-height="166px"

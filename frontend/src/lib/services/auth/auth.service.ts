@@ -4,6 +4,8 @@ import { browser } from '$app/environment'
 import JsCookies from 'js-cookie'
 import user from '$lib/stores/auth/user'
 import { DateTime, Duration } from 'luxon'
+import { writable } from 'svelte/store'
+import phantom from '$lib/stores/provider/phantom'
 
 export type User = {
 	id: number
@@ -11,6 +13,7 @@ export type User = {
 	lastname: string
 	email: string
 	system: boolean
+	solanaPublicKey: string
 	avatarUrl?: string
 	createdAt: Date
 	updatedAt: Date
@@ -219,6 +222,7 @@ export default class AuthService extends FetchBasedService {
 			email: response.email,
 			firstname: response.firstname,
 			lastname: response.lastname,
+			solanaPublicKey: response.solanaPublicKey,
 			system: response.system,
 			avatarUrl: response.avatarUrl,
 			createdAt: new Date(response.createdAt),
@@ -247,4 +251,65 @@ export default class AuthService extends FetchBasedService {
 
 		user.set(undefined)
 	}
+
+
+	async loginWithMetamask() {
+		if (window.ethereum) {
+			const accounts = await window.ethereum
+				.request({ method: 'eth_requestAccounts' })
+				.catch((error: any) => {
+					if (error.code === 4001) {
+						alert('Please connect to MetaMask.');
+						return;
+					} else {
+						console.error(error);
+						return;
+					}
+				});
+
+			if (accounts.length > 0) {
+				let expired_at: Date = new Date();
+				JsCookies.set(this.cookieWalletAddress, accounts[0], {
+					expires: expired_at.setDate(expired_at.getDate() + 1),
+					sameSite: 'strict'
+				});
+
+
+				return {
+					data: {
+						address: accounts[0],
+						name: ''
+					}
+				};
+			} else {
+				alert('No accounts found');
+				return {
+					data: {
+						address: '',
+						name: ''
+					}
+				};
+			}
+		} else {
+			alert('No ethereum wallet found');
+			return {
+				data: {
+					address: '',
+					name: ''
+				}
+			};
+		}
+	}
+
+	async loginWithPhantom(){
+		try {
+			if (window?.solana?.isPhantom) {
+				// phantom.set(window.solana)
+				// window.solana.connect({ onlyIfTrusted: true })
+			}
+		} catch (err) {
+			console.error('connect ERROR:', err)
+		}
+	}
+	
 }
