@@ -255,9 +255,12 @@ export default class AuthService extends FetchBasedService {
 
 	async loginWithMetamask() {
 		if (window.ethereum) {
+			console.log('pippo')
+
 			const accounts = await window.ethereum
 				.request({ method: 'eth_requestAccounts' })
 				.catch((error: any) => {
+					console.log(error.code)
 					if (error.code === 4001) {
 						alert('Please connect to MetaMask.');
 						return;
@@ -266,6 +269,8 @@ export default class AuthService extends FetchBasedService {
 						return;
 					}
 				});
+				console.log(accounts)
+
 
 			if (accounts.length > 0) {
 				let expired_at: Date = new Date();

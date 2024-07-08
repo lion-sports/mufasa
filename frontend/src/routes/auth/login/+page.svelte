@@ -5,8 +5,8 @@
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
 	import { Icon } from '@likable-hair/svelte'
 	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
-	import ConnectWallet from '$lib/components/solana/ConnectWallet.svelte'
-	import SolanaLogo from '$lib/components/solana/SolanaLogo.svelte'
+	import ConnectWallet from '$lib/components/wallet/ConnectWallet.svelte'
+	import SolanaLogo from '$lib/components/wallet/SolanaLogo.svelte'
 
 	let email: string = '',
 		password: string = '',
@@ -56,8 +56,8 @@
 	}
 
 	function loginWithPhantom() {
-		// const service = new AuthService({ fetch })
-		// service.loginWithPhantom()
+		const service = new AuthService({ fetch })
+		service.loginWithPhantom()
 		openConnectWallet = true;
 	}
 
@@ -73,8 +73,8 @@
 			<span style:margin-left="10px"> Log in with Google </span>
 		</StandardButton>
 		<StandardButton style="secondary" on:click={loginWithPhantom} class="!w-full mt-2 mb-4">
-			<SolanaLogo></SolanaLogo>
-			<span style:margin-left="10px"> Log in with Phantom </span>
+			<Icon name="mdi-wallet" --icon-size="12pt" />
+			<span style:margin-left="10px"> Connect Wallet </span>
 		</StandardButton>
 		<hr />
 		<form style:margin-top="20px">
