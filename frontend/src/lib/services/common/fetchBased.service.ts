@@ -58,6 +58,8 @@ export abstract class FetchBasedService {
 	protected cookieName: string = 'session'
 	protected refreshCookieName: string = 'session-refresh'
 	protected token: string | undefined = undefined
+  protected cookieWalletAddress: string = "wallet-address"
+
 
 	protected get client(): ApiClient {
 		return {

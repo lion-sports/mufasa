@@ -1,6 +1,7 @@
 <script lang="ts">
 	export let username: string,
 		description: string = '',
+    solanaPublicKey: string = '',
 		showTitleAndDescription: boolean = true,
     direction: ComponentProps<DescriptiveAvatar>['direction'] = 'row',
     reverse: ComponentProps<DescriptiveAvatar>['reverse'] | undefined = undefined,
@@ -20,6 +21,12 @@
     on:click
     --avatar-min-width="40px"
   ></DescriptiveAvatar>
+
+  {#if solanaPublicKey}
+    <div>
+      Solana wallet: {solanaPublicKey}
+    </div>
+  {/if}
 {:else}
   <Avatar
     text={username.substring(0, 2).toUpperCase()}

@@ -7,6 +7,11 @@ interface ImportMeta {
 	readonly env: ImportMetaEnv
 }
 
+interface Window { 
+  ethereum: Ether;
+	solana: PhantomProvider	
+}
+
 interface PaginationData {
 	currentPage: number
 	firstPage: number
