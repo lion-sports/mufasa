@@ -186,4 +186,45 @@ export default class AuthController {
       throw new Error("Bad token");
     }
   }
+
+  
+  public async loginFromApp({ auth, request }: HttpContextContract) {
+
+    await User.query().where('email', 'ILIKE', request.input('email'))
+    let generateRefresh = request.input('generateRefresh')
+
+    const token = await auth.use('api').attempt(
+      request.input('email'), 
+      request.input('password'), 
+      {
+        expiresIn: '7days'
+      }
+    )
+
+    let finalToken: any = {
+      ...token.toJSON()
+    }
+
+    if (generateRefresh) {
+      const refreshToken = await auth.use('refresh').generate(
+        token.user,
+        {
+          expiresIn: '180days'
+        }
+      )
+
+      finalToken = {
+        ...finalToken,
+        userId: refreshToken.user.id,
+        email: refreshToken.user.email,
+        firstname: refreshToken.user.firstname,
+        lastname: refreshToken.user.lastname,
+        solanaPublicKey: refreshToken.user.solanaPublicKey,
+        refreshToken: refreshToken.token,
+        refreshTokenExpiration: refreshToken.expiresAt?.toJSDate()
+      }
+    }
+
+    return finalToken
+  }
 }
