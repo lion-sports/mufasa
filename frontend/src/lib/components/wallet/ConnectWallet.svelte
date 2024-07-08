@@ -37,20 +37,14 @@
 		})
 	}
 
-	const connectHandler = async () => {
-		try {
-			await $phantom?.connect()
-		} catch (err) {
-			console.error('connect ERROR:', err)
-		}
+	async function handleConnectPhantom() {
+		const authService = new AuthService({ fetch })
+		await authService.connectPhantom()
 	}
 
-	const disconnectHandler = async () => {
-		try {
-			await $phantom?.disconnect()
-		} catch (err) {
-			console.error('disconnect ERROR:', err)
-		}
+	async function handleDisconnectPhantom() {
+		const authService = new AuthService({ fetch })
+		await authService.disconnectPhantom()
 	}
 
 	async function handleLoginMetamask() {
@@ -63,6 +57,7 @@
 			pubKey.set(data.address)
 		}
 	}
+	
 </script>
 
 <StandardDialog bind:open={connectWalletDialog}>
@@ -83,13 +78,13 @@
 
 		<div class="w-full mt-10">
 			{#if $connected}
-				<button disabled={!$connected} on:click={disconnectHandler}>Disconnect</button>
+				<button disabled={!$connected} on:click={handleDisconnectPhantom}>Disconnect</button>
 			{:else}
 				<Card width="400px" --color="rgb(var(--global-color-contract-900))">
 					<div class="flex items-center justify-between gap-2">
 						<SolanaLogo></SolanaLogo>
 						<StandardButton
-							on:click={connectHandler}
+							on:click={handleConnectPhantom}
 							--button-background-color="rgb(var(--global-color-grey-950))">Phantom</StandardButton
 						>
 					</div>

@@ -55,9 +55,7 @@
 		service.loginWithGoogle()
 	}
 
-	function loginWithPhantom() {
-		const service = new AuthService({ fetch })
-		service.loginWithPhantom()
+	function openWallet () {
 		openConnectWallet = true;
 	}
 
@@ -72,7 +70,7 @@
 			<Icon name="mdi-google" --icon-size="12pt" />
 			<span style:margin-left="10px"> Log in with Google </span>
 		</StandardButton>
-		<StandardButton style="secondary" on:click={loginWithPhantom} class="!w-full mt-2 mb-4">
+		<StandardButton style="secondary" on:click={openWallet} class="!w-full mt-2 mb-4">
 			<Icon name="mdi-wallet" --icon-size="12pt" />
 			<span style:margin-left="10px"> Connect Wallet </span>
 		</StandardButton>

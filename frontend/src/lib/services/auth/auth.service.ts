@@ -4,7 +4,7 @@ import { browser } from '$app/environment'
 import JsCookies from 'js-cookie'
 import user from '$lib/stores/auth/user'
 import { DateTime, Duration } from 'luxon'
-import { writable } from 'svelte/store'
+import { get, writable } from 'svelte/store'
 import phantom from '$lib/stores/provider/phantom'
 
 export type User = {
@@ -306,12 +306,17 @@ export default class AuthService extends FetchBasedService {
 		}
 	}
 
-	async loginWithPhantom(){
+	async connectPhantom(){
 		try {
-			if (window?.solana?.isPhantom) {
-				// phantom.set(window.solana)
-				// window.solana.connect({ onlyIfTrusted: true })
-			}
+			await get(phantom)?.connect()
+		} catch (err) {
+			console.error('connect ERROR:', err)
+		}
+	}
+
+	async disconnectPhantom(){
+		try {
+			await get(phantom)?.disconnect()
 		} catch (err) {
 			console.error('connect ERROR:', err)
 		}

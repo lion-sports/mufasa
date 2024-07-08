@@ -7,13 +7,6 @@ interface ImportMeta {
 	readonly env: ImportMetaEnv
 }
 
-interface PhantomProvider {
-	connect: (opts?: Partial<ConnectOpts>) => Promise<{ publicKey: PublicKey }>;
-	disconnect: () => Promise<void>;
-	on: (event: PhantomEvent, callback: (args: any) => void) => void;
-	isPhantom: boolean;
-}
-
 interface Window { 
   ethereum: Ether;
 	solana: PhantomProvider	
