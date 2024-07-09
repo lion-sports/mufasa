@@ -33,6 +33,7 @@ Route.get("/docs", async () => {
 });
 
 Route.post('/auth/login', 'AuthController.login')
+Route.post('/auth/loginFromApp', 'AuthController.loginFromApp')
 Route.post('/auth/refreshToken', 'AuthController.refreshToken')
 Route.post('/auth/signup', 'AuthController.signup')
 Route.post('/auth/logout', 'AuthController.logout').middleware('auth:api')
