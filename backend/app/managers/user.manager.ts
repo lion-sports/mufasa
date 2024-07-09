@@ -12,7 +12,7 @@ export type CreateParams = {
     password: string
     firstname: string
     lastname: string
-    solanaPublicKey: string
+    solanaPublicKey?: string
   }
   context?: Context
 }

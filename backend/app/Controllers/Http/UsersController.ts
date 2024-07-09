@@ -20,7 +20,8 @@ export default class UsersController {
         email: request.input('email'),
         password: request.input('password'),
         firstname: request.input('firstname'),
-        lastname: request.input('lastname')
+        lastname: request.input('lastname'),
+        solanaPublicKey: request.input('solanaPublicKey')
       }
     })
   }
