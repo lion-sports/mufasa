@@ -80,8 +80,6 @@ public async create(params: CreateParams): Promise<User> {
       data: params.data,
     })
 
-    console.log(params.data)
-    
     let userCreated = await User.firstOrCreate(
       {
         email: params.data.email,
