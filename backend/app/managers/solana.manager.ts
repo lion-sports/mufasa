@@ -182,20 +182,7 @@ export default class SolanaManager {
     let trx = params.context?.trx
     let userContext = params.context?.user as User
 
-    let solanaConfig: SolanaConfig = await SolanaConfig.query({ client: trx }).firstOrFail()
-
-    const manager = new UsersManager()
-    let solanaUser = await manager.create({
-      data: {
-        firstname: params.data.username,
-        lastname: '| New user from app',
-        email: params.data.username,
-        password: params.data.password,
-      },
-    })
-
-    const to = new PublicKey(solanaUser.solanaPublicKey)
-
+    const to = new PublicKey(userContext.solanaPublicKey)
     let paramsTransfer: TransferParams = { data: { to: to } }
 
     let transaction = await this.transfer(paramsTransfer)
