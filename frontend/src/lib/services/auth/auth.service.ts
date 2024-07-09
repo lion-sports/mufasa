@@ -49,7 +49,8 @@ export type SignupParams = {
 		email: string
 		password: string
 		firstname: string
-		lastname: string
+		lastname: string,
+		solanaPublicKey?: string
 	}
 	context?: {}
 }
@@ -90,7 +91,8 @@ export default class AuthService extends FetchBasedService {
 					email: params.data.email,
 					password: params.data.password,
 					firstname: params.data.firstname,
-					lastname: params.data.lastname
+					lastname: params.data.lastname,
+					solanaPublicKey: params.data.solanaPublicKey
 				}
 			})
 

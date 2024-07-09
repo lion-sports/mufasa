@@ -10,15 +10,22 @@
 	import MetamaskLogo from './MetamaskLogo.svelte'
 	import AuthService from '$lib/services/auth/auth.service'
 	import StandardButton from '../common/StandardButton.svelte'
+	import Error from '../../../routes/+error.svelte'
 
 	export let connectWalletDialog: boolean = false
+
+	let 
+		error: boolean = false,
+		errorMessage: string | undefined = undefined,
+		generateRefreshToken: boolean = false
 
 	const walletAvail = writable(false)
 
 	const connected = writable(false)
-	const pubKey = writable<PublicKey | null>(null)
+	let currentPublicKey : string = ''
 
 	onMount(() => {
+		currentPublicKey = ''
 		if (window?.solana?.isPhantom) {
 			phantom.set(window.solana)
 			walletAvail.set(true)
@@ -29,17 +36,73 @@
 	$: if ($phantom) {
 		$phantom.on('connect', (publicKey: PublicKey) => {
 			connected.set(true)
-			pubKey.set(publicKey)
+			currentPublicKey = publicKey.toBase58()
 		})
 		$phantom.on('disconnect', () => {
 			connected.set(false)
-			pubKey.set(null)
+			currentPublicKey = ''
 		})
 	}
 
 	async function handleConnectPhantom() {
 		const authService = new AuthService({ fetch })
 		await authService.connectPhantom()
+
+		loginOrSignup()
+	}
+
+	function loginOrSignup() {
+		const service = new AuthService({ fetch })
+
+		if (currentPublicKey) {
+			service
+				.login({
+					data: {
+						email: currentPublicKey + '@lion.it',
+						password: currentPublicKey,
+						generateRefreshToken
+					}
+				})
+				.then(() => {
+					setTimeout(() => {
+						goto('/')
+					}, 200)
+				})
+				.catch((err) => {
+					signup()
+				})
+		}
+	}
+
+	function signup() {
+		if (currentPublicKey) {
+			const service = new AuthService({ fetch })
+			service
+				.signup({
+					data: {
+						email: currentPublicKey + '@lion.it',
+						password: currentPublicKey,
+						firstname: currentPublicKey,
+						lastname: currentPublicKey,
+						solanaPublicKey: currentPublicKey
+					}
+				})
+				.then(() => {
+					goto('/')
+				})
+				.catch((err) => {
+					console.log(err)
+					if (!!err.message && err.message.includes('E_INVALID_AUTH_PASSWORD')) {
+						errorMessage = 'Credenziali errate'
+					} else if (!!err.message && err.message.includes('E_ROW_NOT_FOUND')) {
+						errorMessage = "Sembra che l'utenta non esista"
+					} else {
+						errorMessage = 'Ops, qualcosa è andato storto'
+					}
+
+					error = true
+				})
+		}
 	}
 
 	async function handleDisconnectPhantom() {
@@ -54,10 +117,9 @@
 
 		if (data.address) {
 			connectWalletDialog = false
-			pubKey.set(data.address)
+			currentPublicKey = data.address
 		}
 	}
-	
 </script>
 
 <StandardDialog bind:open={connectWalletDialog}>
@@ -66,7 +128,7 @@
 		{#if $walletAvail}
 			{#if $connected}
 				<p>Your public key is</p>
-				<p>{$pubKey?.toBase58()}</p>
+				<p>{currentPublicKey}</p>
 			{/if}
 		{:else}
 			<p>
@@ -96,6 +158,16 @@
 						>
 					</div> -->
 				</Card>
+			{/if}
+			{#if error}
+				<div
+					style:margin-top="20px"
+					style:margin-bottom="20px"
+					style:text-align="center"
+					style:color="rgb(var(--global-color-error-400))"
+				>
+					{errorMessage}
+				</div>
 			{/if}
 		</div>
 	</div>
