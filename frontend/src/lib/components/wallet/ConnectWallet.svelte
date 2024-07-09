@@ -47,8 +47,6 @@
 	async function handleConnectPhantom() {
 		const authService = new AuthService({ fetch })
 		await authService.connectPhantom()
-
-		loginOrSignup()
 	}
 
 	function loginOrSignup() {
@@ -138,9 +136,11 @@
 			</p>
 		{/if}
 
-		<div class="w-full mt-10">
+		<div class="w-full mt-10" style={"display: flex; justify-content: space-between;"}>
 			{#if $connected}
 				<button disabled={!$connected} on:click={handleDisconnectPhantom}>Disconnect</button>
+				<StandardButton disabled={!$connected} on:click={loginOrSignup}>Log In</StandardButton>
+
 			{:else}
 				<Card width="400px" --color="rgb(var(--global-color-contract-900))">
 					<div class="flex items-center justify-between gap-2">
