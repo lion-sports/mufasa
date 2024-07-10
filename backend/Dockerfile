@@ -34,7 +34,7 @@ ENV GOOGLE_CALLBACK_URL=$GOOGLE_CALLBACK_URL
 COPY --chown=node:node ./package*.json ./
 RUN npm ci --production
 COPY --chown=node:node --from=build /home/node/app/build .
-COPY --chown=node:node ./docker-entrypoint.sh ./docker-entrypoint.sh
+COPY --chown=node:node --chmod=+x ./docker-entrypoint.sh ./docker-entrypoint.sh
 EXPOSE $PORT
 ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD [ "dumb-init", "node", "server.js" ]
