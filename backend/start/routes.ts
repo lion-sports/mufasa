@@ -33,7 +33,6 @@ Route.get("/docs", async () => {
 });
 
 Route.post('/auth/login', 'AuthController.login')
-Route.post('/auth/loginFromApp', 'AuthController.loginFromApp')
 Route.post('/auth/refreshToken', 'AuthController.refreshToken')
 Route.post('/auth/signup', 'AuthController.signup')
 Route.post('/auth/logout', 'AuthController.logout').middleware('auth:api')
@@ -119,4 +118,4 @@ Route.post('/convocations/:id/confirm', 'ConvocationsController.confirm').middle
 Route.post('/convocations/:id/deny', 'ConvocationsController.deny').middleware('auth:api')
 
 
-Route.post('/solana/rewardLionToken', 'SolanaController.rewardLionToken')
+Route.post('/solana/rewardLionToken', 'SolanaController.rewardLionToken').middleware('auth:api')
