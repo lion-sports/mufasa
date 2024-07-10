@@ -37,15 +37,15 @@ export type ConfigParams = {
 export type TransferParams = {
   data: {
     to: PublicKey
+    amount: number
   }
   context?: Context
 }
 
 export type RewardTokenParams = {
   data: {
-    username: string
-    password: string
-    uid: string
+    solanaPublicKey: string
+    amount: number
   }
   context?: Context
 }
@@ -144,8 +144,8 @@ export default class SolanaManager {
       const mainSolanaJSONPrivateKey: number[] = JSON.parse(solanaConfig.privateKey)
 
       const mainSolanaKeypair = Keypair.fromSecretKey(new Uint8Array(mainSolanaJSONPrivateKey))
-      const to = params.data.to
 
+      const to = params.data.to
       const mainMintAccount = new PublicKey(solanaConfig.mintAccount)
 
       const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
@@ -162,29 +162,32 @@ export default class SolanaManager {
         to
       )
 
-      let trasnferTX = await transfer(
+      let trasnferTrx = await transfer(
         connection,
         mainSolanaKeypair,
         fromTokenAccount.address,
         toTokenAccount.address,
         mainSolanaKeypair,
-        10e6
+        10
       )
-
-      console.log(trasnferTX)
-      return trasnferTX
+  
+      return trasnferTrx
     } catch (error) {
       throw new Error(error)
     }
   }
 
-  public async rewardLionToken(params: RewardTokenParams) {
+  public async reward(params: RewardTokenParams) {
     let trx = params.context?.trx
     let userContext = params.context?.user as User
 
-    const to = new PublicKey(userContext.solanaPublicKey)
-    let paramsTransfer: TransferParams = { data: { to: to } }
+    const to = new PublicKey(params.data.solanaPublicKey)
+    let paramsTransfer: TransferParams = { data: { to: to, amount: params.data.amount } }
 
     let transaction = await this.transfer(paramsTransfer)
+  }
+
+  public async timeout(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 }

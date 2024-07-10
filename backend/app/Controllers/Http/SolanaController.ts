@@ -7,14 +7,14 @@ export default class SolanaController {
   }
 
 
-public async rewardLionToken({ request }: HttpContextContract
+public async reward({ request }: HttpContextContract
   ) {
     const manager = new SolanaManager()
-    return await manager.rewardLionToken({
+    return await manager.reward({
       data: {
-        username: request.input('username'),
-        password: request.input('password'),
-        uid: request.input('uid')
+        solanaPublicKey: request.input('solanaPublicKey'),
+        amount: request.input('amount'),
+        
       }
     })
   }

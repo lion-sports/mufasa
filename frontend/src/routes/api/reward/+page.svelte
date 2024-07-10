@@ -8,44 +8,29 @@
 	import type { Reward } from '$lib/services/solana/solana.service'
 	import SolanaService from '$lib/services/solana/solana.service'
 
-	let email: string = '',
-		password: string = '',
-		error: boolean = false,
-		errorMessage: string | undefined = undefined,
-		loading: boolean = false,
-		generateRefreshToken: boolean = false
+	let solanaPublicKey: string = '',
+		loading: boolean = false
 
 	function reward() {
-		error = false
-		errorMessage = undefined
 		loading = true
 
 		const service = new SolanaService({ fetch })
+
 		let params: Reward = {
-			username: email,
-			password: password
+			solanaPublicKey: solanaPublicKey,
+			amount: 10e6,
 		}
 
 		service
 			.reward(params)
 			.then(() => {
-				setTimeout(() => {
-					goto('/')
-				}, 200)
+				loading = false
+				alert('reward success')
 			})
 			.catch((err) => {
-				if (!!err.message && err.message.includes('E_INVALID_AUTH_PASSWORD')) {
-					errorMessage = 'Credenziali errate'
-				} else if (!!err.message && err.message.includes('E_ROW_NOT_FOUND')) {
-					errorMessage = "Sembra che l'utenta non esista"
-				} else {
-					errorMessage = 'Ops, qualcosa è andato storto'
-				}
-
-				error = true
-			})
-			.finally(() => {
 				loading = false
+
+				throw new Error(err)
 			})
 	}
 </script>
@@ -57,8 +42,8 @@
 		<form style:margin-top="20px">
 			<div>
 				<LabelAndTextfield
-					label="Email o Username"
-					placeholder="email o username"
+					label="Wallet"
+					placeholder="wallet address"
 					name="email"
 					class={{
 						label: 'box-border w-full',
@@ -66,52 +51,15 @@
 							container: '!box-border !w-full'
 						}
 					}}
-					bind:value={email}
-					{error}
-				/>
-			</div>
-			<div style:margin-top="10px">
-				<LabelAndTextfield
-					label="Password"
-					name="password"
-					type="password"
-					class={{
-						label: 'box-border w-full',
-						input: {
-							container: '!box-border !w-full'
-						}
-					}}
-					bind:value={password}
-					{error}
+					bind:value={solanaPublicKey}
 				/>
 			</div>
 		</form>
-		{#if error}
-			<div
-				style:margin-top="20px"
-				style:margin-bottom="20px"
-				style:text-align="center"
-				style:color="rgb(var(--global-color-error-400))"
-			>
-				{errorMessage}
-			</div>
-		{/if}
-		<div class="mt-4 mb-4">
-			<LabelAndCheckbox label="Remember me" id="remember-me" bind:value={generateRefreshToken} />
-		</div>
 		<div style:margin-top="20px" style:margin-bottom="20px">
 			<StandardButton on:click={reward} {loading} --button-width="100%" class="mt-3"
-				>Get 1 Lion Token</StandardButton
+				>Get 10 Lion Token</StandardButton
 			>
 		</div>
-		<a href="/" class="forgot-password mb-4"> Forgot password? </a>
-		<hr />
-		<div class="text-center mt-4 mb-4">
-			<span class="opacity-50"> Don't have an account? </span>
-			<br />
-			<a href="/auth/signup" style:color="rgb(var(--global-color-primary-400))">Sign up</a>
-		</div>
-		<a href="/auth/signup" style:color="rgb(var(--global-color-primary-400))">Reward</a>
 	</div>
 </div>
 
