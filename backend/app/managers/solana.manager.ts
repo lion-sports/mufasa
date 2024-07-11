@@ -168,7 +168,7 @@ export default class SolanaManager {
         fromTokenAccount.address,
         toTokenAccount.address,
         mainSolanaKeypair,
-        10
+        10e6
       )
   
       return trasnferTrx
