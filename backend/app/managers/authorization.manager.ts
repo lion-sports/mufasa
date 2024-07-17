@@ -11,6 +11,7 @@ import EventSession from 'App/Models/EventSession'
 import Shirt from 'App/Models/Shirt'
 import Scout from 'App/Models/Scout'
 import ScoringSystem from 'App/Models/ScoringSystem'
+import { Context } from './base.manager'
 
 export type GroupedPermissions<Type = boolean> = {
   team: {
@@ -195,12 +196,15 @@ export default class AuthorizationManager {
     if (!params.entities.team?.id) throw new Error('team must be defined')
     let teamId: number = params.entities.team.id
 
-    let userCanUpdateTeam = await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: teamId },
-      action: 'update',
-      resource: 'team'
-    }, context)
+    let userCanUpdateTeam = await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: teamId },
+        action: 'update',
+        resource: 'team'
+      },
+      context
+    })
 
     return userCanUpdateTeam
   }
@@ -214,12 +218,15 @@ export default class AuthorizationManager {
     let teamId: number = params.entities.team.id
     let userId: number = params.entities.user.id
 
-    let userCanRemoveUser = await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: teamId },
-      action: 'removeUser',
-      resource: 'team'
-    }, context)
+    let userCanRemoveUser = await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: teamId },
+        action: 'removeUser',
+        resource: 'team'
+      },
+      context
+    })
 
     return (userCanRemoveUser || params.actor.id == userId)
   }
@@ -263,12 +270,15 @@ export default class AuthorizationManager {
     if (!params.entities.team?.id) throw new Error('team must be defined')
     let teamId: number = params.entities.team.id
     
-    const userCanInvite = await Helpers.userCanInTeam({
-      user: params.actor,
-      team: {id: teamId},
-      resource: 'team',
-      action: 'invite'
-    }, context)
+    const userCanInvite = await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: {id: teamId},
+        resource: 'team',
+        action: 'invite'
+      },
+      context
+    })
 
     return userCanInvite
   }
@@ -372,12 +382,15 @@ export default class AuthorizationManager {
     if (!params.entities.team?.id) throw new Error('team must be defined')
     let teamId: number = params.entities.team.id
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: teamId },
-      action: 'create',
-      resource: 'event'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: teamId },
+        action: 'create',
+        resource: 'event'
+      },
+      context
+    })
   }
 
   private static async _canUpdateTeammate(
@@ -391,12 +404,15 @@ export default class AuthorizationManager {
       .where('id', teammateId)
       .firstOrFail()
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: teammate.teamId },
-      action: 'update',
-      resource: 'teammate'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: teammate.teamId },
+        action: 'update',
+        resource: 'teammate'
+      },
+      context
+    })
   }
 
   private static async _canUpdateEvent(
@@ -414,12 +430,15 @@ export default class AuthorizationManager {
     if (!results) return false
     else event = results
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: event.teamId },
-      action: 'update',
-      resource: 'event'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: event.teamId },
+        action: 'update',
+        resource: 'event'
+      },
+      context
+    })
   }
 
   private static async _canDestroyEvent(
@@ -437,12 +456,15 @@ export default class AuthorizationManager {
     if (!results) return false
     else event = results
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: event.teamId },
-      action: 'destroy',
-      resource: 'event'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: event.teamId },
+        action: 'destroy',
+        resource: 'event'
+      },
+      context
+    })
   }
 
   private static async _canConvocateToEvent(
@@ -460,12 +482,15 @@ export default class AuthorizationManager {
     if(!results) return false
     else event = results
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: event.teamId },
-      action: 'convocate',
-      resource: 'event'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: event.teamId },
+        action: 'convocate',
+        resource: 'event'
+      },
+      context
+    })
   }
 
   private static async _canConfirmConvocation(
@@ -488,13 +513,14 @@ export default class AuthorizationManager {
     
     if(!convocation) return false
 
-    let canConfirmOtherConvocations = await Helpers.userCanInTeam({
-      user: params.actor,
-      team: {
-        id: convocation.event.teamId
+    let canConfirmOtherConvocations = await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: convocation.event.teamId },
+        action: 'confirm',
+        resource: 'convocation'
       },
-      action: 'confirm',
-      resource: 'convocation'
+      context
     })
 
     return convocationBelongsToUser.length != 0 || canConfirmOtherConvocations
@@ -520,13 +546,14 @@ export default class AuthorizationManager {
 
     if (!convocation) return false
 
-    let canConfirmOtherConvocations = await Helpers.userCanInTeam({
-      user: params.actor,
-      team: {
-        id: convocation.event.teamId
+    let canConfirmOtherConvocations = await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: convocation.event.teamId },
+        action: 'deny',
+        resource: 'convocation'
       },
-      action: 'deny',
-      resource: 'convocation'
+      context
     })
 
     return convocationBelongsToUser.length != 0 || canConfirmOtherConvocations
@@ -546,12 +573,15 @@ export default class AuthorizationManager {
 
     if (!teammate) return false
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: teammate.teamId },
-      action: 'create',
-      resource: 'shirt'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: teammate.teamId },
+        action: 'create',
+        resource: 'shirt'
+      },
+      context
+    })
   }
 
   private static async _canUpdateShirt(
@@ -569,12 +599,15 @@ export default class AuthorizationManager {
 
     if (!shirt) return false
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: shirt.teammate.teamId },
-      action: 'update',
-      resource: 'shirt'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: shirt.teammate.teamId },
+        action: 'update',
+        resource: 'shirt'
+      },
+      context
+    })
   }
 
   private static async _canViewShirt(
@@ -592,12 +625,15 @@ export default class AuthorizationManager {
 
     if (!shirt) return false
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: shirt.teammate.teamId },
-      action: 'view',
-      resource: 'shirt'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: shirt.teammate.teamId },
+        action: 'view',
+        resource: 'shirt'
+      },
+      context
+    })
   }
 
   private static async _canDestroyShirt(
@@ -615,12 +651,15 @@ export default class AuthorizationManager {
 
     if (!shirt) return false
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: shirt.teammate.teamId },
-      action: 'destroy',
-      resource: 'shirt'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: shirt.teammate.teamId },
+        action: 'destroy',
+        resource: 'shirt'
+      },
+      context
+    })
   }
 
   private static async _canManageScout(
@@ -651,12 +690,15 @@ export default class AuthorizationManager {
 
     if (!teamId) return false
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: teamId },
-      action: 'manage',
-      resource: 'scout'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: teamId },
+        action: 'manage',
+        resource: 'scout'
+      },
+      context
+    })
   }
 
   private static async _canViewScout(
@@ -682,12 +724,15 @@ export default class AuthorizationManager {
 
     if (!teamId) return false
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: teamId },
-      action: 'view',
-      resource: 'scout'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: teamId },
+        action: 'view',
+        resource: 'scout'
+      },
+      context
+    })
   }
 
   private static async _canViewScoringSystem(
@@ -705,12 +750,15 @@ export default class AuthorizationManager {
     if (!scoringSystem) return false
     if (scoringSystem.createdByUserId == params.actor.id) return true
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: scoringSystem.createdForTeamId },
-      action: 'view',
-      resource: 'scout'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: scoringSystem.createdForTeamId },
+        action: 'view',
+        resource: 'scout'
+      },
+      context
+    })
   }
 
   private static async _canManageScoringSystem(
@@ -728,12 +776,15 @@ export default class AuthorizationManager {
     if (!scoringSystem) return false
     if (scoringSystem.createdByUserId == params.actor.id) return true
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: scoringSystem.createdForTeamId },
-      action: 'manage',
-      resource: 'scout'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: scoringSystem.createdForTeamId },
+        action: 'manage',
+        resource: 'scout'
+      },
+      context
+    })
   }
 
   private static async _canCreateScoringSystem(
@@ -742,42 +793,47 @@ export default class AuthorizationManager {
   ): Promise<boolean> {
     if (!params.entities.team?.id) throw new Error('team id must be defined')
 
-    return await Helpers.userCanInTeam({
-      user: params.actor,
-      team: { id: params.entities.team.id },
-      action: 'manage',
-      resource: 'scout'
-    }, context)
+    return await AuthorizationHelpers.userCanInTeam({
+      data: {
+        user: params.actor,
+        team: { id: params.entities.team.id },
+        action: 'manage',
+        resource: 'scout'
+      },
+      context
+    })
   }
 }
 
 
-class Helpers {
+export class AuthorizationHelpers {
   public static async userCanInTeam<R extends Resource>(
-    params: { 
-      user: User
-      team: { id: number }
-      resource: R
-      action: Action<R>
+    params: {
+      data: {
+        user: User
+        team: { id: number }
+        resource: R
+        action: Action<R>
+      },
+      context?: Context
     },
-    context?: { trx?: TransactionClientContract }
   ): Promise<boolean> {
     const userHasGroup = await User.query({
-      client: context?.trx
+      client: params.context?.trx
     }).whereHas('teams', (builder) => {
       builder
-        .where('teams.id', params.team.id)
+        .where('teams.id', params.data.team.id)
         .where(teamsBuilder => {
           teamsBuilder
             .whereHas('groups', groupsBuilder => {
               groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
-                resource: params.resource,
-                action: params.action.toString()
+                resource: params.data.resource,
+                action: params.data.action.toString()
               })
             })
-            .orWhere('ownerId', params.user.id)
+            .orWhere('ownerId', params.data.user.id)
         })
-    }).where('users.id', params.user.id)
+    }).where('users.id', params.data.user.id)
 
     return userHasGroup.length != 0
   }

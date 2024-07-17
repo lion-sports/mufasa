@@ -6,6 +6,20 @@ import Convocation from './Convocation'
 import Teammate, { Role } from './Teammate'
 import Scout from './Scout'
 
+export type ScoutEventPlayer = {
+  id: Player['id'],
+  convocationId: Player['convocationId'],
+  scoutId: Player['scoutId'],
+  teammateId: Player['teammateId'],
+  aliases: Player['aliases'],
+  role: Player['role'],
+  shirtId: Player['shirtId'],
+  shirtNumber: Player['shirtNumber'],
+  shirtPrimaryColor: Player['shirtPrimaryColor'],
+  shirtSecondaryColor: Player['shirtSecondaryColor'],
+  isOpponent: Player['isOpponent']
+}
+
 export default class Player extends CamelCaseBaseModel {
   @column({ isPrimary: true })
   public id: number

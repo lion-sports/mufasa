@@ -5,6 +5,7 @@
 
   export let values: Role[] = [],
     multiple: boolean = false,
+    roles: Role[] = ROLES,
     height: ComponentProps<StandardAutocomplete>['height'] = undefined
 
   let selectedValues: ComponentProps<StandardAutocomplete>['values'] = []
@@ -19,7 +20,7 @@
 </script>
 
 <StandardAutocomplete
-  items={ROLES.map((v) => {
+  items={roles.map((v) => {
     return {
       value: v,
       label: v

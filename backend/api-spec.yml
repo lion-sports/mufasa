@@ -1188,6 +1188,19 @@ paths:
       responses:
         '200':
           description: No response.
+  /scouts/{scoutId}/importTeammates:
+    post:
+      summary: Import teammates from event convocations into scout players.
+      responses:
+        '200':
+          description: The scout.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
   /scoringSystems:
     post:
       summary: Create a new scoring system.

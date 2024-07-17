@@ -96,6 +96,7 @@ Route.resource('shirts', 'ShirtsController')
   })
 
 Route.get('/scouts/:id/studio', 'ScoutsController.studio').middleware('auth:api')
+Route.post('/scouts/:id/importTeammates', 'ScoutsController.importTeammates').middleware('auth:api')
 Route.resource('scouts', 'ScoutsController')
   .only(['index', 'store', 'update', 'show', 'destroy'])
   .middleware({

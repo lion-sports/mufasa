@@ -1,57 +1,71 @@
 import Mongo from "App/Services/Mongo"
+import { ObjectId } from "mongodb"
 
 export type Sport = 'none' | 'volleyball' | 'basketball'
 
-export type ScoutEventJson = {
-  _id?: string
+export type ScoutEventJson<Type = string, S extends Sport = Sport> = {
+  _id?: ObjectId
   date: Date
   scoutId: number
   teamId: number
-  sport: Sport
+  sport: S
+  type: Type
+  createdByUserId: number
+  points: any
 }
 
 export const SCOUT_EVENT_COLLECTION_NAME = 'scout_events'
 
-export default abstract class ScoutEvent<
-  JsonType extends {
-    sport: Sport
-  } = {
-    sport: 'none'
-  },
-  EventSport extends Sport = 'none'
-> {
-  public _id: string | undefined
+export default abstract class ScoutEvent<Event = '', Type extends string = string, Points = any> {
+  public _id: ObjectId | undefined
   public date: Date
   public scoutId: number
   public teamId: number
+  public sport: Sport
+  public event: Event
+  public createdByUserId: number
+  public points: Points
+  public abstract type: Type
 
-  constructor()
-  constructor(params?: {
-    _id?: string,
-    date: Date,
-    scoutId: number,
-    teamId: number,
-    sport: EventSport
-  }) {
-    if(!!params) {
-      this.date = params.date
-      this.scoutId = params.scoutId
-      this._id = params._id
+  constructor(params: {
+    _id?: ObjectId
+    date: Date
+    scoutId: number
+    teamId: number
+    sport: Sport
+    type: Type
+    points: Points
+    createdByUserId: number
+  } & Event) {
+    this.date = params.date
+    this.scoutId = params.scoutId
+    this.teamId = params.teamId
+    this.sport = params.sport
+    this.createdByUserId = params.createdByUserId
+    this.points = params.points
+    this._id = params._id
+    
+    this.event = {} as Event
+    for(const [key, value] of Object.entries(params)) {
+      if (['_id', 'date', 'scoutId', 'teamId', 'sport', 'type', 'createdByUserId'].includes(key)) continue
+      else this.event[key] = value
     }
   }
 
-  public abstract get sport(): EventSport
-  protected abstract getEventExtraProperties(): JsonType
+  protected abstract getExtraProperties(): Event
 
-  public toJson(): JsonType & ScoutEventJson {
-    let extraProperties = this.getEventExtraProperties()
+  public toJson(): ScoutEventJson & Event {
+    let extraProperties = this.getExtraProperties()
     return {
-      ...extraProperties,
       _id: this._id,
       date: this.date,
       scoutId: this.scoutId,
       teamId: this.teamId,
-      sport: this.sport
+      sport: this.sport,
+      type: this.type,
+      createdByUserId: this.createdByUserId,
+      points: this.points,
+      ...extraProperties,
     }
   }
 
@@ -62,9 +76,22 @@ export default abstract class ScoutEvent<
   public async save() {
     await Mongo.init()
 
-    await Mongo.insertOne({
-      collectionName: SCOUT_EVENT_COLLECTION_NAME,
-      item: this.toJson()
-    })
+    if(!this.persisted) {
+      await Mongo.insertOne({
+        collectionName: SCOUT_EVENT_COLLECTION_NAME,
+        item: this.toJson()
+      })
+    } else {
+      if(!this._id) throw new Error('must have the id')
+
+      await Mongo.db.collection(SCOUT_EVENT_COLLECTION_NAME).updateOne(
+        {
+          _id: this._id,
+        },
+        {
+          $set: this.toJson()
+        }
+      )
+    }
   }
 }

@@ -11,6 +11,7 @@
   import { SelectableVerticalList } from "@likable-hair/svelte"
 	import StandardButton from "$lib/components/common/StandardButton.svelte"
 	import LabelAndCheckbox from "$lib/components/common/LabelAndCheckbox.svelte"
+	import ScoutsService, { ROLES } from "$lib/services/scouts/scouts.service"
 
   export let scout: Scout
 
@@ -25,7 +26,25 @@
   let addTeamPlayerDialog: boolean = false,
     addTeamPlayerSelectedTab: string = 'create',
     addTeamPlayerImportShirts: boolean = true,
-    addTeamPlayerImportRoles: boolean = true
+    addTeamPlayerImportRoles: boolean = true,
+    addTeamPlayerImportAbsents: boolean = false,
+    loadingImportAll: boolean = false
+
+  async function importAllTeammates() {
+    let confirmed = confirm('Vuoi davvero importare tutte le convocazioni?')
+
+    if(confirmed) {
+      loadingImportAll = true
+      let scoutService = new ScoutsService({ fetch })
+      await scoutService.importTeammates({
+        id: scout.id,
+        importAbsents: addTeamPlayerImportAbsents,
+        importRoles: addTeamPlayerImportRoles,
+        importShirts: addTeamPlayerImportShirts
+      })
+      loadingImportAll = false
+    }
+  }
 </script>
 
 <div class="flex gap-2">
@@ -35,11 +54,19 @@
       {#each scout.players as player}
         <div class="flex justify-end items-center gap-4">
           <ScoutRoleAutocomplete
-            values={[]}
+            values={!!player.role ? [player.role] : []}
+            roles={player.teammate.availableRoles || ROLES}
             height="auto"
           ></ScoutRoleAutocomplete>
           <ShirtDropdown
             items={player.teammate.shirts}
+            values={!!player.shirtId ? [{
+              id: player.shirtId,
+              number: player.shirtNumber,
+              primaryColor: player.shirtPrimaryColor || undefined,
+              secondaryColor: player.shirtSecondaryColor || undefined,
+              teammateId: player.teammateId
+            }] : []}
           ></ShirtDropdown>
           <UserAvatar
             src={player.teammate.user.avatarUrl}
@@ -96,22 +123,34 @@
     ></StandardTabSwitcher>
     <div class="mt-4 max-h-[80vh] overflow-auto">
       {#if addTeamPlayerSelectedTab == 'importConvocation'}
-        <div class="mb-2">
-          <LabelAndCheckbox
-            label="Importa maglie"
-            id="import-shirt"
-            bind:value={addTeamPlayerImportShirts}
-          ></LabelAndCheckbox>
+        <div class="flex gap-2 items-center">
+          <div class="mb-2">
+            <LabelAndCheckbox
+              label="Importa maglie"
+              id="import-shirt"
+              bind:value={addTeamPlayerImportShirts}
+            ></LabelAndCheckbox>
+          </div>
+          <div class="mb-2">
+            <LabelAndCheckbox
+              label="Importa ruoli"
+              id="import-shirt"
+              bind:value={addTeamPlayerImportRoles}
+            ></LabelAndCheckbox>
+          </div>
+          <div class="mb-2">
+            <LabelAndCheckbox
+              label="Importa assenti"
+              id="import-absents"
+              bind:value={addTeamPlayerImportAbsents}
+            ></LabelAndCheckbox>
+          </div>
         </div>
-        <div class="mb-2">
-          <LabelAndCheckbox
-            label="Importa ruoli"
-            id="import-shirt"
-            bind:value={addTeamPlayerImportRoles}
-          ></LabelAndCheckbox>
-        </div>
-        <div class="mb-2">
-          <StandardButton>Importa tutti</StandardButton>
+        <div class="mb-2 w-full">
+          <StandardButton
+            on:click={importAllTeammates}
+            --button-width="100%"
+          >Importa tutti</StandardButton>
         </div>
         <div class="flex flex-col gap-1">
           {#each scout.event.convocations as convocation}

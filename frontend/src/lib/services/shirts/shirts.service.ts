@@ -8,8 +8,8 @@ export type Shirt = {
   teammateId: number
   primaryColor?: string
   secondaryColor?: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 export type PaginatedShirts = {

@@ -46,6 +46,45 @@ export default class AppProvider {
   }
 
   public async ready() {
+    if (this.app.environment === 'web' || this.app.environment === 'test') {
+      let { default: Ws } = await import('../app/Services/Ws')
+      let { default: scoutSocket } = await import('App/managers/scout/scouts.socket')
+      let { AuthorizationHelpers } = await import('App/managers/authorization.manager')
+
+      Ws.boot()
+
+      Ws.io.on('connection', async (socket) => {
+        await socket.data.user.load('teams')
+
+        for(let i = 0; i < socket.data.user.teams.length; i += 1) {
+          const team = socket.data.user.teams[i]
+          let canManageScout = await AuthorizationHelpers.userCanInTeam({
+            data: {
+              user: socket.data.user,
+              team: { id: team.id },
+              action: 'manage',
+              resource: 'scout'
+            }
+          })
+
+          if(canManageScout) socket.join(Ws.roomName({ team, namespace: 'scout' }))
+
+          socket.on(Ws.roomName({ team, namespace: `scout:add` }), async (data) => {
+            try {
+              await scoutSocket.handleEvent({
+                event: 'scout:add',
+                data: data,
+                user: socket.data.user
+              })
+            } catch(err) {
+              console.log(err)
+            }
+          })
+        }
+
+      })
+    }
+
     const Db = this.app.container.use('Adonis/Lucid/Database')
     const Orm = this.app.container.use('Adonis/Lucid/Orm')
 

@@ -1,14 +1,14 @@
-import { Context, withTransaction, withUser } from "./base.manager";
+import { Context, withTransaction, withUser } from "../base.manager";
 import { validator } from "@ioc:Adonis/Core/Validator"
 import User from "App/Models/User";
-import AuthorizationManager from "./authorization.manager";
+import AuthorizationManager from "../authorization.manager";
 import FilterModifierApplier, { Modifier } from "App/Services/FilterModifierApplier";
 import { ModelObject } from "@ioc:Adonis/Lucid/Orm";
 import Scout, { Sport } from "App/Models/Scout";
 import Event from "App/Models/Event";
 import { DateTime } from "luxon";
 import { CreateScoutValidator, UpdateScoutValidator } from "App/Validators/scouts";
-import PlayersManager from "./players.manager";
+import PlayersManager from "../players.manager";
 import { ScoutInfoGeneral } from "App/Models/ScoutInfo";
 
 export type ScoutStudio = {
@@ -147,7 +147,10 @@ export default class ScoutsManager {
   @withUser
   public async importTeammates(params: {
     data: {
-      id: number
+      id: number,
+      importShirts?: boolean
+      importRoles?: boolean
+      importAbsents?: boolean
     },
     context?: Context
   }): Promise<{
@@ -187,20 +190,47 @@ export default class ScoutsManager {
     for(let i = 0; i < scout.event.convocations.length; i += 1) {
       let convocation = scout.event.convocations[i]
 
-      if(scout.players.some((p) => p.convocationId == convocation.id))
-        continue
-      else if(scout.players.some((p) => p.teammateId == convocation.teammateId)) {
+      if(!params.data.importAbsents && convocation.confirmationStatus == 'denied') continue
+
+      if(scout.players.some((p) => p.convocationId == convocation.id)) {
+        let player = scout.players.find((p) => p.convocationId == convocation.id)!
+
+        if (params.data.importShirts && !player.shirtId && convocation.teammate.shirts.length > 0) {
+          player.shirtId = convocation.teammate.shirts[0].id
+          player.shirtNumber = convocation.teammate.shirts[0].number
+          player.shirtPrimaryColor = convocation.teammate.shirts[0].primaryColor
+          player.shirtSecondaryColor = convocation.teammate.shirts[0].secondaryColor
+        }
+
+        if (params.data.importRoles && !player.role) {
+          player.role = convocation.teammate.defaultRole
+        }
+
+        await player.save()
+      } else if(scout.players.some((p) => p.teammateId == convocation.teammateId)) {
         let player = scout.players.find((p) => p.teammateId == convocation.teammateId)!
         
         player.convocationId = convocation.id
-        player.save()
+        if (params.data.importShirts && !player.shirtId && convocation.teammate.shirts.length) {
+          player.shirtId = convocation.teammate.shirts[0].id
+          player.shirtNumber = convocation.teammate.shirts[0].number
+          player.shirtPrimaryColor = convocation.teammate.shirts[0].primaryColor
+          player.shirtSecondaryColor = convocation.teammate.shirts[0].secondaryColor
+        }
+
+        if(params.data.importRoles && !player.role) {
+          player.role = convocation.teammate.defaultRole
+        }
+
+        await player.save()
       } else {
         const playerManager = new PlayersManager()
         await playerManager.create({
           data: {
             scoutId: scout.id,
             convocationId: convocation.id,
-            shirtId: convocation.teammate.shirts[0]?.id
+            shirtId: params.data.importShirts ? convocation.teammate.shirts[0]?.id : undefined,
+            role: params.data.importRoles ? convocation.teammate.defaultRole : undefined
           },
           context: {
             trx,

@@ -3,6 +3,7 @@ import type { Convocation } from '../convocations/convocations.service'
 import type { Event } from '../events/events.service'
 import type { ScoringSystem } from '../scoringSystems/scoringSystems.service'
 import type { Teammate } from '../teams/teams.service'
+import type { VolleyballPlayersPosition, VolleyballPoints } from './volleyball'
 
 export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
@@ -34,10 +35,47 @@ export type Player = {
   isOpponent: boolean
 }
 
+export type ScoutEventPlayer = {
+  id: Player['id'],
+  convocationId: Player['convocationId'],
+  scoutId: Player['scoutId'],
+  teammateId: Player['teammateId'],
+  aliases: Player['aliases'],
+  role: Player['role'],
+  shirtId: Player['shirtId'],
+  shirtNumber: Player['shirtNumber'],
+  shirtPrimaryColor: Player['shirtPrimaryColor'],
+  shirtSecondaryColor: Player['shirtSecondaryColor'],
+  isOpponent: Player['isOpponent']
+}
+
+export type VolleyballScoutStash = {
+  points: VolleyballPoints,
+  playersServePositions: VolleyballPlayersPosition,
+  playersReceivePositions: VolleyballPlayersPosition,
+  playersSpikePositions: VolleyballPlayersPosition,
+  playersDefensePositions: VolleyballPlayersPosition,
+  currentSetSubstitutionsMade: {
+    friends: {
+      playerIn: ScoutEventPlayer,
+      playerOut: ScoutEventPlayer
+    }[]
+    enemy: {
+      playerIn: ScoutEventPlayer,
+      playerOut: ScoutEventPlayer
+    }[]
+  },
+  currentSetTimeoutsCalled: {
+    friends: number
+    enemy: number
+  }
+}
+
 export type Scout = {
   id: number
   sport: Sport
   name: string
+  stash: VolleyballScoutStash
   startedAt: Date
   eventId: number
   scoringSystem: ScoringSystem
@@ -47,6 +85,17 @@ export type Scout = {
   scoutInfo: ScoutInfo
   createdAt: Date
   updatedAt: Date
+}
+
+export type ScoutEventJson<Type = string, S extends Sport = Sport> = {
+  _id?: string
+  date: Date
+  scoutId: number
+  teamId: number
+  sport: S
+  type: Type
+  createdByUserId: number
+  points: any
 }
 
 export type ScoutStudio = {
@@ -108,6 +157,20 @@ export default class ScoutsService extends FetchBasedService {
     response.startedAt = new Date(response.startedAt)
     response.createdAt = new Date(response.createdAt)
     response.updatedAt = new Date(response.updatedAt)
+
+    return response
+  }
+
+  public async importTeammates(params: {
+    id: number
+    importShirts?: boolean
+    importRoles?: boolean
+    importAbsents?: boolean
+  }): Promise<{ success: boolean }> {
+    let response = await this.client.post({
+      url: '/scouts/' + params.id + '/importTeammates',
+      body: params
+    })
 
     return response
   }

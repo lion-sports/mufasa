@@ -28,5 +28,9 @@ export default Env.rules({
   MONGO_URL: Env.schema.string.optional(),
   MONGO_DB: Env.schema.string.optional(),
   TELEGRAM_FIPAV_BOT_TOKEN: Env.schema.string.optional(),
-  PUBLIC_URL: Env.schema.string.optional()
+  PUBLIC_URL: Env.schema.string.optional(),
+  REDIS_CONNECTION: Env.schema.enum(['local'] as const),
+  REDIS_HOST: Env.schema.string({ format: 'host' }),
+  REDIS_PORT: Env.schema.number(),
+  REDIS_PASSWORD: Env.schema.string.optional(),
 })

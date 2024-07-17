@@ -11,6 +11,7 @@ test.group('Scouts', (group) => {
   let loggedInUser: User
   let team: Team
   let teammate: Teammate
+  let teammate2: Teammate
   let event: Event
 
   group.setup(async () => {
@@ -24,12 +25,31 @@ test.group('Scouts', (group) => {
     teammate.defaultRole = 'setter'
     await teammate.save()
 
+    await teammate.related('shirts').create({
+      number: 10
+    })
+    await teammate.load('shirts')
+
+    teammate2 = await TeammateFactory.with('user').create()
+    teammate2.teamId = team.id
+    teammate2.defaultRole = 'middleBlocker'
+    await teammate2.save()
+
+    await teammate2.related('shirts').create({
+      number: 23
+    })
+    await teammate2.load('shirts')
+
     event = await EventFactory.create()
     event.teamId = team.id
     await event.save()
 
     await event.related('convocations').create({
       teammateId: teammate.id
+    })
+
+    await event.related('convocations').create({
+      teammateId: teammate2.id
     })
   })
 
@@ -78,7 +98,7 @@ test.group('Scouts', (group) => {
     response.assertAgainstApiSpec()
     assert.equal(scout.name, 'Nome dello scout', 'should have the right name')
     assert.equal(scout.scoringSystemId, scoringSystem.id, 'should have the scoring system')
-    assert.equal(scout.players.length, 1, 'should have created a player with the convocation')
+    assert.equal(scout.players.length, 2, 'should have created a player with the convocation')
     assert.equal(scout.players[0].role, teammate.defaultRole, 'should have created the players with the right role')
     assert.exists(scout.scoutInfo, 'should have created a row of scout info')
     assert.equal(scout.scoutInfo.general.opponent.name, 'Il nome avversario', 'shoud have set the opponent name')
@@ -146,6 +166,50 @@ test.group('Scouts', (group) => {
     assert.equal(scoutResponse.name, 'il nuovo nome dello scout', "should update the scout")
     assert.exists(scoutResponse.scoutInfo, 'should have the row of scout info')
     assert.equal(scoutResponse.scoutInfo.general.opponent.name, 'nome nuovo', 'shoud have set the opponent name')
+  })
+
+  test('import teammates to an existing scout', async ({ client, assert }) => {
+    let createScoutResponse = await client.post('/scouts').json({
+      sport: 'volleyball',
+      name: 'Nome dello scout',
+      startedAt: new Date(),
+      eventId: event.id
+    }).loginAs(loggedInUser)
+
+    let scout = createScoutResponse.body()
+
+    let teammate3 = await TeammateFactory.with('user').create()
+    teammate3.teamId = team.id
+    teammate3.defaultRole = 'oppositeHitter'
+    await teammate3.save()
+
+    await teammate3.related('shirts').create({
+      number: 32
+    })
+    await teammate3.load('shirts')
+
+    await event.related('convocations').create({
+      teammateId: teammate3.id,
+      confirmationStatus: 'confirmed'
+    })
+
+    const response = await client.post('/scouts/' + scout.id + '/importTeammates').json({
+      importShirts: true,
+      importRoles: true,
+      importAbsents: false
+    }).loginAs(loggedInUser)
+
+    response.assertAgainstApiSpec()
+    
+    let scoutFromDatabase = await Scout
+      .query()
+      .where('id', scout.id)
+      .preload('players')
+      .firstOrFail()
+
+    assert.equal(scoutFromDatabase.players.length, 3, 'should have imported all the players')
+    assert.equal(scoutFromDatabase.players.find((p) => p.teammateId == teammate3.id)?.role, teammate3.defaultRole, 'should have imported the default role')
+    assert.equal(scoutFromDatabase.players.find((p) => p.teammateId == teammate3.id)?.shirtNumber, teammate3.shirts[0].number, 'should have imported the default role')
   })
 
   test('destroy an existing scout', async ({ client, assert }) => {

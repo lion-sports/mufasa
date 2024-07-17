@@ -1,5 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import ScoutsManager from 'App/managers/scouts.manager'
+import ScoutsManager from 'App/managers/scout/scouts.manager'
 
 export default class ScoutsController {
   public async index({ request }: HttpContextContract) {
@@ -34,6 +34,18 @@ export default class ScoutsController {
     return await manager.get({
       data: {
         id: params.id
+      }
+    })
+  }
+
+  public async importTeammates({ request, params }: HttpContextContract) {
+    const manager = new ScoutsManager()
+    return await manager.importTeammates({
+      data: {
+        id: params.id,
+        importShirts: request.input('importShirts'),
+        importRoles: request.input('importRoles'),
+        importAbsents: request.input('importAbsents')
       }
     })
   }
