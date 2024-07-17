@@ -1,11 +1,13 @@
 import Env from '@ioc:Adonis/Core/Env';
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User';
+import SolanaManager from 'App/managers/solana.manager';
 import UsersManager from 'App/managers/user.manager';
 import { OAuth2Client } from 'google-auth-library';
 
 export default class AuthController {
   public async login({ auth, request }: HttpContextContract) {
+
     await User.query().where('email', 'ILIKE', request.input('email'))
     let generateRefresh = request.input('generateRefresh')
 
@@ -67,7 +69,8 @@ export default class AuthController {
         email: request.input('email'),
         password: request.input('password'),
         firstname: request.input('firstname'),
-        lastname: request.input('lastname')
+        lastname: request.input('lastname'),
+        solanaPublicKey: request.input('solanaPublicKey')
       }
     })
 
@@ -92,6 +95,7 @@ export default class AuthController {
 
     const googleUser = await google.user()
 
+    
     const user = await User.updateOrCreate({
       email: googleUser.email || undefined,
     }, {
@@ -101,6 +105,12 @@ export default class AuthController {
       avatarUrl: googleUser.avatarUrl || undefined,
       googleToken: googleUser.token.token
     })
+
+    
+    const manager = new SolanaManager();
+    if(!user.solanaPublicKey) {
+      await manager.keygen( { data: {userId: user.id}})
+    }
 
     const token = await auth.use('api').login(user, {
       expiresIn: '7days'
@@ -177,4 +187,6 @@ export default class AuthController {
       throw new Error("Bad token");
     }
   }
+
+  
 }

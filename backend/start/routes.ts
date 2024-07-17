@@ -117,3 +117,6 @@ Route.resource('scoringSystems', 'ScoringSystemsController')
 
 Route.post('/convocations/:id/confirm', 'ConvocationsController.confirm').middleware('auth:api')
 Route.post('/convocations/:id/deny', 'ConvocationsController.deny').middleware('auth:api')
+
+
+Route.post('/solana/reward', 'SolanaController.reward').middleware('auth:api')

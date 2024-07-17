@@ -40,6 +40,12 @@ export default class User extends CamelCaseBaseModel {
   @column({ serializeAs: null })
   public googleToken: string
 
+  @column()
+  public solanaPublicKey: string
+
+  @column()
+  public solanaPrivateKey: string
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
@@ -78,4 +84,15 @@ export default class User extends CamelCaseBaseModel {
   public getDecryptedGoogleToken(): string | null {
     return Encryption.decrypt(this.googleToken)
   }
+
+  // @beforeSave()
+  // public static async encryptSolanaPrivateKey(user: User) {
+  //   if (user.$dirty.solanaPrivateKey) {
+  //     user.solanaPrivateKey = await Encryption.encrypt(user.solanaPrivateKey)
+  //   }
+  // }
+
+  // public getDecryptedSolanaPrivateKey(): string | null {
+  //   return Encryption.decrypt(this.solanaPrivateKey)
+  // }
 }

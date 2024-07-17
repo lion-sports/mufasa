@@ -12,6 +12,30 @@
       "aliases": [],
       "flags": []
     },
+    "init:platform": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/InitPlatform",
+      "commandName": "init:platform",
+      "description": "Initiialize platform",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
+    "token": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/Token",
+      "commandName": "token",
+      "description": "",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
     "dump:rcfile": {
       "settings": {},
       "commandPath": "@adonisjs/core/build/commands/DumpRc",

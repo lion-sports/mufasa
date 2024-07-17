@@ -14,7 +14,7 @@
 	function handleLogoClick() {
 		goto('/')
 	}
-
+ 
 	function handleProfileClick() {
 		goto('/profile')
 	}
