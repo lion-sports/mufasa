@@ -22,9 +22,11 @@
   $: if(!scout.scoutInfo.general.opponent) scout.scoutInfo.general.opponent = {}
 
   function getPlayerFullname(params: { player: Scout['players'][0] }): string {
-    return TeammatesService.getTeammateName({
-      teammate: params.player.teammate
-    })
+    if(!!params.player.teammate) return TeammatesService.getTeammateName({
+        teammate: params.player.teammate,
+        player: params.player
+      })
+    else return 'Non specificato'
   }
 
   let selectedTab: string = 'friends'
@@ -67,25 +69,25 @@
             </div>
             <div class="basis-3/12">
               <UserAvatar
-                src={player.teammate.user.avatarUrl}
+                src={player.teammate?.user.avatarUrl}
                 username={getPlayerFullname({ player })}
                 description={player.role}
                 --descriptive-avatar-image-gap="16px"
               />
             </div>
             <ShirtDropdown
-              items={player.teammate.shirts}
-              values={!!player.shirtId ? [{
+              items={player.teammate?.shirts || []}
+              values={player.shirtNumber !== undefined ? [{
                 id: player.shirtId,
                 number: player.shirtNumber,
                 primaryColor: player.shirtPrimaryColor || undefined,
                 secondaryColor: player.shirtSecondaryColor || undefined,
-                teammateId: player.teammateId
+                teammateId: player.teammateId || undefined
               }] : []}
             ></ShirtDropdown>
             <ScoutRoleAutocomplete
               values={!!player.role ? [player.role] : []}
-              roles={player.teammate.availableRoles || ROLES}
+              roles={player.teammate?.availableRoles || ROLES}
               height="auto"
             ></ScoutRoleAutocomplete>
           </div>

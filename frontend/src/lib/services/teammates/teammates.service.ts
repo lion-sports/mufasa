@@ -1,7 +1,8 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Teammate } from '$lib/services/teams/teams.service'
 import type { User } from '../auth/auth.service';
-import type { Player, Role } from '../scouts/scouts.service';
+import type { Player } from '../players/players.service';
+import type { Role } from '../scouts/scouts.service';
 
 export default class TeammatesService extends FetchBasedService {
 	public async update(params: { 
@@ -56,6 +57,7 @@ export default class TeammatesService extends FetchBasedService {
   }): string {
     let fullnameFromTeammate = [params.teammate.user.firstname, params.teammate.user.lastname].filter(v => !!v).join(' ')
     let aliasFromTeammate = params.teammate.alias
-    return aliasFromTeammate || fullnameFromTeammate
+    let aliasFromPlayer = params.player?.aliases?.[0]
+    return aliasFromPlayer || aliasFromTeammate || fullnameFromTeammate
   }
 }

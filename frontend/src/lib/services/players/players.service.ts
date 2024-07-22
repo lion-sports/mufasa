@@ -6,12 +6,12 @@ import type { Teammate } from '../teams/teams.service'
 
 export type Player = {
   id: number
-  convocationId: number
-  convocation: Convocation
+  convocationId?: number | null
+  convocation?: Convocation
   scoutId: number
   scout: Scout
-  teammateId: number
-  teammate: Teammate
+  teammateId?: number | null
+  teammate?: Teammate
   aliases: string[]
   role: Role
   shirtId: number
@@ -29,8 +29,8 @@ export type PaginatedPlayers = {
 export default class PlayersService extends FetchBasedService {
   public async create(params: {
     scoutId: number
-    convocationId?: number
-    teammateId?: number
+    convocationId?: number | null
+    teammateId?: number | null
     aliases?: string[]
     shirtId?: number
     role?: Role

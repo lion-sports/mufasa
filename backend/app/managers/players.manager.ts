@@ -136,19 +136,23 @@ export default class PlayersManager {
       shirt = teammate.shirts[0]
     }
 
-    if(!teammate) throw new Error('no teammate defined')   
-    
-    let player = await Player.updateOrCreate({
+    let searchPayload: {
+      scoutId: number
+      teammateId?: number | null
+      convocationId?: number | null
+    } = {
       scoutId: scout.id,
-      teammateId: teammate.id,
-      convocationId: validatedData.convocationId
-    }, {
-      aliases: validatedData.aliases || [teammate.alias],
+      teammateId: teammate?.id || null,
+      convocationId: validatedData.convocationId || null
+    }
+
+    let player = await Player.updateOrCreate(searchPayload, {
+      aliases: validatedData.aliases || [ teammate?.alias || '' ],
       shirtId: shirt?.id,
       shirtNumber: validatedData.shirtNumber || shirt?.number,
       shirtPrimaryColor: validatedData.shirtPrimaryColor || shirt?.primaryColor,
       shirtSecondaryColor: validatedData.shirtSecondaryColor || shirt?.secondaryColor,
-      role: validatedData.role || teammate.defaultRole,
+      role: validatedData.role || teammate?.defaultRole,
       isOpponent: validatedData.isOpponent
     }, { client: trx })
 

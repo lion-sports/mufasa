@@ -17,6 +17,7 @@
     importAbsentsActive: boolean = false,
     loadingImportAll: boolean = false,
     loadingImportConvocation: number | undefined = undefined,
+    loadingCreatePlayer: boolean = false,
     newPlayer: Partial<Player> = {
       aliases: []
     },
@@ -54,6 +55,21 @@
   }
 
   $: newPlayer.scoutId = scout.id
+
+  async function createPlayer() {
+    let confirmed = confirm('Sei sicuro di voler creare il giocatore?')
+
+    if(confirmed) {
+      loadingCreatePlayer = true
+      let playerService = new PlayersService({ fetch })
+      await playerService.create({
+        scoutId: scout.id,
+        ...newPlayer
+      })
+      await reload()
+      loadingCreatePlayer = false
+    }
+  }
 </script>
 
 <div class="min-w-[min(95vw,400px)] max-w-[min(95vw,400px)]">
@@ -120,7 +136,7 @@
             </div>
             <div class="ml-auto">
               {#if loadingImportConvocation == convocation.id}
-                <CircularLoader></CircularLoader>
+                <CircularLoader --circular-loader-width="12px" --circular-loader-height="12px"></CircularLoader>
               {:else if scout.players.some((p) => p.convocationId == convocation.id)}
                 <Icon name="mdi-refresh"></Icon>
               {:else}
@@ -146,6 +162,12 @@
           --simple-textfield-background-color="rgb(var(--global-color-background-200))"
           --simple-textfield-width="100%"
         ></StudioPlayerForm>
+      </div>
+      <div class="mt-4">
+        <StandardButton
+          on:click={createPlayer}
+          --button-width="100%"
+        >Crea</StandardButton>
       </div>
     {/if}
   </div>

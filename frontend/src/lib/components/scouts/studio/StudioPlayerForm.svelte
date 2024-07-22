@@ -41,13 +41,12 @@
       label="Numero di maglia"
     ></LabelAndTextfield>
   </div>
-  <div>
-    <LabelAndTextfield
-      bind:value={shirtNumber}
-      type="number"
-      name="player-shirt-number"
-      label="Numero di maglia"
-    ></LabelAndTextfield>
+  <div class="my-2">
+    <LabelAndCheckbox
+      id="player-is-opponent"
+      bind:value={isOpponent}
+      label="Avversario"
+    ></LabelAndCheckbox>
   </div>
   <div class="flex gap-2">
     <div class="flex flex-col gap-2 basis-1/2">
@@ -58,12 +57,5 @@
       <label for="secondary-color">Colore maglia secondario</label>
       <input type="color" name="secondary-color" bind:value={shirtSecondaryColor}/>
     </div>
-  </div>
-  <div class="mt-2">
-    <LabelAndCheckbox
-      id="player-is-opponent"
-      bind:value={isOpponent}
-      label="Avversario"
-    ></LabelAndCheckbox>
   </div>
 </div>

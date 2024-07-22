@@ -25,7 +25,7 @@ export default class Player extends CamelCaseBaseModel {
   public id: number
 
   @column()
-  public convocationId: number
+  public convocationId: number | null
 
   @belongsTo(() => Convocation, {
     foreignKey: 'convocationId'
@@ -41,7 +41,7 @@ export default class Player extends CamelCaseBaseModel {
   public scout: BelongsTo<typeof Scout>
 
   @column()
-  public teammateId: number
+  public teammateId: number | null
 
   @belongsTo(() => Teammate, {
     foreignKey: 'teammateId'

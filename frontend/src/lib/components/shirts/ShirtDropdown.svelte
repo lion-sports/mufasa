@@ -4,18 +4,19 @@
   import { createEventDispatcher, type ComponentProps } from "svelte";
 	import ShirtIcon from "./ShirtIcon.svelte"
 
+  type ShirtWithPartialTeammate = Omit<Shirt, 'teammateId' | 'id'> & { teammateId?: number, id?: number }
   type Item = NonNullable<ComponentProps<Dropdown>['items']>[number]
 
   let dispatch = createEventDispatcher<{
     change: {
-      unselect: Shirt | undefined;
-      select: Shirt | undefined;
-      selection: Shirt[];
+      unselect: ShirtWithPartialTeammate | undefined;
+      select: ShirtWithPartialTeammate | undefined;
+      selection: ShirtWithPartialTeammate[];
     }
   }>()
 
-  export let items: Shirt[] = [],
-    values: Shirt[] = [],
+  export let items: ShirtWithPartialTeammate[] = [],
+    values: ShirtWithPartialTeammate[] = [],
     disabled: boolean = false,
     width: string | undefined = "auto",
     minWidth: string | undefined = "auto",
@@ -24,14 +25,14 @@
   let dropdownValues: ComponentProps<Dropdown>['items'] = []
 
   $: dropdownValues = values.map((e) => ({
-    value: e.id,
+    value: e.id || `${e.number}_${e.primaryColor}_${e.secondaryColor}`,
     data: {
       shirt: e
     }
   }))
 
   $: dropDownItems = items.map((e) => ({
-    value: e.id,
+    value: e.id || `${e.number}_${e.primaryColor}_${e.secondaryColor}`,
     data: {
       shirt: e
     }
