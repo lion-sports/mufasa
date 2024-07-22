@@ -23,7 +23,11 @@ export default class PlayersController {
         teammateId: request.input('teammateId'),
         aliases: request.input('aliases'),
         shirtId: request.input('shirtId'),
-        role: request.input('role')
+        role: request.input('role'),
+        shirtNumber: request.input('shirtNumber'),
+        shirtPrimaryColor: request.input('shirtPrimaryColor'),
+        shirtSecondaryColor: request.input('shirtSecondaryColor'),
+        isOpponent: request.input('isOpponent')
       }
     })
   }
@@ -45,6 +49,9 @@ export default class PlayersController {
         aliases: request.input('aliases'),
         shirtId: request.input('shirtId'),
         role: request.input('role'),
+        shirtNumber: request.input('shirtNumber'),
+        shirtPrimaryColor: request.input('shirtPrimaryColor'),
+        shirtSecondaryColor: request.input('shirtSecondaryColor'),
         isOpponent: request.input('isOpponent')
       }
     })

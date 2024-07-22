@@ -29,5 +29,5 @@
       fill={secondaryColor}
     />
   </svg>
-  <div class="absolute top-[40%] left-[37%] bg-[rgb(var(--global-color-background-100))] leading-tight">{number || ''}</div>
+  <div class="absolute top-[40%] left-[37%] bg-[rgb(var(--global-color-background-100))] text-[rgb(var(--global-color-contrast-900))] leading-tight">{number || ''}</div>
 </div>

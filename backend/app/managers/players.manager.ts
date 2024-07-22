@@ -70,12 +70,15 @@ export default class PlayersManager {
   public async create(params: {
     data: {
       scoutId: number
-      convocationId: number
+      convocationId?: number
       teammateId?: number
       aliases?: string[]
       shirtId?: number
       role?: Role
-      opponent?: boolean
+      shirtNumber?: number
+      shirtPrimaryColor?: string | null
+      shirtSecondaryColor?: string | null
+      isOpponent?: boolean
     },
     context?: Context
   }): Promise<Player> {
@@ -118,29 +121,33 @@ export default class PlayersManager {
     if(!!params.data.convocationId) {
       let convocation = await Convocation.query({ client: trx })
         .where('id', params.data.convocationId)
-        .preload('teammate')
+        .preload('teammate', b => b.preload('shirts'))
         .firstOrFail()
 
       teammate = convocation.teammate
     } else if(!!params.data.teammateId) {
       teammate = await Teammate.query({ client: trx })
+        .preload('shirts')
         .where('id', params.data.teammateId)
         .first()
     }
 
+    if(!!teammate && !shirt) {
+      shirt = teammate.shirts[0]
+    }
+
     if(!teammate) throw new Error('no teammate defined')   
-
-    // TODO check if a player already exists for a teammate
-
-    let player = await Player.create({
+    
+    let player = await Player.updateOrCreate({
       scoutId: scout.id,
       teammateId: teammate.id,
-      convocationId: validatedData.convocationId,
+      convocationId: validatedData.convocationId
+    }, {
       aliases: validatedData.aliases || [teammate.alias],
       shirtId: shirt?.id,
-      shirtNumber: shirt?.number,
-      shirtPrimaryColor: shirt?.primaryColor,
-      shirtSecondaryColor: shirt?.secondaryColor,
+      shirtNumber: validatedData.shirtNumber || shirt?.number,
+      shirtPrimaryColor: validatedData.shirtPrimaryColor || shirt?.primaryColor,
+      shirtSecondaryColor: validatedData.shirtSecondaryColor || shirt?.secondaryColor,
       role: validatedData.role || teammate.defaultRole,
       isOpponent: validatedData.isOpponent
     }, { client: trx })
@@ -194,6 +201,9 @@ export default class PlayersManager {
       aliases?: string[]
       shirtId?: number
       role?: Role
+      shirtNumber?: number
+      shirtPrimaryColor?: string | null
+      shirtSecondaryColor?: string | null
       isOpponent?: boolean
     },
     context?: Context

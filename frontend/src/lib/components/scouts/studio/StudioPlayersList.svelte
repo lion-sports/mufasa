@@ -1,17 +1,21 @@
 <script lang="ts">
-	import StandardDialog from "$lib/components/common/StandardDialog.svelte"
   import UserAvatar from "$lib/components/common/UserAvatar.svelte"
 	import ShirtDropdown from "$lib/components/shirts/ShirtDropdown.svelte"
-	import type { Player, Scout } from "$lib/services/scouts/scouts.service"
+	import type { Scout } from "$lib/services/scouts/scouts.service"
 	import TeammatesService from "$lib/services/teammates/teammates.service"
-	import type { Teammate } from "$lib/services/teams/teams.service"
-	import { Icon } from "@likable-hair/svelte"
+	import { CircularLoader, Icon, TabSwitcher } from "@likable-hair/svelte"
 	import ScoutRoleAutocomplete from "../ScoutRoleAutocomplete.svelte"
-	import StandardTabSwitcher from "$lib/components/common/StandardTabSwitcher.svelte"
-  import { SelectableVerticalList } from "@likable-hair/svelte"
-	import StandardButton from "$lib/components/common/StandardButton.svelte"
-	import LabelAndCheckbox from "$lib/components/common/LabelAndCheckbox.svelte"
-	import ScoutsService, { ROLES } from "$lib/services/scouts/scouts.service"
+	import { ROLES } from "$lib/services/scouts/scouts.service"
+	import { createEventDispatcher } from "svelte"
+	import type { Player } from "@/lib/services/players/players.service"
+	import PlayersService from "@/lib/services/players/players.service"
+	import { reload } from "@/lib/stores/scout/studio"
+
+  let dispatch = createEventDispatcher<{
+    add: {
+      friendsOrOpponents: 'friends' | 'opponents'
+    }
+  }>()
 
   export let scout: Scout
 
@@ -23,163 +27,91 @@
     })
   }
 
-  let addTeamPlayerDialog: boolean = false,
-    addTeamPlayerSelectedTab: string = 'create',
-    addTeamPlayerImportShirts: boolean = true,
-    addTeamPlayerImportRoles: boolean = true,
-    addTeamPlayerImportAbsents: boolean = false,
-    loadingImportAll: boolean = false
+  let selectedTab: string = 'friends'
 
-  async function importAllTeammates() {
-    let confirmed = confirm('Vuoi davvero importare tutte le convocazioni?')
+  let loadingDelete: number | undefined = undefined
+  async function deletePlayer(player: Player) {
+    let confirmed = confirm('sei sicuro di voler eliminare il giocatore?')
 
     if(confirmed) {
-      loadingImportAll = true
-      let scoutService = new ScoutsService({ fetch })
-      await scoutService.importTeammates({
-        id: scout.id,
-        importAbsents: addTeamPlayerImportAbsents,
-        importRoles: addTeamPlayerImportRoles,
-        importShirts: addTeamPlayerImportShirts
-      })
-      loadingImportAll = false
+      loadingDelete = player.id
+      let playerService = new PlayersService({ fetch })
+      await playerService.destroy({ id: player.id })
+      await reload()
+      loadingDelete = undefined
     }
   }
 </script>
 
-<div class="flex gap-2">
-  <div class="basis-5/12">
-    <div class="text-right text-2xl font-bold">{scout.event.team.name}</div>
-    <div class="flex flex-col gap-2 mt-8">
-      {#each scout.players as player}
-        <div class="flex justify-end items-center gap-4">
-          <ScoutRoleAutocomplete
-            values={!!player.role ? [player.role] : []}
-            roles={player.teammate.availableRoles || ROLES}
-            height="auto"
-          ></ScoutRoleAutocomplete>
-          <ShirtDropdown
-            items={player.teammate.shirts}
-            values={!!player.shirtId ? [{
-              id: player.shirtId,
-              number: player.shirtNumber,
-              primaryColor: player.shirtPrimaryColor || undefined,
-              secondaryColor: player.shirtSecondaryColor || undefined,
-              teammateId: player.teammateId
-            }] : []}
-          ></ShirtDropdown>
-          <UserAvatar
-            src={player.teammate.user.avatarUrl}
-            username={getPlayerFullname({ player })}
-            description={player.role}
-            reverse
-            --descriptive-avatar-image-gap="16px"
-          />
-        </div>
-      {/each}
-      <div class="flex justify-center">
-        <button
-          on:click={() => {
-            addTeamPlayerDialog = true
-            addTeamPlayerSelectedTab = 'importConvocation'
-          }}
-        >
-          <Icon name="mdi-plus"></Icon>
-        </button>
-      </div>
-    </div>
-  </div>
-  <div class="w-[24px] text-center basis-2/12 mt-2">
-    vs
-  </div>
-  <div class="basis-5/12 text-2xl font-bold">
-    {#if !!scout.scoutInfo.general.opponent}
-      <input 
-        type="text"
-        placeholder="Avversari"
-        class="bg-transparent border-none outline-none"
-        bind:value={scout.scoutInfo.general.opponent.name}
-      />
-    {/if}
-  </div>
-</div>
+<div class="">
+  <TabSwitcher
+    tabs={[
+      { name: 'friends', label: scout.event.team.name },
+      { name: 'opponents', label: scout.scoutInfo.general.opponent?.name || 'Avversari' }
+    ]}
+    bind:selected={selectedTab}
+  ></TabSwitcher>
 
-<StandardDialog
-  title="Aggiungi giocatore"
-  bind:open={addTeamPlayerDialog}
->
-  <div class="min-w-[min(95vw,400px)] max-w-[min(95vw,400px)]">
-    <StandardTabSwitcher 
-      tabs={[
-        {
-          name: 'importConvocation',
-          label: 'Da convocazioni',
-        }, {
-          name: 'create',
-          label: 'Nuovo',
-        }
-      ]}
-      bind:selected={addTeamPlayerSelectedTab}
-    ></StandardTabSwitcher>
-    <div class="mt-4 max-h-[80vh] overflow-auto">
-      {#if addTeamPlayerSelectedTab == 'importConvocation'}
-        <div class="flex gap-2 items-center">
-          <div class="mb-2">
-            <LabelAndCheckbox
-              label="Importa maglie"
-              id="import-shirt"
-              bind:value={addTeamPlayerImportShirts}
-            ></LabelAndCheckbox>
-          </div>
-          <div class="mb-2">
-            <LabelAndCheckbox
-              label="Importa ruoli"
-              id="import-shirt"
-              bind:value={addTeamPlayerImportRoles}
-            ></LabelAndCheckbox>
-          </div>
-          <div class="mb-2">
-            <LabelAndCheckbox
-              label="Importa assenti"
-              id="import-absents"
-              bind:value={addTeamPlayerImportAbsents}
-            ></LabelAndCheckbox>
-          </div>
-        </div>
-        <div class="mb-2 w-full">
-          <StandardButton
-            on:click={importAllTeammates}
-            --button-width="100%"
-          >Importa tutti</StandardButton>
-        </div>
-        <div class="flex flex-col gap-1">
-          {#each scout.event.convocations as convocation}
-            <button class="flex gap-2 hover:bg-[rgb(var(--global-color-background-400))] p-4 rounded transition-all">
-              <div>
-                {#if convocation.confirmationStatus == 'confirmed' }
-                  <Icon name="mdi-check" --icon-color="rgb(var(--global-color-success))"></Icon>
-                {:else if convocation.confirmationStatus == 'denied'}
-                  <Icon name="mdi-close" --icon-color="rgb(var(--global-color-error-500))"></Icon>
+  {#if selectedTab == 'friends'}
+      <div class="flex flex-col gap-2 mt-8">
+        {#each scout.players as player}
+          <div class="flex items-center gap-4">
+            <div class="pl-2">
+              <button on:click={() => deletePlayer(player)} disabled={loadingDelete !== undefined}>
+                {#if loadingDelete == player.id}
+                  <CircularLoader></CircularLoader>
                 {:else}
-                  <Icon name="mdi-minus" --icon-color="rgb(var(--global-color-primary-400))"></Icon>
+                  <Icon name="mdi-delete" --icon-color="rgb(var(--global-color-error-500))"></Icon>
                 {/if}
-              </div>
-              <div>
-                {TeammatesService.getTeammateName({ teammate: convocation.teammate })}
-              </div>
-              <div class="ml-auto">
-                {#if scout.players.some((p) => p.convocationId == convocation.id)}
-                  <Icon name="mdi-refresh"></Icon>
-                {:else}
-                  <Icon name="mdi-download"></Icon>
-                {/if}
-              </div>
-            </button>
-          {/each}
+              </button>
+            </div>
+            <div class="basis-3/12">
+              <UserAvatar
+                src={player.teammate.user.avatarUrl}
+                username={getPlayerFullname({ player })}
+                description={player.role}
+                --descriptive-avatar-image-gap="16px"
+              />
+            </div>
+            <ShirtDropdown
+              items={player.teammate.shirts}
+              values={!!player.shirtId ? [{
+                id: player.shirtId,
+                number: player.shirtNumber,
+                primaryColor: player.shirtPrimaryColor || undefined,
+                secondaryColor: player.shirtSecondaryColor || undefined,
+                teammateId: player.teammateId
+              }] : []}
+            ></ShirtDropdown>
+            <ScoutRoleAutocomplete
+              values={!!player.role ? [player.role] : []}
+              roles={player.teammate.availableRoles || ROLES}
+              height="auto"
+            ></ScoutRoleAutocomplete>
+          </div>
+        {/each}
+        <div class="flex justify-center">
+          <button
+            on:click={() => {
+              dispatch('add', {
+                friendsOrOpponents: 'friends'
+              })
+            }}
+          >
+            <Icon name="mdi-plus"></Icon>
+          </button>
         </div>
-      {:else if addTeamPlayerSelectedTab == 'create'}
-        create
+      </div>
+  {:else}
+    <div class="mt-2 pl-2">
+      {#if !!scout.scoutInfo.general.opponent}
+        <input 
+          type="text"
+          placeholder="Avversari"
+          class="bg-transparent border-none outline-none text-2xl font-bold"
+          bind:value={scout.scoutInfo.general.opponent.name}
+        />
       {/if}
     </div>
-  </div>
-</StandardDialog>
+  {/if}
+</div>

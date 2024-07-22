@@ -10,7 +10,10 @@ const config = {
 
   kit: {
     adapter:
-      process.env.ADAPTER == 'node' ? adapterNode({ out: 'build' }) : adapterAuto({ out: 'build' })
+      process.env.ADAPTER == 'node' ? adapterNode({ out: 'build' }) : adapterAuto({ out: 'build' }),
+    alias: {
+      "@/*": "./src/*",
+    },
   }
 };
 

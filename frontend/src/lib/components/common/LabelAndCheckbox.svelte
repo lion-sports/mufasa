@@ -7,13 +7,13 @@
 		disabled: boolean = false
 </script>
 
-<div class="container">
+<div class="standard-checkbox-container">
 	<StandardCheckbox bind:value {id} on:change {disabled} />
 	<label style:margin-left="0.7rem" for={id}><slot name="text">{label}</slot></label>
 </div>
 
 <style>
-	.container {
+	.standard-checkbox-container {
 		display: flex;
 		align-items: center;
 	}

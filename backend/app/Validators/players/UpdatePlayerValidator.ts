@@ -11,6 +11,9 @@ export default class UpdatePlayerValidator {
     ])),
     shirtId: schema.number.optional(),
     role: schema.enum.optional(ROLES),
+    shirtNumber: schema.number.optional(),
+    shirtPrimaryColor: schema.string.optional(),
+    shirtSecondaryColor: schema.string.optional(),
     isOpponent: schema.boolean.optional()
   })
 

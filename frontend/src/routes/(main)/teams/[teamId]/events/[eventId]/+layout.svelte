@@ -114,6 +114,7 @@
 			<PageTitle
 				title={$event.name}
 				prependVisible={true}
+        prependRoute={`/teams/${data.team.id}/calendar`}
 			>
 				<svelte:fragment slot="append">
 					{#if !!options && options.length > 0}

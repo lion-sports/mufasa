@@ -1,8 +1,7 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
-import type { Convocation } from '../convocations/convocations.service'
 import type { Event } from '../events/events.service'
 import type { ScoringSystem } from '../scoringSystems/scoringSystems.service'
-import type { Teammate } from '../teams/teams.service'
+import type { Player } from '../players/players.service'
 import type { VolleyballPlayersPosition, VolleyballPoints } from './volleyball'
 
 export const SPORTS = ['volleyball', 'basketball'] as const
@@ -17,23 +16,6 @@ export const ROLES = [
 export type VolleyballRole = typeof VOLLEYBALL_ROLES[number]
 export type BasketballRole = typeof BASKETBALL_ROLES[number]
 export type Role = typeof ROLES[number]
-
-export type Player = {
-  id: number
-  convocationId: number
-  convocation: Convocation
-  scoutId: number
-  scout: Scout
-  teammateId: number
-  teammate: Teammate
-  aliases: string[]
-  role: Role
-  shirtId: number
-  shirtNumber: number
-  shirtPrimaryColor?: string | null
-  shirtSecondaryColor?: string | null
-  isOpponent: boolean
-}
 
 export type ScoutEventPlayer = {
   id: Player['id'],
