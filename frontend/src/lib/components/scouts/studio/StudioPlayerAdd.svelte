@@ -11,7 +11,7 @@
 	import PlayersService from "@/lib/services/players/players.service"
 	import { reload } from "@/lib/stores/scout/studio"
 
-  export let selectedTab: string = 'create',
+  export let selectedTab: string = '',
     importShirtsActive: boolean = true,
     importRolesActive: boolean = true,
     importAbsentsActive: boolean = false,

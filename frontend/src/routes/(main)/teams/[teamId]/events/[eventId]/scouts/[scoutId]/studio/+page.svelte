@@ -35,12 +35,12 @@
           <Menubar.SubTrigger>Nuovo</Menubar.SubTrigger>
           <Menubar.SubContent>
             <Menubar.Item on:click={() => {
-              addPlayerDialog = true
               addPlayerSelectedTab = 'importConvocation'
+              addPlayerDialog = true
             }}>Da convocazione</Menubar.Item>
             <Menubar.Item on:click={() => {
-              addPlayerDialog = true
               addPlayerSelectedTab = 'create'
+              addPlayerDialog = true
             }}>In aggiunta</Menubar.Item>
           </Menubar.SubContent>
         </Menubar.Sub>
