@@ -6,13 +6,17 @@
 	import StandardDialog from '$lib/components/common/StandardDialog.svelte'
 	import StudioPlayerAdd from '$lib/components/scouts/studio/StudioPlayerAdd.svelte'
   import studio from '$lib/stores/scout/studio';
+	import type { Player } from '@/lib/services/players/players.service'
 
   export let data: PageData;
   $: $studio = data.studio
 
   let playersOpened: boolean = false,
     addPlayerDialog: boolean = false,
-    addPlayerSelectedTab: string | undefined = undefined
+    addPlayerSelectedTab: string | undefined = undefined,
+    newPlayer: Partial<Player> = {
+      aliases: []
+    }
 
 </script>
 
@@ -58,9 +62,13 @@
   <div class="p-2">
     <StudioPlayersList 
       scout={$studio.scout}
-      on:add={() => {
+      on:add={(e) => {
         addPlayerDialog = true
-        addPlayerSelectedTab = 'importConvocation'
+        addPlayerSelectedTab = e.detail.friendsOrOpponents == 'opponents' ? 'create' : 'importConvocation'
+        newPlayer = {
+          aliases: [],
+          isOpponent: e.detail.friendsOrOpponents == 'opponents'
+        }
       }}
     ></StudioPlayersList>
   </div>
@@ -72,6 +80,8 @@
 >
   <StudioPlayerAdd
     scout={$studio.scout}
+    bind:newPlayer
     bind:selectedTab={addPlayerSelectedTab}
+    --autocomplete-background-color="rgb(var(--global-color-background-200))"
   ></StudioPlayerAdd>
 </StandardDialog>

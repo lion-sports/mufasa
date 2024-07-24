@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { createEventDispatcher } from "svelte"
+	import { createEventDispatcher, type ComponentProps } from "svelte"
 	import LabelAndTextfield from "$lib/components/common/LabelAndTextfield.svelte"
   import LabelAndCheckbox from "$lib/components/common/LabelAndCheckbox.svelte";
+  import ScoutRoleAutocomplete from "$lib/components/scouts/ScoutRoleAutocomplete.svelte";
+	import { VOLLEYBALL_ROLES, type Role } from "@/lib/services/scouts/scouts.service"
 
   let dispatch = createEventDispatcher<{
     input: {
@@ -14,8 +16,11 @@
     shirtNumber: number | undefined = undefined,
     shirtPrimaryColor: string | null | undefined = undefined,
     shirtSecondaryColor: string | null | undefined = undefined,
-    isOpponent: boolean | undefined = undefined
+    isOpponent: boolean | undefined = undefined,
+    role: Role | undefined = undefined
 
+  let selectedRoles: ComponentProps<ScoutRoleAutocomplete>['values'] = []
+  $: selectedRoles = !!role ? [role] : []
 </script>
 
 
@@ -47,6 +52,16 @@
       bind:value={isOpponent}
       label="Avversario"
     ></LabelAndCheckbox>
+  </div>
+  <div class="my-2">
+    <div class="font-medium mb-2">Ruolo</div>
+    <ScoutRoleAutocomplete
+      roles={[...VOLLEYBALL_ROLES]}
+      values={selectedRoles}
+      on:change={() => {
+        role = selectedRoles[0]
+      }}
+    ></ScoutRoleAutocomplete>
   </div>
   <div class="flex gap-2">
     <div class="flex flex-col gap-2 basis-1/2">

@@ -5,7 +5,7 @@
 		showTitleAndDescription: boolean = true,
     direction: ComponentProps<DescriptiveAvatar>['direction'] = 'row',
     reverse: ComponentProps<DescriptiveAvatar>['reverse'] | undefined = undefined,
-		src: string | undefined
+		src: string | undefined = undefined
 
 	import { Avatar, DescriptiveAvatar } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'

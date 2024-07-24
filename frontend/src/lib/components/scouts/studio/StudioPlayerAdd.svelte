@@ -159,6 +159,7 @@
           bind:shirtPrimaryColor={newPlayer.shirtPrimaryColor}
           bind:shirtSecondaryColor={newPlayer.shirtSecondaryColor}
           bind:isOpponent={newPlayer.isOpponent}
+          bind:role={newPlayer.role}
           --simple-textfield-background-color="rgb(var(--global-color-background-200))"
           --simple-textfield-width="100%"
         ></StudioPlayerForm>
