@@ -1,6 +1,7 @@
 import { ScoutEventPlayer } from "App/Models/Player";
 import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
 import { VolleyballPoints, VolleyballScoutEventPosition } from "./common";
+import PlayersManager from "App/managers/players.manager";
 
 export type PlayerInPositionScoutExtraProperties = {
   playerId: number,
@@ -17,8 +18,15 @@ export default class PlayerInPositionScoutEvent extends ScoutEvent<PlayerInPosit
     if (!params.playerId) params.playerId = params.player.id
     if (!params.playerId) throw new Error('playerId must be defined')
 
-    if (!params.playerIsOpponent) params.playerIsOpponent = params.player.isOpponent
-    if (!params.playerIsOpponent) throw new Error('playerIsOpponent must be defined')
+    if (params.playerIsOpponent === undefined) params.playerIsOpponent = params.player.isOpponent
+    if (params.playerIsOpponent === undefined) throw new Error('playerIsOpponent must be defined')
+
+    let playersManager = new PlayersManager()
+    params.player = playersManager.shrinkPlayer({
+      data: {
+        player: params.player
+      }
+    })
 
     super({
       ...params,

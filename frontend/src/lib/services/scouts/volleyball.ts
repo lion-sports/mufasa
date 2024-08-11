@@ -1,4 +1,5 @@
 import type { ScoutEventJson, ScoutEventPlayer } from "./scouts.service"
+import lodash from 'lodash'
 
 export type VolleyballScoutEventPosition = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -6,16 +7,54 @@ export type VolleyballPoints = {
   friends: {
     points: number
     sets: number
+    won?: boolean
   },
   enemy: {
     points: number
     sets: number
+    won?: boolean
   }
 }
 
+/*
+1    2   3   4     5
+    |----------|   
+6   |7   8   9 |   10
+11  |12  13  14|   15
+16  |17  18  19|   20
+    |----------|
+21   22  23  24    25
+*/
+export type VolleyballScoutEventAnchor = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
+
 export type VolleyballPlayersPosition = {
-  friends: Record<VolleyballScoutEventPosition, ScoutEventPlayer>
-  enemy: Record<VolleyballScoutEventPosition, ScoutEventPlayer>
+  friends: {
+    [Key in VolleyballScoutEventPosition]?: {
+      player: ScoutEventPlayer,
+      anchor?: VolleyballScoutEventAnchor
+    }
+  },
+  enemy: {
+    [Key in VolleyballScoutEventPosition]?: {
+      player: ScoutEventPlayer,
+      anchor?: VolleyballScoutEventAnchor
+    }
+  }
+}
+
+export type VolleyballPlayersDynamicPosition = {
+  friends?: {
+    [Key: number]: {
+      position: VolleyballScoutEventPosition,
+      anchor?: VolleyballScoutEventAnchor
+    }
+  },
+  enemy?: {
+    [Key: number]: {
+      position: VolleyballScoutEventPosition,
+      anchor?: VolleyballScoutEventAnchor
+    }
+  }
 }
 
 export type BlockScoutEventResult = 'handsOut' | 'point' | 'touch' | 'putBack'

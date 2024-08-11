@@ -17,6 +17,7 @@
 		"@playwright/test": "^1.28.1",
 		"@sveltejs/adapter-auto": "^3.1.1",
 		"@sveltejs/kit": "^2.0.0",
+		"@types/lodash": "^4.17.7",
 		"@types/luxon": "^3.2.0",
 		"@types/nprogress": "^0.2.0",
 		"@types/qs": "^6.9.7",
@@ -37,7 +38,7 @@
 		"vitest": "^0.25.3"
 	},
 	"dependencies": {
-		"@likable-hair/svelte": "^3.1.26",
+		"@likable-hair/svelte": "^3.1.41",
 		"@paralleldrive/cuid2": "^2.2.0",
 		"@solana/web3.js": "^1.94.0",
 		"@sveltejs/adapter-node": "^4.0.1",

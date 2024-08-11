@@ -44,7 +44,7 @@ export default class ShirtManager {
       
     
 
-    if (!!params.data.filtersBuilder) {
+    if (!!params.data.filtersBuilder?.modifiers) {
       let filtersApplier = new FilterModifierApplier()
       filtersApplier.applyModifiers(query, params.data.filtersBuilder.modifiers)
     }

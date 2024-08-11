@@ -10,6 +10,13 @@
 	import type { Convocation } from "@/lib/services/convocations/convocations.service"
 	import PlayersService from "@/lib/services/players/players.service"
 	import { reload } from "@/lib/stores/scout/studio"
+	import { createEventDispatcher } from "svelte"
+
+  let dispatch = createEventDispatcher<{
+    'create': {
+      player: Player
+    }
+  }>()
 
   export let selectedTab: string = '',
     importShirtsActive: boolean = true,
@@ -62,12 +69,17 @@
     if(confirmed) {
       loadingCreatePlayer = true
       let playerService = new PlayersService({ fetch })
-      await playerService.create({
+      let player = await playerService.create({
         scoutId: scout.id,
         ...newPlayer
       })
+
       await reload()
       loadingCreatePlayer = false
+
+      dispatch('create', {
+        player
+      })
     }
   }
 </script>
@@ -152,7 +164,11 @@
           name={newPlayer?.aliases?.[0] || ''}
           on:input={(e) => {
             if(e.detail.field == 'name') {
-              newPlayer.aliases = [e.detail.value || '']
+              if(!!e.detail.value) {
+                newPlayer.aliases = [e.detail.value]
+              } else {
+                newPlayer.aliases = []
+              }
             }
           }}
           bind:shirtNumber={newPlayer.shirtNumber}

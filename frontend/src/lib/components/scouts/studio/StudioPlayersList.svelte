@@ -10,6 +10,10 @@
 	import type { Player } from "@/lib/services/players/players.service"
 	import PlayersService from "@/lib/services/players/players.service"
 	import { reload } from "@/lib/stores/scout/studio"
+	import StandardDialog from "../../common/StandardDialog.svelte"
+	import StudioPlayerForm from "./StudioPlayerForm.svelte"
+	import ConfirmOrCancelButtons from "../../common/ConfirmOrCancelButtons.svelte"
+	import ShirtIcon from "../../shirts/ShirtIcon.svelte"
 
   let dispatch = createEventDispatcher<{
     add: {
@@ -53,6 +57,25 @@
     })
     loadingUpdateScoutInfo = false
   }
+
+  let editingPlayer: Player | undefined = undefined,
+    editPlayerDialog: boolean = false,
+    loadingSave: boolean = false
+
+  async function handleSaveEditPlayer() {
+    if(!editingPlayer) return
+
+    loadingSave = true
+
+    let service = new PlayersService({ fetch })
+    await service.update({
+      ...editingPlayer
+    })
+
+    await reload()
+    loadingSave = false
+    editPlayerDialog = false
+  }
 </script>
 
 <div class="">
@@ -67,7 +90,7 @@
   {#if selectedTab == 'friends'}
     <div class="flex flex-col gap-2 mt-8">
       {#each scout.players.filter((p) => !p.isOpponent) as player}
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 hover:bg-[rgb(var(--global-color-background-300))] p-1">
           <div class="pl-2">
             <button on:click={() => deletePlayer(player)} disabled={loadingDelete !== undefined}>
               {#if loadingDelete == player.id}
@@ -77,7 +100,7 @@
               {/if}
             </button>
           </div>
-          <div class="basis-3/12">
+          <div class="flex-grow">
             <UserAvatar
               src={player.teammate?.user.avatarUrl}
               username={getPlayerFullname({ player })}
@@ -85,21 +108,21 @@
               --descriptive-avatar-image-gap="16px"
             />
           </div>
-          <ShirtDropdown
-            items={player.teammate?.shirts || []}
-            values={player.shirtNumber !== undefined ? [{
-              id: player.shirtId,
-              number: player.shirtNumber,
-              primaryColor: player.shirtPrimaryColor || undefined,
-              secondaryColor: player.shirtSecondaryColor || undefined,
-              teammateId: player.teammateId || undefined
-            }] : []}
-          ></ShirtDropdown>
-          <ScoutRoleAutocomplete
-            values={!!player.role ? [player.role] : []}
-            roles={player.teammate?.availableRoles || ROLES}
-            height="auto"
-          ></ScoutRoleAutocomplete>
+          <div>
+            <ShirtIcon
+              number={player.shirtNumber}
+              primaryColor={player.shirtPrimaryColor || 'blue'}
+              secondaryColor={player.shirtSecondaryColor || 'white'}
+            ></ShirtIcon>
+          </div>
+          <div class="flex-shrink pr-4">
+            <button on:click={() => {
+              editPlayerDialog = true
+              editingPlayer = player
+            }}>
+              <Icon name="mdi-pencil"></Icon>
+            </button>
+          </div>
         </div>
       {/each}
       <div class="flex justify-center">
@@ -136,8 +159,8 @@
       {/if}
       <div class="flex flex-col gap-2 mt-8">
         {#each scout.players.filter((p) => p.isOpponent) as opponentPlayer}
-          <div class="flex items-center gap-4">
-            <div class="pl-2">
+          <div class="flex items-center gap-4 hover:bg-[rgb(var(--global-color-background-300))] p-1">
+            <div class="pl-2 flex-shrink">
               <button on:click={() => deletePlayer(opponentPlayer)} disabled={loadingDelete !== undefined}>
                 {#if loadingDelete == opponentPlayer.id}
                   <CircularLoader></CircularLoader>
@@ -146,12 +169,31 @@
                 {/if}
               </button>
             </div>
-            <div class="basis-3/12">
-              <UserAvatar
-                username={getPlayerFullname({ player: opponentPlayer })}
-                description={opponentPlayer.role}
-                --descriptive-avatar-image-gap="16px"
-              />
+            <div class="flex-grow">
+              {#if !!getPlayerFullname({ player: opponentPlayer })}
+                <UserAvatar
+                  username={getPlayerFullname({ player: opponentPlayer })}
+                  description={opponentPlayer.role}
+                  --descriptive-avatar-image-gap="16px"
+                />
+              {:else if !!opponentPlayer.role}
+                <div class="text-xl">{opponentPlayer.role}</div>
+              {/if}
+            </div>
+            <div class="flex-shrink">
+              <ShirtIcon
+                number={opponentPlayer.shirtNumber}
+                primaryColor={opponentPlayer.shirtPrimaryColor || 'blue'}
+                secondaryColor={opponentPlayer.shirtSecondaryColor || 'white'}
+              ></ShirtIcon>
+            </div>
+            <div class="flex-shrink pr-4">
+              <button on:click={() => {
+                editPlayerDialog = true
+                editingPlayer = opponentPlayer
+              }}>
+                <Icon name="mdi-pencil"></Icon>
+              </button>
             </div>
           </div>
         {/each}
@@ -170,3 +212,34 @@
     </div>
   {/if}
 </div>
+
+<StandardDialog
+  title={!!editingPlayer ? getPlayerFullname({ player: editingPlayer }) : 'Modifica giocatore'}
+  bind:open={editPlayerDialog}
+>
+  {#if editingPlayer !== undefined}
+    <StudioPlayerForm
+      name={editingPlayer?.aliases?.[0] || getPlayerFullname({ player: editingPlayer })}
+      on:input={(e) => {
+        if(e.detail.field == 'name' && !!editingPlayer) {
+          editingPlayer.aliases = [e.detail.value || '']
+          editingPlayer.aliases = editingPlayer.aliases.filter(e => !!e)
+        }
+      }}
+      bind:shirtNumber={editingPlayer.shirtNumber}
+      bind:shirtPrimaryColor={editingPlayer.shirtPrimaryColor}
+      bind:shirtSecondaryColor={editingPlayer.shirtSecondaryColor}
+      bind:isOpponent={editingPlayer.isOpponent}
+      bind:role={editingPlayer.role}
+    ></StudioPlayerForm>
+  {/if}
+  <ConfirmOrCancelButtons
+    confirmText="Salva"
+    on:confirm-click={handleSaveEditPlayer}
+    on:cancel-click={() => {
+      editPlayerDialog = false
+      editingPlayer = undefined
+    }}
+    loading={loadingSave}
+  ></ConfirmOrCancelButtons>
+</StandardDialog>

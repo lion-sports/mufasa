@@ -3,6 +3,8 @@ import ScoutEvent from "./ScoutEvent"
 import Scout from "App/Models/Scout"
 import { AuthorizationHelpers } from "../authorization.manager"
 import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT, VolleyballScoutEventJson } from "./events/volleyball/VolleyballScoutEvent"
+import ScoutsManager from "./scouts.manager"
+import { FIRST_POINT } from "./events/volleyball/common"
 
 export type ScoutSocketEventMapping = {
   'scout:add': VolleyballScoutEventJson
@@ -36,20 +38,42 @@ class ScoutSocket {
     }
 
     if(params.event == 'scout:add') {
-      this.handleAdd({ scoutEvent: params.data, user: params.user })
+      await this.handleAdd({ scoutEvent: params.data, user: params.user, scout })
     }
   }
 
   private async handleAdd(params: {
-    scoutEvent: VolleyballScoutEventJson,
+    scoutEvent: VolleyballScoutEventJson
+    scout: Scout
     user: User
   }) {
+    if (!params.scoutEvent.points) params.scoutEvent.points = params.scout.stash?.points
+    if (!params.scoutEvent.points) params.scoutEvent.points = FIRST_POINT
+
     let Cl = TYPE_TO_VOLLEYBALL_SCOUT_EVENT[params.scoutEvent.type]
     let event = new Cl({ 
       ...params.scoutEvent,
       createdByUserId: params.user.id
     })
+    await event.preReceived({ 
+      data: {
+        scout: params.scout
+      }
+    })
     await event.save()
+    await event.postReceived({
+      data: {
+        scout: params.scout
+      }
+    })
+
+    let scoutManager = new ScoutsManager()
+    await scoutManager.recalculateStash({ 
+      data: { id: params.scout.id },
+      context: {
+        user: params.user
+      }
+    })
   }
 }
 

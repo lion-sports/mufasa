@@ -5,11 +5,19 @@ import Shirt from './Shirt'
 import Convocation from './Convocation'
 import Teammate, { Role } from './Teammate'
 import Scout from './Scout'
+import User from './User'
 
 export type ScoutEventPlayer = {
   id: Player['id'],
   convocationId: Player['convocationId'],
   scoutId: Player['scoutId'],
+  teammate: {
+    alias?: Teammate['alias'],
+    user: {
+      firstname: User['firstname'],
+      lastname: User['lastname']
+    }
+  },
   teammateId: Player['teammateId'],
   aliases: Player['aliases'],
   role: Player['role'],

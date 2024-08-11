@@ -20,7 +20,11 @@
     role: Role | undefined = undefined
 
   let selectedRoles: ComponentProps<ScoutRoleAutocomplete>['values'] = []
-  $: selectedRoles = !!role ? [role] : []
+  $: if(role !== undefined) {
+    selectedRoles = [role] 
+  } else selectedRoles = []
+
+  $: console.log({selectedRoles})
 </script>
 
 
@@ -58,8 +62,8 @@
     <ScoutRoleAutocomplete
       roles={[...VOLLEYBALL_ROLES]}
       values={selectedRoles}
-      on:change={() => {
-        role = selectedRoles[0]
+      on:change={(e) => {
+        role = e.detail.selection[0]?.value
       }}
     ></ScoutRoleAutocomplete>
   </div>

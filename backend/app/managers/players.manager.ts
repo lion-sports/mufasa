@@ -5,7 +5,7 @@ import AuthorizationManager from "./authorization.manager";
 import FilterModifierApplier, { Modifier } from "App/Services/FilterModifierApplier";
 import { ModelAttributes, ModelObject } from "@ioc:Adonis/Lucid/Orm";
 import Scout from "App/Models/Scout";
-import Player from "App/Models/Player";
+import Player, { ScoutEventPlayer } from "App/Models/Player";
 import { CreatePlayerValidator, UpdatePlayerValidator } from "App/Validators/players";
 import Teammate, { Role } from "App/Models/Teammate";
 import Convocation from "App/Models/Convocation";
@@ -136,25 +136,33 @@ export default class PlayersManager {
       shirt = teammate.shirts[0]
     }
 
-    let searchPayload: {
-      scoutId: number
-      teammateId?: number | null
-      convocationId?: number | null
-    } = {
-      scoutId: scout.id,
-      teammateId: teammate?.id || null,
-      convocationId: validatedData.convocationId || null
+    let player: Player
+    if(!!teammate) {
+      player = await Player.updateOrCreate({
+          scoutId: scout.id,
+          teammateId: teammate?.id,
+          convocationId: validatedData.convocationId || null
+        }, {
+          aliases: validatedData.aliases || [ teammate?.alias || '' ],
+          shirtId: shirt?.id,
+          shirtNumber: validatedData.shirtNumber || shirt?.number,
+          shirtPrimaryColor: validatedData.shirtPrimaryColor || shirt?.primaryColor,
+          shirtSecondaryColor: validatedData.shirtSecondaryColor || shirt?.secondaryColor,
+          role: validatedData.role || teammate?.defaultRole,
+          isOpponent: validatedData.isOpponent
+      }, { client: trx })
+    } else {
+      player = await Player.create({
+        scoutId: scout.id,
+        aliases: validatedData.aliases || [''],
+        shirtId: shirt?.id,
+        shirtNumber: validatedData.shirtNumber || shirt?.number,
+        shirtPrimaryColor: validatedData.shirtPrimaryColor || shirt?.primaryColor,
+        shirtSecondaryColor: validatedData.shirtSecondaryColor || shirt?.secondaryColor,
+        role: validatedData.role,
+        isOpponent: validatedData.isOpponent
+      })
     }
-
-    let player = await Player.updateOrCreate(searchPayload, {
-      aliases: validatedData.aliases || [ teammate?.alias || '' ],
-      shirtId: shirt?.id,
-      shirtNumber: validatedData.shirtNumber || shirt?.number,
-      shirtPrimaryColor: validatedData.shirtPrimaryColor || shirt?.primaryColor,
-      shirtSecondaryColor: validatedData.shirtSecondaryColor || shirt?.secondaryColor,
-      role: validatedData.role || teammate?.defaultRole,
-      isOpponent: validatedData.isOpponent
-    }, { client: trx })
 
     return player
   }
@@ -241,7 +249,10 @@ export default class PlayersManager {
 
     let playerData: Partial<ModelAttributes<Player>> = {
       aliases: validatedData.aliases,
-      role: validatedData.role
+      role: validatedData.role,
+      shirtNumber: validatedData.shirtNumber,
+      shirtPrimaryColor: validatedData.shirtPrimaryColor,
+      shirtSecondaryColor: validatedData.shirtSecondaryColor
     }
 
     if(!!validatedData.shirtId) {
@@ -297,5 +308,32 @@ export default class PlayersManager {
     await Player.query({ client: trx })
       .where('id', params.data.id)
       .del()
+  }
+
+  public shrinkPlayer(params: {
+    data: {
+      player: Player | ScoutEventPlayer
+    }
+  }): ScoutEventPlayer {
+    return {
+      id: params.data.player.id,
+      convocationId: params.data.player.convocationId,
+      teammate: {
+        alias: params.data.player.teammate?.alias,
+        user: {
+          firstname: params.data.player.teammate?.user?.firstname,
+          lastname: params.data.player.teammate?.user?.lastname
+        }
+      },
+      scoutId: params.data.player.scoutId,
+      teammateId: params.data.player.teammateId,
+      aliases: params.data.player.aliases,
+      role: params.data.player.role,
+      shirtId: params.data.player.shirtId,
+      shirtNumber: params.data.player.shirtNumber,
+      shirtPrimaryColor: params.data.player.shirtPrimaryColor,
+      shirtSecondaryColor: params.data.player.shirtSecondaryColor,
+      isOpponent: params.data.player.isOpponent
+    }
   }
 }

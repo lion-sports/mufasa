@@ -10,6 +10,14 @@ import { DateTime } from "luxon";
 import { CreateScoutValidator, UpdateScoutValidator } from "App/Validators/scouts";
 import PlayersManager from "../players.manager";
 import { ScoutInfoGeneral } from "App/Models/ScoutInfo";
+import Mongo from "App/Services/Mongo";
+import { SCOUT_EVENT_COLLECTION_NAME } from "./ScoutEvent";
+import { FIRST_POINT, VolleyballPlayersPosition, VolleyballPoints, VolleyballScoutEventPosition } from "./events/volleyball/common";
+import TeamRotationScoutEvent, { TeamRotationScoutEventJson } from "./events/volleyball/TeamRotationScoutEvent";
+import { TimeoutScoutEventJson } from "./events/volleyball/TimeoutScoutEvent";
+import PlayerSubstitutionScoutEvent, { PlayerSubstitutionScoutEventJson } from "./events/volleyball/PlayerSubstitutionScoutEvent";
+import PlayerInPositionScoutEvent, { PlayerInPositionScoutEventJson } from "./events/volleyball/PlayerInPositionScoutEvent";
+import { ScoutEventPlayer } from "App/Models/Player";
 
 export type ScoutStudio = {
   scout: Scout
@@ -281,6 +289,7 @@ export default class ScoutsManager {
           )
       )
       .preload('players', b => b
+        .orderBy(['players.shirtNumber', 'players.createdAt'])
         .preload('convocation')
         .preload('shirt')
         .preload('teammate', b => b.preload('user').preload('shirts'))
@@ -427,5 +436,207 @@ export default class ScoutsManager {
     return {
       scout
     }
+  }
+
+  @withTransaction
+  @withUser
+  public async recalculateStash(params: {
+    data: {
+      id: number
+    },
+    context?: Context
+  }): Promise<Scout> {
+    let trx = params.context?.trx
+    let user = params.context?.user as User
+
+    let scout = await Scout.query({ client: trx })
+      .where('id', params.data.id)
+      .firstOrFail()
+
+    await Mongo.init()
+
+
+    let lastPoint = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        newPoints: VolleyballPoints
+      }>([
+        {
+          $match: {
+            scoutId: params.data.id,
+            type: 'pointScored'
+          },
+        },
+        {
+          $sort: {
+            date: -1
+          }
+        },
+        {
+          $limit: 1
+        }
+      ])
+      .toArray()
+
+    if(!scout.stash) scout.stash = {}
+    if(lastPoint.length != 0) {
+      scout.stash.points = lastPoint[0].newPoints
+    } else {
+      scout.stash.points = FIRST_POINT
+    }
+
+    let lastPosition = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<TeamRotationScoutEventJson>([
+        {
+          $match: {
+            scoutId: params.data.id,
+            type: 'teamRotation'
+          },
+        },
+        {
+          $sort: {
+            date: -1
+          }
+        },
+        {
+          $limit: 1
+        }
+      ])
+      .toArray()
+
+    let lastPositionFound: VolleyballPlayersPosition | undefined = undefined
+    if (lastPosition.length != 0) {
+      lastPositionFound = lastPosition[0].newPositions
+    } else {
+      let lastPlayerInPositionEvents = await Mongo.db
+        .collection(SCOUT_EVENT_COLLECTION_NAME)
+        .aggregate<{
+          _id: number,
+          lastPlayer: ScoutEventPlayer
+          lastPosition: VolleyballScoutEventPosition
+        }>([
+          {
+            $match: {
+              scoutId: params.data.id,
+              type: 'playerInPosition',
+              $and: [
+                { 'points.friends.sets': scout.stash.points.friends.sets },
+                { 'points.enemy.sets': scout.stash.points.enemy.sets },
+              ]
+            },
+          },
+          {
+            $sort: {
+              date: -1
+            }
+          },
+          {
+            $group: {
+              _id: '$playerId',
+              lastPosition: {
+                $last: "$position"
+              },
+              lastPlayer: {
+                $last: "$player"
+              }
+            }
+          }
+        ])
+        .toArray()
+
+      lastPositionFound = {
+        friends: {},
+        enemy: {}
+      }
+
+      for(let i = 0; i < lastPlayerInPositionEvents.length; i += 1) {
+        if (lastPlayerInPositionEvents[i].lastPlayer.isOpponent) {
+          lastPositionFound.enemy[lastPlayerInPositionEvents[i].lastPosition] = {
+            player: lastPlayerInPositionEvents[i].lastPlayer
+          }
+        } else {
+          lastPositionFound.friends[lastPlayerInPositionEvents[i].lastPosition] = {
+            player: lastPlayerInPositionEvents[i].lastPlayer
+          }
+        }
+      }
+    }
+    if(!!lastPositionFound) {
+      let positions = TeamRotationScoutEvent.getPlayersPositions({
+        positions: lastPositionFound
+      })
+
+      scout.stash.playersDefenseBreakPositions = positions.playersDefenseBreakPositions
+      scout.stash.playersDefenseSideOutPositions = positions.playersDefenseSideoutPositions
+      scout.stash.playersReceivePositions = positions.playersReceivePositions
+      scout.stash.playersServePositions = positions.playersServePositions
+    }
+
+    let lastsTimeoutsEvents = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<TimeoutScoutEventJson>([
+        {
+          $match: {
+            scoutId: params.data.id,
+            type: 'timeout',
+            $and: [
+              { 'points.friends.sets': scout.stash.points.friends.sets },
+              { 'points.enemy.sets': scout.stash.points.enemy.sets },
+            ]
+          },
+        },
+        {
+          $sort: {
+            date: -1
+          }
+        },
+        {
+          $limit: 1
+        }
+      ])
+      .toArray()
+
+    scout.stash.currentSetTimeoutsCalled = {
+      enemy: lastsTimeoutsEvents.filter((e) => e.opponent).length,
+      friends: lastsTimeoutsEvents.filter((e) => !e.opponent).length
+    }
+
+    let lastsSubstitutionsEvents = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<PlayerSubstitutionScoutEventJson>([
+        {
+          $match: {
+            scoutId: params.data.id,
+            type: 'playerSubstitution',
+            $and: [
+              { 'points.friends.sets': scout.stash.points.friends.sets },
+              { 'points.enemy.sets': scout.stash.points.enemy.sets },
+            ]
+          },
+        },
+        {
+          $sort: {
+            date: -1
+          }
+        },
+        {
+          $limit: 1
+        }
+      ])
+      .toArray()
+
+    scout.stash.currentSetSubstitutionsMade = {
+      friends: lastsSubstitutionsEvents.filter((lse) => !lse.playerIsOpponent).map((lse) => ({
+        playerIn: lse.playerIn,
+        playerOut: lse.player
+      })),
+      enemy: lastsSubstitutionsEvents.filter((lse) => lse.playerIsOpponent).map((lse) => ({
+        playerIn: lse.playerIn,
+        playerOut: lse.player
+      }))
+    }
+    await scout.save()
+    return scout
   }
 }

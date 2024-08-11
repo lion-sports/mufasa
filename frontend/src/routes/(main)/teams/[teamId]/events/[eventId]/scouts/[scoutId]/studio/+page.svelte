@@ -5,8 +5,12 @@
 	import { Drawer, Icon } from '@likable-hair/svelte'
 	import StandardDialog from '$lib/components/common/StandardDialog.svelte'
 	import StudioPlayerAdd from '$lib/components/scouts/studio/StudioPlayerAdd.svelte'
-  import studio from '$lib/stores/scout/studio';
+  import studio, { add, playerInPosition } from '$lib/stores/scout/studio';
 	import type { Player } from '@/lib/services/players/players.service'
+	import StudioField from '@/lib/components/scouts/studio/StudioField.svelte'
+	import StudioStartingSixSetter from '@/lib/components/scouts/studio/StudioStartingSixSetter.svelte'
+	import type { VolleyballScoutEventPosition } from '@/lib/services/scouts/volleyball'
+	import type { ScoutEventPlayer } from '@/lib/services/scouts/scouts.service'
 
   export let data: PageData;
   $: $studio = data.studio
@@ -16,8 +20,18 @@
     addPlayerSelectedTab: string | undefined = undefined,
     newPlayer: Partial<Player> = {
       aliases: []
-    }
+    },
+    insertStartingSixDialog: boolean = false,
+    insertStartingSixSelectedTab: string | undefined = undefined
 
+  async function handleStartingSixSet(e: CustomEvent<{ position: VolleyballScoutEventPosition, player: ScoutEventPlayer | undefined }>) {
+    if(!!e.detail.player)
+    
+    await playerInPosition({
+      position: e.detail.position,
+      player: e.detail.player
+    })
+  }
 </script>
 
 <div class="p-2">
@@ -48,9 +62,28 @@
             }}>In aggiunta</Menubar.Item>
           </Menubar.SubContent>
         </Menubar.Sub>
+        <Menubar.Sub>
+          <Menubar.SubTrigger>Formazione</Menubar.SubTrigger>
+          <Menubar.SubContent>
+            <Menubar.Item on:click={() => {
+              insertStartingSixDialog = true
+              insertStartingSixSelectedTab = 'friends'
+            }}>Amici</Menubar.Item>
+            <Menubar.Item on:click={() => {
+              insertStartingSixDialog = true
+              insertStartingSixSelectedTab = 'opponents'
+            }}>Avversari</Menubar.Item>
+          </Menubar.SubContent>
+        </Menubar.Sub>
       </Menubar.Content>
     </Menubar.Menu>
   </Menubar.Root>
+</div>
+
+<div class="w-full">
+  <StudioField
+    scout={$studio.scout}
+  ></StudioField>
 </div>
 
 <Drawer 
@@ -83,5 +116,20 @@
     bind:newPlayer
     bind:selectedTab={addPlayerSelectedTab}
     --autocomplete-background-color="rgb(var(--global-color-background-200))"
+    on:create={() => {
+      addPlayerDialog = false
+    }}
   ></StudioPlayerAdd>
+</StandardDialog>
+
+<StandardDialog
+  title="Inserisci formazione"
+  bind:open={insertStartingSixDialog}
+>
+  <StudioStartingSixSetter
+    bind:selectedTab={insertStartingSixSelectedTab}
+    players={$studio.scout.players}
+    playersPosition={$studio.scout.stash?.playersServePositions}
+    on:change={handleStartingSixSet}
+  ></StudioStartingSixSetter>
 </StandardDialog>

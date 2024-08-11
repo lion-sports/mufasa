@@ -5,18 +5,18 @@ import Event from 'App/Models/Event'
 import Player, { ScoutEventPlayer } from './Player'
 import ScoringSystem from './ScoringSystem'
 import ScoutInfo from './ScoutInfo'
-import { VolleyballPlayersPosition, VolleyballPoints } from 'App/managers/scout/events/volleyball/common'
+import { VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from 'App/managers/scout/events/volleyball/common'
 
 export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
 
 export type VolleyballScoutStash = {
-  points: VolleyballPoints,
-  playersServePositions: VolleyballPlayersPosition,
-  playersReceivePositions: VolleyballPlayersPosition,
-  playersSpikePositions: VolleyballPlayersPosition,
-  playersDefensePositions: VolleyballPlayersPosition,
-  currentSetSubstitutionsMade: {
+  points?: VolleyballPoints,
+  playersServePositions?: VolleyballPlayersPosition,
+  playersReceivePositions?: VolleyballPlayersDynamicPosition,
+  playersDefenseBreakPositions?: VolleyballPlayersPosition,
+  playersDefenseSideOutPositions?: VolleyballPlayersPosition,
+  currentSetSubstitutionsMade?: {
     friends: {
       playerIn: ScoutEventPlayer,
       playerOut: ScoutEventPlayer
@@ -26,7 +26,7 @@ export type VolleyballScoutStash = {
       playerOut: ScoutEventPlayer
     }[]
   },
-  currentSetTimeoutsCalled: {
+  currentSetTimeoutsCalled?: {
     friends: number
     enemy: number
   }

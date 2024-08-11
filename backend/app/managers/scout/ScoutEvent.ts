@@ -1,5 +1,7 @@
 import Mongo from "App/Services/Mongo"
 import { ObjectId } from "mongodb"
+import { Context } from "../base.manager"
+import Scout from "App/Models/Scout"
 
 export type Sport = 'none' | 'volleyball' | 'basketball'
 
@@ -16,7 +18,12 @@ export type ScoutEventJson<Type = string, S extends Sport = Sport> = {
 
 export const SCOUT_EVENT_COLLECTION_NAME = 'scout_events'
 
-export default abstract class ScoutEvent<Event = '', Type extends string = string, Points = any> {
+export default abstract class ScoutEvent<
+  Event = '', 
+  Type extends string = string, 
+  Points = any, 
+  ExtraProperties = Event
+> {
   public _id: ObjectId | undefined
   public date: Date
   public scoutId: number
@@ -52,9 +59,9 @@ export default abstract class ScoutEvent<Event = '', Type extends string = strin
     }
   }
 
-  protected abstract getExtraProperties(): Event
+  protected abstract getExtraProperties(): ExtraProperties
 
-  public toJson(): ScoutEventJson & Event {
+  public toJson(): ScoutEventJson & ExtraProperties {
     let extraProperties = this.getExtraProperties()
     return {
       _id: this._id,
@@ -94,4 +101,18 @@ export default abstract class ScoutEvent<Event = '', Type extends string = strin
       )
     }
   }
+
+  public async postReceived(params: {
+    data: {
+      scout: Scout 
+    },
+    context?: Context
+  }) { }
+  
+  public async preReceived(params: {
+    data: {
+      scout: Scout
+    },
+    context?: Context
+  }) { }
 }

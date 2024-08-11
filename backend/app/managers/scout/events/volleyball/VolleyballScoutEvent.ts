@@ -6,11 +6,13 @@ import PointScoredScoutEvent, { PointScoredScoutEventJson } from "./PointScoredS
 import ReceiveScoutEvent, { ReceiveScoutEventJson } from "./ReceiveScoutEvent";
 import ServeScoutEvent, { ServeScoutEventJson } from "./ServeScoutEvent";
 import SpikeScoutEvent, { SpikeScoutEventJson } from "./SpikeScoutEvent";
+import TeamRotationScoutEvent, { TeamRotationScoutEventJson } from "./TeamRotationScoutEvent";
 import TimeoutScoutEvent, { TimeoutScoutEventJson } from "./TimeoutScoutEvent";
 
 export type VolleyballScoutEventJson = BlockScoutEventJson | LiberoSubstitutionScoutEventJson |
   PlayerInPositionScoutEventJson | PointScoredScoutEventJson | ReceiveScoutEventJson | 
-  ServeScoutEventJson | SpikeScoutEventJson | TimeoutScoutEventJson | PlayerSubstitutionScoutEventJson
+  ServeScoutEventJson | SpikeScoutEventJson | TimeoutScoutEventJson | PlayerSubstitutionScoutEventJson |
+  TeamRotationScoutEventJson
 
 export type VolleyballScoutEventType = VolleyballScoutEventJson['type']
 
@@ -23,7 +25,8 @@ export const TYPE_TO_VOLLEYBALL_SCOUT_EVENT: {
     typeof ReceiveScoutEvent |
     typeof ServeScoutEvent |
     typeof SpikeScoutEvent |
-    typeof TimeoutScoutEvent
+    typeof TimeoutScoutEvent |
+    typeof TeamRotationScoutEvent
 } = {
   'block': BlockScoutEvent,
   'liberoSubstitution': LiberoSubstitutionScoutEvent,
@@ -33,5 +36,6 @@ export const TYPE_TO_VOLLEYBALL_SCOUT_EVENT: {
   'receive': ReceiveScoutEvent,
   'serve': ServeScoutEvent,
   'spike': SpikeScoutEvent,
-  'timeout': TimeoutScoutEvent
+  'timeout': TimeoutScoutEvent,
+  'teamRotation': TeamRotationScoutEvent
 } as const

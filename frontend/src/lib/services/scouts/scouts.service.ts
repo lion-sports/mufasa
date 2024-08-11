@@ -2,7 +2,9 @@ import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Event } from '../events/events.service'
 import type { ScoringSystem } from '../scoringSystems/scoringSystems.service'
 import type { Player } from '../players/players.service'
-import type { VolleyballPlayersPosition, VolleyballPoints } from './volleyball'
+import type { VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from './volleyball'
+import type { Teammate } from '../teams/teams.service'
+import type { User } from '../auth/auth.service'
 
 export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
@@ -22,6 +24,13 @@ export type ScoutEventPlayer = {
   convocationId: Player['convocationId'],
   scoutId: Player['scoutId'],
   teammateId: Player['teammateId'],
+  teammate: {
+    alias?: Teammate['alias'],
+    user: {
+      firstname: User['firstname'],
+      lastname: User['lastname']
+    }
+  },
   aliases: Player['aliases'],
   role: Player['role'],
   shirtId: Player['shirtId'],
@@ -33,10 +42,11 @@ export type ScoutEventPlayer = {
 
 export type VolleyballScoutStash = {
   points: VolleyballPoints,
-  playersServePositions: VolleyballPlayersPosition,
-  playersReceivePositions: VolleyballPlayersPosition,
-  playersSpikePositions: VolleyballPlayersPosition,
-  playersDefensePositions: VolleyballPlayersPosition,
+  playersServePositions?: VolleyballPlayersPosition,
+  playersReceivePositions?: VolleyballPlayersDynamicPosition,
+  playersDefenseBreakPositions?: VolleyballPlayersPosition,
+  playersDefenseSideOutPositions?: VolleyballPlayersPosition,
+  playersReceiveDynamicPositions?: VolleyballPlayersPosition,
   currentSetSubstitutionsMade: {
     friends: {
       playerIn: ScoutEventPlayer,
@@ -57,7 +67,7 @@ export type Scout = {
   id: number
   sport: Sport
   name: string
-  stash: VolleyballScoutStash
+  stash?: VolleyballScoutStash
   startedAt: Date
   eventId: number
   scoringSystem: ScoringSystem
@@ -76,7 +86,7 @@ export type ScoutEventJson<Type = string, S extends Sport = Sport> = {
   teamId: number
   sport: S
   type: Type
-  createdByUserId: number
+  createdByUserId?: number
   points: any
 }
 

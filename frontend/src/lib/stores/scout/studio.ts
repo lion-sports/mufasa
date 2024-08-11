@@ -1,5 +1,5 @@
-import ScoutService, { type Scout, type ScoutStudio } from '$lib/services/scouts/scouts.service'
-import type { VolleyballScoutEventJson } from '$lib/services/scouts/volleyball'
+import ScoutService, { type Scout, type ScoutEventPlayer, type ScoutStudio } from '$lib/services/scouts/scouts.service'
+import type { VolleyballScoutEventJson, VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
 import { get, writable } from 'svelte/store'
 import socketService from '$lib/services/common/socket.service';
 
@@ -17,7 +17,31 @@ export async function reload() {
 }
 
 export async function add(params: {
-  event: Omit<VolleyballScoutEventJson, 'createdByUserId' | 'points'>
+  event: VolleyballScoutEventJson
 }) {
   socketService.io?.emit(`teams:${params.event.teamId}:scout:add`, params.event)
+}
+
+export async function playerInPosition(params: {
+  player: ScoutEventPlayer,
+  position: VolleyballScoutEventPosition
+}) {
+  let currentStudio = get(studio)
+  if(!currentStudio) throw new Error('cannot call without a studio')
+
+  await add({
+    event: {
+      type: 'playerInPosition',
+      playerId: params.player.id,
+      playerIsOpponent: params.player.isOpponent,
+      player: params.player,
+      position: params.position,
+      date: new Date(),
+      scoutId: currentStudio.scout.id,
+      sport: 'volleyball',
+      teamId: currentStudio.scout.event.teamId,
+      createdByUserId: undefined,
+      points: undefined
+    }
+  })
 }

@@ -10,7 +10,7 @@
 	export let items: Item[],
 		width: string = '100%',
 		maxWidth: string = '100%',
-    height: string | undefined = "60px",
+    height: string | undefined = "44px",
 		multiple: boolean = false,
 		placeholder: string | undefined = undefined,
 		values: Item[]
@@ -28,4 +28,12 @@
   --autocomplete-min-height="44px"
   {height}
 	on:change
-/>
+>
+  <svelte:fragment slot="item-label" let:item>
+    <slot name="item-label" {item}>
+      <div class="label-container">
+        <div>{item.label || ''}</div>
+      </div>
+    </slot>
+  </svelte:fragment>
+</Autocomplete>

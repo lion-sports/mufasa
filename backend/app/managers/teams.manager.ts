@@ -37,7 +37,10 @@ export default class TeamsManager {
         })
       })
       .preload('teammates', (teammateQuery) => {
-        teammateQuery.preload('user')
+        teammateQuery.select('teammates.*')
+          .leftJoin('users', 'users.id', 'teammates.userId')
+          .orderBy(['users.firstname', 'users.lastname'])
+          .preload('user')
       })
       .preload('groups')
       .paginate(params.data.page, params.data.perPage)
@@ -118,7 +121,11 @@ export default class TeamsManager {
         client: trx
       })
       .preload('teammates', (teammateQuery) => {
-        teammateQuery.preload('user').preload('group')
+        teammateQuery.select('teammates.*')
+          .leftJoin('users', 'users.id', 'teammates.userId')
+          .orderBy(['users.firstname', 'users.lastname'])
+          .preload('user')
+          .preload('group')
       })
       .preload('owner')
       .preload('groups', (groupsBuilder) => {
