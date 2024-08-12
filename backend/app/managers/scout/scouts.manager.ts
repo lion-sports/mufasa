@@ -512,7 +512,7 @@ export default class ScoutsManager {
       let lastPlayerInPositionEvents = await Mongo.db
         .collection(SCOUT_EVENT_COLLECTION_NAME)
         .aggregate<{
-          _id: number,
+          _id: [number, boolean],
           lastPlayer: ScoutEventPlayer
           lastPosition: VolleyballScoutEventPosition
         }>([
@@ -528,12 +528,12 @@ export default class ScoutsManager {
           },
           {
             $sort: {
-              date: -1
+              date: 1
             }
           },
           {
             $group: {
-              _id: '$playerId',
+              _id: ['$position', '$playerIsOpponent'],
               lastPosition: {
                 $last: "$position"
               },
@@ -549,9 +549,9 @@ export default class ScoutsManager {
         friends: {},
         enemy: {}
       }
-
+      
       for(let i = 0; i < lastPlayerInPositionEvents.length; i += 1) {
-        if (lastPlayerInPositionEvents[i].lastPlayer.isOpponent) {
+        if (lastPlayerInPositionEvents[i]._id[1]) {
           lastPositionFound.enemy[lastPlayerInPositionEvents[i].lastPosition] = {
             player: lastPlayerInPositionEvents[i].lastPlayer
           }
@@ -562,6 +562,7 @@ export default class ScoutsManager {
         }
       }
     }
+
     if(!!lastPositionFound) {
       let positions = TeamRotationScoutEvent.getPlayersPositions({
         positions: lastPositionFound

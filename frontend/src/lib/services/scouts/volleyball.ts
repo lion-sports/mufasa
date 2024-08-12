@@ -42,6 +42,17 @@ export type VolleyballPlayersPosition = {
   }
 }
 
+export const FIRST_POINT: VolleyballPoints = {
+  friends: {
+    points: 0,
+    sets: 0
+  },
+  enemy: {
+    points: 0,
+    sets: 0
+  }
+}
+
 export type VolleyballPlayersDynamicPosition = {
   friends?: {
     [Key: number]: {

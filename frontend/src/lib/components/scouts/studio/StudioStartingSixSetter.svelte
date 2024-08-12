@@ -25,13 +25,13 @@
 
   $: notSelectedFriendsPlayer = friendsPlayer.filter((fp) => {
     return !playersPosition || (
-      Object.values(playersPosition.friends).filter(v => !!v).every(p => Number(p.player.id) !== Number(fp.id))
+      Object.values(playersPosition.friends).filter(v => !!v && !!v.player).every(p => Number(p.player.id) !== Number(fp.id))
     )
   })
 
   $: notSelectedOpponentsPlayer = opponentsPlayer.filter((fp) => {
     return !playersPosition || (
-      Object.values(playersPosition.enemy).filter(v => !!v).every(p => Number(p.player.id) !== Number(fp.id))
+      Object.values(playersPosition.enemy).filter(v => !!v && !!v.player).every(p => Number(p.player.id) !== Number(fp.id))
     )
   })
 

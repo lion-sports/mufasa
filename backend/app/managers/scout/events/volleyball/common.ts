@@ -3,6 +3,7 @@ import { ScoutEventPlayer } from "App/Models/Player"
 export type VolleyballScoutEventPosition = 1 | 2 | 3 | 4 | 5 | 6
 
 /*
+WALL
 1    2   3   4     5
     |----------|   
 6   |7   8   9 |   10
@@ -10,6 +11,7 @@ export type VolleyballScoutEventPosition = 1 | 2 | 3 | 4 | 5 | 6
 16  |17  18  19|   20
     |----------|
 21   22  23  24    25
+NET
 */
 export type VolleyballScoutEventAnchor = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
 

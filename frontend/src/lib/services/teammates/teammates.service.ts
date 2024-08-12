@@ -58,6 +58,8 @@ export default class TeammatesService extends FetchBasedService {
     let fullnameFromTeammate = [params.teammate?.user.firstname, params.teammate?.user.lastname].filter(v => !!v).join(' ')
     let aliasFromTeammate = params.teammate?.alias
     let aliasFromPlayer = params.player?.aliases?.[0]
-    return aliasFromPlayer || aliasFromTeammate || fullnameFromTeammate
+
+    let result = aliasFromPlayer || aliasFromTeammate || fullnameFromTeammate
+    return result
   }
 }

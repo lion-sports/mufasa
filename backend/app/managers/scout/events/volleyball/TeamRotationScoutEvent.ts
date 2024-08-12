@@ -15,170 +15,170 @@ export type RotationType = 'backward' | 'forward'
 export const SETTER_POSITION_TO_ROLES_POSITIONS: {
   [Key in VolleyballScoutEventPosition]?: {
     serve: {
-      [Key in VolleyballScoutEventPosition]?: Role
+      [Key in VolleyballScoutEventPosition]?: `${Role}${':1' | ':2' | ''}`
     },
     defenseBreak: {
-      [Key in VolleyballScoutEventPosition]?: Role
+      [Key in VolleyballScoutEventPosition]?: `${Role}${':1' | ':2' | ''}`
     },
     defenseSideOut: {
-      [Key in VolleyballScoutEventPosition]?: Role
+      [Key in VolleyballScoutEventPosition]?: `${Role}${':1' | ':2' | ''}`
     }
   }
 } = {
   1: {
     serve: {
       1: 'setter',
-      2: 'outsideHitter',
-      3: 'middleBlocker',
+      2: 'outsideHitter:1',
+      3: 'middleBlocker:2',
       4: 'oppositeHitter',
-      5: 'outsideHitter',
+      5: 'outsideHitter:2',
       6: 'libero'
     },
     defenseBreak: {
       1: 'setter',
       2: 'oppositeHitter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
+      3: 'middleBlocker:2',
+      4: 'outsideHitter:1',
       5: 'libero',
-      6: 'outsideHitter'
+      6: 'outsideHitter:2'
     },
     defenseSideOut: {
       1: 'setter',
-      2: 'oppositeHitter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
+      2: 'outsideHitter:1',
+      3: 'middleBlocker:2',
+      4: 'oppositeHitter',
       5: 'libero',
-      6: 'outsideHitter'
+      6: 'outsideHitter:2'
     },
   },
   2: {
     serve: {
-      1: 'middleBlocker',
+      1: 'middleBlocker:1',
       2: 'setter',
-      3: 'outsideHitter',
-      4: 'middleBlocker',
+      3: 'outsideHitter:1',
+      4: 'middleBlocker:2',
       5: 'oppositeHitter',
-      6: 'outsideHitter'
+      6: 'outsideHitter:2'
     },
     defenseBreak: {
       1: 'oppositeHitter',
       2: 'setter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
-      5: 'middleBlocker',
-      6: 'outsideHitter'
+      3: 'middleBlocker:2',
+      4: 'outsideHitter:1',
+      5: 'middleBlocker:2',
+      6: 'outsideHitter:2'
     },
     defenseSideOut: {
       1: 'oppositeHitter',
       2: 'setter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
+      3: 'middleBlocker:2',
+      4: 'outsideHitter:1',
       5: 'libero',
-      6: 'outsideHitter'
+      6: 'outsideHitter:2'
     },
   },
   3: {
     serve: {
-      1: 'outsideHitter',
-      2: 'middleBlocker',
+      1: 'outsideHitter:2',
+      2: 'middleBlocker:1',
       3: 'setter',
-      4: 'outsideHitter',
+      4: 'outsideHitter:1',
       5: 'libero',
       6: 'oppositeHitter'
     },
     defenseBreak: {
       1: 'oppositeHitter',
       2: 'setter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
+      3: 'middleBlocker:1',
+      4: 'outsideHitter:1',
       5: 'libero',
-      6: 'outsideHitter'
+      6: 'outsideHitter:2'
     },
     defenseSideOut: {
       1: 'oppositeHitter',
       2: 'setter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
+      3: 'middleBlocker:1',
+      4: 'outsideHitter:1',
       5: 'libero',
-      6: 'outsideHitter'
+      6: 'outsideHitter:2'
     },
   }, 
   4: {
     serve: {
       1: 'oppositeHitter',
-      2: 'outsideHitter',
-      3: 'middleBlocker',
+      2: 'outsideHitter:2',
+      3: 'middleBlocker:1',
       4: 'setter',
-      5: 'outsideHitter',
+      5: 'outsideHitter:1',
       6: 'libero'
     },
     defenseBreak: {
       1: 'oppositeHitter',
       2: 'setter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
+      3: 'middleBlocker:1',
+      4: 'outsideHitter:2',
       5: 'libero',
-      6: 'outsideHitter'
+      6: 'outsideHitter:1'
     },
     defenseSideOut: {
       1: 'oppositeHitter',
       2: 'setter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
+      3: 'middleBlocker:1',
+      4: 'outsideHitter:2',
       5: 'libero',
-      6: 'outsideHitter'
+      6: 'outsideHitter:1'
     },
   },
   5: {
     serve: {
-      1: 'middleBlocker',
+      1: 'middleBlocker:2',
       2: 'oppositeHitter',
-      3: 'outsideHitter',
-      4: 'middleBlocker',
+      3: 'outsideHitter:2',
+      4: 'middleBlocker:1',
       5: 'setter',
-      6: 'outsideHitter'
+      6: 'outsideHitter:1'
     },
     defenseBreak: {
       1: 'setter',
       2: 'oppositeHitter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
-      5: 'middleBlocker',
-      6: 'outsideHitter'
+      3: 'middleBlocker:1',
+      4: 'outsideHitter:2',
+      5: 'middleBlocker:2',
+      6: 'outsideHitter:1'
     },
     defenseSideOut: {
       1: 'setter',
       2: 'oppositeHitter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
+      3: 'middleBlocker:1',
+      4: 'outsideHitter:2',
       5: 'libero',
-      6: 'outsideHitter'
+      6: 'outsideHitter:1'
     },
   },
   6: {
     serve: {
-      1: 'outsideHitter',
-      2: 'middleBlocker',
+      1: 'outsideHitter:1',
+      2: 'middleBlocker:2',
       3: 'oppositeHitter',
-      4: 'outsideHitter',
+      4: 'outsideHitter:2',
       5: 'libero',
       6: 'setter'
     },
     defenseBreak: {
       1: 'setter',
       2: 'oppositeHitter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
+      3: 'middleBlocker:2',
+      4: 'outsideHitter:2',
       5: 'libero',
-      6: 'outsideHitter'
+      6: 'outsideHitter:1'
     },
     defenseSideOut: {
       1: 'setter',
       2: 'oppositeHitter',
-      3: 'middleBlocker',
-      4: 'outsideHitter',
+      3: 'middleBlocker:2',
+      4: 'outsideHitter:2',
       5: 'libero',
-      6: 'outsideHitter'
+      6: 'outsideHitter:1'
     },
   }
 }
@@ -204,7 +204,7 @@ export const SETTER_POSITION_TO_ROLES_RECEIVES_POSITIONS: {
         anchor: 13
       },
       'middleBlocker:2': {
-        position: 1,
+        position: 3,
         anchor: 13
       },
       'oppositeHitter': {
@@ -362,6 +362,7 @@ export const SETTER_POSITION_TO_ROLES_RECEIVES_POSITIONS: {
     }
   }
 }
+
 
 export default class TeamRotationScoutEvent extends ScoutEvent<
   {
@@ -452,10 +453,10 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
     playersDefenseBreakPositions: VolleyballPlayersPosition,
     playersDefenseSideoutPositions: VolleyballPlayersPosition,
   } {
-    let playersServePositions: VolleyballPlayersPosition = params.positions,
+    let playersServePositions: VolleyballPlayersPosition = lodash.cloneDeep(params.positions),
       playersReceivePositions: VolleyballPlayersDynamicPosition,
-      playersDefenseBreakPositions: VolleyballPlayersPosition = params.positions,
-      playersDefenseSideoutPositions: VolleyballPlayersPosition = params.positions
+      playersDefenseBreakPositions: VolleyballPlayersPosition = lodash.cloneDeep(params.positions),
+      playersDefenseSideoutPositions: VolleyballPlayersPosition = lodash.cloneDeep(params.positions)
 
     playersServePositions.enemy = this.getPhasePosition({
       phase: 'serve',
@@ -521,6 +522,37 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
     let rolesPositions = SETTER_POSITION_TO_ROLES_POSITIONS[setterPosition]
     if (!rolesPositions) return result
 
+    const mapper: Record<string, {
+      role: Role,
+      line?: 'first' | 'second'
+    }> = {
+      'setter': {
+        role: 'setter'
+      },
+      'oppositeHitter': {
+        role: 'oppositeHitter'
+      },
+      'libero': {
+        role: 'libero'
+      },
+      'outsideHitter:1': {
+        role: 'outsideHitter',
+        line: [1, 2, 3].includes(setterPosition) ? 'first' : 'second'
+      },
+      'outsideHitter:2': {
+        role: 'outsideHitter',
+        line: [4, 5, 6].includes(setterPosition) ? 'first' : 'second'
+      },
+      'middleBlocker:1': {
+        role: 'middleBlocker',
+        line: [3, 4, 5].includes(setterPosition) ? 'first' : 'second'
+      },
+      'middleBlocker:2': {
+        role: 'middleBlocker',
+        line: [1, 2, 6].includes(setterPosition) ? 'first' : 'second'
+      }
+    }
+
     let loopPositions: VolleyballScoutEventPosition[] = [1, 2, 3, 4, 5, 6]
     for(let i = 0; i < loopPositions.length; i += 1) {
       let position = loopPositions[i]
@@ -529,7 +561,8 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
 
       let positionSpec = this.findRoleInPositions({
         friendsOrEnemyPositions: params.friendsOrEnemyPositions,
-        role: rolePosition
+        role: mapper[rolePosition].role,
+        line: mapper[rolePosition].line
       })
       if(!positionSpec) continue
 
@@ -591,6 +624,14 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
         line: mapper[actualRole].line
       })
 
+      if (!positionSpec && actualRole === 'libero') {
+        positionSpec = this.findRoleInPositions({
+          friendsOrEnemyPositions: params.friendsOrEnemyPositions,
+          role: 'middleBlocker',
+          line: 'second'
+        })
+      }
+
       if(!positionSpec) continue
 
       result[positionSpec.player.id] = value
@@ -622,7 +663,7 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
       }
     }
 
-    return playerPosition
+    return Number(playerPosition) as VolleyballScoutEventPosition
   }
 
   private static findRoleInPositions(params: {

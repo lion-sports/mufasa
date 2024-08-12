@@ -5,12 +5,13 @@
 	import { Drawer, Icon } from '@likable-hair/svelte'
 	import StandardDialog from '$lib/components/common/StandardDialog.svelte'
 	import StudioPlayerAdd from '$lib/components/scouts/studio/StudioPlayerAdd.svelte'
-  import studio, { add, playerInPosition } from '$lib/stores/scout/studio';
+  import studio, { add, playerInPosition, reload } from '$lib/stores/scout/studio';
 	import type { Player } from '@/lib/services/players/players.service'
 	import StudioField from '@/lib/components/scouts/studio/StudioField.svelte'
 	import StudioStartingSixSetter from '@/lib/components/scouts/studio/StudioStartingSixSetter.svelte'
 	import type { VolleyballScoutEventPosition } from '@/lib/services/scouts/volleyball'
 	import type { ScoutEventPlayer } from '@/lib/services/scouts/scouts.service'
+	import StudioScoreBoard from '@/lib/components/scouts/studio/StudioScoreBoard.svelte'
 
   export let data: PageData;
   $: $studio = data.studio
@@ -31,6 +32,8 @@
       position: e.detail.position,
       player: e.detail.player
     })
+
+    await reload()
   }
 </script>
 
@@ -78,6 +81,14 @@
       </Menubar.Content>
     </Menubar.Menu>
   </Menubar.Root>
+</div>
+
+<div class="w-full pb-4">
+  <StudioScoreBoard
+    points={$studio.scout.stash?.points}
+    friendName={data.team.name}
+    opponentName={data.studio.scout.scoutInfo.general.opponent?.name}
+  ></StudioScoreBoard>
 </div>
 
 <div class="w-full">

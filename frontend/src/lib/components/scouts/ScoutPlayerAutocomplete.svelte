@@ -65,7 +65,6 @@
       {#each values as selectedPlayer}
         <div class="relative">
           <button {disabled} class="absolute -top-2 -right-2" on:click|stopPropagation={() => {
-            console.log(selectedPlayer)
             unselect(selectedPlayer)
           }}>
             <Icon name="mdi-close-circle" --icon-size="20px" --icon-color="red"></Icon>
