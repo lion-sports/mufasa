@@ -16,6 +16,28 @@ export async function reload() {
   studio.set(newStudio)
 }
 
+const handleStashReload = (data: {
+  scout: Scout
+}) => {
+  studio.update(v => {
+    if(!!v) {
+      v.scout.stash = data.scout.stash
+    }
+    return v
+  })
+}
+
+studio.subscribe((value) => {
+  if(!!value) {
+    socketService.off(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
+    socketService.on(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
+  }
+
+  return () => {
+    if(!!value) socketService.off(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
+  }
+})
+
 export async function add(params: {
   event: VolleyballScoutEventJson
 }) {

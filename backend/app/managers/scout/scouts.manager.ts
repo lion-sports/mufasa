@@ -18,6 +18,7 @@ import { TimeoutScoutEventJson } from "./events/volleyball/TimeoutScoutEvent";
 import PlayerSubstitutionScoutEvent, { PlayerSubstitutionScoutEventJson } from "./events/volleyball/PlayerSubstitutionScoutEvent";
 import PlayerInPositionScoutEvent, { PlayerInPositionScoutEventJson } from "./events/volleyball/PlayerInPositionScoutEvent";
 import { ScoutEventPlayer } from "App/Models/Player";
+import scoutsSocket from "./scouts.socket";
 
 export type ScoutStudio = {
   scout: Scout
@@ -638,6 +639,18 @@ export default class ScoutsManager {
       }))
     }
     await scout.save()
+
+    await scoutsSocket.emit({
+      data: {
+        event: 'scout:stashReload',
+        data: {
+          scout
+        }
+      },
+      context: {
+        trx
+      }
+    })
     return scout
   }
 }

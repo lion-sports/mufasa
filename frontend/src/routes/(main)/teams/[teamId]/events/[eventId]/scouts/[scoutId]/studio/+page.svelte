@@ -33,8 +33,6 @@
       position: e.detail.position,
       player: e.detail.player
     })
-
-    await reload()
   }
 </script>
 

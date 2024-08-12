@@ -8,8 +8,6 @@ import Database from '@ioc:Adonis/Lucid/Database';
 import User from 'App/Models/User';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
-export type EventName = 'report:unlock' | 'report:lock' | 'userSettings:set'
-
 class Ws {
   public io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, { user: User }>
   private booted = false
@@ -75,7 +73,7 @@ class Ws {
     })
   }
 
-  emit(event: EventName, data: any) {
+  emit(event: string, data: any) {
     this.io.emit(event, data)
   }
 
