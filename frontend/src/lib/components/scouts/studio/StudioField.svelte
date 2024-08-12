@@ -48,14 +48,12 @@
     }
   } else enemyReceivePositions = []
 
-  $: console.log(enemyReceivePositions)
-
 	let leftPositionsNumbers: VolleyballScoutEventPosition[] = [5, 4, 6, 3, 1, 2]
 	let rightPositionsNumbers: VolleyballScoutEventPosition[] = [2, 1, 3, 6, 4, 5]
 </script>
 
-<div class="bg-blue-400 w-full h-[500px] flex justify-center items-center">
-	<div class="bg-orange-400 w-[600px] h-[300px] border-slate-500 border-2 relative">
+<div class="bg-blue-400 w-full h-full flex justify-center items-center">
+	<div class="bg-orange-400 w-[70%] max-w-[700px] h-[70%] min-h-[300px] border-slate-500 border-2 relative">
 		<div
 			class="absolute top-[-32px] bottom-[-32px] left-[calc(50%-2px)] bg-slate-500 w-[4px] rounded-full"
 		></div>

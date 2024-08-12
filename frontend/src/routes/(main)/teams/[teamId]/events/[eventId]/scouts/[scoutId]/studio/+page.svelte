@@ -12,6 +12,7 @@
 	import type { VolleyballScoutEventPosition } from '@/lib/services/scouts/volleyball'
 	import type { ScoutEventPlayer } from '@/lib/services/scouts/scouts.service'
 	import StudioScoreBoard from '@/lib/components/scouts/studio/StudioScoreBoard.svelte'
+  import { PaneGroup, Pane, PaneResizer } from "paneforge";
 
   export let data: PageData;
   $: $studio = data.studio
@@ -91,10 +92,24 @@
   ></StudioScoreBoard>
 </div>
 
-<div class="w-full">
-  <StudioField
-    scout={$studio.scout}
-  ></StudioField>
+<div class="h-[100vh]">
+  <PaneGroup direction="vertical">
+	<Pane defaultSize={40} >
+    <div class="w-full h-full">
+      <StudioField
+        scout={$studio.scout}
+      ></StudioField>
+    </div>
+  </Pane>
+	<PaneResizer class="relative flex h-2 items-center justify-center bg-[rgb(var(--global-color-background-400))]">
+			<div class="z-10 flex h-5 w-7 items-center justify-center rounded-sm border bg-[rgb(var(--global-color-background-400))]">
+        <Icon name="mdi-dots-horizontal"></Icon>
+			</div>
+		</PaneResizer>
+	<Pane defaultSize={60}>
+
+  </Pane>
+</PaneGroup>
 </div>
 
 <Drawer 
