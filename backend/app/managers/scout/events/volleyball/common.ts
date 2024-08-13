@@ -1,5 +1,7 @@
 import { ScoutEventPlayer } from "App/Models/Player"
 
+export type VolleyballPhase = 'serve' | 'receive' | 'defenseBreak' | 'defenseSideOut'
+
 export type VolleyballScoutEventPosition = 1 | 2 | 3 | 4 | 5 | 6
 
 /*

@@ -5,7 +5,7 @@ import Event from 'App/Models/Event'
 import Player, { ScoutEventPlayer } from './Player'
 import ScoringSystem from './ScoringSystem'
 import ScoutInfo from './ScoutInfo'
-import { VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from 'App/managers/scout/events/volleyball/common'
+import { VolleyballPhase, VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from 'App/managers/scout/events/volleyball/common'
 
 export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
@@ -29,7 +29,8 @@ export type VolleyballScoutStash = {
   currentSetTimeoutsCalled?: {
     friends: number
     enemy: number
-  }
+  },
+  phase?: VolleyballPhase
 }
 
 export default class Scout extends CamelCaseBaseModel {

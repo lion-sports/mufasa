@@ -5,7 +5,7 @@
 	import { Drawer, Icon } from '@likable-hair/svelte'
 	import StandardDialog from '$lib/components/common/StandardDialog.svelte'
 	import StudioPlayerAdd from '$lib/components/scouts/studio/StudioPlayerAdd.svelte'
-  import studio, { add, playerInPosition, reload } from '$lib/stores/scout/studio';
+  import studio, { add, manualPhase, playerInPosition, reload } from '$lib/stores/scout/studio';
 	import type { Player } from '@/lib/services/players/players.service'
 	import StudioField from '@/lib/components/scouts/studio/StudioField.svelte'
 	import StudioStartingSixSetter from '@/lib/components/scouts/studio/StudioStartingSixSetter.svelte'
@@ -13,6 +13,7 @@
 	import type { ScoutEventPlayer } from '@/lib/services/scouts/scouts.service'
 	import StudioScoreBoard from '@/lib/components/scouts/studio/StudioScoreBoard.svelte'
   import { PaneGroup, Pane, PaneResizer } from "paneforge";
+	import StudioPhaseSwitch from '@/lib/components/scouts/studio/StudioPhaseSwitch.svelte'
 
   export let data: PageData;
   $: $studio = data.studio
@@ -78,6 +79,16 @@
           </Menubar.SubContent>
         </Menubar.Sub>
       </Menubar.Content>
+      <div class="flex-grow flex justify-end">
+        <div class="py-1">
+          <StudioPhaseSwitch
+            phase={$studio.scout.stash?.phase || 'serve'}
+            on:change={(e) => {
+              manualPhase({ phase: e.detail.phase })
+            }}
+          ></StudioPhaseSwitch>
+        </div>
+      </div>
     </Menubar.Menu>
   </Menubar.Root>
 </div>
@@ -96,6 +107,7 @@
     <div class="w-full h-full">
       <StudioField
         scout={$studio.scout}
+        phase={$studio.scout.stash?.phase || 'serve'}
       ></StudioField>
     </div>
   </Pane>

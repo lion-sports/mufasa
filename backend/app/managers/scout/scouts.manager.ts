@@ -19,6 +19,7 @@ import PlayerSubstitutionScoutEvent, { PlayerSubstitutionScoutEventJson } from "
 import PlayerInPositionScoutEvent, { PlayerInPositionScoutEventJson } from "./events/volleyball/PlayerInPositionScoutEvent";
 import { ScoutEventPlayer } from "App/Models/Player";
 import scoutsSocket from "./scouts.socket";
+import { ManualPhaseScoutEventJson } from "./events/volleyball/ManualPhaseScoutEvent";
 
 export type ScoutStudio = {
   scout: Scout
@@ -638,6 +639,33 @@ export default class ScoutsManager {
         playerOut: lse.player
       }))
     }
+
+    let lastManualPhaseEvent = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<ManualPhaseScoutEventJson>([
+        {
+          $match: {
+            scoutId: params.data.id,
+            type: 'manualPhase',
+            $and: [
+              { 'points.friends.sets': scout.stash.points.friends.sets },
+              { 'points.enemy.sets': scout.stash.points.enemy.sets },
+            ]
+          },
+        },
+        {
+          $sort: {
+            date: -1
+          }
+        },
+        {
+          $limit: 1
+        }
+      ])
+      .toArray()
+
+    scout.stash.phase = lastManualPhaseEvent[0]?.phase
+
     await scout.save()
 
     await scoutsSocket.emit({

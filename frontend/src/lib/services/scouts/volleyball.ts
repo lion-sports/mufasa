@@ -1,5 +1,6 @@
 import type { ScoutEventJson, ScoutEventPlayer } from "./scouts.service"
-import lodash from 'lodash'
+
+export type VolleyballPhase = 'serve' | 'receive' | 'defenseBreak' | 'defenseSideOut'
 
 export type VolleyballScoutEventPosition = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -79,12 +80,13 @@ export type BlockScoutExtraProperties = {
 export type BlockScoutEventJson = ScoutEventJson<'block', 'volleyball'> & BlockScoutExtraProperties
 
 export type LiberoSubstitutionScoutExtraProperties = {
-  playerIsOpponent: boolean,
+  opponent: boolean,
   playerId: number,
   player: ScoutEventPlayer,
-  inOrOut: 'in' | 'out'
+  inOrOut: 'in' | 'out',
+  liberoId: number,
+  libero: ScoutEventPlayer
 }
-
 export type LiberoSubstitutionScoutEventJson = ScoutEventJson<'liberoSubstitution', 'volleyball'> & LiberoSubstitutionScoutExtraProperties
 
 export type PlayerInPositionScoutExtraProperties = {
@@ -150,6 +152,12 @@ export type PlayerSubstitutionScoutExtraProperties = {
 
 export type PlayerSubstitutionScoutEventJson = ScoutEventJson<'playerSubstitution', 'volleyball'> & PlayerSubstitutionScoutExtraProperties
 
+export type ManualPhaseScoutExtraProperties = {
+  phase: VolleyballPhase
+}
+export type ManualPhaseScoutEventJson = ScoutEventJson<'manualPhase', 'volleyball'> & ManualPhaseScoutExtraProperties
+
 export type VolleyballScoutEventJson = BlockScoutEventJson | LiberoSubstitutionScoutEventJson |
   PlayerInPositionScoutEventJson | PointScoredScoutEventJson | ReceiveScoutEventJson |
-  ServeScoutEventJson | SpikeScoutEventJson | TimeoutScoutEventJson | PlayerSubstitutionScoutEventJson
+  ServeScoutEventJson | SpikeScoutEventJson | TimeoutScoutEventJson | PlayerSubstitutionScoutEventJson |
+  ManualPhaseScoutEventJson

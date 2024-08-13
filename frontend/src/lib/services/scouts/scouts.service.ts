@@ -2,7 +2,7 @@ import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Event } from '../events/events.service'
 import type { ScoringSystem } from '../scoringSystems/scoringSystems.service'
 import type { Player } from '../players/players.service'
-import type { VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from './volleyball'
+import type { VolleyballPhase, VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from './volleyball'
 import type { Teammate } from '../teams/teams.service'
 import type { User } from '../auth/auth.service'
 
@@ -60,7 +60,8 @@ export type VolleyballScoutStash = {
   currentSetTimeoutsCalled: {
     friends: number
     enemy: number
-  }
+  },
+  phase?: VolleyballPhase
 }
 
 export type Scout = {
