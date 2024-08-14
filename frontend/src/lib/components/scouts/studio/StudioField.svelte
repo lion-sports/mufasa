@@ -58,9 +58,9 @@
 	} else enemyReceivePositions = []
 
   let friendsReceivePositions: ReceivePositions = []
-	$: if (!!scout.stash?.playersReceivePositions?.enemy) {
+	$: if (!!scout.stash?.playersReceivePositions?.friends) {
 		friendsReceivePositions = []
-		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.enemy)) {
+		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.friends)) {
 			let player = scout.players.find((p) => Number(p.id) === Number(playerId))
 			if (!player) continue
 
@@ -81,7 +81,7 @@
 
 <div class="bg-blue-400 w-full h-full flex justify-center items-center">
 	<div
-		class="bg-orange-400 w-[70%] max-w-[700px] h-[70%] min-h-[300px] max-h-[450px] border-slate-500 border-2 relative"
+		class="bg-orange-400 w-[70%] max-w-[700px] min-w-[400px] h-[70%] min-h-[300px] max-h-[450px] border-slate-500 border-2 relative"
 	>
 		<div
 			class="absolute top-[-32px] bottom-[-32px] left-[calc(50%-2px)] bg-slate-500 w-[4px] rounded-full"
@@ -195,8 +195,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.field {
-	}
-</style>

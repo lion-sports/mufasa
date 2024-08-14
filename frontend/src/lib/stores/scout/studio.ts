@@ -1,5 +1,5 @@
 import ScoutService, { type Scout, type ScoutEventPlayer, type ScoutStudio } from '$lib/services/scouts/scouts.service'
-import type { VolleyballPhase, VolleyballScoutEventJson, VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
+import type { RotationType, VolleyballPhase, VolleyballPlayersPosition, VolleyballScoutEventParameters, VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
 import { get, writable } from 'svelte/store'
 import socketService from '$lib/services/common/socket.service';
 
@@ -39,7 +39,7 @@ studio.subscribe((value) => {
 })
 
 export async function add(params: {
-  event: VolleyballScoutEventJson
+  event: VolleyballScoutEventParameters
 }) {
   socketService.io?.emit(`teams:${params.event.teamId}:scout:add`, params.event)
 }
@@ -78,6 +78,32 @@ export async function manualPhase(params: {
     event: {
       type: 'manualPhase',
       phase: params.phase,
+      date: new Date(),
+      scoutId: currentStudio.scout.id,
+      sport: 'volleyball',
+      teamId: currentStudio.scout.event.teamId,
+      createdByUserId: undefined,
+      points: undefined
+    }
+  })
+}
+
+export async function teamRotation(params: {
+  opponent: boolean,
+  rotationType?: RotationType
+}) {
+  let currentStudio = get(studio)
+  if (!currentStudio) throw new Error('cannot call without a studio')
+
+  let fromPositions: VolleyballPlayersPosition | undefined = currentStudio.scout.stash?.playersServePositions
+  if(!fromPositions) throw new Error('cannot rotate if position are not defined')
+
+  await add({
+    event: {
+      type: 'teamRotation',
+      fromPositions: fromPositions,
+      rotationType: params.rotationType || 'forward',
+      opponent: params.opponent,
       date: new Date(),
       scoutId: currentStudio.scout.id,
       sport: 'volleyball',

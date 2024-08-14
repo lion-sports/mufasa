@@ -6,6 +6,7 @@ import { ScoutEventPlayer } from "App/Models/Player";
 
 export type TeamRotationScoutExtraProperties = {
   opponent: boolean,
+  rotationType: RotationType
   newPositions: VolleyballPlayersPosition
 }
 export type TeamRotationScoutEventJson = ScoutEventJson<'teamRotation', 'volleyball'> & TeamRotationScoutExtraProperties
@@ -378,7 +379,7 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
   public newPositions: VolleyballPlayersPosition
 
   constructor(params) {
-    let newPosition = TeamRotationScoutEvent.rotate({
+    let newPositions = TeamRotationScoutEvent.rotate({
       position: params.fromPositions,
       opponent: params.opponent,
       rotationType: params.rotationType
@@ -388,57 +389,58 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
       ...params,
       opponent: params.opponent,
       rotationType: params.rotationType,
-      newPosition: newPosition
+      newPositions: newPositions
     })
-
+    this.newPositions = newPositions
     this.type = params.type
   }
 
   protected getExtraProperties(): TeamRotationScoutExtraProperties {
     return {
       opponent: this.event.opponent,
-      newPositions: this.newPositions
+      newPositions: this.newPositions,
+      rotationType: this.event.rotationType
     }
   }
 
   public static rotate(params: {
     position: VolleyballPlayersPosition,
     opponent: boolean,
-    rotationType?: 'backword' | 'forward'
+    rotationType?: RotationType
   }): VolleyballPlayersPosition {
     let newPosition: typeof params.position = lodash.cloneDeep(params.position)
 
     if(params.opponent) {
-      if(params.rotationType == 'backword') {
-        newPosition.enemy[1] = params.position.enemy[2]
-        newPosition.enemy[2] = params.position.enemy[3]
-        newPosition.enemy[3] = params.position.enemy[4]
-        newPosition.enemy[4] = params.position.enemy[5]
-        newPosition.enemy[5] = params.position.enemy[6]
-        newPosition.enemy[6] = params.position.enemy[1]
-      } else {
+      if(params.rotationType == 'backward') {
         newPosition.enemy[1] = params.position.enemy[6]
         newPosition.enemy[2] = params.position.enemy[1]
         newPosition.enemy[3] = params.position.enemy[2]
         newPosition.enemy[4] = params.position.enemy[3]
         newPosition.enemy[5] = params.position.enemy[4]
         newPosition.enemy[6] = params.position.enemy[5]
+      } else {
+        newPosition.enemy[1] = params.position.enemy[2]
+        newPosition.enemy[2] = params.position.enemy[3]
+        newPosition.enemy[3] = params.position.enemy[4]
+        newPosition.enemy[4] = params.position.enemy[5]
+        newPosition.enemy[5] = params.position.enemy[6]
+        newPosition.enemy[6] = params.position.enemy[1]
       }
     } else {
-      if (params.rotationType == 'backword') {
-        newPosition.friends[1] = params.position.friends[2]
-        newPosition.friends[2] = params.position.friends[3]
-        newPosition.friends[3] = params.position.friends[4]
-        newPosition.friends[4] = params.position.friends[5]
-        newPosition.friends[5] = params.position.friends[6]
-        newPosition.friends[6] = params.position.friends[1]
-      } else {
+      if (params.rotationType == 'backward') {
         newPosition.friends[1] = params.position.friends[6]
         newPosition.friends[2] = params.position.friends[1]
         newPosition.friends[3] = params.position.friends[2]
         newPosition.friends[4] = params.position.friends[3]
         newPosition.friends[5] = params.position.friends[4]
         newPosition.friends[6] = params.position.friends[5]
+      } else {
+        newPosition.friends[1] = params.position.friends[2]
+        newPosition.friends[2] = params.position.friends[3]
+        newPosition.friends[3] = params.position.friends[4]
+        newPosition.friends[4] = params.position.friends[5]
+        newPosition.friends[5] = params.position.friends[6]
+        newPosition.friends[6] = params.position.friends[1]
       }
     }
 
@@ -564,8 +566,16 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
         role: mapper[rolePosition].role,
         line: mapper[rolePosition].line
       })
-      if(!positionSpec) continue
 
+      if (!positionSpec && rolePosition === 'libero') {
+        positionSpec = this.findRoleInPositions({
+          friendsOrEnemyPositions: params.friendsOrEnemyPositions,
+          role: 'middleBlocker',
+          line: 'second'
+        })
+      }
+
+      if (!positionSpec) continue
       result[position] = positionSpec
     }
 

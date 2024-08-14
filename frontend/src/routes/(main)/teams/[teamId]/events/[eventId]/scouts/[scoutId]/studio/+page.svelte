@@ -5,7 +5,7 @@
 	import { Drawer, Icon } from '@likable-hair/svelte'
 	import StandardDialog from '$lib/components/common/StandardDialog.svelte'
 	import StudioPlayerAdd from '$lib/components/scouts/studio/StudioPlayerAdd.svelte'
-  import studio, { add, manualPhase, playerInPosition, reload } from '$lib/stores/scout/studio';
+  import studio, { manualPhase, playerInPosition, teamRotation } from '$lib/stores/scout/studio';
 	import type { Player } from '@/lib/services/players/players.service'
 	import StudioField from '@/lib/components/scouts/studio/StudioField.svelte'
 	import StudioStartingSixSetter from '@/lib/components/scouts/studio/StudioStartingSixSetter.svelte'
@@ -76,6 +76,56 @@
               insertStartingSixDialog = true
               insertStartingSixSelectedTab = 'opponents'
             }}>Avversari</Menubar.Item>
+          </Menubar.SubContent>
+        </Menubar.Sub>
+        <Menubar.Sub>
+          <Menubar.SubTrigger>Rotazione</Menubar.SubTrigger>
+          <Menubar.SubContent>
+            <Menubar.Item on:click={() => {
+                teamRotation({
+                  opponent: false,
+                  rotationType: 'forward'
+                })
+            }}>
+              <Icon name="mdi-rotate-right"></Icon> 
+              <span class="ml-2">
+                Amici avanti
+              </span>
+            </Menubar.Item>
+            <Menubar.Item on:click={() => {
+              teamRotation({
+                opponent: false,
+                rotationType: 'backward'
+              })
+            }}>
+              <Icon name="mdi-rotate-left"></Icon> 
+              <span class="ml-2">
+                Amici indietro
+              </span>
+            </Menubar.Item>
+            <Menubar.Separator />
+            <Menubar.Item on:click={() => {
+              teamRotation({
+                opponent: true,
+                rotationType: 'forward'
+              })
+            }}>
+              <Icon name="mdi-rotate-right"></Icon> 
+              <span class="ml-2">
+                Avversari avanti
+              </span>
+            </Menubar.Item>
+            <Menubar.Item on:click={() => {
+              teamRotation({
+                opponent: true,
+                rotationType: 'backward'
+              })
+            }}>
+              <Icon name="mdi-rotate-left"></Icon> 
+              <span class="ml-2">
+                Avversari indietro
+              </span>
+            </Menubar.Item>
           </Menubar.SubContent>
         </Menubar.Sub>
       </Menubar.Content>
