@@ -1,12 +1,13 @@
 import { ScoutEventPlayer } from "App/Models/Player";
 import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
-import { VolleyballPoints } from "./common";
+import { VolleyballPlayersPosition, VolleyballPoints } from "./common";
 
 export type LiberoSubstitutionScoutExtraProperties = {
   opponent: boolean,
   playerId: number,
   player: ScoutEventPlayer,
   inOrOut: 'in' | 'out',
+  position: VolleyballPlayersPosition
   liberoId: number,
   libero: ScoutEventPlayer
 }
@@ -26,8 +27,8 @@ export default class LiberoSubstitutionScoutEvent extends ScoutEvent<
     if (!params.liberoId) params.liberId = params.libero.id
     if (!params.liberoId) throw new Error('liberoId must be defined')
 
-    if (!params.opponent) params.opponent = params.player.isOpponent
-    if (!params.opponent) throw new Error('opponent must be defined')
+    if (params.opponent === undefined) params.opponent = params.player.isOpponent
+    if (params.opponent === undefined) throw new Error('opponent must be defined')
 
 
     super({
@@ -43,7 +44,8 @@ export default class LiberoSubstitutionScoutEvent extends ScoutEvent<
       opponent: this.event.opponent,
       inOrOut: this.event.inOrOut,
       liberoId: this.event.liberoId,
-      libero: this.event.libero
+      libero: this.event.libero,
+      position: this.event.position
     }
   }
 }

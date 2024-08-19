@@ -1,6 +1,8 @@
 import { ScoringSystemConfig } from "App/Models/ScoringSystem";
 import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
 import { VolleyballPoints } from "./common";
+import { Context, withTransaction } from "App/managers/base.manager";
+import Scout from "App/Models/Scout";
 
 export type PointScoredScoutExtraProperties = {
   opponent: boolean,
@@ -9,9 +11,13 @@ export type PointScoredScoutExtraProperties = {
 export type PointScoredScoutEventJson = ScoutEventJson<'pointScored', 'volleyball'> & PointScoredScoutExtraProperties
 
 export default class PointScoredScoutEvent extends ScoutEvent<
-  PointScoredScoutExtraProperties,
+  {
+    opponent: boolean,
+    newPoints?: VolleyballPoints
+  },
   'pointScored',
-  VolleyballPoints
+  VolleyballPoints,
+  PointScoredScoutExtraProperties
 > {
   public type = 'pointScored' as const
 
@@ -25,8 +31,42 @@ export default class PointScoredScoutEvent extends ScoutEvent<
   protected getExtraProperties(): PointScoredScoutExtraProperties {
     return {
       opponent: this.event.opponent,
-      newPoints: this.event.newPoints
+      newPoints: this.event.newPoints || this.points
     }
+  }
+
+  @withTransaction
+  public async preReceived(params: { 
+    data: {
+      scout: Scout
+    }
+    context?: Context
+  }): Promise<void> {
+    await params.data.scout.load('scoringSystem')
+    let scoringSystemConfig = params.data.scout.scoringSystem.config
+
+    this.event.newPoints = await PointScoredScoutEvent.incrementScore({
+      data: {
+        currentScore: this.points,
+        opponent: this.event.opponent,
+        scoringSystemConfig: scoringSystemConfig || {
+          set: {
+            mode: 'winSet',
+            winSets: 3
+          },
+          points: {
+            mode: 'winPoints',
+            totalPoints: 25,
+            hasAdvantages: true
+          },
+          tieBreak: {
+            mode: 'winPoints',
+            winPoints: 15,
+            hasAdvantages: true
+          }
+        }
+      }
+    })
   }
 
   public static async incrementScore(params: {
@@ -45,11 +85,11 @@ export default class PointScoredScoutEvent extends ScoutEvent<
     const totalPointScored = Number(newScore.enemy.points) + Number(newScore.friends.points)
     const isTieBreak = !!params.data.scoringSystemConfig.tieBreak && (
       (
-        params.data.scoringSystemConfig.set.mode == 'winSet' && 
+        params.data.scoringSystemConfig.set.mode == 'winSet' &&
         (Number(newScore.enemy.sets) + 1) == params.data.scoringSystemConfig.set.winSets &&
         (Number(newScore.friends.sets) + 1) == params.data.scoringSystemConfig.set.winSets
       ) || (
-        params.data.scoringSystemConfig.set.mode == 'totalSet' && 
+        params.data.scoringSystemConfig.set.mode == 'totalSet' &&
         (Number(totalSetScoredBefore) + 1) == params.data.scoringSystemConfig.set.totalSets &&
         Number(newScore.enemy.sets) == Number(newScore.friends.sets)
       )
@@ -89,7 +129,7 @@ export default class PointScoredScoutEvent extends ScoutEvent<
       }
     } else {
       if (params.data.scoringSystemConfig.points.mode == 'totalPoints' && totalPointScored == params.data.scoringSystemConfig.points.totalPoints) {
-        if(newScore.enemy.points > newScore.friends.points) {
+        if (newScore.enemy.points > newScore.friends.points) {
           newScore = this.incrementSetFor('enemy', newScore)
         } else {
           newScore = this.incrementSetFor('friends', newScore)
@@ -106,7 +146,7 @@ export default class PointScoredScoutEvent extends ScoutEvent<
             }
           }
         }
-  
+
         if (newScore.friends.points >= params.data.scoringSystemConfig.points.winPoints) {
           let differencePoints = Number(newScore.friends.points) - Number(newScore.enemy.points)
           if (differencePoints > 1 || !params.data.scoringSystemConfig.points.hasAdvantages) {
@@ -120,14 +160,14 @@ export default class PointScoredScoutEvent extends ScoutEvent<
         }
       }
     }
-    
+
 
     const totalSetScored = Number(newScore.enemy.sets) + Number(newScore.friends.sets)
 
     if (params.data.scoringSystemConfig.set.mode == 'winSet') {
       if (newScore.enemy.sets >= params.data.scoringSystemConfig.set.winSets) newScore.enemy.won = true
       if (newScore.friends.sets >= params.data.scoringSystemConfig.set.winSets) newScore.friends.won = true
-    } else if(params.data.scoringSystemConfig.set.mode == 'totalSet') {
+    } else if (params.data.scoringSystemConfig.set.mode == 'totalSet') {
       if (totalSetScored >= params.data.scoringSystemConfig.set.totalSets) {
         if (newScore.enemy.sets > newScore.friends.sets) newScore.enemy.won = true
         if (newScore.enemy.sets < newScore.friends.sets) newScore.friends.won = true

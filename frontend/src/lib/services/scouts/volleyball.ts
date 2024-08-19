@@ -84,6 +84,7 @@ export type LiberoSubstitutionScoutExtraProperties = {
   opponent: boolean,
   playerId: number,
   player: ScoutEventPlayer,
+  position: VolleyballScoutEventPosition
   inOrOut: 'in' | 'out',
   liberoId: number,
   libero: ScoutEventPlayer
@@ -105,7 +106,10 @@ export type PointScoredScoutExtraProperties = {
   newPoints: VolleyballPoints
 }
 export type PointScoredScoutEventJson = ScoutEventJson<'pointScored', 'volleyball'> & PointScoredScoutExtraProperties
-export type PointScoredScoutEventParameters = PointScoredScoutEventJson
+export type PointScoredScoutEventParameters = ScoutEventJson<'pointScored', 'volleyball'> & {
+  opponent: boolean,
+  newPoints?: VolleyballPoints
+}
 
 export type ReceiveScoutEventResult = '++' | '+' | '-' | '/' | 'x'
 export type ReceiveScoutExtraProperties = {

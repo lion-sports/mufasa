@@ -9,9 +9,17 @@
 	import TeammatesService from '@/lib/services/teammates/teammates.service'
 	import PlayerMarker from '../PlayerMarker.svelte'
 	import PlayerAnchorPosition from '../PlayerAnchorPosition.svelte'
+	import { createEventDispatcher } from 'svelte'
+
+	let dispatch = createEventDispatcher<{
+		playerClick: {
+			player: ScoutEventPlayer
+		}
+	}>()
 
 	export let scout: Scout,
-		phase: VolleyballPhase = 'serve'
+		phase: VolleyballPhase = 'serve',
+    selectedPlayer: ScoutEventPlayer | undefined = undefined
 
 	let positionPhaseKeyMapper = {
 		serve: 'playersServePositions',
@@ -57,7 +65,7 @@
 		}
 	} else enemyReceivePositions = []
 
-  let friendsReceivePositions: ReceivePositions = []
+	let friendsReceivePositions: ReceivePositions = []
 	$: if (!!scout.stash?.playersReceivePositions?.friends) {
 		friendsReceivePositions = []
 		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.friends)) {
@@ -77,6 +85,14 @@
 
 	let leftPositionsNumbers: VolleyballScoutEventPosition[] = [5, 4, 6, 3, 1, 2]
 	let rightPositionsNumbers: VolleyballScoutEventPosition[] = [2, 1, 3, 6, 4, 5]
+
+	function handlePlayerClick(player: ScoutEventPlayer | undefined) {
+		if (!!player) {
+			dispatch('playerClick', {
+				player
+			})
+		}
+	}
 </script>
 
 <div class="bg-blue-400 w-full h-full flex justify-center items-center">
@@ -94,19 +110,27 @@
 				<div class="grid grid-cols-2 h-full z-10">
 					{#each leftPositionsNumbers as position}
 						<div class="flex justify-center items-center">
-							<PlayerMarker friend>
-								{friendsPosition?.[position]?.player.shirtNumber}
-								<svelte:fragment slot="tooltip">
-									{TeammatesService.getTeammateName({
-										player: friendsPosition?.[position]?.player,
-										teammate: friendsPosition?.[position]?.player.teammate
-									})}
-								</svelte:fragment>
-							</PlayerMarker>
+							{#if !!friendsPosition?.[position]}
+								<PlayerMarker
+									friend
+									class="z-[15]"
+									libero={friendsPosition[position].player.role === 'libero'}
+									on:click={() => handlePlayerClick(friendsPosition[position]?.player)}
+                  selected={!!selectedPlayer && selectedPlayer?.id ===  friendsPosition[position]?.player.id}
+								>
+									{friendsPosition[position].player.shirtNumber}
+									<svelte:fragment slot="tooltip">
+										{TeammatesService.getTeammateName({
+											player: friendsPosition?.[position]?.player,
+											teammate: friendsPosition?.[position]?.player.teammate
+										})}
+									</svelte:fragment>
+								</PlayerMarker>
+							{/if}
 						</div>
 					{/each}
 				</div>
-      {:else}
+			{:else}
 				<div class="w-[100%]">
 					<div class="relative w-full h-full">
 						{#each friendsReceivePositions as positionSpec}
@@ -126,7 +150,12 @@
 									anchor={positionSpec.anchor}
 									class="z-20"
 								>
-									<PlayerMarker friend>
+									<PlayerMarker
+										friend
+										libero={positionSpec.player.role === 'libero'}
+										on:click={() => handlePlayerClick(positionSpec?.player)}
+                    selected={!!selectedPlayer && selectedPlayer?.id ===  positionSpec?.player.id}
+									>
 										{positionSpec.player.shirtNumber}
 										<svelte:fragment slot="tooltip">
 											{TeammatesService.getTeammateName({
@@ -145,15 +174,22 @@
 				<div class="grid grid-cols-2 h-full z-10">
 					{#each rightPositionsNumbers as position}
 						<div class="flex justify-center items-center">
-							<PlayerMarker opponent>
-								{enemyPosition?.[position]?.player.shirtNumber}
-								<svelte:fragment slot="tooltip">
-									{TeammatesService.getTeammateName({
-										player: enemyPosition?.[position]?.player,
-										teammate: enemyPosition?.[position]?.player.teammate
-									})}
-								</svelte:fragment>
-							</PlayerMarker>
+							{#if !!enemyPosition?.[position]}
+								<PlayerMarker
+									opponent
+									libero={enemyPosition[position].player.role === 'libero'}
+									on:click={() => handlePlayerClick(enemyPosition[position]?.player)}
+                  selected={!!selectedPlayer && selectedPlayer?.id ===  enemyPosition[position]?.player.id}
+								>
+									{enemyPosition[position].player.shirtNumber}
+									<svelte:fragment slot="tooltip">
+										{TeammatesService.getTeammateName({
+											player: enemyPosition?.[position]?.player,
+											teammate: enemyPosition?.[position]?.player.teammate
+										})}
+									</svelte:fragment>
+								</PlayerMarker>
+							{/if}
 						</div>
 					{/each}
 				</div>
@@ -177,7 +213,12 @@
 									anchor={positionSpec.anchor}
 									class="z-20"
 								>
-									<PlayerMarker opponent>
+									<PlayerMarker
+										opponent
+										libero={positionSpec.player.role === 'libero'}
+										on:click={() => handlePlayerClick(positionSpec?.player)}
+                    selected={!!selectedPlayer && selectedPlayer?.id ===  positionSpec?.player.id}
+									>
 										{positionSpec.player.shirtNumber}
 										<svelte:fragment slot="tooltip">
 											{TeammatesService.getTeammateName({

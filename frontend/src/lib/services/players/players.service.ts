@@ -104,4 +104,21 @@ export default class PlayersService extends FetchBasedService {
 
     return response
   }
+
+  public static translateRole(role: Role | undefined): string {
+    if(!role) return 'Non specificato'
+    
+    return {
+      'setter': 'Palleggiatore', 
+      'outsideHitter': 'Schiacciatore', 
+      'oppositeHitter': 'Opposto', 
+      'middleBlocker': 'Centrale', 
+      'libero': 'Libero',
+      'pointGuard': 'Playmaker', 
+      'shootingGuard': 'Guardia', 
+      'smallForward': 'Ala piccola', 
+      'powerForward': 'Ala grande', 
+      'center': 'Centro'
+    }[role]
+  }
 }

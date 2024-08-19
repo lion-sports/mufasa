@@ -43,6 +43,7 @@
 		"@solana/web3.js": "^1.94.0",
 		"@sveltejs/adapter-node": "^4.0.1",
 		"@sveltejs/vite-plugin-svelte": "^3.0.2",
+		"@tailwindcss/container-queries": "^0.1.1",
 		"@types/downloadjs": "^1.4.3",
 		"@types/js-cookie": "^3.0.2",
 		"bits-ui": "^0.21.12",

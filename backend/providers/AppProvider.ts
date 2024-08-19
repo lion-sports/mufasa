@@ -80,6 +80,18 @@ export default class AppProvider {
               console.log(err)
             }
           })
+
+          socket.on(Ws.roomName({ team, namespace: `scout:undo` }), async (data) => {
+            try {
+              await scoutSocket.handleEvent({
+                event: 'scout:undo',
+                data: data,
+                user: socket.data.user
+              })
+            } catch (err) {
+              console.log(err)
+            }
+          })
         }
 
       })

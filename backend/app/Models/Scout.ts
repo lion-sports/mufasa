@@ -6,6 +6,7 @@ import Player, { ScoutEventPlayer } from './Player'
 import ScoringSystem from './ScoringSystem'
 import ScoutInfo from './ScoutInfo'
 import { VolleyballPhase, VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from 'App/managers/scout/events/volleyball/common'
+import { LiberoSubstitutionScoutEventJson } from 'App/managers/scout/events/volleyball/LiberoSubstitutionScoutEvent'
 
 export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
@@ -26,6 +27,7 @@ export type VolleyballScoutStash = {
       playerOut: ScoutEventPlayer
     }[]
   },
+  currentSetOpenLiberoSubstitution?: LiberoSubstitutionScoutEventJson[],
   currentSetTimeoutsCalled?: {
     friends: number
     enemy: number

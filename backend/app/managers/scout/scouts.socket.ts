@@ -12,6 +12,9 @@ export type ScoutSocketEventMapping = {
   'scout:add': VolleyballScoutEventJson,
   'scout:stashReload': {
     scout: Scout
+  },
+  'scout:undo': {
+    scoutId: number
   }
 }
 
@@ -46,8 +49,6 @@ class ScoutSocket {
         namespace: 'scout:stashReload'
       })
 
-      console.log('emitting zio porco', { eventName, data })
-
       Ws.io.to(roomName).emit(eventName, data)
     }
   }
@@ -60,7 +61,7 @@ class ScoutSocket {
     data: EventData,
     user: User
   }) {
-    if(params.event == 'scout:add') {
+    if(params.event == 'scout:add' || params.event == 'scout:undo') {
       let data = params.data as ScoutSocketEventMapping['scout:add']
 
       // check if user can manage the scout
@@ -84,6 +85,8 @@ class ScoutSocket {
   
       if(params.event == 'scout:add') {
         await this.handleAdd({ scoutEvent: data, user: params.user, scout })
+      } else if(params.event == 'scout:undo') {
+        await this.handleUndo({ user: params.user, scout })
       }
     }
   }
@@ -115,6 +118,19 @@ class ScoutSocket {
 
     let scoutManager = new ScoutsManager()
     await scoutManager.recalculateStash({ 
+      data: { id: params.scout.id },
+      context: {
+        user: params.user
+      }
+    })
+  }
+
+  private async handleUndo(params: {
+    scout: Scout
+    user: User
+  }) {
+    let scoutManager = new ScoutsManager()
+    await scoutManager.undo({
       data: { id: params.scout.id },
       context: {
         user: params.user

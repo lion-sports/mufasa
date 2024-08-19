@@ -297,7 +297,7 @@ export default BaseManager
 //#endregion
 
 //#region Decorators
-function withUser(_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
+function withUser(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   if (typeof descriptor.value != 'function')
     throw new Error('withUser decorator can only be used on functions')
 
@@ -305,13 +305,12 @@ function withUser(_target: any, _propertyKey: string, descriptor: PropertyDescri
 
   descriptor.value = async function (...args: any[]) {
     let user: User | undefined | null = null
-    
     if (!!args[0]?.context?.user) {
-      user = await User.query().where('id', args[0]?.context.user.id).first()
+      user = await User.query({ client: args[0]?.context.trx }).where('id', args[0].context.user.id).first()
     } else {
       const ctx = HttpContext.get()
       if (!!ctx?.auth?.user) {
-        user = await User.query().where('id', ctx?.auth?.user?.id).first()
+        user = await User.query({ client: args[0]?.context.trx }).where('id', ctx?.auth?.user?.id).first()
       }
     }
 
@@ -333,7 +332,7 @@ function withTransaction(_target: any, _propertyKey: string, descriptor: Propert
       let res = await originalMethod.apply(this, [
         {
           ...(!!args[0] ? args[0] : {}),
-          context: { ...(!!args[0] ? args[0].context : {}), trx: trx },
+          context: { ...(!!args[0]?.context ? args[0].context : {}), trx: trx },
         },
         ...args.slice(1),
       ])

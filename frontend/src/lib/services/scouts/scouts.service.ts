@@ -2,7 +2,7 @@ import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Event } from '../events/events.service'
 import type { ScoringSystem } from '../scoringSystems/scoringSystems.service'
 import type { Player } from '../players/players.service'
-import type { VolleyballPhase, VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from './volleyball'
+import type { LiberoSubstitutionScoutEventJson, VolleyballPhase, VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from './volleyball'
 import type { Teammate } from '../teams/teams.service'
 import type { User } from '../auth/auth.service'
 
@@ -21,10 +21,10 @@ export type Role = typeof ROLES[number]
 
 export type ScoutEventPlayer = {
   id: Player['id'],
-  convocationId: Player['convocationId'],
+  convocationId?: Player['convocationId'],
   scoutId: Player['scoutId'],
-  teammateId: Player['teammateId'],
-  teammate: {
+  teammateId?: Player['teammateId'],
+  teammate?: {
     alias?: Teammate['alias'],
     user: {
       firstname: User['firstname'],
@@ -35,8 +35,8 @@ export type ScoutEventPlayer = {
   role: Player['role'],
   shirtId: Player['shirtId'],
   shirtNumber: Player['shirtNumber'],
-  shirtPrimaryColor: Player['shirtPrimaryColor'],
-  shirtSecondaryColor: Player['shirtSecondaryColor'],
+  shirtPrimaryColo?: Player['shirtPrimaryColor'],
+  shirtSecondaryColor?: Player['shirtSecondaryColor'],
   isOpponent: Player['isOpponent']
 }
 
@@ -57,6 +57,7 @@ export type VolleyballScoutStash = {
       playerOut: ScoutEventPlayer
     }[]
   },
+  currentSetOpenLiberoSubstitution?: LiberoSubstitutionScoutEventJson[],
   currentSetTimeoutsCalled: {
     friends: number
     enemy: number
@@ -92,7 +93,8 @@ export type ScoutEventJson<Type = string, S extends Sport = Sport> = {
 }
 
 export type ScoutStudio = {
-  scout: Scout
+  scout: Scout,
+  selectedPlayer?: ScoutEventPlayer
 }
 
 export type ScoutInfo = {
