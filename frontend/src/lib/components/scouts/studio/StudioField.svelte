@@ -10,6 +10,7 @@
 	import PlayerMarker from '../PlayerMarker.svelte'
 	import PlayerAnchorPosition from '../PlayerAnchorPosition.svelte'
 	import { createEventDispatcher } from 'svelte'
+	import PlayersService from '@/lib/services/players/players.service'
 
 	let dispatch = createEventDispatcher<{
 		playerClick: {
@@ -38,7 +39,7 @@
 			: phase == 'defenseBreak'
 				? scout.stash?.playersDefenseSideOutPositions
 				: phase == 'defenseSideOut'
-					? scout.stash?.playersDefenseSideOutPositions
+					? scout.stash?.playersDefenseBreakPositions
 					: undefined
 	$: enemyPosition = enemyTotalPositions?.enemy
 
@@ -120,10 +121,13 @@
 								>
 									{friendsPosition[position].player.shirtNumber}
 									<svelte:fragment slot="tooltip">
-										{TeammatesService.getTeammateName({
-											player: friendsPosition?.[position]?.player,
-											teammate: friendsPosition?.[position]?.player.teammate
-										})}
+                    <div class="font-bold">
+                      {TeammatesService.getTeammateName({
+                        player: friendsPosition?.[position]?.player,
+                        teammate: friendsPosition?.[position]?.player.teammate
+                      })}
+                    </div>
+                    <div class="font-light text-sm">{PlayersService.translateRole(friendsPosition?.[position]?.player.role)}</div>
 									</svelte:fragment>
 								</PlayerMarker>
 							{/if}
@@ -158,10 +162,13 @@
 									>
 										{positionSpec.player.shirtNumber}
 										<svelte:fragment slot="tooltip">
-											{TeammatesService.getTeammateName({
-												player: positionSpec.player,
-												teammate: positionSpec.player.teammate
-											})}
+                      <div class="font-bold">
+                        {TeammatesService.getTeammateName({
+                          player: positionSpec.player,
+                          teammate: positionSpec.player.teammate
+                        })}
+                      </div>
+                      <div class="font-light text-sm">{PlayersService.translateRole(positionSpec.player.role)}</div>
 										</svelte:fragment>
 									</PlayerMarker>
 								</PlayerAnchorPosition>
@@ -183,10 +190,13 @@
 								>
 									{enemyPosition[position].player.shirtNumber}
 									<svelte:fragment slot="tooltip">
-										{TeammatesService.getTeammateName({
-											player: enemyPosition?.[position]?.player,
-											teammate: enemyPosition?.[position]?.player.teammate
-										})}
+                    <div class="font-bold">
+                      {TeammatesService.getTeammateName({
+                        player: enemyPosition?.[position]?.player,
+                        teammate: enemyPosition?.[position]?.player.teammate
+                      })}
+                    </div>
+                    <div class="font-light text-sm">{PlayersService.translateRole(enemyPosition?.[position]?.player.role)}</div>
 									</svelte:fragment>
 								</PlayerMarker>
 							{/if}
@@ -221,10 +231,13 @@
 									>
 										{positionSpec.player.shirtNumber}
 										<svelte:fragment slot="tooltip">
-											{TeammatesService.getTeammateName({
-												player: positionSpec.player,
-												teammate: positionSpec.player.teammate
-											})}
+                      <div class="font-bold">
+                        {TeammatesService.getTeammateName({
+                          player: positionSpec.player,
+                          teammate: positionSpec.player.teammate
+                        })}
+                      </div>
+                      <div class="font-light text-sm">{PlayersService.translateRole(positionSpec.player.role)}</div>
 										</svelte:fragment>
 									</PlayerMarker>
 								</PlayerAnchorPosition>

@@ -480,12 +480,12 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
       friendsOrEnemyPositions: params.positions.friends
     })
 
-    playersDefenseBreakPositions.enemy = this.getPhasePosition({
+    playersDefenseSideoutPositions.enemy = this.getPhasePosition({
       phase: 'defenseSideOut',
       friendsOrEnemyPositions: params.positions.enemy
     })
 
-    playersDefenseBreakPositions.friends = this.getPhasePosition({
+    playersDefenseSideoutPositions.friends = this.getPhasePosition({
       phase: 'defenseSideOut',
       friendsOrEnemyPositions: params.positions.friends
     })

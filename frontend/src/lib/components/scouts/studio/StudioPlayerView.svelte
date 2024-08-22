@@ -6,6 +6,7 @@
 	import StudioPlayerAction from "./StudioPlayerAction.svelte"
 	import StudioLastEventsList from "./StudioLastEventsList.svelte"
 	import { block, receive, serve, spike } from "@/lib/stores/scout/studio"
+	import StudioPlayerSubstitutionSuggestion from "./StudioPlayerSubstitutionSuggestion.svelte"
 
   export let studio: ScoutStudio
 
@@ -78,39 +79,50 @@
   </div>
   <div class="grid gird-cols-1 @md:grid-cols-2 @2xl:grid-cols-12 gap-3">
     <div class="@2xl:col-span-3">
-      <div class="font-medium text-xl p-1">Info</div>
-      <div class="w-full {cardBackgroundClass} p-2 rounded-sm transition-all">
-        <div class="flex flex-col gap-2">
-          <div class="flex justify-between gap-2">
-            <div class="font-light">Numero di maglia</div>
-            <div class="font-bold">{studio.selectedPlayer?.shirtNumber}</div>
-          </div>
-          <div class="flex justify-between gap-2">
-            <div class="font-light">Ruolo</div>
-            <div class="font-bold">{PlayersService.translateRole(studio.selectedPlayer?.role)}</div>
-          </div>
-          <div class="flex justify-between gap-2">
-            <div class="font-light">Posizione</div>
-            <div class="font-bold">{selectedPlayerFieldPosition || 'Non specificato'}</div>
-          </div>
-          <div class="flex justify-between gap-2">
-            <div class="font-light">Squadra</div>
-            <div class="font-bold">
-              <div 
-                class="py-1 px-2 rounded-md text-[.7rem] uppercase font-bold leading-[1.2rem]"
-                class:bg-red-200={studio.selectedPlayer?.isOpponent}
-                class:text-red-800={studio.selectedPlayer?.isOpponent}
-                class:bg-blue-200={!studio.selectedPlayer?.isOpponent}
-                class:text-blue-800={!studio.selectedPlayer?.isOpponent}
-              >
-                {#if studio.selectedPlayer?.isOpponent}
-                  Avversario
-                {:else}
-                  Amico
-                {/if}
+      <div class="flex flex-col">
+        <div class="font-medium text-xl p-1">Info</div>
+        <div class="w-full {cardBackgroundClass} p-2 rounded-sm transition-all">
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between gap-2">
+              <div class="font-light">Numero di maglia</div>
+              <div class="font-bold">{studio.selectedPlayer?.shirtNumber}</div>
+            </div>
+            <div class="flex justify-between gap-2">
+              <div class="font-light">Ruolo</div>
+              <div class="font-bold">{PlayersService.translateRole(studio.selectedPlayer?.role)}</div>
+            </div>
+            <div class="flex justify-between gap-2">
+              <div class="font-light">Posizione</div>
+              <div class="font-bold">{selectedPlayerFieldPosition || 'Non specificato'}</div>
+            </div>
+            <div class="flex justify-between gap-2">
+              <div class="font-light">Squadra</div>
+              <div class="font-bold">
+                <div 
+                  class="py-1 px-2 rounded-md text-[.7rem] uppercase font-bold leading-[1.2rem]"
+                  class:bg-red-200={studio.selectedPlayer?.isOpponent}
+                  class:text-red-800={studio.selectedPlayer?.isOpponent}
+                  class:bg-blue-200={!studio.selectedPlayer?.isOpponent}
+                  class:text-blue-800={!studio.selectedPlayer?.isOpponent}
+                >
+                  {#if studio.selectedPlayer?.isOpponent}
+                    Avversario
+                  {:else}
+                    Amico
+                  {/if}
+                </div>
               </div>
             </div>
           </div>
+        </div>
+        <div class="font-medium text-xl p-1 mt-2">Sostituzioni suggerite</div>
+        <div class="w-full {cardBackgroundClass} p-2 rounded-sm transition-all">
+          {#if !!studio.selectedPlayer}
+            <StudioPlayerSubstitutionSuggestion
+              player={studio.selectedPlayer}
+              scout={studio.scout}
+            ></StudioPlayerSubstitutionSuggestion>
+          {/if}
         </div>
       </div>
     </div>

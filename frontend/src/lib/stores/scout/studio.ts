@@ -175,6 +175,11 @@ export async function pointScored(params: {
       points: undefined
     }
   })
+
+  await autoRotation({
+    phase: currentStudio.scout.stash?.phase,
+    opponent: params.opponent
+  })
 }
 
 export async function playerSubstitution(params: {
@@ -282,6 +287,16 @@ export async function block(params: {
       points: undefined
     }
   })
+
+  if(params.result == 'handsOut') {
+    autoPoint({
+      opponent: !params.player.isOpponent
+    })
+  } else if (params.result == 'point') {
+    autoPoint({
+      opponent: params.player.isOpponent
+    })
+  }
 }
 
 export async function serve(params: {
@@ -305,6 +320,17 @@ export async function serve(params: {
       points: undefined
     }
   })
+
+  if (params.result == 'error') {
+    await autoPoint({
+      opponent: !params.player.isOpponent
+    })
+  }
+  // else if (params.result == 'point') {
+  //   await autoPoint({
+  //     opponent: params.player.isOpponent
+  //   })
+  // }
 }
 
 export async function spike(params: {
@@ -340,6 +366,16 @@ export async function spike(params: {
       points: undefined
     }
   })
+
+  if (params.result == 'error') {
+    autoPoint({
+      opponent: !params.player.isOpponent
+    })
+  } else if (params.result == 'point') {
+    autoPoint({
+      opponent: params.player.isOpponent
+    })
+  }
 }
 
 export async function receive(params: {
@@ -361,7 +397,6 @@ export async function receive(params: {
         if (Number(playerId) == Number(params.player.id)) position = value.position
       }
     }
-
   }
 
   if (position === undefined) throw new Error('cannot locate position')
@@ -381,6 +416,22 @@ export async function receive(params: {
       points: undefined
     }
   })
+
+  if (params.result == 'x') {
+    autoPoint({
+      opponent: !params.player.isOpponent
+    })
+  } else {
+    if (!params.player.isOpponent) {
+      await manualPhase({
+        phase: 'defenseSideOut'
+      })
+    } else {
+      await manualPhase({
+        phase: 'defenseBreak'
+      })
+    }
+  }
 }
 
 export function getPlayerPositions(params: {
@@ -398,4 +449,43 @@ export function getPlayerPositions(params: {
   }
 
   return undefined
+}
+
+async function autoPoint(params: {
+  opponent: boolean
+}) {
+  await pointScored({
+    opponent: params.opponent
+  })
+}
+
+async function autoRotation(params: {
+  phase: NonNullable<Scout['stash']>['phase'],
+  opponent: boolean
+}) {
+  if (!params.opponent &&
+    params.phase == 'receive' ||
+    params.phase == 'defenseSideOut'
+  ) {
+    await teamRotation({
+      opponent: false
+    })
+
+    await manualPhase({
+      phase: 'serve'
+    })
+  }
+
+  if (params.opponent &&
+    params.phase == 'serve' ||
+    params.phase == 'defenseBreak'
+  ) {
+    await teamRotation({
+      opponent: true
+    })
+
+    await manualPhase({
+      phase: 'receive'
+    })
+  }
 }

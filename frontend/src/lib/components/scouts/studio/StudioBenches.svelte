@@ -6,6 +6,7 @@
   import { Icon } from "@likable-hair/svelte";
 	import StandardDialog from "../../common/StandardDialog.svelte"
 	import { liberoSubstitution, playerSubstitution } from "@/lib/stores/scout/studio"
+	import PlayersService from "@/lib/services/players/players.service"
 
   let dispatch = createEventDispatcher<{
   }>()
@@ -141,7 +142,7 @@
             class="flex text-left items-center gap-4 hover:bg-[rgb(var(--global-color-background-300))] py-1 px-2 w-full rounded-sm"
           >
             <div>
-              <PlayerMarker friend>{libero.shirtNumber}</PlayerMarker>
+              <PlayerMarker friend libero>{libero.shirtNumber}</PlayerMarker>
             </div>
             <div class="flex-grow">
               <div class="text-lg font-medium">
@@ -150,7 +151,7 @@
                   teammate: libero.teammate
                 })}
               </div>
-              <div>{libero.role}</div>
+              <div>{PlayersService.translateRole(libero.role)}</div>
             </div>
             <div>
               <Icon name="mdi-arrow-up"></Icon>
@@ -164,15 +165,15 @@
     <div class="basis-1/2 text-right">
       <div class="mb-2">Liberi</div>
       <div class="flex flex-col w-full mb-2">
-        {#each opponentsPlayers.filter(fp => fp.role == 'libero') as player}
+        {#each opponentsPlayers.filter(fp => fp.role == 'libero') as libero}
           <button 
-            on:click={() => handlePlayerClick(player)}
+            on:click={() => handlePlayerClick(libero)}
             class="flex text-right items-center justify-end gap-4 hover:bg-[rgb(var(--global-color-background-300))] p-1 w-full rounded-sm"
           >
             <div>
-              {#if player.isSubstituted && !player.isClosed}
+              {#if libero.isSubstituted && !libero.isClosed}
                 <Icon name="mdi-arrow-down"></Icon>
-              {:else if player.isClosed}
+              {:else if libero.isClosed}
                 <Icon name="mdi-close"></Icon>
               {:else}
                 <Icon name="mdi-arrow-up"></Icon>
@@ -181,14 +182,14 @@
             <div class="flex-grow">
               <div class="text-lg font-medium">
                 {TeammatesService.getTeammateName({
-                  player: player,
-                  teammate: player.teammate
+                  player: libero,
+                  teammate: libero.teammate
                 }) || 'Non specificato'}
               </div>
-              <div>{player.role}</div>
+              <div>{PlayersService.translateRole(libero.role)}</div>
             </div>
             <div>
-              <PlayerMarker opponent>{player.shirtNumber}</PlayerMarker>
+              <PlayerMarker opponent libero>{libero.shirtNumber}</PlayerMarker>
             </div>
           </button>
         {:else}
@@ -217,7 +218,7 @@
                   teammate: player.teammate
                 })}
               </div>
-              <div>{player.role}</div>
+              <div>{PlayersService.translateRole(player.role)}</div>
             </div>
             <div>
               {#if player.isSubstituted && !player.isClosed}
@@ -262,7 +263,7 @@
                   teammate: player.teammate
                 }) || 'Non specificato'}
               </div>
-              <div>{player.role}</div>
+              <div>{PlayersService.translateRole(player.role)}</div>
             </div>
             <div>
               <PlayerMarker opponent>{player.shirtNumber}</PlayerMarker>
@@ -312,7 +313,7 @@
                 teammate: player.teammate
               })}
             </div>
-            <div>{player.role}</div>
+            <div>{PlayersService.translateRole(player.role)}</div>
           </div>
         </button>
       {:else}
