@@ -326,11 +326,6 @@ export async function serve(params: {
       opponent: !params.player.isOpponent
     })
   }
-  // else if (params.result == 'point') {
-  //   await autoPoint({
-  //     opponent: params.player.isOpponent
-  //   })
-  // }
 }
 
 export async function spike(params: {
@@ -366,16 +361,6 @@ export async function spike(params: {
       points: undefined
     }
   })
-
-  if (params.result == 'error') {
-    autoPoint({
-      opponent: !params.player.isOpponent
-    })
-  } else if (params.result == 'point') {
-    autoPoint({
-      opponent: params.player.isOpponent
-    })
-  }
 }
 
 export async function receive(params: {
