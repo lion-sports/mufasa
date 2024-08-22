@@ -7,11 +7,15 @@ import ScoutsManager from "./scouts.manager"
 import { FIRST_POINT } from "./events/volleyball/common"
 import Ws from "App/Services/Ws"
 import { Context } from "../base.manager"
+import PlayersManager from "../players.manager"
 
 export type ScoutSocketEventMapping = {
   'scout:add': VolleyballScoutEventJson,
   'scout:stashReload': {
     scout: Scout
+  },
+  'scout:lastEventReload': {
+    scoutId: number
   },
   'scout:undo': {
     scoutId: number
@@ -50,6 +54,41 @@ class ScoutSocket {
       })
 
       Ws.io.to(roomName).emit(eventName, data)
+    } else if (params.data.event == 'scout:lastEventReload') {
+      let data = params.data.data as ScoutSocketEventMapping['scout:lastEventReload']
+
+      let scout = await Scout.query({ client: params.context?.trx })
+        .preload('event')
+        .preload('players')
+        .where('id', data.scoutId)
+        .firstOrFail()
+
+      let roomName = Ws.roomName({
+        team: {
+          id: scout.event.teamId
+        },
+        namespace: 'scout'
+      })
+
+      let eventName = Ws.roomName({
+        team: {
+          id: scout.event.teamId
+        },
+        namespace: 'scout:lastEventReload'
+      })
+
+      let playersManager = new PlayersManager()
+      let lastEventsForPlayers = await playersManager.lastScoutEventsForMany({
+        data: {
+          players: scout.players,
+          scout: scout
+        },
+        context: params.context
+      })
+
+      Ws.io.to(roomName).emit(eventName, {
+        lastEventsForPlayers
+      })
     }
   }
 
@@ -82,7 +121,7 @@ class ScoutSocket {
       if (!canManageScout) {
         throw new Error('cannot manage the scout')
       }
-  
+      
       if(params.event == 'scout:add') {
         await this.handleAdd({ scoutEvent: data, user: params.user, scout })
       } else if(params.event == 'scout:undo') {
@@ -107,12 +146,18 @@ class ScoutSocket {
     await event.preReceived({ 
       data: {
         scout: params.scout
+      },
+      context: {
+        user: params.user
       }
     })
     await event.save()
     await event.postReceived({
       data: {
         scout: params.scout
+      },
+      context: {
+        user: params.user
       }
     })
 

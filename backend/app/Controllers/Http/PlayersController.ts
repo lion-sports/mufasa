@@ -65,4 +65,19 @@ export default class PlayersController {
       }
     })
   }
+
+  public async lastScoutEvents({ params, request }: HttpContextContract) {
+    const manager = new PlayersManager()
+    return await manager.lastScoutEvents({
+      data: {
+        player: {
+          id: params.id,
+        },
+        scout: {
+          id: request.input('scoutId')
+        },
+        limit: request.input('limit')
+      }
+    })
+  }
 }

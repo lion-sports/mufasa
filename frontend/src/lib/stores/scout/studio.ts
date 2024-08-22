@@ -1,5 +1,5 @@
 import ScoutService, { type Scout, type ScoutEventPlayer, type ScoutStudio } from '$lib/services/scouts/scouts.service'
-import type { RotationType, VolleyballPhase, VolleyballPlayersPosition, VolleyballScoutEventParameters, VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
+import type { BlockScoutEventResult, ReceiveScoutEventResult, RotationType, ServeScoutEventResult, SpikeScoutEventResult, VolleyballPhase, VolleyballPlayersPosition, VolleyballScoutEventJson, VolleyballScoutEventParameters, VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
 import { get, writable } from 'svelte/store'
 import socketService from '$lib/services/common/socket.service';
 
@@ -27,14 +27,37 @@ const handleStashReload = (data: {
   })
 }
 
+const handleLastEventReload = (data: {
+  lastEventsForPlayers: Record<number, VolleyballScoutEventJson[]>
+}) => {
+  studio.update(v => {
+    if (!!v && !!v?.lastEventsForPlayers) v.lastEventsForPlayers = {}
+
+    if(!!v?.lastEventsForPlayers) {
+      for(const [key, value] of Object.entries(data.lastEventsForPlayers)) {
+        let playerId = key as any as number
+        v.lastEventsForPlayers[playerId] = value
+      }
+    }
+
+    return v
+  })
+}
+
 studio.subscribe((value) => {
   if(!!value) {
     socketService.off(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
     socketService.on(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
+
+    socketService.off(`teams:${value.scout.event.teamId}:scout:lastEventReload`, handleLastEventReload)
+    socketService.on(`teams:${value.scout.event.teamId}:scout:lastEventReload`, handleLastEventReload)
   }
 
   return () => {
-    if(!!value) socketService.off(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
+    if(!!value) {
+      socketService.off(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
+      socketService.off(`teams:${value.scout.event.teamId}:scout:lastEventReload`, handleLastEventReload)
+    }
   }
 })
 
@@ -163,18 +186,12 @@ export async function playerSubstitution(params: {
 
   let playerIsOpponent = params.playerOut.isOpponent,
     playerId = params.playerOut.id,
-    position: VolleyballScoutEventPosition | undefined = undefined,
     playerIdIn = params.playerIn.id
 
-  if(!!currentStudio.scout.stash?.playersServePositions) {
-    let currentPosition = playerIsOpponent ? 
-      currentStudio.scout.stash?.playersServePositions?.enemy :
-      currentStudio.scout.stash?.playersServePositions?.friends
-
-    for (const [pos, value] of Object.entries(currentPosition)) {
-      if(Number(value.player.id) == Number(playerId)) position = Number(pos) as VolleyballScoutEventPosition
-    }
-  }
+  let position = getPlayerPositions({
+    playerPositions: currentStudio.scout.stash?.playersServePositions,
+    player: params.playerOut
+  })
 
   if(position === undefined) throw new Error('cannot locate position')
 
@@ -207,19 +224,12 @@ export async function liberoSubstitution(params: {
 
   let opponent = params.player.isOpponent,
     playerId = params.player.id,
-    liberoId = params.libero.id,
-    position: VolleyballScoutEventPosition | undefined = undefined
+    liberoId = params.libero.id
 
-  if (!!currentStudio.scout.stash?.playersServePositions) {
-    let currentPosition = opponent ?
-      currentStudio.scout.stash?.playersServePositions?.enemy :
-      currentStudio.scout.stash?.playersServePositions?.friends
-
-    for (const [pos, value] of Object.entries(currentPosition)) {
-      if (params.inOrOut == 'in' && Number(value.player.id) == Number(playerId)) position = Number(pos) as VolleyballScoutEventPosition 
-      if (params.inOrOut == 'out' && Number(value.player.id) == Number(liberoId)) position = Number(pos) as VolleyballScoutEventPosition 
-    }
-  }
+  let position = getPlayerPositions({
+    playerPositions: currentStudio.scout.stash?.playersServePositions,
+    player: params.inOrOut == 'in' ? params.player : params.libero
+  })
 
   if (position === undefined) throw new Error('cannot locate position')
 
@@ -241,4 +251,151 @@ export async function liberoSubstitution(params: {
       points: undefined
     }
   })
+}
+
+export async function block(params: {
+  player: ScoutEventPlayer,
+  result: BlockScoutEventResult
+}) {
+  let currentStudio = get(studio)
+  if (!currentStudio) throw new Error('cannot call without a studio')
+
+  let position = getPlayerPositions({
+    playerPositions: currentStudio.scout.stash?.playersServePositions,
+    player: params.player
+  })
+
+  if (position === undefined) throw new Error('cannot locate position')
+  
+  await add({
+    event: {
+      type: 'block',
+      player: params.player,
+      playerId: params.player.id,
+      result: params.result,
+      position: position, 
+      date: new Date(),
+      scoutId: currentStudio.scout.id,
+      sport: 'volleyball',
+      teamId: currentStudio.scout.event.teamId,
+      createdByUserId: undefined,
+      points: undefined
+    }
+  })
+}
+
+export async function serve(params: {
+  player: ScoutEventPlayer,
+  result: ServeScoutEventResult
+}) {
+  let currentStudio = get(studio)
+  if (!currentStudio) throw new Error('cannot call without a studio')
+
+  await add({
+    event: {
+      type: 'serve',
+      player: params.player,
+      playerId: params.player.id,
+      result: params.result,
+      date: new Date(),
+      scoutId: currentStudio.scout.id,
+      sport: 'volleyball',
+      teamId: currentStudio.scout.event.teamId,
+      createdByUserId: undefined,
+      points: undefined
+    }
+  })
+}
+
+export async function spike(params: {
+  player: ScoutEventPlayer,
+  result: SpikeScoutEventResult
+}) {
+  let currentStudio = get(studio)
+  if (!currentStudio) throw new Error('cannot call without a studio')
+
+  let currentPahse = currentStudio.scout.stash?.phase || 'defenseBreak'
+
+  let position = getPlayerPositions({
+    playerPositions: currentPahse == 'defenseBreak' ? 
+      currentStudio.scout.stash?.playersDefenseBreakPositions : 
+      currentStudio.scout.stash?.playersDefenseSideOutPositions,
+    player: params.player
+  })
+
+  if (position === undefined) throw new Error('cannot locate position')
+
+  await add({
+    event: {
+      type: 'spike',
+      player: params.player,
+      playerId: params.player.id,
+      result: params.result,
+      position,
+      date: new Date(),
+      scoutId: currentStudio.scout.id,
+      sport: 'volleyball',
+      teamId: currentStudio.scout.event.teamId,
+      createdByUserId: undefined,
+      points: undefined
+    }
+  })
+}
+
+export async function receive(params: {
+  player: ScoutEventPlayer,
+  result: ReceiveScoutEventResult
+}) {
+  let currentStudio = get(studio)
+  if (!currentStudio) throw new Error('cannot call without a studio')
+
+  let position: VolleyballScoutEventPosition | undefined = undefined
+
+  if (!!currentStudio.scout.stash?.playersReceivePositions) {
+    let currentPosition = params.player.isOpponent ?
+      currentStudio.scout.stash?.playersReceivePositions.enemy :
+      currentStudio.scout.stash?.playersReceivePositions.friends
+
+    if(!!currentPosition) {
+      for (const [playerId, value] of Object.entries(currentPosition)) {
+        if (Number(playerId) == Number(params.player.id)) position = value.position
+      }
+    }
+
+  }
+
+  if (position === undefined) throw new Error('cannot locate position')
+
+  await add({
+    event: {
+      type: 'receive',
+      player: params.player,
+      playerId: params.player.id,
+      result: params.result,
+      position,
+      date: new Date(),
+      scoutId: currentStudio.scout.id,
+      sport: 'volleyball',
+      teamId: currentStudio.scout.event.teamId,
+      createdByUserId: undefined,
+      points: undefined
+    }
+  })
+}
+
+export function getPlayerPositions(params: {
+  playerPositions: VolleyballPlayersPosition | undefined,
+  player: ScoutEventPlayer
+}): VolleyballScoutEventPosition | undefined {
+  if (!!params.playerPositions) {
+    let currentPosition = params.player.isOpponent ?
+      params.playerPositions.enemy :
+      params.playerPositions.friends
+
+    for (const [pos, value] of Object.entries(currentPosition)) {
+      if (Number(value.player.id) == Number(params.player.id)) return Number(pos) as VolleyballScoutEventPosition
+    }
+  }
+
+  return undefined
 }

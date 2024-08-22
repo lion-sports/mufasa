@@ -27,18 +27,18 @@
     <div class="flex flex-col items-end">
       <div class="flex gap-4 items-end">
         <div class="text-lg">{friendName}</div>
-        <div class="text-5xl">{points.friends.sets}</div>
+        <div class="text-5xl">{points.friends?.sets || FIRST_POINT.friends.sets}</div>
       </div>
-      <div class="text-2xl">{points.friends.points}</div>
+      <div class="text-2xl">{points.friends?.points || FIRST_POINT.friends.points}</div>
     </div>
   </div>
   <div class="flex gap-4 items-center">
     <div class="flex flex-col">
       <div class="flex gap-4 items-end">
-        <div class="text-5xl">{points.enemy.sets}</div>
+        <div class="text-5xl">{points.enemy?.sets || FIRST_POINT.enemy.sets}</div>
         <div class="text-lg">{opponentName}</div>
       </div>
-      <div class="text-2xl">{points.enemy.points}</div>
+      <div class="text-2xl">{points.enemy?.points || FIRST_POINT.enemy.points}</div>
     </div>
     <button 
       class="text-2xl hover:bg-[rgb(var(--global-color-background-200))] rounded-full h-[56px] w-[56px]"

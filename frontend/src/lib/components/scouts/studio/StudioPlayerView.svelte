@@ -1,8 +1,11 @@
 <script lang="ts">
 	import type { ScoutStudio } from "@/lib/services/scouts/scouts.service"
-	import type { VolleyballScoutEventPosition } from "@/lib/services/scouts/volleyball"
+	import type { BlockScoutEventResult, ReceiveScoutEventResult, ServeScoutEventResult, SpikeScoutEventResult, VolleyballScoutEventPosition } from "@/lib/services/scouts/volleyball"
 	import TeammatesService from "@/lib/services/teammates/teammates.service"
   import PlayersService from "@/lib/services/players/players.service";
+	import StudioPlayerAction from "./StudioPlayerAction.svelte"
+	import StudioLastEventsList from "./StudioLastEventsList.svelte"
+	import { block, receive, serve, spike } from "@/lib/stores/scout/studio"
 
   export let studio: ScoutStudio
 
@@ -20,6 +23,50 @@
   }
 
   $: cardBackgroundClass = studio.selectedPlayer?.isOpponent ? 'bg-red-500/15' : 'bg-blue-500/15'
+
+  function handleBlock(event: CustomEvent<{
+    result: BlockScoutEventResult
+  }>) {
+    if(!studio.selectedPlayer) return
+
+    block({
+      player: studio.selectedPlayer,
+      result: event.detail.result
+    })
+  }
+
+  function handleReceive(event: CustomEvent<{
+    result: ReceiveScoutEventResult
+  }>) {
+    if(!studio.selectedPlayer) return
+
+    receive({
+      player: studio.selectedPlayer,
+      result: event.detail.result
+    })
+  }
+
+  function handleServe(event: CustomEvent<{
+    result: ServeScoutEventResult
+  }>) {
+    if(!studio.selectedPlayer) return
+
+    serve({
+      player: studio.selectedPlayer,
+      result: event.detail.result
+    })
+  }
+
+  function handleSpike(event: CustomEvent<{
+    result: SpikeScoutEventResult
+  }>) {
+    if(!studio.selectedPlayer) return
+
+    spike({
+      player: studio.selectedPlayer,
+      result: event.detail.result
+    })
+  }
 </script>
 
 <div class="@container">
@@ -31,6 +78,7 @@
   </div>
   <div class="grid gird-cols-1 @md:grid-cols-2 @2xl:grid-cols-12 gap-3">
     <div class="@2xl:col-span-3">
+      <div class="font-medium text-xl p-1">Info</div>
       <div class="w-full {cardBackgroundClass} p-2 rounded-sm transition-all">
         <div class="flex flex-col gap-2">
           <div class="flex justify-between gap-2">
@@ -67,10 +115,31 @@
       </div>
     </div>
     <div class="@2xl:col-span-6">
-      <div class="w-full {cardBackgroundClass} p-2 rounded-sm transition-all">pippo</div>
+      <div class="font-medium text-xl p-1">Azioni</div>
+      <div class="w-full {cardBackgroundClass} p-2 rounded-sm transition-all">
+        <StudioPlayerAction
+          opponent={studio.selectedPlayer?.isOpponent}
+          on:block={handleBlock}
+          on:block
+          on:receive={handleReceive}
+          on:receive
+          on:serve={handleServe}
+          on:serve
+          on:spike={handleSpike}
+          on:spike
+        ></StudioPlayerAction>
+      </div>
     </div>
     <div class="@2xl:col-span-3">
-      <div class="w-full {cardBackgroundClass} p-2 rounded-sm transition-all">pippo</div>
+      <div class="font-medium text-xl p-1">Eventi</div>
+      <div class="w-full {cardBackgroundClass} p-2 rounded-sm transition-all">
+        {#if !!studio.selectedPlayer?.id}
+          <StudioLastEventsList
+            events={studio.lastEventsForPlayers?.[studio.selectedPlayer?.id]}
+            --studio-last-events-list-height="300px"
+          ></StudioLastEventsList>
+        {/if}
+      </div>
     </div>
   </div>
 </div>

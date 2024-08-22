@@ -103,6 +103,7 @@ Route.resource('scouts', 'ScoutsController')
     '*': ['auth:api']
   })
 
+Route.get('/players/:id/lastScoutEvents', 'PlayersController.lastScoutEvents').middleware('auth:api')
 Route.resource('players', 'PlayersController')
   .only(['index', 'store', 'update', 'show', 'destroy'])
   .middleware({

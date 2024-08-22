@@ -130,11 +130,12 @@ export type ServeScoutExtraProperties = {
 export type ServeScoutEventJson = ScoutEventJson<'serve', 'volleyball'> & ServeScoutExtraProperties
 export type ServeScoutEventParameters = ServeScoutEventJson
 
-export type SpikeScoutEventResult = 'error' | 'point' | 'difense'
+export type SpikeScoutEventResult = 'error' | 'point' | 'defense'
 export type SpikeScoutExtraProperties = {
   playerId: number,
   player: ScoutEventPlayer,
   result: SpikeScoutEventResult,
+  position: VolleyballScoutEventPosition
 }
 export type SpikeScoutEventJson = ScoutEventJson<'spike', 'volleyball'> & SpikeScoutExtraProperties
 export type SpikeScoutEventParameters = SpikeScoutEventJson
@@ -182,3 +183,24 @@ export type VolleyballScoutEventParameters = BlockScoutEventParameters | LiberoS
   PlayerInPositionScoutEventParameters | PointScoredScoutEventParameters | ReceiveScoutEventParameters |
   ServeScoutEventParameters | SpikeScoutEventParameters | TimeoutScoutEventParameters | PlayerSubstitutionScoutEventParameters |
   ManualPhaseScoutEventParameters | TeamRotationScoutEventParameters
+
+export const EVENT_TYPE_TRANSLATIONS: Record<VolleyballScoutEventJson['type'], string> = {
+  'block': 'Muro',
+  'liberoSubstitution': 'Entrata/uscita libero',
+  'manualPhase': 'Cambio fase',
+  'playerInPosition': 'Giocatore in posizione',
+  'playerSubstitution': 'Sostituzione',
+  'pointScored': 'Punto',
+  'receive': 'Ricezione',
+  'serve': 'Battuta',
+  'spike': 'Attacco',
+  'teamRotation': 'Giro',
+  'timeout': 'Timeout'
+}
+
+export type EventToResultType = {
+  'serve': ServeScoutEventResult,
+  'spike': SpikeScoutEventResult,
+  'block': BlockScoutEventResult,
+  'receive': ReceiveScoutEventResult
+}

@@ -10,6 +10,9 @@ import { CreatePlayerValidator, UpdatePlayerValidator } from "App/Validators/pla
 import Teammate, { Role } from "App/Models/Teammate";
 import Convocation from "App/Models/Convocation";
 import Shirt from "App/Models/Shirt";
+import Mongo from "App/Services/Mongo";
+import { SCOUT_EVENT_COLLECTION_NAME } from "./scout/ScoutEvent";
+import { VolleyballScoutEventJson } from "./scout/events/volleyball/VolleyballScoutEvent";
 
 export default class PlayersManager {
   @withTransaction
@@ -308,6 +311,176 @@ export default class PlayersManager {
     await Player.query({ client: trx })
       .where('id', params.data.id)
       .del()
+  }
+
+  @withTransaction
+  @withUser
+  public async lastScoutEvents(params: {
+    data: {
+      player: {
+        id: number
+      },
+      scout: {
+        id: number
+      },
+      limit?: number
+    }
+    context?: Context
+  }): Promise<VolleyballScoutEventJson[]> {
+    let trx = params.context?.trx
+    let user = params.context?.user as User
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'manage',
+        resource: 'scout',
+        entities: {
+          scout: {
+            id: params.data.scout.id
+          }
+        }
+      },
+      context: {
+        trx
+      }
+    })
+
+    await Mongo.init()
+    let lastEvents = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<VolleyballScoutEventJson>([
+        {
+          $match: {
+            scoutId: params.data.scout.id,
+            $or: [
+              { playerId: params.data.player.id },
+              { liberoId: params.data.player.id },
+            ]
+          },
+        },
+        {
+          $sort: {
+            date: -1
+          }
+        },
+        {
+          $limit: params.data.limit || 15
+        }
+      ])
+      .toArray()
+
+    return lastEvents
+  }
+
+  @withTransaction
+  @withUser
+  public async lastScoutEventsForMany(params: {
+    data: {
+      players: {
+        id: number
+      }[],
+      scout: {
+        id: number
+      },
+      limit?: number
+    }
+    context?: Context
+  }): Promise<Record<number, VolleyballScoutEventJson[]>> {
+    let trx = params.context?.trx
+    let user = params.context?.user as User
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'manage',
+        resource: 'scout',
+        entities: {
+          scout: {
+            id: params.data.scout.id
+          }
+        }
+      },
+      context: {
+        trx
+      }
+    })
+
+    await Mongo.init()
+    let lastEvents = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        playerId: number,
+        events: VolleyballScoutEventJson[]
+      }>([
+        {
+          $match: {
+            scoutId: params.data.scout.id,
+            $or: [
+              {
+                playerId: {
+                  $in: params.data.players.map((p) => p.id)
+                }
+              },
+              {
+                liberoId: {
+                  $in: params.data.players.map((p) => p.id)
+                }
+              }
+            ]
+          }
+        },
+        {
+          $sort: {
+            date: -1
+          }
+        },
+        {
+          $addFields: {
+            players: {
+              $filter: {
+                input: ["$playerId", "$liberoId"],
+                as: "id",
+                cond: {
+                  $ne: ["$$id", null]
+                }
+              }
+            }
+          }
+        },
+        {
+          $unwind: {
+            path: "$players"
+          }
+        },
+        {
+          $group: {
+            _id: "$players",
+            events: {
+              $push: "$$ROOT"
+            }
+          }
+        },
+        {
+          $project:
+          {
+            playerId: "$_id",
+            events: {
+              $firstN: {
+                input: "$events",
+                n: params.data.limit || 15
+              }
+            }
+          }
+        }
+      ])
+      .toArray()
+
+    let result: Record<number, VolleyballScoutEventJson[]> = {}
+    for(let i = 0; i < lastEvents.length; i += 1) {
+      result[lastEvents[i].playerId] = lastEvents[i].events
+    }
+    return result
   }
 
   public shrinkPlayer(params: {

@@ -2,7 +2,7 @@ import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Event } from '../events/events.service'
 import type { ScoringSystem } from '../scoringSystems/scoringSystems.service'
 import type { Player } from '../players/players.service'
-import type { LiberoSubstitutionScoutEventJson, VolleyballPhase, VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from './volleyball'
+import type { LiberoSubstitutionScoutEventJson, VolleyballPhase, VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints, VolleyballScoutEventJson } from './volleyball'
 import type { Teammate } from '../teams/teams.service'
 import type { User } from '../auth/auth.service'
 
@@ -46,7 +46,6 @@ export type VolleyballScoutStash = {
   playersReceivePositions?: VolleyballPlayersDynamicPosition,
   playersDefenseBreakPositions?: VolleyballPlayersPosition,
   playersDefenseSideOutPositions?: VolleyballPlayersPosition,
-  playersReceiveDynamicPositions?: VolleyballPlayersPosition,
   currentSetSubstitutionsMade: {
     friends: {
       playerIn: ScoutEventPlayer,
@@ -94,7 +93,8 @@ export type ScoutEventJson<Type = string, S extends Sport = Sport> = {
 
 export type ScoutStudio = {
   scout: Scout,
-  selectedPlayer?: ScoutEventPlayer
+  selectedPlayer?: ScoutEventPlayer,
+  lastEventsForPlayers?: Record<number, VolleyballScoutEventJson[]>
 }
 
 export type ScoutInfo = {

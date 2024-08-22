@@ -3,6 +3,7 @@ import type { FilterBuilder } from '@likable-hair/svelte'
 import type { Convocation } from '../convocations/convocations.service'
 import type { Role, Scout } from '../scouts/scouts.service'
 import type { Teammate } from '../teams/teams.service'
+import type { VolleyballScoutEventJson } from '../scouts/volleyball'
 
 export type Player = {
   id: number
@@ -100,6 +101,26 @@ export default class PlayersService extends FetchBasedService {
   public async destroy(params: { id: number }): Promise<void> {
     let response = await this.client.delete({
       url: '/players/' + params.id
+    })
+
+    return response
+  }
+
+  public async lastScoutEvents(params: {
+    player: {
+      id: number
+    },
+    scout: {
+      id: number
+    },
+    limit?: number
+  }): Promise<VolleyballScoutEventJson[]> {
+    let response = await this.client.get({
+      url: '/players/' + params.player.id + '/lastScoutEvents',
+      params: {
+        scoutId: params.scout.id,
+        limit: params.limit
+      }
     })
 
     return response

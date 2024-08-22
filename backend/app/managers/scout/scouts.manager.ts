@@ -12,18 +12,20 @@ import PlayersManager from "../players.manager";
 import { ScoutInfoGeneral } from "App/Models/ScoutInfo";
 import Mongo from "App/Services/Mongo";
 import { SCOUT_EVENT_COLLECTION_NAME } from "./ScoutEvent";
-import { FIRST_POINT, VolleyballPlayersPosition, VolleyballPoints, VolleyballScoutEventPosition } from "./events/volleyball/common";
-import TeamRotationScoutEvent, { TeamRotationScoutEventJson } from "./events/volleyball/TeamRotationScoutEvent";
+import { FIRST_POINT, VolleyballPlayersPosition, VolleyballPoints } from "./events/volleyball/common";
+import TeamRotationScoutEvent from "./events/volleyball/TeamRotationScoutEvent";
 import { TimeoutScoutEventJson } from "./events/volleyball/TimeoutScoutEvent";
-import PlayerSubstitutionScoutEvent, { PlayerSubstitutionScoutEventJson } from "./events/volleyball/PlayerSubstitutionScoutEvent";
-import PlayerInPositionScoutEvent, { PlayerInPositionScoutEventJson } from "./events/volleyball/PlayerInPositionScoutEvent";
+import { PlayerSubstitutionScoutEventJson } from "./events/volleyball/PlayerSubstitutionScoutEvent";
 import { ScoutEventPlayer } from "App/Models/Player";
 import scoutsSocket from "./scouts.socket";
 import { ManualPhaseScoutEventJson } from "./events/volleyball/ManualPhaseScoutEvent";
 import { LiberoSubstitutionScoutEventJson } from "./events/volleyball/LiberoSubstitutionScoutEvent";
+import { VolleyballScoutEventJson } from "./events/volleyball/VolleyballScoutEvent";
 
 export type ScoutStudio = {
-  scout: Scout
+  scout: Scout,
+  selectedPlayer?: ScoutEventPlayer,
+  lastEventsForPlayers?: Record<number, VolleyballScoutEventJson[]>
 }
 
 export default class ScoutsManager {
@@ -436,8 +438,24 @@ export default class ScoutsManager {
       }
     })
 
+    let lastEventsForPlayers: ScoutStudio['lastEventsForPlayers'] = {}
+    if(!!scout.players) {
+      let playersManager = new PlayersManager()
+
+      lastEventsForPlayers = await playersManager.lastScoutEventsForMany({
+        data: {
+          players: scout.players,
+          scout: scout
+        },
+        context: {
+          user, trx
+        }
+      })
+    }
+
     return {
-      scout
+      scout,
+      lastEventsForPlayers
     }
   }
 

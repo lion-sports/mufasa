@@ -12,11 +12,11 @@ export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
 
 export type VolleyballScoutStash = {
-  points?: VolleyballPoints,
-  playersServePositions?: VolleyballPlayersPosition,
-  playersReceivePositions?: VolleyballPlayersDynamicPosition,
-  playersDefenseBreakPositions?: VolleyballPlayersPosition,
-  playersDefenseSideOutPositions?: VolleyballPlayersPosition,
+  points?: VolleyballPoints
+  playersServePositions?: VolleyballPlayersPosition
+  playersReceivePositions?: VolleyballPlayersDynamicPosition
+  playersDefenseBreakPositions?: VolleyballPlayersPosition
+  playersDefenseSideOutPositions?: VolleyballPlayersPosition
   currentSetSubstitutionsMade?: {
     friends: {
       playerIn: ScoutEventPlayer,
@@ -26,12 +26,12 @@ export type VolleyballScoutStash = {
       playerIn: ScoutEventPlayer,
       playerOut: ScoutEventPlayer
     }[]
-  },
+  }
   currentSetOpenLiberoSubstitution?: LiberoSubstitutionScoutEventJson[],
   currentSetTimeoutsCalled?: {
     friends: number
     enemy: number
-  },
+  }
   phase?: VolleyballPhase
 }
 

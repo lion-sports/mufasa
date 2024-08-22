@@ -42,7 +42,7 @@
 </script>
 
 <div class="p-2">
-  <Menubar.Root>
+  <Menubar.Root class="overflow-auto">
     <a 
       class="group mx-2"
       href={`/teams/${data.team.id}/events/${data.event.id}/scouts`}

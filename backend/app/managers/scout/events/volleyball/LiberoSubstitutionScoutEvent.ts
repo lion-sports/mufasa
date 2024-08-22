@@ -1,6 +1,9 @@
 import { ScoutEventPlayer } from "App/Models/Player";
 import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
 import { VolleyballPlayersPosition, VolleyballPoints } from "./common";
+import scoutsSocket from "../../scouts.socket";
+import Scout from "App/Models/Scout";
+import { Context } from "App/managers/base.manager";
 
 export type LiberoSubstitutionScoutExtraProperties = {
   opponent: boolean,
@@ -47,5 +50,22 @@ export default class LiberoSubstitutionScoutEvent extends ScoutEvent<
       libero: this.event.libero,
       position: this.event.position
     }
+  }
+
+  public async postReceived(params: {
+    data: {
+      scout: Scout
+    }
+    context?: Context
+  }): Promise<void> {
+    scoutsSocket.emit({
+      data: {
+        event: 'scout:lastEventReload',
+        data: {
+          scoutId: params.data.scout.id
+        }
+      },
+      context: params.context
+    })
   }
 }

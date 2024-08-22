@@ -4,6 +4,7 @@
 	import '../app.css'
 	import NProgress from 'nprogress'
 	import { navigating } from '$app/stores'
+  import { Toaster } from "$lib/components/ui/sonner";
 
 	/************************************
 	 ***** NProgress for page loader *****
@@ -38,5 +39,7 @@
 <svelte:head>
 	<title>Lion Sport</title>
 </svelte:head>
+
+<Toaster />
 
 <slot />
