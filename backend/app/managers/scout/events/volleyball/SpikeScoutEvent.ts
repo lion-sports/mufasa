@@ -44,9 +44,19 @@ export default class SpikeScoutEvent extends ScoutEvent<SpikeScoutExtraPropertie
     }
     context?: Context
   }): Promise<void> {
-    scoutsSocket.emit({
+    await scoutsSocket.emit({
       data: {
         event: 'scout:lastEventReload',
+        data: {
+          scoutId: params.data.scout.id
+        }
+      },
+      context: params.context
+    })
+
+    await scoutsSocket.emit({
+      data: {
+        event: 'scout:analysisReload',
         data: {
           scoutId: params.data.scout.id
         }

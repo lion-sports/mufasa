@@ -8,10 +8,6 @@
   export let player: ScoutEventPlayer,
     scout: Scout
 
-  $: friendsPlayers = scout.players.filter((p) => !p.isOpponent)
-  $: opponentsPlayers = scout.players.filter((p) => p.isOpponent)
-  $: openLiberoSubstitutions = scout.stash?.currentSetOpenLiberoSubstitution || []
-
   async function handleSubstitutionClick(playerIn: ScoutEventPlayer) {
     let confirmed = confirm('Vuoi davverso sotituire il giocatore?')
     
@@ -46,7 +42,8 @@
   {#each scout.players.filter(fp => fp.role == 'libero' && fp.isOpponent == player.isOpponent) as libero}
     <button 
       on:click={() => handleSubstitutionClick(libero)}
-      class="flex text-left items-center gap-4 hover:bg-[rgb(var(--global-color-background-300))] py-1 px-2 w-full rounded-sm"
+      style:--hover-background-color={player.isOpponent ? '#fca5a51f' : '#93c5fd1f'}
+      class="flex text-left items-center gap-4 hover:bg-[var(--hover-background-color)] py-2 px-2 w-full rounded-sm"
     >
       <div>
         <PlayerMarker friend libero>{libero.shirtNumber}</PlayerMarker>

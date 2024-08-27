@@ -161,7 +161,7 @@
     <button 
       class="category-button text-left p-3 rounded-md w-full hover:bg-[var(--hover-background-color)] bg-[var(--background-color)] text-lg font-medium"
       class:selected={selectedCategory == 'serve'}
-      on:click={() => triggerEvent('serve', 'error')}
+      on:click={() => toggleCategory('serve')}
     >Battuta</button>
     <button 
       class="category-button text-left p-3 rounded-md w-full hover:bg-[var(--hover-background-color)] bg-[var(--background-color)] text-lg font-medium"
@@ -193,12 +193,14 @@
         progress={50}
         --icon-color="#f59e0b70"
         --circular-progress-indicator-color="#f59e0b70"
+        on:click={() => triggerEvent('serve', 'received')}
       >Ricevuta</StudioPlayerActionButton>
       <StudioPlayerActionButton
         icon="mdi-check"
         progress={100}
         --icon-color="#22c55e70"
         --circular-progress-indicator-color="#22c55e70"
+        on:click={() => triggerEvent('serve', 'point')}
       >Punto</StudioPlayerActionButton>
     {:else if selectedCategory == 'spike'}
       <StudioPlayerActionButton

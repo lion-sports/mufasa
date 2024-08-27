@@ -149,6 +149,7 @@
           <StudioLastEventsList
             events={studio.lastEventsForPlayers?.[studio.selectedPlayer?.id]}
             --studio-last-events-list-height="300px"
+            opponent={studio.selectedPlayer?.isOpponent}
           ></StudioLastEventsList>
         {/if}
       </div>

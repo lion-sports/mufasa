@@ -17,6 +17,9 @@ export type ScoutSocketEventMapping = {
   'scout:lastEventReload': {
     scoutId: number
   },
+  'scout:analysisReload': {
+    scoutId: number
+  },
   'scout:undo': {
     scoutId: number
   }
@@ -88,6 +91,40 @@ class ScoutSocket {
 
       Ws.io.to(roomName).emit(eventName, {
         lastEventsForPlayers
+      })
+    } else if (params.data.event == 'scout:analysisReload') {
+      let data = params.data.data as ScoutSocketEventMapping['scout:analysisReload']
+
+      let scout = await Scout.query({ client: params.context?.trx })
+        .preload('event')
+        .preload('players')
+        .where('id', data.scoutId)
+        .firstOrFail()
+
+      let roomName = Ws.roomName({
+        team: {
+          id: scout.event.teamId
+        },
+        namespace: 'scout'
+      })
+
+      let eventName = Ws.roomName({
+        team: {
+          id: scout.event.teamId
+        },
+        namespace: 'scout:analysisReload'
+      })
+
+      let scoutManager = new ScoutsManager()
+      let analysis = await scoutManager.analysis({
+        data: {
+          id: scout.id
+        },
+        context: params.context
+      })
+
+      Ws.io.to(roomName).emit(eventName, {
+        analysis
       })
     }
   }

@@ -25,7 +25,16 @@ import { VolleyballScoutEventJson } from "./events/volleyball/VolleyballScoutEve
 export type ScoutStudio = {
   scout: Scout,
   selectedPlayer?: ScoutEventPlayer,
-  lastEventsForPlayers?: Record<number, VolleyballScoutEventJson[]>
+  lastEventsForPlayers?: Record<number, VolleyballScoutEventJson[]>,
+  analysis?: ScoutAnalysis
+}
+
+export type ScoutAnalysis = {
+  pointsMade: {
+    player: ScoutEventPlayer,
+    pointsMade: number,
+    category: 'block' | 'serve' | 'spike'
+  }[]
 }
 
 export default class ScoutsManager {
@@ -453,9 +462,19 @@ export default class ScoutsManager {
       })
     }
 
+    let analysis = await this.analysis({
+      data: {
+        id: scout.id
+      },
+      context: {
+        user, trx
+      }
+    })
+
     return {
       scout,
-      lastEventsForPlayers
+      lastEventsForPlayers,
+      analysis
     }
   }
 
@@ -1038,7 +1057,7 @@ export default class ScoutsManager {
       query.createdByUserId = params.context?.user?.id
     }
 
-    let result = await Mongo.db
+    await Mongo.db
       .collection(SCOUT_EVENT_COLLECTION_NAME)
       .findOneAndDelete(
         query, { sort: { date: -1 } }
@@ -1052,5 +1071,154 @@ export default class ScoutsManager {
     })
 
     return scout
+  }
+
+  @withTransaction
+  @withUser
+  public async analysis(params: {
+    data: {
+      id: number,
+      playerId?: number,
+      set?: number
+    },
+    context?: Context
+  }): Promise<ScoutAnalysis> {
+    await Mongo.init()
+
+    let matchScoutAndPlayerQuery: any = {
+      $match: {
+        scoutId: params.data.id,
+      }
+    }
+
+    if(!!params.data.playerId) {
+      matchScoutAndPlayerQuery['$match'].playerId = params.data.playerId
+    }
+
+    if (!!params.data.set) {
+      if(params.data.set == 1) {
+        matchScoutAndPlayerQuery['$match']['$or'] = [
+          {
+            $and: [
+              { 'points.friends.sets': 0 },
+              { 'points.enemy.sets': 0 },
+            ]
+          }
+        ]
+      } else if(params.data.set == 2) {
+        matchScoutAndPlayerQuery['$match']['$or'] = [
+          {
+            $and: [
+              { 'points.friends.sets': 1 },
+              { 'points.enemy.sets': 0 },
+            ]
+          },
+          {
+            $and: [
+              { 'points.friends.sets': 0 },
+              { 'points.enemy.sets': 1 },
+            ]
+          }
+        ]
+      } else if (params.data.set == 3) {
+        matchScoutAndPlayerQuery['$match']['$or'] = [
+          {
+            $and: [
+              { 'points.friends.sets': 2 },
+              { 'points.enemy.sets': 0 },
+            ]
+          },
+          {
+            $and: [
+              { 'points.friends.sets': 0 },
+              { 'points.enemy.sets': 2 },
+            ]
+          },
+          {
+            $and: [
+              { 'points.friends.sets': 1 },
+              { 'points.enemy.sets': 1 },
+            ]
+          }
+        ]
+      } else if (params.data.set == 4) {
+        matchScoutAndPlayerQuery['$match']['$or'] = [
+          {
+            $and: [
+              { 'points.friends.sets': 2 },
+              { 'points.enemy.sets': 1 },
+            ]
+          },
+          {
+            $and: [
+              { 'points.friends.sets': 1 },
+              { 'points.enemy.sets': 2 },
+            ]
+          },
+        ]
+      } else if (params.data.set == 5) {
+        matchScoutAndPlayerQuery['$match']['$or'] = [
+          {
+            $and: [
+              { 'points.friends.sets': 2 },
+              { 'points.enemy.sets': 2 },
+            ]
+          }
+        ]
+      }
+    }
+
+    let pointsMade = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        player: ScoutEventPlayer,
+        pointsMade: number,
+        category: 'block' | 'serve' | 'spike'
+      }>([
+        matchScoutAndPlayerQuery,
+        {
+          $match:
+          {
+            $or: [
+              {
+                type: "block",
+                result: "point"
+              },
+              {
+                type: "spike",
+                result: "point"
+              },
+              {
+                type: "serve",
+                result: "point"
+              }
+            ]
+          }
+        },
+        {
+          $sort: {
+            date: -1
+          }
+        },
+        {
+          $group: {
+            _id: ["$playerId", "$type"],
+            player: {
+              $last: "$player"
+            },
+            pointsMade: {
+              $count: {}
+            },
+            category: {
+              $last: "$type"
+            }
+          }
+        }
+      ])
+      .toArray()
+
+    return {
+      pointsMade
+    }
   }
 }

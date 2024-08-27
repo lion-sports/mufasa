@@ -35,7 +35,7 @@ export type ScoutEventPlayer = {
   role: Player['role'],
   shirtId: Player['shirtId'],
   shirtNumber: Player['shirtNumber'],
-  shirtPrimaryColo?: Player['shirtPrimaryColor'],
+  shirtPrimaryColor?: Player['shirtPrimaryColor'],
   shirtSecondaryColor?: Player['shirtSecondaryColor'],
   isOpponent: Player['isOpponent']
 }
@@ -94,7 +94,16 @@ export type ScoutEventJson<Type = string, S extends Sport = Sport> = {
 export type ScoutStudio = {
   scout: Scout,
   selectedPlayer?: ScoutEventPlayer,
-  lastEventsForPlayers?: Record<number, VolleyballScoutEventJson[]>
+  lastEventsForPlayers?: Record<number, VolleyballScoutEventJson[]>,
+  analysis?: ScoutAnalysis
+}
+
+export type ScoutAnalysis = {
+  pointsMade: {
+    player: ScoutEventPlayer,
+    pointsMade: number,
+    category: 'block' | 'serve' | 'spike'
+  }[]
 }
 
 export type ScoutInfo = {
@@ -201,6 +210,50 @@ export default class ScoutsService extends FetchBasedService {
     })
 
     return response
+  }
+
+  public static get friendsColors() {
+    return [
+      '#3b82f6',
+      '#1354bf',
+      '#4481e5',
+      '#224a8d',
+      '#5d8ad6',
+      '#123a7e'
+    ]
+  }
+
+  public static get friendsRgbColors() {
+    return [
+      '59, 130, 246',
+      '19, 84, 191',
+      '68, 129, 229',
+      '34, 74, 141',
+      '93, 138, 214',
+      '18, 58, 126'
+    ]
+  }  
+
+  public static get opponentsColors() {
+    return [
+      '#ef4444',
+      '#cb0f0f',
+      '#fc1d1d',
+      '#9d1010',
+      '#952b2b',
+      '#963d3d'
+    ]
+  }
+
+  public static get opponentsRgbColors() {
+    return [
+      '239, 68, 68',
+      '203, 15, 15',
+      '252, 29, 29',
+      '157, 16, 16',
+      '149, 43, 43',
+      '150, 61, 61'
+    ]
   }
 
 }

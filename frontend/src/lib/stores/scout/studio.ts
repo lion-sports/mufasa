@@ -1,4 +1,4 @@
-import ScoutService, { type Scout, type ScoutEventPlayer, type ScoutStudio } from '$lib/services/scouts/scouts.service'
+import ScoutService, { type Scout, type ScoutAnalysis, type ScoutEventPlayer, type ScoutStudio } from '$lib/services/scouts/scouts.service'
 import type { BlockScoutEventResult, ReceiveScoutEventResult, RotationType, ServeScoutEventResult, SpikeScoutEventResult, VolleyballPhase, VolleyballPlayersPosition, VolleyballScoutEventJson, VolleyballScoutEventParameters, VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
 import { get, writable } from 'svelte/store'
 import socketService from '$lib/services/common/socket.service';
@@ -44,6 +44,17 @@ const handleLastEventReload = (data: {
   })
 }
 
+const handleAnalysisReload = (data: {
+  analysis: ScoutAnalysis
+}) => {
+  studio.update(v => {
+    if (!!v) {
+      v.analysis = data.analysis
+    }
+    return v
+  })
+}
+
 studio.subscribe((value) => {
   if(!!value) {
     socketService.off(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
@@ -51,12 +62,16 @@ studio.subscribe((value) => {
 
     socketService.off(`teams:${value.scout.event.teamId}:scout:lastEventReload`, handleLastEventReload)
     socketService.on(`teams:${value.scout.event.teamId}:scout:lastEventReload`, handleLastEventReload)
+
+    socketService.off(`teams:${value.scout.event.teamId}:scout:analysisReload`, handleAnalysisReload)
+    socketService.on(`teams:${value.scout.event.teamId}:scout:analysisReload`, handleAnalysisReload)
   }
 
   return () => {
     if(!!value) {
       socketService.off(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
       socketService.off(`teams:${value.scout.event.teamId}:scout:lastEventReload`, handleLastEventReload)
+      socketService.off(`teams:${value.scout.event.teamId}:scout:analysisReload`, handleAnalysisReload)
     }
   }
 })

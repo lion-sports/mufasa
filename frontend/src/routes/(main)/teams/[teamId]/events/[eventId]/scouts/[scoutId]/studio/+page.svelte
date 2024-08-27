@@ -17,6 +17,7 @@
   import * as Tabs from "$lib/components/ui/tabs";
 	import StudioBenches from '@/lib/components/scouts/studio/StudioBenches.svelte'
 	import StudioPlayerView from '@/lib/components/scouts/studio/StudioPlayerView.svelte'
+	import StudioAnalysis from '@/lib/components/scouts/studio/analysis/StudioAnalysis.svelte'
 
   export let data: PageData;
   $: $studio = data.studio
@@ -29,7 +30,7 @@
     },
     insertStartingSixDialog: boolean = false,
     insertStartingSixSelectedTab: string | undefined = undefined,
-    selectedSection: 'benches' | 'player' = 'benches'
+    selectedSection: 'benches' | 'player' | 'analysis' = 'benches'
 
   async function handleStartingSixSet(e: CustomEvent<{ position: VolleyballScoutEventPosition, player: ScoutEventPlayer | undefined }>) {
     if(!!e.detail.player)
@@ -170,54 +171,67 @@
 </div>
 
 <div class="h-[calc(100dvh-155px)]">
-  <PaneGroup direction="vertical">
-	<Pane defaultSize={40} class="!overflow-visible">
-    <div class="w-full h-full">
-      <StudioField
-        scout={$studio.scout}
-        phase={$studio.scout.stash?.phase || 'serve'}
-        on:playerClick={(e) => {
-          selectPlayer({ player: e.detail.player })
-          selectedSection = 'player'
-        }}
-        selectedPlayer={$studio.selectedPlayer}
-      ></StudioField>
-    </div>
-  </Pane>
-	<PaneResizer class="relative flex h-2 items-center justify-center bg-[rgb(var(--global-color-background-400))]">
-    <div class="z-20 flex h-5 w-7 items-center justify-center rounded-sm border bg-[rgb(var(--global-color-background-400))]">
-      <Icon name="mdi-dots-horizontal"></Icon>
-    </div>
-  </PaneResizer>
-	<Pane defaultSize={60} class="!overflow-auto">
-    <div class="flex justify-center w-full">
-      <Tabs.Root bind:value={selectedSection} class="w-full relative">
-        <div class="flex w-full justify-center sticky top-0 bg-[rgb(var(--global-color-background-100))] p-2 z-10">
-          <Tabs.List>
-            <Tabs.Trigger value="benches">
-              <Icon name="mdi-format-list-bulleted"></Icon>
-              <span class="ml-2">Benches</span>
-            </Tabs.Trigger>
-            <Tabs.Trigger value="player" disabled={!$studio.selectedPlayer}>
-              <Icon name="mdi-account"></Icon>
-              <span class="ml-2">Player</span>
-            </Tabs.Trigger>
-          </Tabs.List>
+  {#key selectedSection !== 'analysis'}
+    <PaneGroup direction="vertical">
+      {#if selectedSection !== 'analysis'}
+        <Pane defaultSize={40} class="!overflow-visible">
+          <div class="w-full h-full">
+            <StudioField
+              scout={$studio.scout}
+              phase={$studio.scout.stash?.phase || 'serve'}
+              on:playerClick={(e) => {
+                selectPlayer({ player: e.detail.player })
+                selectedSection = 'player'
+              }}
+              selectedPlayer={$studio.selectedPlayer}
+            ></StudioField>
+          </div>
+        </Pane>
+        <PaneResizer class="relative flex h-2 items-center justify-center bg-[rgb(var(--global-color-background-400))]">
+          <div class="z-20 flex h-5 w-7 items-center justify-center rounded-sm border bg-[rgb(var(--global-color-background-400))]">
+            <Icon name="mdi-dots-horizontal"></Icon>
+          </div>
+        </PaneResizer>
+      {/if}
+      <Pane defaultSize={60} class="!overflow-auto">
+        <div class="flex justify-center w-full">
+          <Tabs.Root bind:value={selectedSection} class="w-full relative">
+            <div class="flex w-full justify-center sticky top-0 bg-[rgb(var(--global-color-background-100))] p-2 z-10">
+              <Tabs.List>
+                <Tabs.Trigger value="benches">
+                  <Icon name="mdi-format-list-bulleted"></Icon>
+                  <span class="ml-2">Benches</span>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="player" disabled={!$studio.selectedPlayer}>
+                  <Icon name="mdi-account"></Icon>
+                  <span class="ml-2">Player</span>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="analysis">
+                  <Icon name="mdi-chart-line"></Icon>
+                  <span class="ml-2">Analysis</span>
+                </Tabs.Trigger>
+              </Tabs.List>
+            </div>
+            <Tabs.Content value="benches" class="w-full overflow-auto py-2 px-4">
+              <StudioBenches
+                scout={$studio.scout}
+              ></StudioBenches>
+            </Tabs.Content>
+            <Tabs.Content value="player" class="w-full overflow-auto py-2 px-4">
+              <StudioPlayerView
+                studio={$studio}
+              ></StudioPlayerView>
+            </Tabs.Content>
+            <Tabs.Content value="analysis" class="w-full overflow-auto py-2 px-4">
+              <StudioAnalysis
+                analysis={$studio.analysis}
+              ></StudioAnalysis>
+            </Tabs.Content>
+          </Tabs.Root>
         </div>
-        <Tabs.Content value="benches" class="w-full overflow-auto py-2 px-4">
-          <StudioBenches
-            scout={$studio.scout}
-          ></StudioBenches>
-        </Tabs.Content>
-        <Tabs.Content value="player" class="w-full overflow-auto py-2 px-4">
-          <StudioPlayerView
-            studio={$studio}
-          ></StudioPlayerView>
-        </Tabs.Content>
-      </Tabs.Root>
-    </div>
-  </Pane>
-</PaneGroup>
+      </Pane>
+    </PaneGroup>
+  {/key}
 </div>
 
 <Drawer 
