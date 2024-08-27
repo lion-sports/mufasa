@@ -103,6 +103,11 @@ export type ScoutAnalysis = {
     player: ScoutEventPlayer,
     pointsMade: number,
     category: 'block' | 'serve' | 'spike'
+  }[],
+  errorsMade: {
+    player: ScoutEventPlayer,
+    errorsMade: number,
+    category: 'block' | 'serve' | 'spike'
   }[]
 }
 
@@ -223,6 +228,14 @@ export default class ScoutsService extends FetchBasedService {
     ]
   }
 
+  public static get categoryToColorFriends() {
+    return {
+      'spike': '#52b69a',
+      'block': '#184e77',
+      'serve': '#a2d6f9'
+    }
+  }
+
   public static get friendsRgbColors() {
     return [
       '59, 130, 246',
@@ -243,6 +256,14 @@ export default class ScoutsService extends FetchBasedService {
       '#952b2b',
       '#963d3d'
     ]
+  }
+
+  public static get categoryToColorOpponents() {
+    return {
+      'spike': '#ff7f51',
+      'block': '#ce4257',
+      'serve': '#c1121f'
+    }
   }
 
   public static get opponentsRgbColors() {

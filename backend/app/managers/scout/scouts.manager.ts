@@ -34,6 +34,11 @@ export type ScoutAnalysis = {
     player: ScoutEventPlayer,
     pointsMade: number,
     category: 'block' | 'serve' | 'spike'
+  }[],
+  errorsMade: {
+    player: ScoutEventPlayer,
+    errorsMade: number,
+    category: 'block' | 'serve' | 'spike'
   }[]
 }
 
@@ -1217,8 +1222,58 @@ export default class ScoutsManager {
       ])
       .toArray()
 
+    let errorsMade = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        player: ScoutEventPlayer,
+        errorsMade: number,
+        category: 'block' | 'serve' | 'spike'
+      }>([
+        matchScoutAndPlayerQuery,
+        {
+          $match:
+          {
+            $or: [
+              {
+                type: "block",
+                result: "error"
+              },
+              {
+                type: "spike",
+                result: "error"
+              },
+              {
+                type: "serve",
+                result: "error"
+              }
+            ]
+          }
+        },
+        {
+          $sort: {
+            date: -1
+          }
+        },
+        {
+          $group: {
+            _id: ["$playerId", "$type"],
+            player: {
+              $last: "$player"
+            },
+            errorsMade: {
+              $count: {}
+            },
+            category: {
+              $last: "$type"
+            }
+          }
+        }
+      ])
+      .toArray()
+
     return {
-      pointsMade
+      pointsMade,
+      errorsMade
     }
   }
 }

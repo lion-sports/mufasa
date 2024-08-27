@@ -6,26 +6,26 @@
 	import ScoutsService from "$lib/services/scouts/scouts.service"
   import lodash from 'lodash'
 
-  export let pointsMade: ScoutAnalysis['pointsMade'],
+  export let errorsMade: ScoutAnalysis['errorsMade'],
     opponent: boolean | undefined = undefined,
     maxPoints: number | undefined = undefined,
     groupBy: 'none' | 'category' = 'none'
 
-  let pointsMadeData: ComponentProps<GanymedeBarChart>['data'] = undefined,
+  let errorsMadeData: ComponentProps<GanymedeBarChart>['data'] = undefined,
     dataGroupedByPlayer: Record<number, {
-      player: typeof pointsMade[number]['player'],
-      pointsMade: typeof pointsMade[number]['pointsMade'],
+      player: typeof errorsMade[number]['player'],
+      errorsMade: typeof errorsMade[number]['errorsMade'],
     }> = {}
 
-  $: if(!!pointsMade) {
+  $: if(!!errorsMade) {
     dataGroupedByPlayer = {}
-    for(let i = 0; i < pointsMade.length; i += 1) {
-      let row = pointsMade[i]
+    for(let i = 0; i < errorsMade.length; i += 1) {
+      let row = errorsMade[i]
 
       if(opponent === undefined || row.player.isOpponent === opponent) {
         if(!dataGroupedByPlayer[row.player.id]) dataGroupedByPlayer[row.player.id] = lodash.cloneDeep(row)
         else {
-          dataGroupedByPlayer[row.player.id].pointsMade = dataGroupedByPlayer[row.player.id].pointsMade + row.pointsMade
+          dataGroupedByPlayer[row.player.id].errorsMade = dataGroupedByPlayer[row.player.id].errorsMade + row.errorsMade
         }
       }
 
@@ -33,12 +33,12 @@
   }
 
   $: if(!!dataGroupedByPlayer && groupBy == 'none') {
-    pointsMadeData = {
+    errorsMadeData = {
       labels: [],
       datasets: [
         {
           data: [],
-          label: 'Punti fatti',
+          label: 'Errori',
           backgroundColor: opponent ? ScoutsService.opponentsColors[0] : ScoutsService.friendsColors[0],
           borderColor: opponent ? ScoutsService.opponentsColors[1] : ScoutsService.friendsColors[1]
         }
@@ -46,20 +46,20 @@
     }
 
     for(const [playerId, row] of Object.entries(dataGroupedByPlayer)) {
-      pointsMadeData.labels.push(
+      errorsMadeData.labels.push(
         TeammatesService.getTeammateName({
           teammate: row.player.teammate,
           player: row.player
         }) || ('Maglia ' + row.player.shirtNumber))
 
-      pointsMadeData.datasets[0].data.push(row.pointsMade)
+      errorsMadeData.datasets[0].data.push(row.errorsMade)
     }
 
-    pointsMadeData = {
-      ...pointsMadeData
+    errorsMadeData = {
+      ...errorsMadeData
     }
-  } else if(!!dataGroupedByPlayer && !!pointsMade && groupBy == 'category') {
-    pointsMadeData = {
+  } else if(!!dataGroupedByPlayer && !!errorsMade && groupBy == 'category') {
+    errorsMadeData = {
       labels: [],
       datasets: [
         {
@@ -84,32 +84,32 @@
     }
 
     for(const [playerId, row] of Object.entries(dataGroupedByPlayer)) {
-      let spikePoints = pointsMade.find((pm) => pm.category == 'spike' && pm.player.id == Number(playerId))?.pointsMade || 0
-      let blockPoints = pointsMade.find((pm) => pm.category == 'block' && pm.player.id == Number(playerId))?.pointsMade || 0
-      let servePoints = pointsMade.find((pm) => pm.category == 'serve' && pm.player.id == Number(playerId))?.pointsMade || 0
+      let spikePoints = errorsMade.find((pm) => pm.category == 'spike' && pm.player.id == Number(playerId))?.errorsMade || 0
+      let blockPoints = errorsMade.find((pm) => pm.category == 'block' && pm.player.id == Number(playerId))?.errorsMade || 0
+      let servePoints = errorsMade.find((pm) => pm.category == 'serve' && pm.player.id == Number(playerId))?.errorsMade || 0
 
-      pointsMadeData.labels.push(
+      errorsMadeData.labels.push(
         TeammatesService.getTeammateName({
           teammate: row.player.teammate,
           player: row.player
         }) || ('Maglia ' + row.player.shirtNumber))
 
-      pointsMadeData.datasets[0].data.push(spikePoints)
-      pointsMadeData.datasets[1].data.push(blockPoints)
-      pointsMadeData.datasets[2].data.push(servePoints)
+      errorsMadeData.datasets[0].data.push(spikePoints)
+      errorsMadeData.datasets[1].data.push(blockPoints)
+      errorsMadeData.datasets[2].data.push(servePoints)
     }
   }
 </script>
 
 <GanymedeBarChart
-  data={pointsMadeData}
+  data={errorsMadeData}
   rgbBackgroundColor={$theme.dark ? "255, 255, 255" : "100, 100, 100"}
   showYTicks
   showXTicks
   rgbTooltipBackgroundColor={opponent ? ScoutsService.opponentsRgbColors[0] : ScoutsService.friendsRgbColors[0]}
   rgbTooltipColor="255, 255, 255"
   xTickLabel={(tickValue, index, ticks) => {
-    return pointsMadeData?.labels[index] || tickValue
+    return errorsMadeData?.labels[index] || tickValue
   }}
   yTickLabel={(tickValue) => {
     return Number(tickValue) % 1 === 0 ? tickValue : ''
