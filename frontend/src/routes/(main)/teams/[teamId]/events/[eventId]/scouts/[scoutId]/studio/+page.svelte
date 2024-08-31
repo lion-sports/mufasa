@@ -159,16 +159,18 @@
   </Menubar.Root>
 </div>
 
-<div class="w-full pb-4">
-  <StudioScoreBoard
-    points={$studio.scout.stash?.points}
-    friendName={data.team.name}
-    opponentName={data.studio.scout.scoutInfo.general.opponent?.name}
-    on:increment={(e) => {
-      pointScored({ opponent: e.detail.opponent })
-    }}
-  ></StudioScoreBoard>
-</div>
+{#if selectedSection !== 'analysis'}
+  <div class="w-full pb-4">
+    <StudioScoreBoard
+      points={$studio.scout.stash?.points}
+      friendName={data.team.name}
+      opponentName={data.studio.scout.scoutInfo.general.opponent?.name}
+      on:increment={(e) => {
+        pointScored({ opponent: e.detail.opponent })
+      }}
+    ></StudioScoreBoard>
+  </div>
+{/if}
 
 <div class="h-[calc(100dvh-155px)]">
   {#key selectedSection !== 'analysis'}
@@ -196,7 +198,7 @@
       <Pane defaultSize={60} class="!overflow-auto">
         <div class="flex justify-center w-full">
           <Tabs.Root bind:value={selectedSection} class="w-full relative">
-            <div class="flex w-full justify-center sticky top-0 bg-[rgb(var(--global-color-background-100))] p-2 z-10">
+            <div class="flex w-full justify-center sticky top-0 p-2 z-10">
               <Tabs.List>
                 <Tabs.Trigger value="benches">
                   <Icon name="mdi-format-list-bulleted"></Icon>

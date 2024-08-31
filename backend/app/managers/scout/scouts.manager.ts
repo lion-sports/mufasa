@@ -21,6 +21,7 @@ import scoutsSocket from "./scouts.socket";
 import { ManualPhaseScoutEventJson } from "./events/volleyball/ManualPhaseScoutEvent";
 import { LiberoSubstitutionScoutEventJson } from "./events/volleyball/LiberoSubstitutionScoutEvent";
 import { VolleyballScoutEventJson } from "./events/volleyball/VolleyballScoutEvent";
+import { ReceiveScoutEventResult } from "./events/volleyball/ReceiveScoutEvent";
 
 export type ScoutStudio = {
   scout: Scout,
@@ -39,6 +40,13 @@ export type ScoutAnalysis = {
     player: ScoutEventPlayer,
     errorsMade: number,
     category: 'block' | 'serve' | 'spike'
+  }[],
+  receiveOverTimeByPlayer: {
+    player: ScoutEventPlayer,
+    result: ReceiveScoutEventResult,
+    points: VolleyballPoints,
+    sortPointIndex: number
+    resultValue: number
   }[]
 }
 
@@ -1271,9 +1279,77 @@ export default class ScoutsManager {
       ])
       .toArray()
 
+    let receiveOverTimeByPlayer = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        player: ScoutEventPlayer
+        result: ReceiveScoutEventResult
+        points: VolleyballPoints
+        sortPointIndex: number
+        resultValue: number
+      }>([
+        matchScoutAndPlayerQuery,
+        {
+          $match: {
+            type: 'receive'
+          }
+        },
+        {
+          $addFields: {
+            sortPointIndex: {
+              $add: [
+                {
+                  $add: [
+                    "$points.enemy.points",
+                    "$points.friends.points"
+                  ]
+                },
+                {
+                  $multiply: [
+                    {
+                      $add: [
+                        "$points.enemy.sets",
+                        "$points.friends.sets"
+                      ]
+                    },
+                    100
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          $sort: {
+            sortPointIndex: 1
+          }
+        },
+        {
+          $project: {
+            result: "$result",
+            player: "$player",
+            points: "$points",
+            sortPointIndex: "$sortPointIndex",
+            resultValue: {
+              $cond: [{ $eq: ["$result", "x"] }, 0, {
+                $cond: [{ $eq: ["$result", "/"] }, 1, {
+                  $cond: [{ $eq: ["$result", "-"] }, 2, {
+                    $cond: [{ $eq: ["$result", "+"] }, 3, {
+                      $cond: [{ $eq: ["$result", "++"] }, 4, -1]
+                    }]
+                  }]
+                }]
+              }]
+            }
+          }
+        }
+      ])
+      .toArray()
+
     return {
       pointsMade,
-      errorsMade
+      errorsMade,
+      receiveOverTimeByPlayer
     }
   }
 }

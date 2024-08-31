@@ -9,7 +9,7 @@ export default studio
 export async function reload() {
   let currentStudio = get(studio)
 
-  if(!currentStudio) return
+  if (!currentStudio) return
 
   let service = new ScoutService({ fetch })
   let newStudio = await service.studio({ id: currentStudio.scout.id })
@@ -20,7 +20,7 @@ const handleStashReload = (data: {
   scout: Scout
 }) => {
   studio.update(v => {
-    if(!!v) {
+    if (!!v) {
       v.scout.stash = data.scout.stash
     }
     return v
@@ -33,8 +33,8 @@ const handleLastEventReload = (data: {
   studio.update(v => {
     if (!!v && !!v?.lastEventsForPlayers) v.lastEventsForPlayers = {}
 
-    if(!!v?.lastEventsForPlayers) {
-      for(const [key, value] of Object.entries(data.lastEventsForPlayers)) {
+    if (!!v?.lastEventsForPlayers) {
+      for (const [key, value] of Object.entries(data.lastEventsForPlayers)) {
         let playerId = key as any as number
         v.lastEventsForPlayers[playerId] = value
       }
@@ -56,7 +56,7 @@ const handleAnalysisReload = (data: {
 }
 
 studio.subscribe((value) => {
-  if(!!value) {
+  if (!!value) {
     socketService.off(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
     socketService.on(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
 
@@ -68,7 +68,7 @@ studio.subscribe((value) => {
   }
 
   return () => {
-    if(!!value) {
+    if (!!value) {
       socketService.off(`teams:${value.scout.event.teamId}:scout:stashReload`, handleStashReload)
       socketService.off(`teams:${value.scout.event.teamId}:scout:lastEventReload`, handleLastEventReload)
       socketService.off(`teams:${value.scout.event.teamId}:scout:analysisReload`, handleAnalysisReload)
@@ -80,7 +80,7 @@ export function selectPlayer(params: {
   player: ScoutEventPlayer
 }) {
   studio.update(v => {
-    if(!!v) {
+    if (!!v) {
       v.selectedPlayer = params.player
     }
     return v
@@ -107,7 +107,7 @@ export async function playerInPosition(params: {
   position: VolleyballScoutEventPosition
 }) {
   let currentStudio = get(studio)
-  if(!currentStudio) throw new Error('cannot call without a studio')
+  if (!currentStudio) throw new Error('cannot call without a studio')
 
   await add({
     event: {
@@ -154,7 +154,7 @@ export async function teamRotation(params: {
   if (!currentStudio) throw new Error('cannot call without a studio')
 
   let fromPositions: VolleyballPlayersPosition | undefined = currentStudio.scout.stash?.playersServePositions
-  if(!fromPositions) throw new Error('cannot rotate if position are not defined')
+  if (!fromPositions) throw new Error('cannot rotate if position are not defined')
 
   await add({
     event: {
@@ -213,7 +213,7 @@ export async function playerSubstitution(params: {
     player: params.playerOut
   })
 
-  if(position === undefined) throw new Error('cannot locate position')
+  if (position === undefined) throw new Error('cannot locate position')
 
   await add({
     event: {
@@ -286,14 +286,14 @@ export async function block(params: {
   })
 
   if (position === undefined) throw new Error('cannot locate position')
-  
+
   await add({
     event: {
       type: 'block',
       player: params.player,
       playerId: params.player.id,
       result: params.result,
-      position: position, 
+      position: position,
       date: new Date(),
       scoutId: currentStudio.scout.id,
       sport: 'volleyball',
@@ -303,7 +303,7 @@ export async function block(params: {
     }
   })
 
-  if(params.result == 'handsOut') {
+  if (params.result == 'handsOut') {
     autoPoint({
       opponent: !params.player.isOpponent
     })
@@ -353,8 +353,8 @@ export async function spike(params: {
   let currentPahse = currentStudio.scout.stash?.phase || 'defenseBreak'
 
   let position = getPlayerPositions({
-    playerPositions: currentPahse == 'defenseBreak' ? 
-      currentStudio.scout.stash?.playersDefenseBreakPositions : 
+    playerPositions: currentPahse == 'defenseBreak' ?
+      currentStudio.scout.stash?.playersDefenseBreakPositions :
       currentStudio.scout.stash?.playersDefenseSideOutPositions,
     player: params.player
   })
@@ -392,7 +392,7 @@ export async function receive(params: {
       currentStudio.scout.stash?.playersReceivePositions.enemy :
       currentStudio.scout.stash?.playersReceivePositions.friends
 
-    if(!!currentPosition) {
+    if (!!currentPosition) {
       for (const [playerId, value] of Object.entries(currentPosition)) {
         if (Number(playerId) == Number(params.player.id)) position = value.position
       }
@@ -464,8 +464,8 @@ async function autoRotation(params: {
   opponent: boolean
 }) {
   if (!params.opponent &&
-    params.phase == 'receive' ||
-    params.phase == 'defenseSideOut'
+    (params.phase == 'receive' ||
+      params.phase == 'defenseSideOut')
   ) {
     await teamRotation({
       opponent: false
@@ -477,8 +477,8 @@ async function autoRotation(params: {
   }
 
   if (params.opponent &&
-    params.phase == 'serve' ||
-    params.phase == 'defenseBreak'
+    (params.phase == 'serve' ||
+      params.phase == 'defenseBreak')
   ) {
     await teamRotation({
       opponent: true

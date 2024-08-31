@@ -33,7 +33,7 @@
 	}, 0)
 </script>
 
-<div class="text-2xl font-semibold">Errori</div>
+<div class="text-xl">Errori</div>
 <ul class="flex flex-wrap text-sm font-medium text-center text-gray-500 dark:text-gray-400 mt-4">
 	<li class="me-2">
 		<button
