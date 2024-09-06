@@ -49,6 +49,16 @@ jobs:
           - 5432:5432
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
 
     steps:
       - name: Checkout
@@ -81,6 +91,7 @@ jobs:
           PG_USER: postgres
           REDIS_HOST: localhost
           REDIS_PORT: 6379
+          REDIS_CONNECTION: local
           GOOGLE_CLIENT_ID: clientId
           GOOGLE_CLIENT_SECRET: clientSecret
           GOOGLE_IOS_CLIENT_ID: IOSClientId
