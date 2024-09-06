@@ -19,6 +19,7 @@ export async function reload() {
 const handleStashReload = (data: {
   scout: Scout
 }) => {
+  autoExitLibero()
   studio.update(v => {
     if (!!v) {
       v.scout.stash = data.scout.stash
@@ -487,5 +488,31 @@ async function autoRotation(params: {
     await manualPhase({
       phase: 'receive'
     })
+  }
+}
+
+async function autoExitLibero() {
+  let currentStudio = get(studio)
+  if (!currentStudio) throw new Error('cannot call without a studio')
+
+  let currentOpenLiberoSubstitutions = currentStudio.scout.stash?.currentSetOpenLiberoSubstitution
+
+  if (!!currentOpenLiberoSubstitutions && currentOpenLiberoSubstitutions.length > 0) {
+    for (let i = 0; i < currentOpenLiberoSubstitutions.length; i += 1) {
+      let sub = currentOpenLiberoSubstitutions[i]
+      let liberoPosition = getPlayerPositions({
+        player: sub.libero,
+        playerPositions: currentStudio.scout.stash?.playersServePositions
+      })
+
+      if(!liberoPosition) continue
+
+      if([2, 3, 4].includes(liberoPosition))
+      await liberoSubstitution({
+        inOrOut: 'out',
+        player: sub.player,
+        libero: sub.libero
+      })
+    }
   }
 }

@@ -1,7 +1,6 @@
 import { Server } from 'socket.io'
-import { createAdapter } from "@socket.io/redis-adapter";
 import AdonisServer from '@ioc:Adonis/Core/Server'
-import { Redis } from "ioredis";
+import Redis from '@ioc:Adonis/Addons/Redis'
 import { createHash } from 'crypto'
 import { base64 } from '@poppinss/utils/build/helpers'
 import Database from '@ioc:Adonis/Lucid/Database';
@@ -19,15 +18,11 @@ class Ws {
 
     this.booted = true
 
-    const pubClient = new Redis();
-    const subClient = pubClient.duplicate();
-
-    this.io = new Server(AdonisServer.instance, {
+    this.io = new Server(AdonisServer.instance!, {
       cors: {
         origin: '*',
       },
       transports: ['websocket'],
-      adapter: createAdapter(pubClient, subClient)
     })
 
     this.io.use(async (socket, next) => {
@@ -71,10 +66,21 @@ class Ws {
 
       next()
     })
+
+    Redis.subscribe('socket:emit', (data) => {
+      let parsedData = JSON.parse(data)
+      this.io.emit(parsedData.event, parsedData.data)
+    })
   }
 
   emit(event: string, data: any) {
-    this.io.emit(event, data)
+    Redis.publish(
+      `socket:emit`,
+      JSON.stringify({
+        event: event,
+        data: data,
+      })
+    )
   }
 
   public roomName(params: {
