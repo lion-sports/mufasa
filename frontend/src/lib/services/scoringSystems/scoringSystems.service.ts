@@ -73,7 +73,11 @@ export default class ScoringSystemsService extends FetchBasedService {
 
     let response = await this.client.get({
       url: '/scoringSystems',
-      params: params
+      params: {
+        page: params.page,
+        perPage: params.perPage,
+        filtersBuilder: params.filtersBuilder?.toJson()
+      }
     })
 
     return response
