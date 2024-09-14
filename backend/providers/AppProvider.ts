@@ -92,6 +92,18 @@ export default class AppProvider {
               console.log(err)
             }
           })
+
+          socket.on(Ws.roomName({ team, namespace: `scout:restart` }), async (data) => {
+            try {
+              await scoutSocket.handleEvent({
+                event: 'scout:restart',
+                data: data,
+                user: socket.data.user
+              })
+            } catch (err) {
+              console.log(err)
+            }
+          })
         }
 
       })

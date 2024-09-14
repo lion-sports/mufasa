@@ -1088,6 +1088,43 @@ export default class ScoutsManager {
 
   @withTransaction
   @withUser
+  public async restart(params: {
+    data: {
+      id: number
+    },
+    context?: Context
+  }): Promise<Scout> {
+    await Mongo.init()
+
+    await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .deleteMany(
+        { scoutId: params.data.id }
+      )
+
+    let scout = await Scout
+      .query({ client: params.context?.trx })
+      .where('id', params.data.id)
+      .firstOrFail()
+
+    scout.stash = {}
+    await scout.save()
+
+    await scoutsSocket.emit({
+      data: {
+        event: 'scout:stashReload',
+        data: {
+          scout
+        }
+      },
+      context: params.context
+    })
+
+    return scout
+  }
+
+  @withTransaction
+  @withUser
   public async analysis(params: {
     data: {
       id: number,

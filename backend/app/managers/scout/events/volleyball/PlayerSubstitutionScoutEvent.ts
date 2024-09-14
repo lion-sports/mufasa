@@ -22,8 +22,8 @@ export default class PlayerSubstitutionScoutEvent extends ScoutEvent<PlayerSubst
     if (!params.playerId) params.playerId = params.player.id
     if (!params.playerId) throw new Error('playerId must be defined')
 
-    if (!params.playerIsOpponent) params.playerIsOpponent = params.player.isOpponent
-    if (!params.playerIsOpponent) throw new Error('playerIsOpponent must be defined')
+    if (params.playerIsOpponent === undefined) params.playerIsOpponent = params.player.isOpponent
+    if (params.playerIsOpponent === undefined) throw new Error('playerIsOpponent must be defined')
 
     super({
       ...params,

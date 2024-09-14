@@ -5,7 +5,7 @@
 	import { Drawer, Icon } from '@likable-hair/svelte'
 	import StandardDialog from '$lib/components/common/StandardDialog.svelte'
 	import StudioPlayerAdd from '$lib/components/scouts/studio/StudioPlayerAdd.svelte'
-  import studio, { manualPhase, playerInPosition, pointScored, selectPlayer, teamRotation, undo } from '$lib/stores/scout/studio';
+  import studio, { manualPhase, playerInPosition, pointScored, restart, selectPlayer, teamRotation, undo } from '$lib/stores/scout/studio';
 	import type { Player } from '@/lib/services/players/players.service'
 	import StudioField from '@/lib/components/scouts/studio/StudioField.svelte'
 	import StudioStartingSixSetter from '@/lib/components/scouts/studio/StudioStartingSixSetter.svelte'
@@ -60,6 +60,17 @@
           <Icon name="mdi-undo"></Icon>
           <span class="ml-2">
             Undo
+          </span>
+        </Menubar.Item>
+        <Menubar.Item on:click={() => {
+          let confirmed = confirm('Sei sicuro di voler ripartire con lo scout?')
+          if(confirmed) {
+            restart()
+          }
+        }}>
+          <Icon name="mdi-refresh"></Icon>
+          <span class="ml-2">
+            Restart
           </span>
         </Menubar.Item>
       </Menubar.Content>

@@ -97,6 +97,15 @@ export async function undo() {
   })
 }
 
+export async function restart() {
+  let currentStudio = get(studio)
+  if (!currentStudio) throw new Error('cannot call without a studio')
+
+  socketService.io?.emit(`teams:${currentStudio.scout.event.teamId}:scout:restart`, {
+    scoutId: currentStudio.scout.id
+  })
+}
+
 export async function add(params: {
   event: VolleyballScoutEventParameters
 }) {

@@ -1,5 +1,4 @@
 import User from "App/Models/User"
-import ScoutEvent from "./ScoutEvent"
 import Scout from "App/Models/Scout"
 import { AuthorizationHelpers } from "../authorization.manager"
 import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT, VolleyballScoutEventJson } from "./events/volleyball/VolleyballScoutEvent"
@@ -21,6 +20,9 @@ export type ScoutSocketEventMapping = {
     scoutId: number
   },
   'scout:undo': {
+    scoutId: number
+  },
+  'scout:restart': {
     scoutId: number
   }
 }
@@ -137,7 +139,7 @@ class ScoutSocket {
     data: EventData,
     user: User
   }) {
-    if(params.event == 'scout:add' || params.event == 'scout:undo') {
+    if (params.event == 'scout:add' || params.event == 'scout:undo' || params.event == 'scout:restart') {
       let data = params.data as ScoutSocketEventMapping['scout:add']
 
       // check if user can manage the scout
@@ -163,6 +165,8 @@ class ScoutSocket {
         await this.handleAdd({ scoutEvent: data, user: params.user, scout })
       } else if(params.event == 'scout:undo') {
         await this.handleUndo({ user: params.user, scout })
+      } else if (params.event == 'scout:restart') {
+        await this.handleRestart({ user: params.user, scout })
       }
     }
   }
@@ -213,6 +217,19 @@ class ScoutSocket {
   }) {
     let scoutManager = new ScoutsManager()
     await scoutManager.undo({
+      data: { id: params.scout.id },
+      context: {
+        user: params.user
+      }
+    })
+  }
+
+  private async handleRestart(params: {
+    scout: Scout
+    user: User
+  }) {
+    let scoutManager = new ScoutsManager()
+    await scoutManager.restart({
       data: { id: params.scout.id },
       context: {
         user: params.user
