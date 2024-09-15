@@ -94,6 +94,8 @@
 			})
 		}
 	}
+
+  $: console.log(friendsPosition)
 </script>
 
 <div class="bg-blue-400 w-full h-full flex justify-center items-center">
@@ -111,7 +113,7 @@
 				<div class="grid grid-cols-2 h-full z-10">
 					{#each leftPositionsNumbers as position}
 						<div class="flex justify-center items-center">
-							{#if !!friendsPosition?.[position]}
+							{#if !!friendsPosition?.[position]?.player}
 								<PlayerMarker
 									friend
 									class="z-[15]"

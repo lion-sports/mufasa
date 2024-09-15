@@ -1,7 +1,8 @@
-import ScoutService, { type Scout, type ScoutAnalysis, type ScoutEventPlayer, type ScoutStudio } from '$lib/services/scouts/scouts.service'
-import type { BlockScoutEventResult, ReceiveScoutEventResult, RotationType, ServeScoutEventResult, SpikeScoutEventResult, VolleyballPhase, VolleyballPlayersPosition, VolleyballScoutEventJson, VolleyballScoutEventParameters, VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
+import ScoutService, { type Scout, type ScoutAnalysis, type ScoutEventPlayer, type ScoutStudio, type VolleyballRole } from '$lib/services/scouts/scouts.service'
+import { OPPOSITE_POSITIONS, ORDERED_POSITIONS, type BlockScoutEventResult, type ReceiveScoutEventResult, type RotationType, type ServeScoutEventResult, type SpikeScoutEventResult, type VolleyballPhase, type VolleyballPlayersPosition, type VolleyballScoutEventJson, type VolleyballScoutEventParameters, type VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
 import { get, writable } from 'svelte/store'
 import socketService from '$lib/services/common/socket.service';
+import type { Player } from '@/lib/services/players/players.service';
 
 const studio = writable<ScoutStudio | undefined>(undefined)
 export default studio
@@ -524,4 +525,45 @@ async function autoExitLibero() {
       })
     }
   }
+}
+
+export function suggestPlayer(params: {
+  position: VolleyballScoutEventPosition,
+  playersPosition: Partial<VolleyballPlayersPosition['enemy']>,
+  players: ScoutEventPlayer[],
+  avoidPlayers?: ScoutEventPlayer[]
+}): ScoutEventPlayer[] {
+  let setterPosition: VolleyballScoutEventPosition | undefined = undefined
+  for(const [key, playerSpec] of Object.entries(params.playersPosition)) {
+    let position = key as unknown as VolleyballScoutEventPosition
+    if(playerSpec?.player?.role == 'setter') {
+      setterPosition = position
+      break
+    } else if(playerSpec?.player?.role == 'oppositeHitter') {
+      setterPosition = OPPOSITE_POSITIONS[position]
+    }
+  }
+
+  if(!setterPosition) return []
+
+  let result: ScoutEventPlayer[] = []
+  let orderOfSetterPosition = ORDERED_POSITIONS.findIndex((p) => p == setterPosition)
+  let nextSetterPosition = ORDERED_POSITIONS[(orderOfSetterPosition + 1) % ORDERED_POSITIONS.length]
+  let next2SetterPosition = ORDERED_POSITIONS[(orderOfSetterPosition + 2) % ORDERED_POSITIONS.length]
+
+  if(params.position == setterPosition) {
+    result = params.players.filter((p) => p.role == 'setter')
+  } else if (params.position == nextSetterPosition || params.position == OPPOSITE_POSITIONS[nextSetterPosition]) {
+    result = params.players.filter((p) => p.role == 'outsideHitter')
+  } else if (params.position == next2SetterPosition || params.position == OPPOSITE_POSITIONS[next2SetterPosition]) {
+    result = params.players.filter((p) => p.role == 'middleBlocker')
+  } else if(params.position == OPPOSITE_POSITIONS[setterPosition]) {
+    result = params.players.filter((p) => p.role == 'oppositeHitter')
+  }
+
+  if(!!params.avoidPlayers) {
+    result = result.filter((v) => params.avoidPlayers?.every((ap) => ap.id !== v.id))
+  }
+
+  return result
 }

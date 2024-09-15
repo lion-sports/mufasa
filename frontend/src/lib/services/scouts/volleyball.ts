@@ -4,6 +4,16 @@ export type VolleyballPhase = 'serve' | 'receive' | 'defenseBreak' | 'defenseSid
 
 export type VolleyballScoutEventPosition = 1 | 2 | 3 | 4 | 5 | 6
 
+export const ORDERED_POSITIONS: VolleyballScoutEventPosition[] = [1, 2, 3, 4, 5, 6]
+export const OPPOSITE_POSITIONS: Record<VolleyballScoutEventPosition, VolleyballScoutEventPosition> = {
+  1: 4,
+  2: 5,
+  3: 6,
+  4: 1,
+  5: 2,
+  6: 3,
+}
+
 export type VolleyballPoints = {
   friends: {
     points: number

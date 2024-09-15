@@ -66,8 +66,6 @@
       }
     }
   }
-
-  $: console.log(resetZoom)
 </script>
 
 <div class="flex w-full justify-center mb-3">

@@ -1,11 +1,15 @@
 <script lang="ts">
-	import type { VolleyballPlayersPosition, VolleyballScoutEventPosition } from "@/lib/services/scouts/volleyball"
+	import { ORDERED_POSITIONS, type VolleyballPlayersPosition, type VolleyballScoutEventPosition } from "@/lib/services/scouts/volleyball"
 	import StandardTabSwitcher from "../../common/StandardTabSwitcher.svelte"
 	import type { Player } from "@/lib/services/players/players.service"
 	import { Icon } from "@likable-hair/svelte"
 	import ScoutPlayerAutocomplete from "../ScoutPlayerAutocomplete.svelte"
 	import { createEventDispatcher } from "svelte"
 	import type { ScoutEventPlayer } from "@/lib/services/scouts/scouts.service"
+	import { suggestPlayer } from "@/lib/stores/scout/studio"
+	import PlayerMarker from "../PlayerMarker.svelte"
+	import TeammatesService from "@/lib/services/teammates/teammates.service"
+  import lodash from 'lodash'
 
   let dispatch = createEventDispatcher<{
     change: {
@@ -16,7 +20,8 @@
 
   export let selectedTab: string = '',
     playersPosition: VolleyballPlayersPosition | undefined = undefined,
-    players: Player[] = []
+    players: Player[] = [],
+    showSuggestion: boolean = true
 
   $: notLiberoPlayers = players.filter((p) => p.role !== 'libero')
 
@@ -36,9 +41,51 @@
   })
 
   let positions: VolleyballScoutEventPosition[] = [1, 2, 3, 4, 5, 6]
+  let playerSuggestion: {
+    enemy: Partial<Record<VolleyballScoutEventPosition, ScoutEventPlayer[]>>,
+    friends: Partial<Record<VolleyballScoutEventPosition, ScoutEventPlayer[]>>
+  } = {
+    enemy: {},
+    friends: {}
+  }
+
+  $: if(!!playersPosition) {
+    playerSuggestion = {
+      enemy: {},
+      friends: {}
+    }
+
+    for(let i = 0; i < ORDERED_POSITIONS.length; i += 1) {
+      let position = ORDERED_POSITIONS[i]
+      let suggestions = suggestPlayer({
+        position,
+        players: players.filter((p) => !p.isOpponent),
+        playersPosition: playersPosition.friends,
+        avoidPlayers: Object.values(playersPosition.friends).filter(v => !!v && !!v.player).map((v) => v.player)
+      })
+
+      playerSuggestion.friends[position] = lodash.cloneDeep(suggestions)
+
+      suggestions = suggestPlayer({
+        position,
+        players: players.filter((p) => p.isOpponent),
+        playersPosition: playersPosition.enemy,
+        avoidPlayers: Object.values(playersPosition.enemy).filter(v => !!v && !!v.player).map((v) => v.player)
+      })
+
+      playerSuggestion.enemy[position] = lodash.cloneDeep(suggestions)
+    }
+  }
+
+  function handleAcceptSuggestion(position: VolleyballScoutEventPosition, suggestion: ScoutEventPlayer) {
+    dispatch('change', {
+      position: position,
+      player: suggestion
+    })
+  }
 </script>
 
-<div class="min-w-[min(95vw,400px)] max-w-[min(95vw,400px)]">
+<div class="min-w-[min(95vw,400px)] w-[700px] max-w-[95vw]">
   <StandardTabSwitcher 
     tabs={[
       {
@@ -53,6 +100,11 @@
     bind:selected={selectedTab}
   ></StandardTabSwitcher>
   <div class="mt-4 max-h-[80vh] overflow-auto">
+    <div class="">
+      <button class="underline" on:click={() => showSuggestion = !showSuggestion}>
+        {showSuggestion ? 'Nascondi suggerimenti' : 'Mostra suggerimenti'}
+      </button>
+    </div>
     <div class="flex flex-col gap-2">
       {#each positions as position}
         <div class="p-2 flex gap-4 items-center">
@@ -104,6 +156,26 @@
               }
             ></ScoutPlayerAutocomplete>
           </div>
+          {#if showSuggestion}
+            <div class="flex flex-col gap-1">
+              {#each 
+                selectedTab == 'opponents' ?
+                (playerSuggestion.enemy[position] || []) :
+                (playerSuggestion.friends[position] || [])
+              as suggestion}
+                <button class="flex gap-2 items-center" on:click={() => handleAcceptSuggestion(position, suggestion)}>
+                  <PlayerMarker
+                    opponent={suggestion.isOpponent}
+                    friend={!suggestion.isOpponent}
+                  >{suggestion.shirtNumber}</PlayerMarker>
+                  <div class="flex flex-col">
+                    <div class="text-left text-lg font-semibold">{TeammatesService.getTeammateName({ teammate: suggestion.teammate, player: suggestion})}</div>
+                    <div class="text-left">{suggestion.role || ''}</div>
+                  </div>
+                </button>
+              {/each}
+            </div>
+          {/if}
         </div>
       {/each}
     </div>
