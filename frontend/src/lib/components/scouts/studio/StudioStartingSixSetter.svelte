@@ -83,6 +83,80 @@
       player: suggestion
     })
   }
+
+  function handleRotateForward() {
+    if(!!playersPosition) {
+      if(selectedTab == 'opponents') {
+        let firstPlayerSwapped = lodash.cloneDeep(playersPosition.enemy[1])
+        playersPosition.enemy[1] = playersPosition.enemy[2]
+        playersPosition.enemy[2] = playersPosition.enemy[3]
+        playersPosition.enemy[3] = playersPosition.enemy[4]
+        playersPosition.enemy[4] = playersPosition.enemy[5]
+        playersPosition.enemy[5] = playersPosition.enemy[6]
+        playersPosition.enemy[6] = firstPlayerSwapped
+        dispatchAllPlayers({ enemy: true })
+      } else {
+        playersPosition.friends[1] = playersPosition.friends[2]
+        playersPosition.friends[2] = playersPosition.friends[3]
+        playersPosition.friends[3] = playersPosition.friends[4]
+        playersPosition.friends[4] = playersPosition.friends[5]
+        playersPosition.friends[5] = playersPosition.friends[6]
+        playersPosition.friends[6] = playersPosition.friends[1]
+        dispatchAllPlayers({ friends: true })
+      }
+    }
+  }
+
+  function handleRotateBackward() {
+    if(!!playersPosition) {
+      if(selectedTab == 'opponents') {
+        let firstPlayerSwapped = lodash.cloneDeep(playersPosition.enemy[6])
+        playersPosition.enemy[6] = playersPosition.enemy[5]
+        playersPosition.enemy[5] = playersPosition.enemy[4]
+        playersPosition.enemy[4] = playersPosition.enemy[3]
+        playersPosition.enemy[3] = playersPosition.enemy[2]
+        playersPosition.enemy[2] = playersPosition.enemy[1]
+        playersPosition.enemy[1] = firstPlayerSwapped
+        dispatchAllPlayers({ enemy: true })
+      } else {
+        let firstPlayerSwapped = lodash.cloneDeep(playersPosition.friends[6])
+        playersPosition.friends[6] = playersPosition.friends[5]
+        playersPosition.friends[5] = playersPosition.friends[4]
+        playersPosition.friends[4] = playersPosition.friends[3]
+        playersPosition.friends[3] = playersPosition.friends[2]
+        playersPosition.friends[2] = playersPosition.friends[1]
+        playersPosition.friends[1] = firstPlayerSwapped
+        dispatchAllPlayers({ friends: true })
+      }
+    }
+  }
+
+  function dispatchAllPlayers(params: {
+    friends?: boolean,
+    enemy?: boolean
+  }) {
+    if(!!playersPosition) {
+      if(params.enemy) {
+        for(const [key, playerSpec] of Object.entries(playersPosition.enemy)) {
+          let position = key as unknown as VolleyballScoutEventPosition
+          dispatch('change', {
+            position,
+            player: playerSpec.player
+          })
+        }
+      }
+
+      if(params.friends) {
+        for(const [key, playerSpec] of Object.entries(playersPosition.friends)) {
+          let position = key as unknown as VolleyballScoutEventPosition
+          dispatch('change', {
+            position,
+            player: playerSpec.player
+          })
+        }
+      }
+    }
+  }
 </script>
 
 <div class="min-w-[min(95vw,400px)] w-[700px] max-w-[95vw]">
@@ -100,9 +174,15 @@
     bind:selected={selectedTab}
   ></StandardTabSwitcher>
   <div class="mt-4 max-h-[80vh] overflow-auto">
-    <div class="">
+    <div class="flex gap-4">
       <button class="underline" on:click={() => showSuggestion = !showSuggestion}>
         {showSuggestion ? 'Nascondi suggerimenti' : 'Mostra suggerimenti'}
+      </button>
+      <button class="underline" on:click={handleRotateForward}>
+        Ruota in avanti
+      </button>
+      <button class="underline" on:click={handleRotateBackward}>
+        Ruota indietro
       </button>
     </div>
     <div class="flex flex-col gap-2">

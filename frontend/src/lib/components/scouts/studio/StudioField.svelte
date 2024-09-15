@@ -94,8 +94,6 @@
 			})
 		}
 	}
-
-  $: console.log(friendsPosition)
 </script>
 
 <div class="bg-blue-400 w-full h-full flex justify-center items-center">
