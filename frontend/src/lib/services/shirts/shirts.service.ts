@@ -48,7 +48,11 @@ export default class ShirtService extends FetchBasedService {
 
     let response = await this.client.get({
       url: '/shirts',
-      params: params
+      params: {
+        page: params.page,
+        perPage: params.perPage,
+        filtersBuilder: params.filtersBuilder?.toJson()
+      }
     })
 
     return response
