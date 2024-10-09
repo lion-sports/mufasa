@@ -5,7 +5,7 @@
 	import { Drawer, Icon } from '@likable-hair/svelte'
 	import StandardDialog from '$lib/components/common/StandardDialog.svelte'
 	import StudioPlayerAdd from '$lib/components/scouts/studio/StudioPlayerAdd.svelte'
-  import studio, { manualPhase, playerInPosition, pointScored, restart, selectPlayer, teamRotation, undo } from '$lib/stores/scout/studio';
+  import studio, { manualPhase, playerInPosition, pointScored, restart, selectPlayer, teamRotation, undo, updateFriendsFieldSide } from '$lib/stores/scout/studio';
 	import type { Player } from '@/lib/services/players/players.service'
 	import StudioField from '@/lib/components/scouts/studio/StudioField.svelte'
 	import StudioStartingSixSetter from '@/lib/components/scouts/studio/StudioStartingSixSetter.svelte'
@@ -40,6 +40,12 @@
       player: e.detail.player
     })
   }
+
+  async function changeSides() {
+    await updateFriendsFieldSide({
+      side: $studio?.scout.scoutInfo.general.friendsFieldSide == 'right' ? 'left' : 'right'
+    })
+  }
 </script>
 
 <div class="p-2">
@@ -71,6 +77,17 @@
           <Icon name="mdi-refresh"></Icon>
           <span class="ml-2">
             Restart
+          </span>
+        </Menubar.Item>
+      </Menubar.Content>
+    </Menubar.Menu>
+    <Menubar.Menu>
+      <Menubar.Trigger>Layout</Menubar.Trigger>
+      <Menubar.Content>
+        <Menubar.Item on:click={() => { changeSides() }}>
+          <Icon name="mdi-swap-horizontal"></Icon>
+          <span class="ml-2">
+            Cambia lato
           </span>
         </Menubar.Item>
       </Menubar.Content>
@@ -192,6 +209,7 @@
             <StudioField
               scout={$studio.scout}
               phase={$studio.scout.stash?.phase || 'serve'}
+              friendSides={$studio.scout.scoutInfo.general.friendsFieldSide}
               on:playerClick={(e) => {
                 selectPlayer({ player: e.detail.player })
                 selectedSection = 'player'

@@ -6,7 +6,8 @@ import Scout from './Scout';
 export type ScoutInfoGeneral = {
   opponent?: {
     name?: string
-  }
+  },
+  friendsFieldSide?: 'right' | 'left'
 }
 
 export default class ScoutInfo extends CamelCaseBaseModel {

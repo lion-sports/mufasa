@@ -1,10 +1,8 @@
 <script lang="ts">
   import UserAvatar from "$lib/components/common/UserAvatar.svelte"
-	import ShirtDropdown from "$lib/components/shirts/ShirtDropdown.svelte"
 	import type { Scout } from "$lib/services/scouts/scouts.service"
 	import TeammatesService from "$lib/services/teammates/teammates.service"
 	import { CircularLoader, Icon, TabSwitcher } from "@likable-hair/svelte"
-	import ScoutRoleAutocomplete from "../ScoutRoleAutocomplete.svelte"
 	import ScoutsService, { ROLES } from "$lib/services/scouts/scouts.service"
 	import { createEventDispatcher } from "svelte"
 	import type { Player } from "@/lib/services/players/players.service"

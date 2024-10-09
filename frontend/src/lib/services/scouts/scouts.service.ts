@@ -122,7 +122,8 @@ export type ScoutInfo = {
   general: {
     opponent?: {
       name?: string
-    }
+    },
+    friendsFieldSide?: 'right' | 'left'
   }
 }
 
