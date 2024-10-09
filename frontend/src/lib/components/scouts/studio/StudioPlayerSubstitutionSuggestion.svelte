@@ -63,3 +63,27 @@
     </button>
   {/each}
 {/if}
+
+{#each scout.players.filter(fp => fp.role == player.role && fp.isOpponent == player.isOpponent && fp.id !== player.id) as suggestedPlayer}
+  <button 
+    on:click={() => handleSubstitutionClick(suggestedPlayer)}
+    style:--hover-background-color={player.isOpponent ? '#fca5a51f' : '#93c5fd1f'}
+    class="flex text-left items-center gap-4 hover:bg-[var(--hover-background-color)] py-2 px-2 w-full rounded-sm"
+  >
+    <div>
+      <PlayerMarker friend>{suggestedPlayer.shirtNumber}</PlayerMarker>
+    </div>
+    <div class="flex-grow">
+      <div class="text-lg font-medium">
+        {TeammatesService.getTeammateName({
+          player: suggestedPlayer,
+          teammate: suggestedPlayer.teammate
+        })}
+      </div>
+      <div>{suggestedPlayer.role}</div>
+    </div>
+    <div>
+      <Icon name="mdi-arrow-up"></Icon>
+    </div>
+  </button>
+{/each}

@@ -202,6 +202,12 @@ export async function pointScored(params: {
     }
   })
 
+  if(params.opponent && currentStudio.scout.stash?.phase == 'defenseSideOut') {
+    await manualPhase({
+      phase: 'receive'
+    })
+  }
+
   await autoRotation({
     phase: currentStudio.scout.stash?.phase,
     opponent: params.opponent
