@@ -30,6 +30,7 @@
     },
     insertStartingSixDialog: boolean = false,
     insertStartingSixSelectedTab: string | undefined = undefined,
+    reloadFirstSetStartingSix: boolean = false,
     selectedSection: 'benches' | 'player' | 'analysis' = 'benches'
 
   async function handleStartingSixSet(e: CustomEvent<{ position: VolleyballScoutEventPosition, player: ScoutEventPlayer | undefined }>) {
@@ -45,6 +46,12 @@
     await updateFriendsFieldSide({
       side: $studio?.scout.scoutInfo.general.friendsFieldSide == 'right' ? 'left' : 'right'
     })
+  }
+
+  async function openStartingSixDialog(tab: 'friends' | 'opponents') {
+    insertStartingSixDialog = true
+    insertStartingSixSelectedTab = tab
+    reloadFirstSetStartingSix = true
   }
 </script>
 
@@ -113,12 +120,10 @@
           <Menubar.SubTrigger>Formazione</Menubar.SubTrigger>
           <Menubar.SubContent>
             <Menubar.Item on:click={() => {
-              insertStartingSixDialog = true
-              insertStartingSixSelectedTab = 'friends'
+              openStartingSixDialog('friends')
             }}>Amici</Menubar.Item>
             <Menubar.Item on:click={() => {
-              insertStartingSixDialog = true
-              insertStartingSixSelectedTab = 'opponents'
+              openStartingSixDialog('opponents')
             }}>Avversari</Menubar.Item>
           </Menubar.SubContent>
         </Menubar.Sub>
@@ -307,6 +312,7 @@
 >
   <StudioStartingSixSetter
     bind:selectedTab={insertStartingSixSelectedTab}
+    bind:reloadFirstSetStartingSix
     players={$studio.scout.players}
     playersPosition={$studio.scout.stash?.playersServePositions}
     on:change={handleStartingSixSet}

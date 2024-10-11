@@ -82,4 +82,13 @@ export default class ScoutsController {
       }
     })
   }
+
+  public async getFirstSetStartingSix({ params }: HttpContextContract) {
+    const manager = new ScoutsManager()
+    return await manager.getFirstSetStartingSix({
+      data: {
+        id: params.id
+      }
+    })
+  }
 }

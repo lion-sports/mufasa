@@ -96,6 +96,7 @@ Route.resource('shirts', 'ShirtsController')
   })
 
 Route.get('/scouts/:id/studio', 'ScoutsController.studio').middleware('auth:api')
+Route.get('/scouts/:id/getFirstSetStartingSix', 'ScoutsController.getFirstSetStartingSix').middleware('auth:api')
 Route.post('/scouts/:id/importTeammates', 'ScoutsController.importTeammates').middleware('auth:api')
 Route.resource('scouts', 'ScoutsController')
   .only(['index', 'store', 'update', 'show', 'destroy'])
@@ -118,6 +119,5 @@ Route.resource('scoringSystems', 'ScoringSystemsController')
 
 Route.post('/convocations/:id/confirm', 'ConvocationsController.confirm').middleware('auth:api')
 Route.post('/convocations/:id/deny', 'ConvocationsController.deny').middleware('auth:api')
-
 
 Route.post('/solana/reward', 'SolanaController.reward').middleware('auth:api')

@@ -6,10 +6,11 @@
 	import ScoutPlayerAutocomplete from "../ScoutPlayerAutocomplete.svelte"
 	import { createEventDispatcher } from "svelte"
 	import type { ScoutEventPlayer } from "@/lib/services/scouts/scouts.service"
-	import { suggestPlayer } from "@/lib/stores/scout/studio"
+	import studio, { suggestPlayer } from "@/lib/stores/scout/studio"
 	import PlayerMarker from "../PlayerMarker.svelte"
 	import TeammatesService from "@/lib/services/teammates/teammates.service"
   import lodash from 'lodash'
+	import ScoutsService from "@/lib/services/scouts/scouts.service"
 
   let dispatch = createEventDispatcher<{
     change: {
@@ -21,7 +22,9 @@
   export let selectedTab: string = '',
     playersPosition: VolleyballPlayersPosition | undefined = undefined,
     players: Player[] = [],
-    showSuggestion: boolean = true
+    showSuggestion: boolean = true,
+    reloadFirstSetStartingSix: boolean = true,
+    firstSetStartingSix: VolleyballPlayersPosition | undefined = undefined
 
   $: notLiberoPlayers = players.filter((p) => p.role !== 'libero')
 
@@ -131,6 +134,28 @@
     }
   }
 
+  function handleInsertFirstSetStartingSix() {
+    if(!!firstSetStartingSix && !!playersPosition) {
+      if(selectedTab == 'opponents') {
+        playersPosition.enemy[1] = firstSetStartingSix.enemy[1]
+        playersPosition.enemy[2] = firstSetStartingSix.enemy[2]
+        playersPosition.enemy[3] = firstSetStartingSix.enemy[3]
+        playersPosition.enemy[4] = firstSetStartingSix.enemy[4]
+        playersPosition.enemy[5] = firstSetStartingSix.enemy[5]
+        playersPosition.enemy[6] = firstSetStartingSix.enemy[6]
+        dispatchAllPlayers({ enemy: true })
+      } else {
+        playersPosition.friends[1] = firstSetStartingSix.friends[1]
+        playersPosition.friends[2] = firstSetStartingSix.friends[2]
+        playersPosition.friends[3] = firstSetStartingSix.friends[3]
+        playersPosition.friends[4] = firstSetStartingSix.friends[4]
+        playersPosition.friends[5] = firstSetStartingSix.friends[5]
+        playersPosition.friends[6] = firstSetStartingSix.friends[6]
+        dispatchAllPlayers({ friends: true })
+      }
+    }
+  }
+
   function dispatchAllPlayers(params: {
     friends?: boolean,
     enemy?: boolean
@@ -156,6 +181,18 @@
         }
       }
     }
+  }
+
+  async function loadFirstSetStartingSix() {
+    if(!$studio) return
+
+    let scoutService = new ScoutsService({ fetch })
+    firstSetStartingSix = await scoutService.getFirstSetStartingSix({ id: $studio.scout.id })
+  }
+
+  $: if(!!reloadFirstSetStartingSix) {
+    loadFirstSetStartingSix()
+    reloadFirstSetStartingSix = false
   }
 </script>
 
@@ -184,6 +221,11 @@
       <button class="underline" on:click={handleRotateBackward}>
         Ruota indietro
       </button>
+      {#if !!firstSetStartingSix}
+        <button class="underline" on:click={handleInsertFirstSetStartingSix}>
+          Inserisci sestetto primo set
+        </button>
+      {/if}
     </div>
     <div class="flex flex-col gap-2">
       {#each positions as position}

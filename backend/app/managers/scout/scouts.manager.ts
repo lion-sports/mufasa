@@ -22,6 +22,10 @@ import { ManualPhaseScoutEventJson } from "./events/volleyball/ManualPhaseScoutE
 import { LiberoSubstitutionScoutEventJson } from "./events/volleyball/LiberoSubstitutionScoutEvent";
 import { VolleyballScoutEventJson } from "./events/volleyball/VolleyballScoutEvent";
 import { ReceiveScoutEventResult } from "./events/volleyball/ReceiveScoutEvent";
+import excelJS, { Workbook, FillPattern } from 'exceljs'
+import lodash from 'lodash'
+import { lastPlayerPositionAggregation } from "./aggregations/lastPlayerPosition.aggregation";
+import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation";
 
 export type ScoutStudio = {
   scout: Scout,
@@ -41,6 +45,10 @@ export type ScoutAnalysis = {
     errorsMade: number,
     category: 'block' | 'serve' | 'spike'
   }[],
+  total: {
+    player: ScoutEventPlayer,
+    stats: SummarizedPlayerStats
+  }[],
   receiveOverTimeByPlayer: {
     player: ScoutEventPlayer,
     result: ReceiveScoutEventResult,
@@ -48,6 +56,32 @@ export type ScoutAnalysis = {
     sortPointIndex: number
     resultValue: number
   }[]
+}
+
+export type SummarizedPlayerStats = {
+  blocks: {
+    handsOut: number
+    point: number
+    touch: number
+    putBack: number
+  },
+  receive: {
+    '++': number
+    '+': number
+    '-': number
+    '/': number
+    'x': number
+  },
+  serve: {
+    error: number
+    point: number
+    received: number
+  },
+  spike: {
+    error: number
+    point: number
+    defense: number
+  }
 }
 
 export default class ScoutsManager {
@@ -544,313 +578,9 @@ export default class ScoutsManager {
         _id: [string, boolean],
         player: ScoutEventPlayer
       }>(
-        [
-          {
-            $match: {
-              cond: false
-            }
-          },
-          {
-            $unionWith: {
-              coll: SCOUT_EVENT_COLLECTION_NAME,
-              pipeline: [
-                {
-                  $match: {
-                    type: "teamRotation",
-                    scoutId: params.data.id,
-                    $and: [
-                      { 'points.friends.sets': scout.stash.points.friends.sets },
-                      { 'points.enemy.sets': scout.stash.points.enemy.sets },
-                    ]
-                  }
-                },
-                {
-                  $sort: {
-                    date: 1
-                  }
-                },
-                {
-                  $project: {
-                    friendsPlayersFromRotation: {
-                      $objectToArray:
-                        "$newPositions.friends"
-                    },
-                    date: "$date",
-                    type: "teamRotation"
-                  }
-                },
-                {
-                  $unwind: {
-                    path: "$friendsPlayersFromRotation"
-                  }
-                },
-                {
-                  $group: {
-                    _id: [
-                      "$friendsPlayersFromRotation.k",
-                      "$friendsPlayersFromRotation.v.player.isOpponent"
-                    ],
-                    lastPlayer: {
-                      $last:
-                        "$friendsPlayersFromRotation.v.player"
-                    },
-                    lastDate: {
-                      $last: "$date"
-                    },
-                    type: {
-                      $last: "$type"
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          {
-            $unionWith: {
-              coll: SCOUT_EVENT_COLLECTION_NAME,
-              pipeline: [
-                {
-                  $match: {
-                    type: "teamRotation",
-                    scoutId: params.data.id,
-                    $and: [
-                      { 'points.friends.sets': scout.stash.points.friends.sets },
-                      { 'points.enemy.sets': scout.stash.points.enemy.sets },
-                    ]
-                  }
-                },
-                {
-                  $sort: {
-                    date: 1
-                  }
-                },
-                {
-                  $project: {
-                    enemyPlayersFromRotation: {
-                      $objectToArray:
-                        "$newPositions.enemy"
-                    },
-                    date: "$date",
-                    type: "teamRotation"
-                  }
-                },
-                {
-                  $unwind: {
-                    path: "$enemyPlayersFromRotation"
-                  }
-                },
-                {
-                  $group: {
-                    _id: [
-                      "$enemyPlayersFromRotation.k",
-                      "$enemyPlayersFromRotation.v.player.isOpponent"
-                    ],
-                    lastPlayer: {
-                      $last: "$enemyPlayersFromRotation.v.player"
-                    },
-                    lastDate: {
-                      $last: "$date"
-                    },
-                    type: {
-                      $last: "$type"
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          {
-            $unionWith:
-            {
-              coll: SCOUT_EVENT_COLLECTION_NAME,
-              pipeline: [
-                {
-                  $match: {
-                    type: "playerInPosition",
-                    scoutId: params.data.id,
-                    $and: [
-                      { 'points.friends.sets': scout.stash.points.friends.sets },
-                      { 'points.enemy.sets': scout.stash.points.enemy.sets },
-                    ]
-                  }
-                },
-                {
-                  $sort: {
-                    date: 1
-                  }
-                },
-                {
-                  $group: {
-                    _id: [
-                      {
-                        $toString: "$position"
-                      },
-                      "$playerIsOpponent"
-                    ],
-                    lastPlayer: {
-                      $last: "$player"
-                    },
-                    lastDate: {
-                      $last: "$date"
-                    },
-                    type: {
-                      $last: "$type"
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          {
-            $unionWith:
-            {
-              coll: SCOUT_EVENT_COLLECTION_NAME,
-              pipeline: [
-                {
-                  $match: {
-                    type: "playerSubstitution",
-                    scoutId: params.data.id,
-                    $and: [
-                      { 'points.friends.sets': scout.stash.points.friends.sets },
-                      { 'points.enemy.sets': scout.stash.points.enemy.sets },
-                    ]
-                  }
-                },
-                {
-                  $sort: {
-                    date: 1
-                  }
-                },
-                {
-                  $group: {
-                    _id: [
-                      {
-                        $toString: "$position"
-                      },
-                      "$playerIsOpponent"
-                    ],
-                    lastPlayer: {
-                      $last: "$playerIn"
-                    },
-                    lastDate: {
-                      $last: "$date"
-                    },
-                    type: {
-                      $last: "$type"
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          {
-            $unionWith: {
-              coll: SCOUT_EVENT_COLLECTION_NAME,
-              pipeline: [
-                {
-                  $match: {
-                    type: "liberoSubstitution",
-                    inOrOut: "in",
-                    scoutId: params.data.id,
-                    $and: [
-                      { 'points.friends.sets': scout.stash.points.friends.sets },
-                      { 'points.enemy.sets': scout.stash.points.enemy.sets },
-                    ]
-                  }
-                },
-                {
-                  $sort: {
-                    date: 1
-                  }
-                },
-                {
-                  $group: {
-                    _id: [
-                      {
-                        $toString: "$position"
-                      }, 
-                      "$opponent"
-                    ],
-                    lastPlayer: {
-                      $last: "$libero"
-                    },
-                    lastDate: {
-                      $last: "$date"
-                    },
-                    type: {
-                      $last: "$type"
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          {
-            $unionWith: {
-              coll: SCOUT_EVENT_COLLECTION_NAME,
-              pipeline: [
-                {
-                  $match: {
-                    type: "liberoSubstitution",
-                    inOrOut: "out",
-                    scoutId: params.data.id,
-                    $and: [
-                      { 'points.friends.sets': scout.stash.points.friends.sets },
-                      { 'points.enemy.sets': scout.stash.points.enemy.sets },
-                    ]
-                  }
-                },
-                {
-                  $sort: {
-                    date: 1
-                  }
-                },
-                {
-                  $group: {
-                    _id: [
-                      {
-                        $toString: "$position"
-                      }, 
-                      "$opponent"
-                    ],
-                    lastPlayer: {
-                      $last: "$player"
-                    },
-                    lastDate: {
-                      $last: "$date"
-                    },
-                    type: {
-                      $last: "$type"
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          {
-            $sort:
-            {
-              lastDate: 1
-            }
-          },
-          {
-            $group:
-            {
-              _id: "$_id",
-              player: {
-                $last: "$lastPlayer"
-              }
-            }
-          },
-          {
-            $match:
-            {
-              player: {
-                $ne: null
-              }
-            }
-          }
-        ]
+        lastPlayerPositionAggregation({
+          scout
+        })  
       )
       .toArray()
 
@@ -1383,10 +1113,184 @@ export default class ScoutsManager {
       ])
       .toArray()
 
+    let total = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        player: ScoutEventPlayer,
+        stats: SummarizedPlayerStats
+      }>([
+        matchScoutAndPlayerQuery,
+        ...totalAnalysis()
+      ])
+      .toArray()
+
     return {
       pointsMade,
       errorsMade,
-      receiveOverTimeByPlayer
+      receiveOverTimeByPlayer,
+      total
     }
+  }
+
+  @withTransaction
+  @withUser
+  public async exportXlsx(params: {
+    data: {
+      id: number,
+    },
+    context?: Context
+  }): Promise<Buffer> {
+    const workbook = new excelJS.Workbook()
+    let workSheet = workbook.addWorksheet('Statistiche - squadra amica')
+    
+    let analysis = await this.analysis({
+      data: {
+        id: params.data.id
+      }
+    })
+
+    let statsGroupedByPlayers: Record<
+      number, // playerId
+      {
+        player: ScoutEventPlayer,
+        stats: SummarizedPlayerStats
+      }
+    > = {}
+
+    const emptyPlayerStats: SummarizedPlayerStats = {
+      blocks: {
+        handsOut: 0,
+        point: 0,
+        touch: 0,
+        putBack: 0
+      },
+      receive: {
+        '++': 0,
+        '+': 0,
+        '-': 0,
+        '/': 0,
+        'x': 0
+      },
+      serve: {
+        error: 0,
+        point: 0,
+        received: 0
+      },
+      spike: {
+        error: 0,
+        point: 0,
+        defense: 0
+      }
+    }
+
+    for(let i = 0; i < analysis.pointsMade.length; i += 1) {
+      let row = analysis.pointsMade[i]
+      let player = row.player
+
+      if (!statsGroupedByPlayers[player.id]) {
+        statsGroupedByPlayers[player.id] = {
+          player,
+          stats: lodash.cloneDeep(emptyPlayerStats)
+        }
+      }
+
+      if (row.category == 'block') statsGroupedByPlayers[player.id].stats.blocks.point += 1
+      else if (row.category == 'serve') statsGroupedByPlayers[player.id].stats.serve.point += 1
+      else if (row.category == 'spike') statsGroupedByPlayers[player.id].stats.spike.point += 1
+    }
+
+    return await workbook.xlsx.writeBuffer() as Buffer
+  }
+
+  @withTransaction
+  @withUser
+  public async getFirstSetStartingSix(params: {
+    data: {
+      id: number
+    },
+    context?: Context
+  }): Promise<VolleyballPlayersPosition> {
+    let trx = params.context?.trx
+    let user = params.context?.user as User
+
+    let scout = await Scout.query({ client: trx })
+      .where('id', params.data.id)
+      .firstOrFail()
+
+    await Mongo.init()
+
+    let lastPositionsEvent = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        _id: [string, boolean],
+        player: ScoutEventPlayer
+      }>(
+        [
+          {
+            $match: {
+              type: "playerInPosition",
+              scoutId: scout.id,
+              $and: [
+                { 'points.friends.sets': 0 },
+                { 'points.enemy.sets': 0 },
+              ]
+            }
+          },
+          {
+            $sort: {
+              date: 1
+            }
+          },
+          {
+            $group: {
+              _id: [
+                {
+                  $toString: "$position"
+                },
+                "$playerIsOpponent"
+              ],
+              player: {
+                $last: "$player"
+              }
+            }
+          },
+          {
+            $match:
+            {
+              player: {
+                $ne: null
+              }
+            }
+          }
+        ]
+      )
+      .toArray()
+
+    let lastPositionFound: VolleyballPlayersPosition | undefined = undefined
+
+    if (lastPositionsEvent.length > 0) {
+      lastPositionFound = {
+        enemy: {},
+        friends: {}
+      }
+
+      for (let i = 0; i < lastPositionsEvent.length; i += 1) {
+        let event = lastPositionsEvent[i]
+        let position = event._id[0]
+        let isOpponent = event._id[1]
+
+        if (isOpponent) lastPositionFound.enemy[position] = {
+          player: event.player
+        }
+        else lastPositionFound.friends[position] = {
+          player: event.player
+        }
+      }
+    } else lastPositionFound = {
+      enemy: {},
+      friends: {}
+    }
+
+    return lastPositionFound
   }
 }

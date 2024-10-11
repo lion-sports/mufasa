@@ -132,6 +132,7 @@ export type PaginatedScouts = {
   meta: PaginationData
 }
 
+
 export default class ScoutsService extends FetchBasedService {
   public async create(params: { 
     sport: Sport
@@ -220,6 +221,14 @@ export default class ScoutsService extends FetchBasedService {
   public async studio(params: { id: number }): Promise<ScoutStudio> {
     let response = await this.client.get({
       url: '/scouts/' + params.id + '/studio'
+    })
+
+    return response
+  }
+
+  public async getFirstSetStartingSix(params: { id: number }): Promise<VolleyballPlayersPosition> {
+    let response = await this.client.get({
+      url: '/scouts/' + params.id + '/getFirstSetStartingSix'
     })
 
     return response
