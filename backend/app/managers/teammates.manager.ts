@@ -6,6 +6,7 @@ import { validator } from "@ioc:Adonis/Core/Validator"
 import AuthorizationManager from './authorization.manager'
 import Team from 'App/Models/Team';
 import { Context, withTransaction, withUser } from './base.manager';
+import Player from 'App/Models/Player';
 
 export type AbsencesForTeammates = {
   team: {
@@ -151,5 +152,25 @@ export default class TeammatesManager {
     }
 
     return finalResults
+  }
+
+  public static getTeammateName(params: {
+    teammate?: {
+      alias?: Teammate['alias'],
+      user: {
+        firstname: User['firstname'],
+        lastname: User['lastname']
+      }
+    },
+    player?: {
+      aliases?: Player['aliases']
+    }
+  }): string {
+    let fullnameFromTeammate = [params.teammate?.user.firstname, params.teammate?.user.lastname].filter(v => !!v).join(' ')
+    let aliasFromTeammate = params.teammate?.alias
+    let aliasFromPlayer = params.player?.aliases?.[0]
+
+    let result = aliasFromPlayer || aliasFromTeammate || fullnameFromTeammate
+    return result
   }
 }

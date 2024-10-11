@@ -1,12 +1,30 @@
 export function totalAnalysis(params?: {
+  groupBy?: ('$playerId' | '$setNumber')[]
 }) {
+  let groupByClause = !!params?.groupBy && params.groupBy.length > 0 ? params.groupBy : ["$playerId"]
+
   return [
     {
+      $addFields: {
+        setNumber: {
+          $add: ["$points.enemy.sets", "$points.friends.sets"]
+        }
+      }
+    },
+    {
       $group: {
-        _id: ["$playerId"],
+        _id: groupByClause,
         player: {
           $last: "$player"
         },
+        ...(
+          groupByClause.includes("$setNumber") ? 
+          {
+            setNumber: {
+              $last: "$setNumber"
+            }
+          } : {}
+        ),
         blockHandsOut: {
           $sum: {
             $cond: [
@@ -282,6 +300,12 @@ export function totalAnalysis(params?: {
     {
       $project: {
         player: "$player",
+        ...(
+          groupByClause.includes("$setNumber") ?
+            {
+              setNumber: "$setNumber"
+            } : {}
+        ),
         block: {
           handsOut: "$blockHandsOut",
           point: "$blockPoint",
@@ -303,7 +327,7 @@ export function totalAnalysis(params?: {
         spike: {
           error: "$spikeError",
           point: "$spikePoint",
-          received: "$spikeReceived"
+          defense: "$spikeDefense"
         },
       }
     },

@@ -234,6 +234,21 @@ export default class ScoutsService extends FetchBasedService {
     return response
   }
 
+  public async exportXlsx(params: {
+    id: number
+  }): Promise<void> {
+    const response = await this.client.getWithDownload({
+      url: `/scouts/${params.id}/exportXlsx`,
+      params: {
+      },
+      fileExt: 'xlsx',
+      fileName: 'Export scout',
+      fileMime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    })
+
+    return response
+  }
+
   public static get friendsColors() {
     return [
       '#3b82f6',

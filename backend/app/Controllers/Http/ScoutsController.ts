@@ -1,4 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import ScoutExporter from 'App/managers/scout/scout.exporter'
 import ScoutsManager from 'App/managers/scout/scouts.manager'
 
 export default class ScoutsController {
@@ -77,6 +78,15 @@ export default class ScoutsController {
   public async studio({ params }: HttpContextContract) {
     const manager = new ScoutsManager()
     return await manager.studio({
+      data: {
+        id: params.id
+      }
+    })
+  }
+
+  public async exportXlsx({ params }: HttpContextContract) {
+    const manager = new ScoutExporter()
+    return await manager.exportXlsx({
       data: {
         id: params.id
       }

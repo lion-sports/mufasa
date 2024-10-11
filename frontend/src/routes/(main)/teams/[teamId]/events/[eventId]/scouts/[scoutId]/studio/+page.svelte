@@ -18,6 +18,7 @@
 	import StudioBenches from '@/lib/components/scouts/studio/StudioBenches.svelte'
 	import StudioPlayerView from '@/lib/components/scouts/studio/StudioPlayerView.svelte'
 	import StudioAnalysis from '@/lib/components/scouts/studio/analysis/StudioAnalysis.svelte'
+	import ScoutsService from '@/lib/services/scouts/scouts.service'
 
   export let data: PageData;
   $: $studio = data.studio
@@ -84,6 +85,16 @@
           <Icon name="mdi-refresh"></Icon>
           <span class="ml-2">
             Restart
+          </span>
+        </Menubar.Item>
+        <Menubar.Separator />
+        <Menubar.Item on:click={() => {
+          let service = new ScoutsService({ fetch })
+          service.exportXlsx({ id: $studio.scout.id })
+        }}>
+          <Icon name="mdi-microsoft-excel"></Icon>
+          <span class="ml-2">
+            Esporta
           </span>
         </Menubar.Item>
       </Menubar.Content>

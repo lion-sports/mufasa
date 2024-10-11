@@ -2,7 +2,6 @@ import ScoutService, { type Scout, type ScoutAnalysis, type ScoutEventPlayer, ty
 import { OPPOSITE_POSITIONS, ORDERED_POSITIONS, type BlockScoutEventResult, type ReceiveScoutEventResult, type RotationType, type ServeScoutEventResult, type SpikeScoutEventResult, type VolleyballPhase, type VolleyballPlayersPosition, type VolleyballScoutEventJson, type VolleyballScoutEventParameters, type VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
 import { get, writable } from 'svelte/store'
 import socketService from '$lib/services/common/socket.service';
-import type { Player } from '@/lib/services/players/players.service';
 
 const studio = writable<ScoutStudio | undefined>(undefined)
 export default studio

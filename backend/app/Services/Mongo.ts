@@ -9,6 +9,8 @@ class MongoService {
 
   async init(params?: { connectionString?: string; dbName?: string }) {
     try {
+      if(!!this.client) return
+
       let connString =
         params?.connectionString || Env.get('MONGO_URL') || 'mongodb://localhost:27017'
       this.client = new MongoClient(connString)

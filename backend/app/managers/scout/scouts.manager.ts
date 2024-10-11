@@ -22,10 +22,10 @@ import { ManualPhaseScoutEventJson } from "./events/volleyball/ManualPhaseScoutE
 import { LiberoSubstitutionScoutEventJson } from "./events/volleyball/LiberoSubstitutionScoutEvent";
 import { VolleyballScoutEventJson } from "./events/volleyball/VolleyballScoutEvent";
 import { ReceiveScoutEventResult } from "./events/volleyball/ReceiveScoutEvent";
-import excelJS, { Workbook, FillPattern } from 'exceljs'
-import lodash from 'lodash'
+import excelJS from 'exceljs'
 import { lastPlayerPositionAggregation } from "./aggregations/lastPlayerPosition.aggregation";
 import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation";
+import TeammatesManager from "../teammates.manager";
 
 export type ScoutStudio = {
   scout: Scout,
@@ -59,7 +59,7 @@ export type ScoutAnalysis = {
 }
 
 export type SummarizedPlayerStats = {
-  blocks: {
+  block: {
     handsOut: number
     point: number
     touch: number
@@ -1130,76 +1130,6 @@ export default class ScoutsManager {
       receiveOverTimeByPlayer,
       total
     }
-  }
-
-  @withTransaction
-  @withUser
-  public async exportXlsx(params: {
-    data: {
-      id: number,
-    },
-    context?: Context
-  }): Promise<Buffer> {
-    const workbook = new excelJS.Workbook()
-    let workSheet = workbook.addWorksheet('Statistiche - squadra amica')
-    
-    let analysis = await this.analysis({
-      data: {
-        id: params.data.id
-      }
-    })
-
-    let statsGroupedByPlayers: Record<
-      number, // playerId
-      {
-        player: ScoutEventPlayer,
-        stats: SummarizedPlayerStats
-      }
-    > = {}
-
-    const emptyPlayerStats: SummarizedPlayerStats = {
-      blocks: {
-        handsOut: 0,
-        point: 0,
-        touch: 0,
-        putBack: 0
-      },
-      receive: {
-        '++': 0,
-        '+': 0,
-        '-': 0,
-        '/': 0,
-        'x': 0
-      },
-      serve: {
-        error: 0,
-        point: 0,
-        received: 0
-      },
-      spike: {
-        error: 0,
-        point: 0,
-        defense: 0
-      }
-    }
-
-    for(let i = 0; i < analysis.pointsMade.length; i += 1) {
-      let row = analysis.pointsMade[i]
-      let player = row.player
-
-      if (!statsGroupedByPlayers[player.id]) {
-        statsGroupedByPlayers[player.id] = {
-          player,
-          stats: lodash.cloneDeep(emptyPlayerStats)
-        }
-      }
-
-      if (row.category == 'block') statsGroupedByPlayers[player.id].stats.blocks.point += 1
-      else if (row.category == 'serve') statsGroupedByPlayers[player.id].stats.serve.point += 1
-      else if (row.category == 'spike') statsGroupedByPlayers[player.id].stats.spike.point += 1
-    }
-
-    return await workbook.xlsx.writeBuffer() as Buffer
   }
 
   @withTransaction
