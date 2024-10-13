@@ -250,23 +250,19 @@ export default class PlayersManager {
       data: params.data
     })
 
-    let playerData: Partial<ModelAttributes<Player>> = {
-      aliases: validatedData.aliases,
-      role: validatedData.role,
-      shirtNumber: validatedData.shirtNumber,
-      shirtPrimaryColor: validatedData.shirtPrimaryColor,
-      shirtSecondaryColor: validatedData.shirtSecondaryColor
-    }
-
+    let shirt: Shirt | undefined = undefined
     if(!!validatedData.shirtId) {
-      let shirt = await Shirt.query({ client: trx })
+      shirt = await Shirt.query({ client: trx })
         .where('id', validatedData.shirtId)
         .firstOrFail()
+    }
 
-      playerData.shirtId = shirt.id
-      playerData.shirtNumber = shirt.number
-      playerData.shirtPrimaryColor = shirt.primaryColor
-      playerData.shirtSecondaryColor = shirt.secondaryColor
+    let playerData: Partial<ModelAttributes<Player>> = {
+      aliases: validatedData.aliases?.filter((a) => a !== undefined),
+      role: validatedData.role,
+      shirtNumber: validatedData.shirtNumber || shirt?.number,
+      shirtPrimaryColor: validatedData.shirtPrimaryColor || shirt?.primaryColor,
+      shirtSecondaryColor: validatedData.shirtSecondaryColor || shirt?.secondaryColor
     }
 
     player.merge(playerData)

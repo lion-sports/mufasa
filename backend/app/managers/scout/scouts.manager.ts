@@ -456,6 +456,16 @@ export default class ScoutsManager {
     await Scout.query({ client: trx })
       .where('id', params.data.id)
       .del()
+
+    await Mongo.init()
+
+    let query: any = { scoutId: params.data.id }
+
+    await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .deleteMany(
+        query
+      )
   }
 
   @withTransaction

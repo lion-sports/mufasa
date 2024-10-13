@@ -23,8 +23,6 @@
   $: if(role !== undefined) {
     selectedRoles = [role] 
   } else selectedRoles = []
-
-  $: console.log({selectedRoles})
 </script>
 
 

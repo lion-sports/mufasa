@@ -6,7 +6,7 @@ export default class UpdatePlayerValidator {
   constructor(protected ctx?: HttpContextContract) { }
 
   public schema = schema.create({
-    aliases: schema.array.optional().members(schema.string([
+    aliases: schema.array.optional().members(schema.string.optional([
       rules.maxLength(255)
     ])),
     shirtId: schema.number.optional(),
