@@ -6,6 +6,9 @@ import { ScoutEventPlayer } from "App/Models/Player"
 import { SummarizedPlayerStats } from "./scouts.manager"
 import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation"
 import TeammatesManager from "../teammates.manager"
+import Scout from "App/Models/Scout"
+import { User } from "node-telegram-bot-api"
+import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database"
 
 export default class ScoutExporter {
   @withTransaction
@@ -16,6 +19,9 @@ export default class ScoutExporter {
     },
     context?: Context
   }): Promise<Buffer> {
+    let trx = params.context?.trx as TransactionClientContract
+    let user = params.context?.user as User
+    
     await Mongo.init()
 
     const workbook = new excelJS.Workbook()
@@ -49,6 +55,41 @@ export default class ScoutExporter {
       ])
       .toArray()
 
+    let insidePlayers = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        player: ScoutEventPlayer,
+      }>([
+        {
+          $sort: {
+            date: -1
+          }
+        },
+        {
+          $match: {
+            type: {
+              $ne: 'playerInPosition'
+            }
+          }
+        },
+        {
+          $group: {
+            _id: ["$player.id"],
+            player: {
+              $last: "$player"
+            }
+          }
+        },
+        {
+          $match: {
+            player: {
+              $ne: null
+            }
+          }
+        },
+      ])
+      .toArray()
+
     await this.addWorkseet({
       stats: total,
       workseetName: 'Totale',
@@ -67,6 +108,49 @@ export default class ScoutExporter {
         workbook
       })
     }
+
+    // calculate text analytics
+    let scout = await Scout.query({ client: trx })
+      .where('id', params.data.id)
+      .preload('players', 
+        b => b
+          .preload('teammate', 
+            b => b.preload('user')
+          )
+          .select('players.*')
+          .leftJoin('teammates', 'teammates.id', 'players.teammateId')
+          .leftJoin('users', 'teammates.userId', 'users.id')
+          .where('isOpponent', false)
+          .orderByRaw(`COALESCE(NULLIF(CONCAT(users.firstname, users.lastname), ''), COALESCE(teammates.alias, aliases[1]))`)
+      )
+      .preload('event')
+      .firstOrFail()
+
+    let textAnalysis: string[] = []
+    for(let i = 0; i < scout.players.length; i += 1) {
+      let player = scout.players[i]
+      let beenInside = insidePlayers.find((ip) => ip.player.id == player.id)
+      let totalRow = total.find((t) => t.player.id == player.id)
+      let totalPoints = Number(totalRow?.block.point || 0)
+      totalPoints += Number(totalRow?.serve.point || 0)
+      totalPoints += Number(totalRow?.spike.point || 0)
+
+      textAnalysis.push(
+        TeammatesManager.getTeammateName({
+          teammate: player.teammate,
+          player: player
+        }) + 
+        (beenInside ? `, punti: ${totalPoints}` : `, Non entrata`)
+      )
+    }
+
+    let finalText = textAnalysis.join('\n')
+    let event = scout.event
+    if(!event.description) event.description = ''
+    let index = event.description.indexOf('---')
+    if (index !== -1) event.description = event.description.slice(0, index)
+    event.description += `---\n${finalText}`
+    event.useTransaction(trx).save()
 
     return await workbook.xlsx.writeBuffer() as Buffer
   }

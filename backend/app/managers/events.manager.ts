@@ -504,11 +504,11 @@ export default class EventsManager {
         results.push(await eventsToUpdate[i].merge(updateParams).save())
       }
     } else {
-      if (!!params.data.start) event.start = params.data.start
-      if (!!params.data.end) event.end = params.data.end
-      if (!!params.data.name) event.name = params.data.name
-      if (!!params.data.description) event.description = params.data.description
-      if (!!params.data.status) event.status = params.data.status
+      if (params.data.start !== undefined) event.start = params.data.start
+      if (params.data.end !== undefined) event.end = params.data.end
+      if (params.data.name !== undefined) event.name = params.data.name
+      if (params.data.description !== undefined) event.description = params.data.description
+      if (params.data.status !== undefined) event.status = params.data.status
 
       results = await event.save()
     }

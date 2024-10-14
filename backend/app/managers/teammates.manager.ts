@@ -158,8 +158,8 @@ export default class TeammatesManager {
     teammate?: {
       alias?: Teammate['alias'],
       user: {
-        firstname: User['firstname'],
-        lastname: User['lastname']
+        firstname?: User['firstname'],
+        lastname?: User['lastname']
       }
     },
     player?: {
