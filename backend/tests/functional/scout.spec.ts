@@ -200,7 +200,7 @@ test.group('Scouts', (group) => {
     }).loginAs(loggedInUser)
 
     response.assertAgainstApiSpec()
-    
+
     let scoutFromDatabase = await Scout
       .query()
       .where('id', scout.id)
@@ -212,22 +212,21 @@ test.group('Scouts', (group) => {
     assert.equal(scoutFromDatabase.players.find((p) => p.teammateId == teammate3.id)?.shirtNumber, teammate3.shirts[0].number, 'should have imported the default role')
   })
 
-  // TODO uncomment
-  // test('destroy an existing scout', async ({ client, assert }) => {
-  //   let createScoutResponse = await client.post('/scouts').json({
-  //     sport: 'volleyball',
-  //     name: 'Nome dello scout',
-  //     startedAt: new Date(),
-  //     eventId: event.id 
-  //   }).loginAs(loggedInUser)
+  test('destroy an existing scout', async ({ client, assert }) => {
+    let createScoutResponse = await client.post('/scouts').json({
+      sport: 'volleyball',
+      name: 'Nome dello scout',
+      startedAt: new Date(),
+      eventId: event.id
+    }).loginAs(loggedInUser)
 
-  //   let scout = createScoutResponse.body()
-  //   await client.delete('/scouts/' + scout.id).loginAs(loggedInUser)
+    let scout = createScoutResponse.body()
+    await client.delete('/scouts/' + scout.id).loginAs(loggedInUser)
 
-  //   let scoutFromDatabase = await Scout.query()
-  //     .where('id', scout.id)
-  //     .first()
+    let scoutFromDatabase = await Scout.query()
+      .where('id', scout.id)
+      .first()
 
-  //   assert.notExists(scoutFromDatabase, 'should have destroyed the scout')
-  // })
+    assert.notExists(scoutFromDatabase, 'should have destroyed the scout')
+  })
 })
