@@ -3,11 +3,13 @@ import { CamelCaseBaseModel } from './CamelCaseBaseModel';
 import { BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Scout from './Scout';
 
+export const FRIENDS_FIELD_SIDES = ['right', 'left'] as const
+
 export type ScoutInfoGeneral = {
   opponent?: {
     name?: string
   },
-  friendsFieldSide?: 'right' | 'left'
+  friendsFieldSide?: typeof FRIENDS_FIELD_SIDES[number]
 }
 
 export default class ScoutInfo extends CamelCaseBaseModel {

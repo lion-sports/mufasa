@@ -1,6 +1,7 @@
 import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { SPORTS } from 'App/Models/Scout'
+import { FRIENDS_FIELD_SIDES } from 'App/Models/ScoutInfo'
 
 export default class CreateScoutValidator {
   constructor(protected ctx?: HttpContextContract) { }
@@ -15,7 +16,8 @@ export default class CreateScoutValidator {
       general: schema.object().members({
         opponent: schema.object.optional().members({
           name: schema.string.optional()
-        })
+        }),
+        friendsFieldSide: schema.enum.optional(FRIENDS_FIELD_SIDES)
       })
     })
   })

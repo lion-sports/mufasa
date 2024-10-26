@@ -145,7 +145,12 @@ test.group('Scouts', (group) => {
       sport: 'volleyball',
       name: 'Nome dello scout',
       startedAt: new Date(),
-      eventId: event.id
+      eventId: event.id,
+      scoutInfo: {
+        general: {
+          friendsFieldSide: 'right'
+        }
+      }
     }).loginAs(loggedInUser)
 
     let scout = createScoutResponse.body()
@@ -166,6 +171,7 @@ test.group('Scouts', (group) => {
     assert.equal(scoutResponse.name, 'il nuovo nome dello scout', "should update the scout")
     assert.exists(scoutResponse.scoutInfo, 'should have the row of scout info')
     assert.equal(scoutResponse.scoutInfo.general.opponent.name, 'nome nuovo', 'shoud have set the opponent name')
+    assert.equal(scoutResponse.scoutInfo.general.friendsFieldSide, 'right', 'shoud have not updated the friends field side')
   })
 
   test('import teammates to an existing scout', async ({ client, assert }) => {

@@ -274,6 +274,12 @@ components:
                     name: 
                       type: string
                       nullable: true
+                friendsFieldSide:
+                  type: string
+                  nullable: true
+                  enum:
+                    - right
+                    - left
         createdAt:
           type: string
           format: date-time

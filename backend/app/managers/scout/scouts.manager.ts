@@ -26,6 +26,7 @@ import excelJS from 'exceljs'
 import { lastPlayerPositionAggregation } from "./aggregations/lastPlayerPosition.aggregation";
 import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation";
 import TeammatesManager from "../teammates.manager";
+import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database";
 
 export type ScoutStudio = {
   scout: Scout,
@@ -379,7 +380,7 @@ export default class ScoutsManager {
     },
     context?: Context
   }): Promise<Scout> {
-    let trx = params.context?.trx
+    let trx = params.context?.trx as TransactionClientContract
     let user = params.context?.user as User
 
     await AuthorizationManager.canOrFail({
@@ -413,11 +414,29 @@ export default class ScoutsManager {
     await scout.save()
 
     if(!!scoutInfo) {
-      await scout.related('scoutInfo').updateOrCreate({}, {
-        general: params.data.scoutInfo?.general || {}
-      }, {
-        client: trx
-      })
+      let existingScoutInfo = await scout.related('scoutInfo').firstOrCreate(
+        { },
+        { },
+        { client: trx }
+      )
+
+      let ObjectAssign = (target, ...sources) => {
+        sources.forEach(source => {
+          Object.keys(source).forEach(key => {
+            const s_val = source[key]
+            const t_val = target[key]
+            target[key] = t_val && s_val && typeof t_val === 'object' && typeof s_val === 'object'
+              ? ObjectAssign(t_val, s_val)
+              : s_val
+          })
+        })
+        return target
+      }
+
+      console.log('zio cane 2', ObjectAssign(existingScoutInfo.general, (params.data.scoutInfo?.general || {})))
+      
+      existingScoutInfo.general = ObjectAssign(existingScoutInfo.general, (params.data.scoutInfo?.general || {}))
+      await existingScoutInfo.useTransaction(trx).save()
     }
 
     if (!!scout.scoringSystemId) await scout.load('scoringSystem')
