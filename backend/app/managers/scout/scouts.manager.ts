@@ -9,7 +9,7 @@ import Event from "App/Models/Event";
 import { DateTime } from "luxon";
 import { CreateScoutValidator, UpdateScoutValidator } from "App/Validators/scouts";
 import PlayersManager from "../players.manager";
-import { ScoutInfoGeneral } from "App/Models/ScoutInfo";
+import { ScoutInfoGeneral, ScoutInfoSettings } from "App/Models/ScoutInfo";
 import Mongo from "App/Services/Mongo";
 import { SCOUT_EVENT_COLLECTION_NAME } from "./ScoutEvent";
 import { FIRST_POINT, VolleyballPlayersPosition, VolleyballPoints } from "./events/volleyball/common";
@@ -185,7 +185,8 @@ export default class ScoutsManager {
       .firstOrFail()
 
     await scout.related('scoutInfo').create({
-      general: scoutInfo?.general || {}
+      general: scoutInfo?.general || {},
+      settings: scoutInfo?.settings || {}
     }, {
       client: trx
     })
@@ -375,7 +376,8 @@ export default class ScoutsManager {
       eventId?: number,
       scoringSystemId?: number,
       scoutInfo?: {
-        general: ScoutInfoGeneral
+        general?: ScoutInfoGeneral,
+        settings?: ScoutInfoSettings
       }
     },
     context?: Context
@@ -423,6 +425,8 @@ export default class ScoutsManager {
       let ObjectAssign = (target, ...sources) => {
         sources.forEach(source => {
           Object.keys(source).forEach(key => {
+            if(!target) target = {}
+            
             const s_val = source[key]
             const t_val = target[key]
             target[key] = t_val && s_val && typeof t_val === 'object' && typeof s_val === 'object'
@@ -432,10 +436,9 @@ export default class ScoutsManager {
         })
         return target
       }
-
-      console.log('zio cane 2', ObjectAssign(existingScoutInfo.general, (params.data.scoutInfo?.general || {})))
       
-      existingScoutInfo.general = ObjectAssign(existingScoutInfo.general, (params.data.scoutInfo?.general || {}))
+      existingScoutInfo.general = ObjectAssign(existingScoutInfo.general, (scoutInfo.general || {}))
+      existingScoutInfo.settings = ObjectAssign(existingScoutInfo.settings, (scoutInfo.settings || {}))
       await existingScoutInfo.useTransaction(trx).save()
     }
 

@@ -118,13 +118,30 @@ export type ScoutAnalysis = {
   }[]
 }
 
-export type ScoutInfo = {
-  general: {
-    opponent?: {
-      name?: string
-    },
-    friendsFieldSide?: 'right' | 'left'
+export const FRIENDS_FIELD_SIDES = ['right', 'left'] as const
+
+export type ScoutInfoGeneral = {
+  opponent?: {
+    name?: string
   }
+  friendsFieldSide?: typeof FRIENDS_FIELD_SIDES[number]
+}
+
+export const POSSIBLE_AUTO_POINT_FRIENDS_EVENTS = ['blockPoint', 'servePoint', 'spikePoint'] as const
+export const POSSIBLE_AUTO_POINT_ENEMY_EVENTS = ['blockHandsOut', 'serveError', 'spikeError', 'receiveError'] as const
+
+export type ScoutInfoSettings = {
+  automations?: {
+    autoPoint?: {
+      friends?: (typeof POSSIBLE_AUTO_POINT_FRIENDS_EVENTS[number])[],
+      enemy?: (typeof POSSIBLE_AUTO_POINT_ENEMY_EVENTS[number])[]
+    }
+  }
+}
+
+export type ScoutInfo = {
+  general?: ScoutInfoGeneral,
+  settings?: ScoutInfoSettings
 }
 
 export type PaginatedScouts = {
@@ -208,6 +225,30 @@ export default class ScoutsService extends FetchBasedService {
     })
 
     return response
+  }
+
+  public async updateGeneralInfo(params: {
+    id: number,
+    general: ScoutInfoGeneral
+  }): Promise<Scout> {
+    return await this.update({
+      id: params.id,
+      scoutInfo: {
+        general: params.general
+      }
+    })
+  }
+
+  public async updateSetting(params: {
+    id: number,
+    settings: ScoutInfoSettings
+  }): Promise<Scout> {
+    return await this.update({
+      id: params.id,
+      scoutInfo: {
+        settings: params.settings
+      }
+    })
   }
 
   public async destroy(params: { id: number }): Promise<void> {

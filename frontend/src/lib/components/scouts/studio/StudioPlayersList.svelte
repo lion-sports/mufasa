@@ -21,7 +21,8 @@
 
   export let scout: Scout
 
-  $: if(!scout.scoutInfo.general.opponent) scout.scoutInfo.general.opponent = {}
+  $: if(!scout.scoutInfo.general) scout.scoutInfo.general = {}
+  $: if(!!scout.scoutInfo.general && !scout.scoutInfo.general?.opponent) scout.scoutInfo.general.opponent = {}
 
   function getPlayerFullname(params: { player: Scout['players'][0] }): string {
     return TeammatesService.getTeammateName({
@@ -80,7 +81,7 @@
   <TabSwitcher
     tabs={[
       { name: 'friends', label: scout.event.team.name },
-      { name: 'opponents', label: scout.scoutInfo.general.opponent?.name || 'Avversari' }
+      { name: 'opponents', label: scout.scoutInfo.general?.opponent?.name || 'Avversari' }
     ]}
     bind:selected={selectedTab}
   ></TabSwitcher>
@@ -137,7 +138,7 @@
     </div>
   {:else}
     <div class="mt-2 pl-2">
-      {#if !!scout.scoutInfo.general.opponent}
+      {#if !!scout.scoutInfo.general?.opponent}
         <input 
           type="text"
           placeholder="Avversari"

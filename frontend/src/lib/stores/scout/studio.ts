@@ -579,21 +579,21 @@ export async function updateFriendsFieldSide(params: {
   let currentStudio = get(studio)
   if (!currentStudio) throw new Error('cannot call without a studio')
 
-  if (!currentStudio.scout.scoutInfo.general) {
-    currentStudio.scout.scoutInfo.general = {
+  let scoutService = new ScoutService({ fetch })
+  await scoutService.updateGeneralInfo({
+    id: currentStudio.scout.id,
+    general: {
       friendsFieldSide: params.side
     }
-  } else currentStudio.scout.scoutInfo.general.friendsFieldSide = params.side
-
-  let scoutService = new ScoutService({ fetch })
-  await scoutService.update({
-    id: currentStudio.scout.id,
-    scoutInfo: currentStudio.scout.scoutInfo
   })
 
   studio.update((studio) => {
     if(!!studio) {
-      studio.scout.scoutInfo = currentStudio.scout.scoutInfo
+      if (!studio.scout.scoutInfo.general) studio.scout.scoutInfo.general = {}
+
+      if(!!studio.scout.scoutInfo.general) {
+        studio.scout.scoutInfo.general.friendsFieldSide = params.side
+      }
     }
 
     return studio

@@ -19,11 +19,13 @@
 	import StudioPlayerView from '@/lib/components/scouts/studio/StudioPlayerView.svelte'
 	import StudioAnalysis from '@/lib/components/scouts/studio/analysis/StudioAnalysis.svelte'
 	import ScoutsService from '@/lib/services/scouts/scouts.service'
+	import StudioSettings from '@/lib/components/scouts/studio/StudioSettings.svelte'
 
   export let data: PageData;
   $: $studio = data.studio
 
   let playersOpened: boolean = false,
+    settingsOpened: boolean = false,
     addPlayerDialog: boolean = false,
     addPlayerSelectedTab: string | undefined = undefined,
     newPlayer: Partial<Player> = {
@@ -45,7 +47,7 @@
 
   async function changeSides() {
     await updateFriendsFieldSide({
-      side: $studio?.scout.scoutInfo.general.friendsFieldSide == 'right' ? 'left' : 'right'
+      side: $studio?.scout.scoutInfo.general?.friendsFieldSide == 'right' ? 'left' : 'right'
     })
   }
 
@@ -85,6 +87,15 @@
           <Icon name="mdi-refresh"></Icon>
           <span class="ml-2">
             Restart
+          </span>
+        </Menubar.Item>
+        <Menubar.Separator />
+        <Menubar.Item on:click={() => {
+          settingsOpened = !settingsOpened
+        }}>
+          <Icon name="mdi-cog"></Icon>
+          <span class="ml-2">
+            Impostazioni
           </span>
         </Menubar.Item>
         <Menubar.Separator />
@@ -208,7 +219,7 @@
     <StudioScoreBoard
       points={$studio.scout.stash?.points}
       friendName={data.team.name}
-      opponentName={data.studio.scout.scoutInfo.general.opponent?.name}
+      opponentName={data.studio.scout.scoutInfo.general?.opponent?.name}
       on:increment={(e) => {
         pointScored({ opponent: e.detail.opponent })
       }}
@@ -225,7 +236,7 @@
             <StudioField
               scout={$studio.scout}
               phase={$studio.scout.stash?.phase || 'serve'}
-              friendSides={$studio.scout.scoutInfo.general.friendsFieldSide}
+              friendSides={$studio.scout.scoutInfo.general?.friendsFieldSide}
               on:playerClick={(e) => {
                 selectPlayer({ player: e.detail.player })
                 selectedSection = 'player'
@@ -299,6 +310,19 @@
         }
       }}
     ></StudioPlayersList>
+  </div>
+</Drawer>
+
+<Drawer 
+  position={'right'}
+  bind:open={settingsOpened}
+  _space={'80vw'}
+  _overlayOpacity=".7"
+>
+  <div class="p-4">
+    <StudioSettings
+      scout={$studio.scout}
+    ></StudioSettings>
   </div>
 </Drawer>
 
