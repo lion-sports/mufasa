@@ -3,17 +3,22 @@ import LiberoSubstitutionScoutEvent, { LiberoSubstitutionScoutEventJson } from "
 import ManualPhaseScoutEvent, { ManualPhaseScoutEventJson } from "./ManualPhaseScoutEvent";
 import PlayerInPositionScoutEvent, { PlayerInPositionScoutEventJson } from "./PlayerInPositionScoutEvent";
 import PlayerSubstitutionScoutEvent, { PlayerSubstitutionScoutEventJson } from "./PlayerSubstitutionScoutEvent";
-import PointScoredScoutEvent, { PointScoredScoutEventJson } from "./PointScoredScoutEvent";
+import PointScoredScoutEvent, { PointScoredScoutEventAddParameters, PointScoredScoutEventJson } from "./PointScoredScoutEvent";
 import ReceiveScoutEvent, { ReceiveScoutEventJson } from "./ReceiveScoutEvent";
 import ServeScoutEvent, { ServeScoutEventJson } from "./ServeScoutEvent";
 import SpikeScoutEvent, { SpikeScoutEventJson } from "./SpikeScoutEvent";
-import TeamRotationScoutEvent, { TeamRotationScoutEventJson } from "./TeamRotationScoutEvent";
+import TeamRotationScoutEvent, { TeamRotationScoutEventAddParamters, TeamRotationScoutEventJson } from "./TeamRotationScoutEvent";
 import TimeoutScoutEvent, { TimeoutScoutEventJson } from "./TimeoutScoutEvent";
 
 export type VolleyballScoutEventJson = BlockScoutEventJson | LiberoSubstitutionScoutEventJson |
   PlayerInPositionScoutEventJson | PointScoredScoutEventJson | ReceiveScoutEventJson | 
   ServeScoutEventJson | SpikeScoutEventJson | TimeoutScoutEventJson | PlayerSubstitutionScoutEventJson |
   TeamRotationScoutEventJson | ManualPhaseScoutEventJson
+
+export type VolleyballScoutEventJsonAddParameters = BlockScoutEventJson | LiberoSubstitutionScoutEventJson |
+  PlayerInPositionScoutEventJson | PointScoredScoutEventAddParameters | ReceiveScoutEventJson |
+  ServeScoutEventJson | SpikeScoutEventJson | TimeoutScoutEventJson | PlayerSubstitutionScoutEventJson |
+  TeamRotationScoutEventAddParamters | ManualPhaseScoutEventJson
 
 export type VolleyballScoutEventType = VolleyballScoutEventJson['type']
 

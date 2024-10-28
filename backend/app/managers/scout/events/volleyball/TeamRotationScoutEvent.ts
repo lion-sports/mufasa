@@ -10,6 +10,9 @@ export type TeamRotationScoutExtraProperties = {
   newPositions: VolleyballPlayersPosition
 }
 export type TeamRotationScoutEventJson = ScoutEventJson<'teamRotation', 'volleyball'> & TeamRotationScoutExtraProperties
+export type TeamRotationScoutEventAddParamters = Omit<TeamRotationScoutEventJson, 'newPositions'> & {
+  fromPositions: VolleyballPlayersPosition
+}
 
 export type RotationType = 'backward' | 'forward'
 

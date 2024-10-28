@@ -426,7 +426,7 @@ export default class ScoutsManager {
         sources.forEach(source => {
           Object.keys(source).forEach(key => {
             if(!target) target = {}
-            
+
             const s_val = source[key]
             const t_val = target[key]
             target[key] = t_val && s_val && typeof t_val === 'object' && typeof s_val === 'object'
@@ -436,6 +436,8 @@ export default class ScoutsManager {
         })
         return target
       }
+
+      console.log(ObjectAssign(existingScoutInfo.settings, (scoutInfo.settings || {})))
       
       existingScoutInfo.general = ObjectAssign(existingScoutInfo.general, (scoutInfo.general || {}))
       existingScoutInfo.settings = ObjectAssign(existingScoutInfo.settings, (scoutInfo.settings || {}))
@@ -773,6 +775,7 @@ export default class ScoutsManager {
       .toArray()
 
     scout.stash.currentSetOpenLiberoSubstitution = openLiberoSubstitutions.map((e) => e.substitution)
+    console.log('zio canta', openLiberoSubstitutions)
 
     let lastManualPhaseEvent = await Mongo.db
       .collection(SCOUT_EVENT_COLLECTION_NAME)

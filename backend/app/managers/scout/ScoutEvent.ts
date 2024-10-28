@@ -2,6 +2,7 @@ import Mongo from "App/Services/Mongo"
 import { ObjectId } from "mongodb"
 import { Context } from "../base.manager"
 import Scout from "App/Models/Scout"
+import User from "App/Models/User"
 
 export type Sport = 'none' | 'volleyball' | 'basketball'
 
@@ -44,7 +45,7 @@ export default abstract class ScoutEvent<
     points: Points
     createdByUserId: number
   } & Event) {
-    this.date = params.date
+    this.date = new Date(params.date)
     this.scoutId = params.scoutId
     this.teamId = params.teamId
     this.sport = params.sport
@@ -106,13 +107,17 @@ export default abstract class ScoutEvent<
     data: {
       scout: Scout 
     },
-    context?: Context
+    context: {
+      user: User
+    }
   }) { }
   
   public async preReceived(params: {
     data: {
       scout: Scout
     },
-    context?: Context
+    context: {
+      user: User
+    }
   }) { }
 }

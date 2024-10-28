@@ -71,7 +71,7 @@
     class="flex text-left items-center gap-4 hover:bg-[var(--hover-background-color)] py-2 px-2 w-full rounded-sm"
   >
     <div>
-      <PlayerMarker friend>{suggestedPlayer.shirtNumber}</PlayerMarker>
+      <PlayerMarker friend libero={suggestedPlayer.role === 'libero'}>{suggestedPlayer.shirtNumber}</PlayerMarker>
     </div>
     <div class="flex-grow">
       <div class="text-lg font-medium">

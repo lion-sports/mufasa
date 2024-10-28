@@ -4,6 +4,7 @@ import { VolleyballPoints, VolleyballScoutEventPosition } from "./common";
 import Scout from "App/Models/Scout";
 import { Context } from "App/managers/base.manager";
 import scoutsSocket from "../../scouts.socket";
+import User from "App/Models/User";
 
 export type ReceiveScoutEventResult = '++' | '+' | '-' | '/' | 'x'
 
@@ -42,7 +43,9 @@ export default class ReceiveScoutEvent extends ScoutEvent<ReceiveScoutExtraPrope
     data: {
       scout: Scout
     }
-    context?: Context
+    context: {
+      user: User
+    }
   }): Promise<void> {
     await scoutsSocket.emit({
       data: {
@@ -63,5 +66,63 @@ export default class ReceiveScoutEvent extends ScoutEvent<ReceiveScoutExtraPrope
       },
       context: params.context
     })
+
+    if (
+      this.event.result == 'x' &&
+      params.data.scout.scoutInfo.settings?.automations?.autoPoint?.enemy?.includes('receiveError')
+    ) {
+      await scoutsSocket.handleEvent({
+        event: 'scout:add',
+        data: {
+          type: 'pointScored',
+          opponent: !this.event.player.isOpponent,
+          date: new Date(),
+          scoutId: this.scoutId,
+          sport: 'volleyball',
+          teamId: this.teamId,
+          createdByUserId: this.createdByUserId,
+          points: this.points
+        },
+        user: params.context.user
+      })
+    } else if (
+      !this.event.player.isOpponent &&
+      params.data.scout.scoutInfo.settings?.automations?.autoPhase?.friends?.includes('receive')
+    ) {
+      await scoutsSocket.handleEvent({
+        event: 'scout:add',
+        data: {
+          type: 'manualPhase',
+          phase: 'defenseSideOut',
+          opponent: false,
+          date: new Date(),
+          scoutId: this.scoutId,
+          sport: 'volleyball',
+          teamId: this.teamId,
+          createdByUserId: this.createdByUserId,
+          points: this.points
+        },
+        user: params.context.user
+      })
+    } else if (
+      this.event.player.isOpponent &&
+      params.data.scout.scoutInfo.settings?.automations?.autoPhase?.enemy?.includes('receive')
+    ) {
+      await scoutsSocket.handleEvent({
+        event: 'scout:add',
+        data: {
+          type: 'manualPhase',
+          phase: 'defenseBreak',
+          opponent: false,
+          date: new Date(),
+          scoutId: this.scoutId,
+          sport: 'volleyball',
+          teamId: this.teamId,
+          createdByUserId: this.createdByUserId,
+          points: this.points
+        },
+        user: params.context.user
+      })
+    }
   }
 }

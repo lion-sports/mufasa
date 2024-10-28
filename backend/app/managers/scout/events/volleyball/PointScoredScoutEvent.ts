@@ -3,12 +3,15 @@ import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
 import { VolleyballPoints } from "./common";
 import { Context, withTransaction } from "App/managers/base.manager";
 import Scout from "App/Models/Scout";
+import User from "App/Models/User";
+import scoutsSocket from "../../scouts.socket";
 
 export type PointScoredScoutExtraProperties = {
   opponent: boolean,
   newPoints: VolleyballPoints
 }
 export type PointScoredScoutEventJson = ScoutEventJson<'pointScored', 'volleyball'> & PointScoredScoutExtraProperties
+export type PointScoredScoutEventAddParameters = Omit<PointScoredScoutEventJson, 'newPoints'>
 
 export default class PointScoredScoutEvent extends ScoutEvent<
   {
@@ -36,7 +39,7 @@ export default class PointScoredScoutEvent extends ScoutEvent<
   }
 
   @withTransaction
-  public async preReceived(params: { 
+  public async preReceived(params: {
     data: {
       scout: Scout
     }
@@ -67,6 +70,135 @@ export default class PointScoredScoutEvent extends ScoutEvent<
         }
       }
     })
+  }
+
+  public async postReceived(params: { 
+    data: { 
+      scout: Scout
+    } 
+    context: { 
+      user: User 
+    } 
+  }): Promise<void> {
+    console.log(this.event)
+    console.log(params.data.scout.stash.phase)
+    if(
+      !this.event.opponent &&
+      (
+        params.data.scout.stash.phase == 'receive' ||
+        params.data.scout.stash.phase == 'defenseSideOut'
+      ) &&
+      !!params.data.scout.stash.playersServePositions
+    ) {
+      await scoutsSocket.handleEvent({
+        event: 'scout:add',
+        data: {
+          type: 'teamRotation',
+          rotationType: 'forward',
+          fromPositions: params.data.scout.stash.playersServePositions,
+          opponent: false,
+          date: new Date(),
+          scoutId: this.scoutId,
+          sport: 'volleyball',
+          teamId: this.teamId,
+          createdByUserId: this.createdByUserId,
+          points: this.points
+        },
+        user: params.context.user
+      })
+
+      await scoutsSocket.handleEvent({
+        event: 'scout:add',
+        data: {
+          type: 'manualPhase',
+          phase: 'serve',
+          opponent: false,
+          date: new Date(),
+          scoutId: this.scoutId,
+          sport: 'volleyball',
+          teamId: this.teamId,
+          createdByUserId: this.createdByUserId,
+          points: this.points
+        },
+        user: params.context.user
+      })
+    }
+
+    if (
+      this.event.opponent &&
+      (
+        params.data.scout.stash.phase == 'serve' ||
+        params.data.scout.stash.phase == 'defenseBreak'
+      ) &&
+      !!params.data.scout.stash.playersServePositions
+    ) {
+      await scoutsSocket.handleEvent({
+        event: 'scout:add',
+        data: {
+          type: 'teamRotation',
+          rotationType: 'forward',
+          fromPositions: params.data.scout.stash.playersServePositions,
+          opponent: true,
+          date: new Date(),
+          scoutId: this.scoutId,
+          sport: 'volleyball',
+          teamId: this.teamId,
+          createdByUserId: this.createdByUserId,
+          points: this.points
+        },
+        user: params.context.user
+      })
+
+      await scoutsSocket.handleEvent({
+        event: 'scout:add',
+        data: {
+          type: 'manualPhase',
+          phase: 'receive',
+          opponent: false,
+          date: new Date(),
+          scoutId: this.scoutId,
+          sport: 'volleyball',
+          teamId: this.teamId,
+          createdByUserId: this.createdByUserId,
+          points: this.points
+        },
+        user: params.context.user
+      })
+    }
+
+    if (this.event.opponent && params.data.scout.stash.phase == 'defenseSideOut') {
+      await scoutsSocket.handleEvent({
+        event: 'scout:add',
+        data: {
+          type: 'manualPhase',
+          phase: 'receive',
+          opponent: false,
+          date: new Date(),
+          scoutId: this.scoutId,
+          sport: 'volleyball',
+          teamId: this.teamId,
+          createdByUserId: this.createdByUserId,
+          points: this.points
+        },
+        user: params.context.user
+      })
+    } else if (!this.event.opponent && params.data.scout.stash.phase == 'defenseBreak') {
+      await scoutsSocket.handleEvent({
+        event: 'scout:add',
+        data: {
+          type: 'manualPhase',
+          phase: 'serve',
+          opponent: false,
+          date: new Date(),
+          scoutId: this.scoutId,
+          sport: 'volleyball',
+          teamId: this.teamId,
+          createdByUserId: this.createdByUserId,
+          points: this.points
+        },
+        user: params.context.user
+      })
+    }
   }
 
   public static async incrementScore(params: {

@@ -1,7 +1,7 @@
 import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { SPORTS } from 'App/Models/Scout'
-import { FRIENDS_FIELD_SIDES, POSSIBLE_AUTO_POINT_ENEMY_EVENTS, POSSIBLE_AUTO_POINT_FRIENDS_EVENTS } from 'App/Models/ScoutInfo'
+import { FRIENDS_FIELD_SIDES, POSSIBLE_AUTO_PAHSE_EVENTS, POSSIBLE_AUTO_POINT_ENEMY_EVENTS, POSSIBLE_AUTO_POINT_FRIENDS_EVENTS } from 'App/Models/ScoutInfo'
 
 export default class CreateScoutValidator {
   constructor(protected ctx?: HttpContextContract) { }
@@ -27,6 +27,14 @@ export default class CreateScoutValidator {
             ),
             enemy: schema.array.optional().members(
               schema.enum(POSSIBLE_AUTO_POINT_ENEMY_EVENTS)
+            )
+          }),
+          autoPhase: schema.object.optional().members({
+            friends: schema.array.optional().members(
+              schema.enum(POSSIBLE_AUTO_PAHSE_EVENTS)
+            ),
+            enemy: schema.array.optional().members(
+              schema.enum(POSSIBLE_AUTO_PAHSE_EVENTS)
             )
           })
         }),

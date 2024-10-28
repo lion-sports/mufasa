@@ -312,16 +312,6 @@ export async function block(params: {
       points: undefined
     }
   })
-
-  if (params.result == 'handsOut') {
-    autoPoint({
-      opponent: !params.player.isOpponent
-    })
-  } else if (params.result == 'point') {
-    autoPoint({
-      opponent: params.player.isOpponent
-    })
-  }
 }
 
 export async function serve(params: {
@@ -346,11 +336,6 @@ export async function serve(params: {
     }
   })
 
-  if (params.result == 'error') {
-    await autoPoint({
-      opponent: !params.player.isOpponent
-    })
-  }
 }
 
 export async function spike(params: {
@@ -426,22 +411,6 @@ export async function receive(params: {
       points: undefined
     }
   })
-
-  if (params.result == 'x') {
-    autoPoint({
-      opponent: !params.player.isOpponent
-    })
-  } else {
-    if (!params.player.isOpponent) {
-      await manualPhase({
-        phase: 'defenseSideOut'
-      })
-    } else {
-      await manualPhase({
-        phase: 'defenseBreak'
-      })
-    }
-  }
 }
 
 export function getPlayerPositions(params: {
@@ -459,14 +428,6 @@ export function getPlayerPositions(params: {
   }
 
   return undefined
-}
-
-async function autoPoint(params: {
-  opponent: boolean
-}) {
-  await pointScored({
-    opponent: params.opponent
-  })
 }
 
 async function autoRotation(params: {
@@ -520,14 +481,14 @@ async function autoExitLibero() {
         playerPositions: currentStudio.scout.stash?.playersServePositions
       })
 
-      if(!liberoPosition) continue
+      if (!liberoPosition) continue
 
-      if([2, 3, 4].includes(liberoPosition))
-      await liberoSubstitution({
-        inOrOut: 'out',
-        player: sub.player,
-        libero: sub.libero
-      })
+      if ([2, 3, 4].includes(liberoPosition))
+        await liberoSubstitution({
+          inOrOut: 'out',
+          player: sub.player,
+          libero: sub.libero
+        })
     }
   }
 }
@@ -539,34 +500,34 @@ export function suggestPlayer(params: {
   avoidPlayers?: ScoutEventPlayer[]
 }): ScoutEventPlayer[] {
   let setterPosition: VolleyballScoutEventPosition | undefined = undefined
-  for(const [key, playerSpec] of Object.entries(params.playersPosition)) {
+  for (const [key, playerSpec] of Object.entries(params.playersPosition)) {
     let position = key as unknown as VolleyballScoutEventPosition
-    if(playerSpec?.player?.role == 'setter') {
+    if (playerSpec?.player?.role == 'setter') {
       setterPosition = position
       break
-    } else if(playerSpec?.player?.role == 'oppositeHitter') {
+    } else if (playerSpec?.player?.role == 'oppositeHitter') {
       setterPosition = OPPOSITE_POSITIONS[position]
     }
   }
 
-  if(!setterPosition) return []
+  if (!setterPosition) return []
 
   let result: ScoutEventPlayer[] = []
   let orderOfSetterPosition = ORDERED_POSITIONS.findIndex((p) => p == setterPosition)
   let nextSetterPosition = ORDERED_POSITIONS[(orderOfSetterPosition + 1) % ORDERED_POSITIONS.length]
   let next2SetterPosition = ORDERED_POSITIONS[(orderOfSetterPosition + 2) % ORDERED_POSITIONS.length]
 
-  if(params.position == setterPosition) {
+  if (params.position == setterPosition) {
     result = params.players.filter((p) => p.role == 'setter')
   } else if (params.position == nextSetterPosition || params.position == OPPOSITE_POSITIONS[nextSetterPosition]) {
     result = params.players.filter((p) => p.role == 'outsideHitter')
   } else if (params.position == next2SetterPosition || params.position == OPPOSITE_POSITIONS[next2SetterPosition]) {
     result = params.players.filter((p) => p.role == 'middleBlocker')
-  } else if(params.position == OPPOSITE_POSITIONS[setterPosition]) {
+  } else if (params.position == OPPOSITE_POSITIONS[setterPosition]) {
     result = params.players.filter((p) => p.role == 'oppositeHitter')
   }
 
-  if(!!params.avoidPlayers) {
+  if (!!params.avoidPlayers) {
     result = result.filter((v) => params.avoidPlayers?.every((ap) => ap.id !== v.id))
   }
 
@@ -588,10 +549,10 @@ export async function updateFriendsFieldSide(params: {
   })
 
   studio.update((studio) => {
-    if(!!studio) {
+    if (!!studio) {
       if (!studio.scout.scoutInfo.general) studio.scout.scoutInfo.general = {}
 
-      if(!!studio.scout.scoutInfo.general) {
+      if (!!studio.scout.scoutInfo.general) {
         studio.scout.scoutInfo.general.friendsFieldSide = params.side
       }
     }

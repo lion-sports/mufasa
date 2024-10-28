@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type {
+	POSSIBLE_AUTO_PAHSE_EVENTS,
 		POSSIBLE_AUTO_POINT_ENEMY_EVENTS,
 		Scout,
 		ScoutInfoSettings
@@ -40,7 +41,36 @@
     ) scout.scoutInfo.settings.automations.autoPoint.enemy = []
 	}
 
-	function handleUpdateAutopointFriendsAutomation(
+  function initAutoPhaseObject() {
+		if (!scout.scoutInfo.settings) scout.scoutInfo.settings = {}
+		if (!!scout.scoutInfo.settings && !scout.scoutInfo.settings.automations)
+			scout.scoutInfo.settings.automations = {}
+		if (
+			!!scout.scoutInfo.settings &&
+			!!scout.scoutInfo.settings.automations &&
+			!scout.scoutInfo.settings.automations.autoPhase
+		)
+			scout.scoutInfo.settings.automations.autoPhase= {
+				friends: [],
+				enemy: []
+			}
+
+    if(
+      !!scout.scoutInfo.settings &&
+			!!scout.scoutInfo.settings.automations &&
+			!!scout.scoutInfo.settings.automations.autoPhase &&
+      !scout.scoutInfo.settings.automations?.autoPhase?.friends
+    ) scout.scoutInfo.settings.automations.autoPhase.friends = []
+
+    if(
+      !!scout.scoutInfo.settings &&
+			!!scout.scoutInfo.settings.automations &&
+			!!scout.scoutInfo.settings.automations.autoPhase &&
+      !scout.scoutInfo.settings.automations?.autoPhase?.enemy
+    ) scout.scoutInfo.settings.automations.autoPhase.enemy = []
+	}
+
+	async function handleUpdateAutopointFriendsAutomation(
 		value: (typeof POSSIBLE_AUTO_POINT_FRIENDS_EVENTS)[number],
 		selected: boolean
 	) {
@@ -67,7 +97,7 @@
 		}
 
 		let service = new ScoutsService({ fetch })
-		service.updateSetting({
+		await service.updateSetting({
 			id: scout.id,
 			settings: {
 				automations: {
@@ -79,7 +109,7 @@
 		})
 	}
 
-	function handleUpdateAutopointEnemyAutomation(
+	async function handleUpdateAutopointEnemyAutomation(
 		value: (typeof POSSIBLE_AUTO_POINT_ENEMY_EVENTS)[number],
 		selected: boolean
 	) {
@@ -106,7 +136,7 @@
 		}
 
 		let service = new ScoutsService({ fetch })
-		service.updateSetting({
+		await service.updateSetting({
 			id: scout.id,
 			settings: {
 				automations: {
@@ -117,9 +147,49 @@
 			}
 		})
 	}
+
+  async function handleUpdateAutoPhaseAutomation(
+		value: (typeof POSSIBLE_AUTO_PAHSE_EVENTS)[number],
+		selected: boolean,
+    friendsOrEnemy: 'friends' | 'enemy'
+	) {
+    initAutoPhaseObject()
+
+		if (
+			!!scout.scoutInfo.settings?.automations?.autoPhase?.[friendsOrEnemy] &&
+			!scout.scoutInfo.settings?.automations?.autoPhase[friendsOrEnemy].includes(value) &&
+			selected
+		) {
+			scout.scoutInfo.settings.automations.autoPhase[friendsOrEnemy] = [
+				...(scout.scoutInfo.settings.automations.autoPhase![friendsOrEnemy] || []),
+				value
+			]
+		} else if (
+			!!scout.scoutInfo.settings?.automations?.autoPhase?.[friendsOrEnemy] &&
+			scout.scoutInfo.settings?.automations?.autoPhase[friendsOrEnemy].includes(value) &&
+			!selected
+		) {
+			scout.scoutInfo.settings.automations.autoPhase[friendsOrEnemy] =
+				scout.scoutInfo.settings.automations.autoPhase[friendsOrEnemy].filter((e) => {
+					return e !== value
+				})
+		}
+
+		let service = new ScoutsService({ fetch })
+		await service.updateSetting({
+			id: scout.id,
+			settings: {
+				automations: {
+					autoPhase: {
+						[friendsOrEnemy]: scout.scoutInfo.settings?.automations?.autoPhase?.[friendsOrEnemy]
+					}
+				}
+			}
+		})
+	}
 </script>
 
-<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-2">
 	<div>
 		<div class="font-bold text-2xl">Automazioni</div>
 		<div class="mt-1">Quello che posso automatizzare al susseguirsi di un evento specifico.</div>
@@ -127,7 +197,7 @@
 	<div>
 		<div class="text-lg">Punto automatico</div>
 		<div>Specifica quando voglio che venga assegnato il punto automatico.</div>
-		<div class="mt-2 grid grid-cols-1 md:grid-cols-2">
+		<div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
 			<div class="flex flex-col gap-2">
 				<div>Amici</div>
 				<div>
@@ -243,5 +313,83 @@
 				</div>
 			</div>
 		</div>
+    <div class="text-lg mt-4">Fase automatica</div>
+		<div>Specifica quando voglio che venga spostata la fase in automatico.</div>
+		<div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+			<div class="flex flex-col gap-2">
+        <div>Amici</div>
+				<div>
+					<LabelAndCheckbox
+						label="Servizio"
+						id="automations-autophase-serve-received"
+						value={scout.scoutInfo.settings?.automations?.autoPhase?.friends?.includes(
+							'serveReceived'
+						)}
+						on:change={(e) => {
+							handleUpdateAutoPhaseAutomation(
+								'serveReceived',
+								// @ts-ignore
+								e.target?.checked,
+                'friends'
+							)
+						}}
+					></LabelAndCheckbox>
+				</div>
+        <div>
+					<LabelAndCheckbox
+						label="Ricezione"
+						id="automations-autophase-receive"
+						value={scout.scoutInfo.settings?.automations?.autoPhase?.friends?.includes(
+							'receive'
+						)}
+						on:change={(e) => {
+							handleUpdateAutoPhaseAutomation(
+								'receive',
+								// @ts-ignore
+								e.target?.checked,
+                'friends'
+							)
+						}}
+					></LabelAndCheckbox>
+				</div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <div>Avversari</div>
+				<div>
+					<LabelAndCheckbox
+						label="Servizio"
+						id="automations-autophase-serve-received"
+						value={scout.scoutInfo.settings?.automations?.autoPhase?.enemy?.includes(
+							'serveReceived'
+						)}
+						on:change={(e) => {
+							handleUpdateAutoPhaseAutomation(
+								'serveReceived',
+								// @ts-ignore
+								e.target?.checked,
+                'enemy'
+							)
+						}}
+					></LabelAndCheckbox>
+				</div>
+        <div>
+					<LabelAndCheckbox
+						label="Ricezione"
+						id="automations-autophase-receive"
+						value={scout.scoutInfo.settings?.automations?.autoPhase?.enemy?.includes(
+							'receive'
+						)}
+						on:change={(e) => {
+							handleUpdateAutoPhaseAutomation(
+								'receive',
+								// @ts-ignore
+								e.target?.checked,
+                'enemy'
+							)
+						}}
+					></LabelAndCheckbox>
+				</div>
+      </div>
+    </div>
 	</div>
 </div>

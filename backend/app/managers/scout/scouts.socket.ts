@@ -1,7 +1,7 @@
 import User from "App/Models/User"
 import Scout from "App/Models/Scout"
 import { AuthorizationHelpers } from "../authorization.manager"
-import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT, VolleyballScoutEventJson } from "./events/volleyball/VolleyballScoutEvent"
+import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT, VolleyballScoutEventJsonAddParameters } from "./events/volleyball/VolleyballScoutEvent"
 import ScoutsManager from "./scouts.manager"
 import { FIRST_POINT } from "./events/volleyball/common"
 import Ws from "App/Services/Ws"
@@ -9,7 +9,7 @@ import { Context } from "../base.manager"
 import PlayersManager from "../players.manager"
 
 export type ScoutSocketEventMapping = {
-  'scout:add': VolleyballScoutEventJson,
+  'scout:add': VolleyballScoutEventJsonAddParameters,
   'scout:stashReload': {
     scout: Scout
   },
@@ -145,6 +145,7 @@ class ScoutSocket {
       // check if user can manage the scout
       let scout = await Scout.query()
         .preload('event')
+        .preload('scoutInfo')
         .where('id', data.scoutId)
         .firstOrFail()
       
@@ -172,7 +173,7 @@ class ScoutSocket {
   }
 
   private async handleAdd(params: {
-    scoutEvent: VolleyballScoutEventJson
+    scoutEvent: VolleyballScoutEventJsonAddParameters
     scout: Scout
     user: User
   }) {
@@ -184,6 +185,7 @@ class ScoutSocket {
       ...params.scoutEvent,
       createdByUserId: params.user.id
     })
+    console.log('zio canta', event, params)
     await event.preReceived({ 
       data: {
         scout: params.scout

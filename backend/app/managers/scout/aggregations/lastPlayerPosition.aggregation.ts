@@ -50,10 +50,15 @@ export function lastPlayerPositionAggregation(params: {
             }
           },
           {
+            $addFields: {
+              isOpponent: false
+            }
+          },
+          {
             $group: {
               _id: [
                 "$friendsPlayersFromRotation.k",
-                "$friendsPlayersFromRotation.v.player.isOpponent"
+                "$isOpponent"
               ],
               lastPlayer: {
                 $last:
@@ -105,10 +110,15 @@ export function lastPlayerPositionAggregation(params: {
             }
           },
           {
+            $addFields: {
+              isOpponent: true
+            }
+          },
+          {
             $group: {
               _id: [
                 "$enemyPlayersFromRotation.k",
-                "$enemyPlayersFromRotation.v.player.isOpponent"
+                "$isOpponent"
               ],
               lastPlayer: {
                 $last: "$enemyPlayersFromRotation.v.player"
