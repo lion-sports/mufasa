@@ -66,8 +66,6 @@
 				})
 		}
 
-		console.log(scout.scoutInfo.settings)
-
 		let service = new ScoutsService({ fetch })
 		service.updateSetting({
 			id: scout.id,
@@ -86,7 +84,7 @@
 		selected: boolean
 	) {
     initAutoPointObject()
-    
+
 		if (
 			!!scout.scoutInfo.settings?.automations?.autoPoint?.enemy &&
 			!scout.scoutInfo.settings?.automations?.autoPoint?.enemy.includes(value) &&
