@@ -775,7 +775,6 @@ export default class ScoutsManager {
       .toArray()
 
     scout.stash.currentSetOpenLiberoSubstitution = openLiberoSubstitutions.map((e) => e.substitution)
-    console.log('zio canta', openLiberoSubstitutions)
 
     let lastManualPhaseEvent = await Mongo.db
       .collection(SCOUT_EVENT_COLLECTION_NAME)

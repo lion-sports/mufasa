@@ -185,7 +185,6 @@ class ScoutSocket {
       ...params.scoutEvent,
       createdByUserId: params.user.id
     })
-    console.log('zio canta', event, params)
     await event.preReceived({ 
       data: {
         scout: params.scout
