@@ -3,6 +3,9 @@ import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
 import { VolleyballPoints, VolleyballPlayersPosition, VolleyballScoutEventPosition, VolleyballScoutEventAnchor, VolleyballPlayersDynamicPosition } from "./common";
 import lodash from 'lodash'
 import { ScoutEventPlayer } from "App/Models/Player";
+import Scout from "App/Models/Scout";
+import User from "App/Models/User";
+import scoutsSocket from "../../scouts.socket";
 
 export type TeamRotationScoutExtraProperties = {
   opponent: boolean,
@@ -403,6 +406,35 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
       opponent: this.event.opponent,
       newPositions: this.newPositions,
       rotationType: this.event.rotationType
+    }
+  }
+
+  public async postReceived(params: { data: { scout: Scout; }; context: { user: User; }; }): Promise<void> {
+    let positionFourPlayer = this.newPositions.friends[4]?.player
+    if(!!positionFourPlayer && positionFourPlayer.role == 'libero') {
+      let openLiberoSub = params.data.scout.stash.currentSetOpenLiberoSubstitution?.find((os) => os.liberoId == positionFourPlayer.id)
+      if(!openLiberoSub) return 
+
+      await scoutsSocket.handleEvent({
+        event: 'scout:add',
+        data: {
+          type: 'liberoSubstitution',
+          libero: openLiberoSub.libero,
+          liberoId: openLiberoSub.liberoId,
+          inOrOut: 'out',
+          player: openLiberoSub.player,
+          playerId: openLiberoSub.playerId,
+          position: 4,
+          opponent: openLiberoSub.player.isOpponent,
+          date: new Date(),
+          scoutId: this.scoutId,
+          sport: 'volleyball',
+          teamId: this.teamId,
+          createdByUserId: this.createdByUserId,
+          points: this.points
+        },
+        user: params.context.user
+      })
     }
   }
 

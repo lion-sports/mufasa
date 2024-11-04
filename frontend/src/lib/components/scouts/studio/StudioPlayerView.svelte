@@ -147,7 +147,7 @@
       <div class="w-full {cardBackgroundClass} p-2 rounded-sm transition-all">
         {#if !!studio.selectedPlayer?.id}
           <StudioLastEventsList
-            events={studio.lastEventsForPlayers?.[studio.selectedPlayer?.id]}
+            events={studio.lastEventsForPlayers?.[studio.selectedPlayer?.id] || []}
             --studio-last-events-list-height="300px"
             opponent={studio.selectedPlayer?.isOpponent}
           ></StudioLastEventsList>

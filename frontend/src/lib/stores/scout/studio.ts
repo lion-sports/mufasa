@@ -19,7 +19,6 @@ export async function reload() {
 const handleStashReload = (data: {
   scout: Scout
 }) => {
-  autoExitLibero()
   studio.update(v => {
     if (!!v) {
       v.scout.stash = data.scout.stash
@@ -199,11 +198,6 @@ export async function pointScored(params: {
       createdByUserId: undefined,
       points: undefined
     }
-  })
-
-  await autoRotation({
-    phase: currentStudio.scout.stash?.phase || 'serve',
-    opponent: params.opponent
   })
 }
 
@@ -428,69 +422,6 @@ export function getPlayerPositions(params: {
   }
 
   return undefined
-}
-
-async function autoRotation(params: {
-  phase: NonNullable<Scout['stash']>['phase'],
-  opponent: boolean
-}) {
-  if (!params.opponent &&
-    (params.phase == 'receive' ||
-      params.phase == 'defenseSideOut')
-  ) {
-    await teamRotation({
-      opponent: false
-    })
-
-    await manualPhase({
-      phase: 'serve'
-    })
-  }
-
-  if (params.opponent &&
-    (params.phase == 'serve' ||
-      params.phase == 'defenseBreak')
-  ) {
-    await teamRotation({
-      opponent: true
-    })
-
-    await manualPhase({
-      phase: 'receive'
-    })
-  }
-
-  if (params.opponent && params.phase == 'defenseSideOut') {
-    await manualPhase({
-      phase: 'receive'
-    })
-  }
-}
-
-async function autoExitLibero() {
-  let currentStudio = get(studio)
-  if (!currentStudio) throw new Error('cannot call without a studio')
-
-  let currentOpenLiberoSubstitutions = currentStudio.scout.stash?.currentSetOpenLiberoSubstitution
-
-  if (!!currentOpenLiberoSubstitutions && currentOpenLiberoSubstitutions.length > 0) {
-    for (let i = 0; i < currentOpenLiberoSubstitutions.length; i += 1) {
-      let sub = currentOpenLiberoSubstitutions[i]
-      let liberoPosition = getPlayerPositions({
-        player: sub.libero,
-        playerPositions: currentStudio.scout.stash?.playersServePositions
-      })
-
-      if (!liberoPosition) continue
-
-      if ([2, 3, 4].includes(liberoPosition))
-        await liberoSubstitution({
-          inOrOut: 'out',
-          player: sub.player,
-          libero: sub.libero
-        })
-    }
-  }
 }
 
 export function suggestPlayer(params: {

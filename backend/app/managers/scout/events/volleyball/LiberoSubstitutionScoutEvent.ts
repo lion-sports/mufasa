@@ -10,7 +10,7 @@ export type LiberoSubstitutionScoutExtraProperties = {
   playerId: number,
   player: ScoutEventPlayer,
   inOrOut: 'in' | 'out',
-  position: VolleyballPlayersPosition
+  position: number
   liberoId: number,
   libero: ScoutEventPlayer
 }

@@ -80,8 +80,6 @@ export default class PointScoredScoutEvent extends ScoutEvent<
       user: User 
     } 
   }): Promise<void> {
-    console.log(this.event)
-    console.log(params.data.scout.stash.phase)
     if(
       !this.event.opponent &&
       (

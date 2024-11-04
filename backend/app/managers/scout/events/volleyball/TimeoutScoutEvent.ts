@@ -15,7 +15,6 @@ export default class TimeoutScoutEvent extends ScoutEvent<
 
   constructor(params) {
     if(params.opponent === null || params.opponent === undefined) params.opponent = false
-    console.log(params)
 
     super({
       ...params
