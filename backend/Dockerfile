@@ -8,14 +8,18 @@ USER node
 RUN mkdir tmp
 
 FROM base AS dependencies
+COPY --chown=node:node ./common ../common
+RUN cd ../common; npm ci; npm run build; cd ../app
 COPY --chown=node:node ./package*.json ./
 RUN npm ci
-COPY --chown=node:node . .
+COPY --chown=node:node ./backend .
 
 FROM dependencies AS build
 RUN node ace build --production
 
 FROM base AS production
+COPY --chown=node:node ./common ../common
+RUN cd ../common; npm ci; npm run build; cd ../app
 COPY --chown=node:node ./package*.json ./
 RUN npm ci --production
 COPY --chown=node:node --from=build /home/node/app/build .
