@@ -1,32 +1,8 @@
-import Convocation from 'App/Models/Convocation';
-import Teammate from 'App/Models/Teammate';
-import { DateTime } from 'luxon';
-import User from 'App/Models/User'
-import Team from 'App/Models/Team'
-import { test } from '@japa/runner'
-import { TeamFactory, UserFactory } from 'Database/factories'
-import PointScoredScoutEvent from 'App/managers/scout/events/volleyball/PointScoredScoutEvent';
-import { ScoringSystemConfig } from 'App/Models/ScoringSystem';
+import { describe, test, assert } from 'vitest';
+import { incrementScore } from 'src/scouts/points';
+import { ScoringSystemConfig } from 'src/scouts/common';
 
-test.group('Increment score', (group) => {
-  let loggedInUser: User
-  let team: Team
-  let classicScoringSystemConfig: ScoringSystemConfig = {
-    points: {
-      mode: 'winPoints',
-      winPoints: 25,
-      hasAdvantages: true
-    },
-    set: {
-      mode: 'winSet',
-      winSets: 3
-    },
-    tieBreak: {
-      mode: 'winPoints',
-      winPoints: 15,
-      hasAdvantages: true
-    }
-  }
+describe('points', () => {
   let underScoringSystemConfig: ScoringSystemConfig = {
     points: {
       mode: 'winPoints',
@@ -44,19 +20,25 @@ test.group('Increment score', (group) => {
     }
   }
 
-  group.setup(async () => {
-    team = await TeamFactory.with('owner').with('teammateUsers').create()
+  let classicScoringSystemConfig: ScoringSystemConfig = {
+    points: {
+      mode: 'winPoints',
+      winPoints: 25,
+      hasAdvantages: true
+    },
+    set: {
+      mode: 'winSet',
+      winSets: 3
+    },
+    tieBreak: {
+      mode: 'winPoints',
+      winPoints: 15,
+      hasAdvantages: true
+    }
+  }
 
-    loggedInUser = await User.query().whereHas('teams', builder => {
-      builder.where('teams.id', team.id)
-    }).firstOrFail()
-
-    team.ownerId = loggedInUser.id
-    await team.save()
-  })
-
-  test('classic - increment score', async ({ client, assert }) => {
-    let newScore = await PointScoredScoutEvent.incrementScore({
+  test('classic - increment score', async () => {
+    let newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -76,7 +58,7 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.friends.points, 1, 'should have correct points')
     assert.equal(newScore.friends.sets, 0, 'should have correct sets')
 
-    newScore = await PointScoredScoutEvent.incrementScore({
+    newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -96,7 +78,7 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.enemy.points, 0, 'should have correct points')
     assert.equal(newScore.enemy.sets, 1, 'should have correct sets')
 
-    newScore = await PointScoredScoutEvent.incrementScore({
+    newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -119,8 +101,8 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.friends.sets, 1, 'should have correct sets')
   })
 
-  test('classic - increment score - advantages', async ({ client, assert }) => {
-    let newScore = await PointScoredScoutEvent.incrementScore({
+  test('classic - increment score - advantages', async () => {
+    let newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -142,7 +124,7 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.enemy.sets, 0, 'should have correct sets')
     assert.equal(newScore.friends.sets, 0, 'should have correct sets')
 
-    newScore = await PointScoredScoutEvent.incrementScore({
+    newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -165,8 +147,8 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.friends.sets, 1, 'should have correct sets')
   })
 
-  test('classic - increment score - tie break', async ({ client, assert }) => {
-    let newScore = await PointScoredScoutEvent.incrementScore({
+  test('classic - increment score - tie break', async () => {
+    let newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -188,7 +170,7 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.friends.sets, 2, 'should have correct sets')
     assert.equal(newScore.enemy.sets, 2, 'should have correct sets')
 
-    newScore = await PointScoredScoutEvent.incrementScore({
+    newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -210,7 +192,7 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.friends.sets, 2, 'should have correct sets')
     assert.equal(newScore.enemy.sets, 2, 'should have correct sets')
 
-    newScore = await PointScoredScoutEvent.incrementScore({
+    newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -232,8 +214,8 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.friends.won, true, 'should have won')
   })
 
-  test('under - increment score', async ({ client, assert }) => {
-    let newScore = await PointScoredScoutEvent.incrementScore({
+  test('under - increment score', async () => {
+    let newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -253,7 +235,7 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.friends.points, 21, 'should have correct points')
     assert.equal(newScore.friends.sets, 0, 'should have correct sets')
 
-    newScore = await PointScoredScoutEvent.incrementScore({
+    newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -273,7 +255,7 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.enemy.points, 0, 'should have correct points')
     assert.equal(newScore.enemy.sets, 1, 'should have correct sets')
 
-    newScore = await PointScoredScoutEvent.incrementScore({
+    newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -296,8 +278,8 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.friends.sets, 0, 'should have correct sets')
   })
 
-  test('under - increment score - tie break', async ({ client, assert }) => {
-    let newScore = await PointScoredScoutEvent.incrementScore({
+  test('under - increment score - tie break', async () => {
+    let newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -319,7 +301,7 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.friends.sets, 1, 'should have correct sets')
     assert.equal(newScore.enemy.sets, 1, 'should have correct sets')
 
-    newScore = await PointScoredScoutEvent.incrementScore({
+    newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {
@@ -341,7 +323,7 @@ test.group('Increment score', (group) => {
     assert.equal(newScore.friends.sets, 1, 'should have correct sets')
     assert.equal(newScore.enemy.sets, 1, 'should have correct sets')
 
-    newScore = await PointScoredScoutEvent.incrementScore({
+    newScore = await incrementScore({
       data: {
         currentScore: {
           enemy: {

@@ -72,9 +72,13 @@ export default class AppProvider {
           socket.on(Ws.roomName({ team, namespace: `scout:add` }), async (data) => {
             try {
               await scoutSocket.handleEvent({
-                event: 'scout:add',
-                data: data,
-                user: socket.data.user
+                data: {
+                  event: 'scout:add',
+                  data: data,
+                },
+                context: {
+                  user: socket.data.user
+                }
               })
             } catch(err) {
               console.log(err)
@@ -84,9 +88,13 @@ export default class AppProvider {
           socket.on(Ws.roomName({ team, namespace: `scout:undo` }), async (data) => {
             try {
               await scoutSocket.handleEvent({
-                event: 'scout:undo',
-                data: data,
-                user: socket.data.user
+                data: {
+                  event: 'scout:undo',
+                  data: data,
+                },
+                context: {
+                  user: socket.data.user
+                }
               })
             } catch (err) {
               console.log(err)
@@ -96,9 +104,13 @@ export default class AppProvider {
           socket.on(Ws.roomName({ team, namespace: `scout:restart` }), async (data) => {
             try {
               await scoutSocket.handleEvent({
-                event: 'scout:restart',
-                data: data,
-                user: socket.data.user
+                data: {
+                  event: 'scout:restart',
+                  data: data,
+                },
+                context: {
+                  user: socket.data.user
+                }
               })
             } catch (err) {
               console.log(err)

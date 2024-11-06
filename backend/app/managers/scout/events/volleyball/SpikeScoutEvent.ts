@@ -1,10 +1,9 @@
-import { ScoutEventPlayer } from "App/Models/Player";
+import type { ScoutEventPlayer } from "lionn-common";
 import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
 import { VolleyballPoints, VolleyballScoutEventPosition } from "./common";
 import Scout from "App/Models/Scout";
 import { Context } from "App/managers/base.manager";
 import scoutsSocket from "../../scouts.socket";
-import User from "App/Models/User";
 
 export type SpikeScoutEventResult = 'error' | 'point' | 'defense'
 
@@ -43,9 +42,7 @@ export default class SpikeScoutEvent extends ScoutEvent<SpikeScoutExtraPropertie
     data: {
       scout: Scout
     }
-    context: {
-      user: User
-    }
+    context?: Context
   }): Promise<void> {
     await scoutsSocket.emit({
       data: {
@@ -72,36 +69,40 @@ export default class SpikeScoutEvent extends ScoutEvent<SpikeScoutExtraPropertie
       params.data.scout.scoutInfo.settings?.automations?.autoPoint?.enemy?.includes('spikeError')
     ) {
       await scoutsSocket.handleEvent({
-        event: 'scout:add',
         data: {
-          type: 'pointScored',
-          opponent: !this.event.player.isOpponent,
-          date: new Date(),
-          scoutId: this.scoutId,
-          sport: 'volleyball',
-          teamId: this.teamId,
-          createdByUserId: this.createdByUserId,
-          points: this.points
+          event: 'scout:add',
+          data: {
+            type: 'pointScored',
+            opponent: !this.event.player.isOpponent,
+            date: new Date(),
+            scoutId: this.scoutId,
+            sport: 'volleyball',
+            teamId: this.teamId,
+            createdByUserId: this.createdByUserId,
+            points: this.points
+          },
         },
-        user: params.context.user
+        context: params.context
       })
     } else if (
       this.event.result == 'point' &&
       params.data.scout.scoutInfo.settings?.automations?.autoPoint?.friends?.includes('spikePoint')
     ) {
       await scoutsSocket.handleEvent({
-        event: 'scout:add',
         data: {
-          type: 'pointScored',
-          opponent: this.event.player.isOpponent,
-          date: new Date(),
-          scoutId: this.scoutId,
-          sport: 'volleyball',
-          teamId: this.teamId,
-          createdByUserId: this.createdByUserId,
-          points: this.points
+          event: 'scout:add',
+          data: {
+            type: 'pointScored',
+            opponent: this.event.player.isOpponent,
+            date: new Date(),
+            scoutId: this.scoutId,
+            sport: 'volleyball',
+            teamId: this.teamId,
+            createdByUserId: this.createdByUserId,
+            points: this.points
+          },
         },
-        user: params.context.user
+        context: params.context
       })
     }
   }

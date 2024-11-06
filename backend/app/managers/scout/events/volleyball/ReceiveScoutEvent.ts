@@ -1,4 +1,4 @@
-import { ScoutEventPlayer } from "App/Models/Player";
+import type { ScoutEventPlayer } from "lionn-common";
 import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
 import { VolleyballPoints, VolleyballScoutEventPosition } from "./common";
 import Scout from "App/Models/Scout";
@@ -43,9 +43,7 @@ export default class ReceiveScoutEvent extends ScoutEvent<ReceiveScoutExtraPrope
     data: {
       scout: Scout
     }
-    context: {
-      user: User
-    }
+    context?: Context
   }): Promise<void> {
     await scoutsSocket.emit({
       data: {
@@ -72,56 +70,62 @@ export default class ReceiveScoutEvent extends ScoutEvent<ReceiveScoutExtraPrope
       params.data.scout.scoutInfo.settings?.automations?.autoPoint?.enemy?.includes('receiveError')
     ) {
       await scoutsSocket.handleEvent({
-        event: 'scout:add',
         data: {
-          type: 'pointScored',
-          opponent: !this.event.player.isOpponent,
-          date: new Date(),
-          scoutId: this.scoutId,
-          sport: 'volleyball',
-          teamId: this.teamId,
-          createdByUserId: this.createdByUserId,
-          points: this.points
+          event: 'scout:add',
+          data: {
+            type: 'pointScored',
+            opponent: !this.event.player.isOpponent,
+            date: new Date(),
+            scoutId: this.scoutId,
+            sport: 'volleyball',
+            teamId: this.teamId,
+            createdByUserId: this.createdByUserId,
+            points: this.points
+          },
         },
-        user: params.context.user
+        context: params.context
       })
     } else if (
       !this.event.player.isOpponent &&
       params.data.scout.scoutInfo.settings?.automations?.autoPhase?.friends?.includes('receive')
     ) {
       await scoutsSocket.handleEvent({
-        event: 'scout:add',
         data: {
-          type: 'manualPhase',
-          phase: 'defenseSideOut',
-          opponent: false,
-          date: new Date(),
-          scoutId: this.scoutId,
-          sport: 'volleyball',
-          teamId: this.teamId,
-          createdByUserId: this.createdByUserId,
-          points: this.points
+          event: 'scout:add',
+          data: {
+            type: 'manualPhase',
+            phase: 'defenseSideOut',
+            opponent: false,
+            date: new Date(),
+            scoutId: this.scoutId,
+            sport: 'volleyball',
+            teamId: this.teamId,
+            createdByUserId: this.createdByUserId,
+            points: this.points
+          },
         },
-        user: params.context.user
+        context: params.context
       })
     } else if (
       this.event.player.isOpponent &&
       params.data.scout.scoutInfo.settings?.automations?.autoPhase?.enemy?.includes('receive')
     ) {
       await scoutsSocket.handleEvent({
-        event: 'scout:add',
         data: {
-          type: 'manualPhase',
-          phase: 'defenseBreak',
-          opponent: false,
-          date: new Date(),
-          scoutId: this.scoutId,
-          sport: 'volleyball',
-          teamId: this.teamId,
-          createdByUserId: this.createdByUserId,
-          points: this.points
+          event: 'scout:add',
+          data: {
+            type: 'manualPhase',
+            phase: 'defenseBreak',
+            opponent: false,
+            date: new Date(),
+            scoutId: this.scoutId,
+            sport: 'volleyball',
+            teamId: this.teamId,
+            createdByUserId: this.createdByUserId,
+            points: this.points
+          },
         },
-        user: params.context.user
+        context: params.context
       })
     }
   }

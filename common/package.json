@@ -1,0 +1,70 @@
+{
+  "name": "lionn-common",
+  "private": false,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vitest",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "prepublishOnly": "npm run build",
+    "format": "prettier --write .",
+    "test": "vitest run"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/lionn-common.cjs",
+  "module": "./dist/lionn-common.cjs",
+  "types": "./dist/src/main.d.ts",
+  "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@eslint/js": "^9.5.0",
+    "@types/lodash": "^4.17.13",
+    "@types/node": "^20.14.9",
+    "@types/node-forge": "^1.3.11",
+    "eslint": "^9.5.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "globals": "^15.6.0",
+    "lint-staged": "^15.2.7",
+    "prettier": "^3.3.2",
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^7.14.1",
+    "vite": "^5.3.1",
+    "vite-plugin-dts": "^3.9.1",
+    "vitest": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=20.11.1"
+  },
+  "overrides": {
+    "eslint": "^9.5.0"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,tsx}": [
+      "eslint --fix"
+    ],
+    "**/*": "prettier --write --ignore-unknown"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2",
+    "node-forge": "^1.3.1",
+    "soap": "^1.0.4",
+    "xadesjs": "^2.4.4",
+    "xml2js": "^0.6.2"
+  },
+  "description": "Common library for lionn",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/likablehair/adm-service.git"
+  },
+  "author": "Gabriele Garlaschelli",
+  "license": "ISC"
+}

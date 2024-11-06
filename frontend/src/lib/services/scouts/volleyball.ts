@@ -1,4 +1,5 @@
-import type { ScoutEventJson, ScoutEventPlayer } from "./scouts.service"
+import type { ScoutEventJson, } from "./scouts.service"
+import type { ScoutEventPlayer } from "lionn-common";
 
 export type VolleyballPhase = 'serve' | 'receive' | 'defenseBreak' | 'defenseSideOut'
 

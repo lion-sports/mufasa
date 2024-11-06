@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { Scout, ScoutEventPlayer } from '@/lib/services/scouts/scouts.service'
+	import type { Scout } from '@/lib/services/scouts/scouts.service'
+  import type { ScoutEventPlayer } from 'lionn-common'
 	import type {
 		VolleyballPhase,
 		VolleyballPlayersPosition,
@@ -115,14 +116,14 @@
 						<div class="flex justify-center items-center">
 							{#if !!positions?.[position]?.player}
 								<PlayerMarker
-                  friend={!positions[position].player.isOpponent}
-                  opponent={positions[position].player.isOpponent}
+                  friend={!positions[position]?.player.isOpponent}
+                  opponent={positions[position]?.player.isOpponent}
 									class="z-[15]"
-									libero={positions[position].player.role === 'libero'}
+									libero={positions[position]?.player.role === 'libero'}
 									on:click={() => handlePlayerClick(positions[position]?.player)}
                   selected={!!selectedPlayer && selectedPlayer?.id ===  positions[position]?.player.id}
 								>
-									{positions[position].player.shirtNumber}
+									{positions[position]?.player.shirtNumber}
 									<svelte:fragment slot="tooltip">
                     <div class="font-bold">
                       {TeammatesService.getTeammateName({
@@ -189,13 +190,13 @@
 						<div class="flex justify-center items-center">
 							{#if !!positions?.[position]}
 								<PlayerMarker
-									opponent={positions[position].player.isOpponent}
-                  friend={!positions[position].player.isOpponent}
-									libero={positions[position].player.role === 'libero'}
+									opponent={positions[position]?.player.isOpponent}
+                  friend={!positions[position]?.player.isOpponent}
+									libero={positions[position]?.player.role === 'libero'}
 									on:click={() => handlePlayerClick(positions[position]?.player)}
                   selected={!!selectedPlayer && selectedPlayer?.id ===  positions[position]?.player.id}
 								>
-									{positions[position].player.shirtNumber}
+									{positions[position]?.player.shirtNumber}
 									<svelte:fragment slot="tooltip">
                     <div class="font-bold">
                       {TeammatesService.getTeammateName({

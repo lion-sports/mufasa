@@ -5,8 +5,9 @@ import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT, VolleyballScoutEventJsonAddParameters }
 import ScoutsManager from "./scouts.manager"
 import { FIRST_POINT } from "./events/volleyball/common"
 import Ws from "App/Services/Ws"
-import { Context } from "../base.manager"
+import { Context, withTransaction, withUser } from "../base.manager"
 import PlayersManager from "../players.manager"
+import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database"
 
 export type ScoutSocketEventMapping = {
   'scout:add': VolleyballScoutEventJsonAddParameters,
@@ -31,7 +32,7 @@ class ScoutSocket {
   constructor() { }
 
   public async emit<
-    EventName extends keyof ScoutSocketEventMapping, 
+    EventName extends keyof ScoutSocketEventMapping,
     EventData extends ScoutSocketEventMapping[EventName]
   >(params: {
     data: {
@@ -40,7 +41,7 @@ class ScoutSocket {
     },
     context?: Context
   }) {
-    if(params.data.event == 'scout:stashReload') {
+    if (params.data.event == 'scout:stashReload') {
       let data = params.data.data as ScoutSocketEventMapping['scout:stashReload']
 
       let scout = await Scout.query({ client: params.context?.trx })
@@ -131,84 +132,95 @@ class ScoutSocket {
     }
   }
 
+  @withUser
+  @withTransaction
   public async handleEvent<
     Event extends keyof ScoutSocketEventMapping,
     EventData extends ScoutSocketEventMapping[Event]
   >(params: {
-    event: Event,
-    data: EventData,
-    user: User
+    data: {
+      event: Event,
+      data: EventData,
+    },
+    context?: Context
   }) {
-    if (params.event == 'scout:add' || params.event == 'scout:undo' || params.event == 'scout:restart') {
-      let data = params.data as ScoutSocketEventMapping['scout:add']
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
+
+    if (params.data.event == 'scout:add' || params.data.event == 'scout:undo' || params.data.event == 'scout:restart') {
+      let data = params.data.data as ScoutSocketEventMapping['scout:add']
 
       // check if user can manage the scout
-      let scout = await Scout.query()
+      let scout = await Scout.query({ client: trx })
         .preload('event')
         .preload('scoutInfo')
         .where('id', data.scoutId)
         .firstOrFail()
-      
+
       let canManageScout = await AuthorizationHelpers.userCanInTeam({
         data: {
-          user: params.user,
+          user: user,
           team: { id: scout.event.teamId },
           action: 'manage',
           resource: 'scout'
+        },
+        context: {
+          user, trx
         }
       })
-  
+
       if (!canManageScout) {
         throw new Error('cannot manage the scout')
       }
-      
-      if(params.event == 'scout:add') {
-        await this.handleAdd({ scoutEvent: data, user: params.user, scout })
-      } else if(params.event == 'scout:undo') {
-        await this.handleUndo({ user: params.user, scout })
-      } else if (params.event == 'scout:restart') {
-        await this.handleRestart({ user: params.user, scout })
+
+      if (params.data.event == 'scout:add') {
+        await this.handleAdd({ data: { scoutEvent: data, scout }, context: { user, trx } })
+      } else if (params.data.event == 'scout:undo') {
+        await this.handleUndo({ user, scout })
+      } else if (params.data.event == 'scout:restart') {
+        await this.handleRestart({ user, scout })
       }
     }
   }
 
+  @withUser
+  @withTransaction
   private async handleAdd(params: {
-    scoutEvent: VolleyballScoutEventJsonAddParameters
-    scout: Scout
-    user: User
+    data: {
+      scoutEvent: VolleyballScoutEventJsonAddParameters
+      scout: Scout
+    },
+    context?: Context
   }) {
-    if (!params.scoutEvent.points) params.scoutEvent.points = params.scout.stash?.points
-    if (!params.scoutEvent.points) params.scoutEvent.points = FIRST_POINT
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
 
-    let Cl = TYPE_TO_VOLLEYBALL_SCOUT_EVENT[params.scoutEvent.type]
-    let event = new Cl({ 
-      ...params.scoutEvent,
-      createdByUserId: params.user.id
+    if (!params.data.scoutEvent.points) params.data.scoutEvent.points = params.data.scout.stash?.points
+    if (!params.data.scoutEvent.points) params.data.scoutEvent.points = FIRST_POINT
+
+    let Cl = TYPE_TO_VOLLEYBALL_SCOUT_EVENT[params.data.scoutEvent.type]
+    let event = new Cl({
+      ...params.data.scoutEvent,
+      createdByUserId: user.id
     })
-    await event.preReceived({ 
+    await event.preReceived({
       data: {
-        scout: params.scout
+        scout: params.data.scout
       },
-      context: {
-        user: params.user
-      }
+      context: { user, trx }
     })
     await event.save()
     await event.postReceived({
       data: {
-        scout: params.scout
+        scout: params.data.scout
       },
-      context: {
-        user: params.user
-      }
+      context: { user, trx }
     })
 
     let scoutManager = new ScoutsManager()
-    await scoutManager.recalculateStash({ 
-      data: { id: params.scout.id },
-      context: {
-        user: params.user
-      }
+    await scoutManager.recalculateStash({
+      data: { id: params.data.scout.id },
+      context: { user, trx }
     })
   }
 

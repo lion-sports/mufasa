@@ -107,17 +107,13 @@ export default abstract class ScoutEvent<
     data: {
       scout: Scout 
     },
-    context: {
-      user: User
-    }
+    context?: Context
   }) { }
   
   public async preReceived(params: {
     data: {
       scout: Scout
     },
-    context: {
-      user: User
-    }
+    context?: Context
   }) { }
 }

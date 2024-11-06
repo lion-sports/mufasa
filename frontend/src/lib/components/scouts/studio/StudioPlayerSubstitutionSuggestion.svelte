@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { Scout, ScoutEventPlayer } from "@/lib/services/scouts/scouts.service"
+	import type { Scout } from "@/lib/services/scouts/scouts.service"
+  import type { ScoutEventPlayer } from 'lionn-common'
 	import { liberoSubstitution, playerSubstitution } from "@/lib/stores/scout/studio"
 	import PlayerMarker from "../PlayerMarker.svelte"
 	import TeammatesService from "@/lib/services/teammates/teammates.service"

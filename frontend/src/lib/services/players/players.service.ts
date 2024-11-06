@@ -7,7 +7,7 @@ import type { VolleyballScoutEventJson } from '../scouts/volleyball'
 
 export type Player = {
   id: number
-  convocationId?: number | null
+  convocationId: number | null
   convocation?: Convocation
   scoutId: number
   scout: Scout
@@ -17,8 +17,8 @@ export type Player = {
   role: Role
   shirtId: number
   shirtNumber: number
-  shirtPrimaryColor?: string | null
-  shirtSecondaryColor?: string | null
+  shirtPrimaryColor: string | null | undefined
+  shirtSecondaryColor: string | null | undefined
   isOpponent: boolean
 }
 

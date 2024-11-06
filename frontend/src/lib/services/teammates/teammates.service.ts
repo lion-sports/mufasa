@@ -47,8 +47,8 @@ export default class TeammatesService extends FetchBasedService {
     teammate?: {
       alias?: Teammate['alias'],
       user: {
-        firstname: User['firstname'],
-        lastname: User['lastname']
+        firstname: string | undefined,
+        lastname: string | undefined
       }
     },
     player?: {

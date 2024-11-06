@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Role, type ScoutEventPlayer } from "$lib/services/scouts/scouts.service";
+  import type { ScoutEventPlayer } from "lionn-common";
 	import type { ComponentProps } from "svelte"
 	import StandardAutocomplete from "../common/StandardAutocomplete.svelte"
 	import type { Player } from "@/lib/services/players/players.service"

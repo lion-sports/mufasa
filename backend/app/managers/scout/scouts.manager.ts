@@ -16,17 +16,16 @@ import { FIRST_POINT, VolleyballPlayersPosition, VolleyballPoints } from "./even
 import TeamRotationScoutEvent from "./events/volleyball/TeamRotationScoutEvent";
 import { TimeoutScoutEventJson } from "./events/volleyball/TimeoutScoutEvent";
 import { PlayerSubstitutionScoutEventJson } from "./events/volleyball/PlayerSubstitutionScoutEvent";
-import { ScoutEventPlayer } from "App/Models/Player";
+import type { ScoutEventPlayer } from "lionn-common";
 import scoutsSocket from "./scouts.socket";
 import { ManualPhaseScoutEventJson } from "./events/volleyball/ManualPhaseScoutEvent";
 import { LiberoSubstitutionScoutEventJson } from "./events/volleyball/LiberoSubstitutionScoutEvent";
 import { VolleyballScoutEventJson } from "./events/volleyball/VolleyballScoutEvent";
 import { ReceiveScoutEventResult } from "./events/volleyball/ReceiveScoutEvent";
-import excelJS from 'exceljs'
 import { lastPlayerPositionAggregation } from "./aggregations/lastPlayerPosition.aggregation";
 import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation";
-import TeammatesManager from "../teammates.manager";
 import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database";
+import { getPlayersPositions } from "lionn-common";
 
 export type ScoutStudio = {
   scout: Scout,
@@ -436,8 +435,6 @@ export default class ScoutsManager {
         })
         return target
       }
-
-      console.log(ObjectAssign(existingScoutInfo.settings, (scoutInfo.settings || {})))
       
       existingScoutInfo.general = ObjectAssign(existingScoutInfo.general, (scoutInfo.general || {}))
       existingScoutInfo.settings = ObjectAssign(existingScoutInfo.settings, (scoutInfo.settings || {}))
@@ -643,7 +640,7 @@ export default class ScoutsManager {
     }
     
     if(!!lastPositionFound) {
-      let positions = TeamRotationScoutEvent.getPlayersPositions({
+      let positions = getPlayersPositions({
         positions: lastPositionFound
       })
 

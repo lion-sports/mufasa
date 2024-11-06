@@ -1,4 +1,4 @@
-import { ScoutEventPlayer } from "App/Models/Player";
+import type { ScoutEventPlayer } from "lionn-common";
 import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
 import { VolleyballPoints, VolleyballScoutEventPosition } from "./common";
 import scoutsSocket from "../../scouts.socket";

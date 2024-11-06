@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte"
   import PlayerMarker from "../PlayerMarker.svelte";
-	import type { Scout, ScoutEventPlayer } from "@/lib/services/scouts/scouts.service"
+	import type { Scout } from "@/lib/services/scouts/scouts.service"
+  import type { ScoutEventPlayer } from "lionn-common";
 	import TeammatesService from "@/lib/services/teammates/teammates.service"
   import { Icon } from "@likable-hair/svelte";
 	import StandardDialog from "../../common/StandardDialog.svelte"
@@ -128,7 +129,7 @@
       <div class="text-2xl font-bold mb-4">{scout.event.team.name}</div>
     </div>
     <div class="basis-1/2 text-right">
-      <div class="text-2xl font-bold mb-4">{scout.scoutInfo.general.opponent?.name}</div>
+      <div class="text-2xl font-bold mb-4">{scout.scoutInfo.general?.opponent?.name}</div>
     </div>
   </div>
 

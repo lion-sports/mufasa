@@ -13,11 +13,7 @@ import { DateTime } from 'luxon'
 
 //#region Types
 export type Context = {
-  user?:
-  | {
-    id: number
-  }
-  | User
+  user?: User
   trx?: TransactionClientContract
 }
 

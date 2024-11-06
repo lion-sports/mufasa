@@ -5,7 +5,7 @@
 	import { Icon } from "@likable-hair/svelte"
 	import ScoutPlayerAutocomplete from "../ScoutPlayerAutocomplete.svelte"
 	import { createEventDispatcher } from "svelte"
-	import type { ScoutEventPlayer } from "@/lib/services/scouts/scouts.service"
+  import type { ScoutEventPlayer } from 'lionn-common'
 	import studio, { suggestPlayer } from "@/lib/stores/scout/studio"
 	import PlayerMarker from "../PlayerMarker.svelte"
 	import TeammatesService from "@/lib/services/teammates/teammates.service"
@@ -194,6 +194,12 @@
     loadFirstSetStartingSix()
     reloadFirstSetStartingSix = false
   }
+
+  function getPlayerValueInPosition(position: VolleyballScoutEventPosition, playersPosition: VolleyballPlayersPosition | undefined): ScoutEventPlayer[] {
+    return selectedTab == 'opponents' ?
+    [playersPosition?.enemy[position]?.player].filter(v => !!v) as ScoutEventPlayer[] :
+    [playersPosition?.friends[position]?.player].filter(v => !!v) as ScoutEventPlayer[]
+  }
 </script>
 
 <div class="min-w-[min(95vw,400px)] w-[700px] max-w-[95vw]">
@@ -257,13 +263,17 @@
                     playersPosition.enemy[position] = {
                       player: selection?.data?.player
                     }
-                  } else playersPosition.enemy[position].player = selection?.data?.player
+                  } 
+                  //@ts-ignore
+                  else playersPosition.enemy[position].player = selection?.data?.player
                 } else {
                   if(!playersPosition.friends[position]) {
                     playersPosition.friends[position] = {
                       player: selection?.data?.player
                     }
-                  } else playersPosition.friends[position].player = selection?.data?.player
+                  }
+                  //@ts-ignore
+                  else playersPosition.friends[position].player = selection?.data?.player
                 }
 
                 dispatch('change', {
@@ -271,11 +281,7 @@
                   player: selection?.data?.player
                 })
               }}
-              values={
-                selectedTab == 'opponents' ?
-                [playersPosition?.enemy[position]?.player].filter(v => !!v) :
-                [playersPosition?.friends[position]?.player].filter(v => !!v)
-              }
+              values={getPlayerValueInPosition(position, playersPosition)}
             ></ScoutPlayerAutocomplete>
           </div>
           {#if showSuggestion}

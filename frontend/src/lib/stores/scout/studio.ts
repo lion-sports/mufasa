@@ -1,4 +1,5 @@
-import ScoutService, { type Scout, type ScoutAnalysis, type ScoutEventPlayer, type ScoutStudio, type VolleyballRole } from '$lib/services/scouts/scouts.service'
+import ScoutService, { type Scout, type ScoutAnalysis, type ScoutStudio, type VolleyballRole } from '$lib/services/scouts/scouts.service'
+import type { ScoutEventPlayer } from 'lionn-common'
 import { OPPOSITE_POSITIONS, ORDERED_POSITIONS, type BlockScoutEventResult, type ReceiveScoutEventResult, type RotationType, type ServeScoutEventResult, type SpikeScoutEventResult, type VolleyballPhase, type VolleyballPlayersPosition, type VolleyballScoutEventJson, type VolleyballScoutEventParameters, type VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
 import { get, writable } from 'svelte/store'
 import socketService from '$lib/services/common/socket.service';

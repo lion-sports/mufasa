@@ -1,7 +1,6 @@
-import type { ScoutEventPlayer } from "lionn-common";
+import { ScoutEventPlayer } from "../common"
 
 export type VolleyballPhase = 'serve' | 'receive' | 'defenseBreak' | 'defenseSideOut'
-
 export type VolleyballScoutEventPosition = 1 | 2 | 3 | 4 | 5 | 6
 
 /*

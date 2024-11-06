@@ -157,7 +157,7 @@
 
 		if (
 			!!scout.scoutInfo.settings?.automations?.autoPhase?.[friendsOrEnemy] &&
-			!scout.scoutInfo.settings?.automations?.autoPhase[friendsOrEnemy].includes(value) &&
+			!scout.scoutInfo.settings?.automations?.autoPhase[friendsOrEnemy]?.includes(value) &&
 			selected
 		) {
 			scout.scoutInfo.settings.automations.autoPhase[friendsOrEnemy] = [
@@ -166,11 +166,11 @@
 			]
 		} else if (
 			!!scout.scoutInfo.settings?.automations?.autoPhase?.[friendsOrEnemy] &&
-			scout.scoutInfo.settings?.automations?.autoPhase[friendsOrEnemy].includes(value) &&
+			scout.scoutInfo.settings?.automations?.autoPhase[friendsOrEnemy]?.includes(value) &&
 			!selected
 		) {
 			scout.scoutInfo.settings.automations.autoPhase[friendsOrEnemy] =
-				scout.scoutInfo.settings.automations.autoPhase[friendsOrEnemy].filter((e) => {
+				scout.scoutInfo.settings.automations.autoPhase[friendsOrEnemy]?.filter((e) => {
 					return e !== value
 				})
 		}

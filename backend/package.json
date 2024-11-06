@@ -68,6 +68,7 @@
     "adonis-autoswagger": "^3.16.0",
     "exceljs": "^4.4.0",
     "google-auth-library": "^8.7.0",
+    "lionn-common": "file:../common",
     "luxon": "^2.4.0",
     "mongodb": "^6.5.0",
     "node-telegram-bot-api": "^0.60.0",

@@ -2,13 +2,13 @@ import Mongo from "App/Services/Mongo"
 import { Context, withTransaction, withUser } from "../base.manager"
 import excelJS from 'exceljs'
 import { SCOUT_EVENT_COLLECTION_NAME } from "./ScoutEvent"
-import { ScoutEventPlayer } from "App/Models/Player"
+import type { ScoutEventPlayer } from "lionn-common";
 import { SummarizedPlayerStats } from "./scouts.manager"
 import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation"
 import TeammatesManager from "../teammates.manager"
 import Scout from "App/Models/Scout"
-import { User } from "node-telegram-bot-api"
 import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database"
+import User from "App/Models/User";
 
 export default class ScoutExporter {
   @withTransaction

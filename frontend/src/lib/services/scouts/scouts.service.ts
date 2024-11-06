@@ -3,8 +3,7 @@ import type { Event } from '../events/events.service'
 import type { ScoringSystem } from '../scoringSystems/scoringSystems.service'
 import type { Player } from '../players/players.service'
 import type { LiberoSubstitutionScoutEventJson, ReceiveScoutEventResult, VolleyballPhase, VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints, VolleyballScoutEventJson } from './volleyball'
-import type { Teammate } from '../teams/teams.service'
-import type { User } from '../auth/auth.service'
+import type { ScoutEventPlayer } from "lionn-common";
 
 export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
@@ -18,27 +17,6 @@ export const ROLES = [
 export type VolleyballRole = typeof VOLLEYBALL_ROLES[number]
 export type BasketballRole = typeof BASKETBALL_ROLES[number]
 export type Role = typeof ROLES[number]
-
-export type ScoutEventPlayer = {
-  id: Player['id'],
-  convocationId?: Player['convocationId'],
-  scoutId: Player['scoutId'],
-  teammateId?: Player['teammateId'],
-  teammate?: {
-    alias?: Teammate['alias'],
-    user: {
-      firstname: User['firstname'],
-      lastname: User['lastname']
-    }
-  },
-  aliases: Player['aliases'],
-  role: Player['role'],
-  shirtId: Player['shirtId'],
-  shirtNumber: Player['shirtNumber'],
-  shirtPrimaryColor?: Player['shirtPrimaryColor'],
-  shirtSecondaryColor?: Player['shirtSecondaryColor'],
-  isOpponent: Player['isOpponent']
-}
 
 export type VolleyballScoutStash = {
   points: VolleyballPoints,
