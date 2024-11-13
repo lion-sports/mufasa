@@ -1,20 +1,9 @@
-import type { ScoutEventPlayer } from "lionn-common";
-import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
-import { VolleyballPoints, VolleyballScoutEventPosition } from "./common";
+import type { ScoutEventPlayer, ReceiveScoutEventResult, ReceiveScoutExtraProperties } from "lionn-common";
+import ScoutEvent from "../../ScoutEvent";
+import type { VolleyballPoints } from "lionn-common";
 import Scout from "App/Models/Scout";
 import { Context } from "App/managers/base.manager";
 import scoutsSocket from "../../scouts.socket";
-import User from "App/Models/User";
-
-export type ReceiveScoutEventResult = '++' | '+' | '-' | '/' | 'x'
-
-export type ReceiveScoutExtraProperties = {
-  playerId: number,
-  player: ScoutEventPlayer,
-  result: ReceiveScoutEventResult,
-  position: VolleyballScoutEventPosition
-}
-export type ReceiveScoutEventJson = ScoutEventJson<'receive', 'volleyball'> & ReceiveScoutExtraProperties
 
 export default class ReceiveScoutEvent extends ScoutEvent<ReceiveScoutExtraProperties, 'receive', VolleyballPoints> {
   public type = 'receive' as const

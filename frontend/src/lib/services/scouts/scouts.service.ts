@@ -2,8 +2,8 @@ import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Event } from '../events/events.service'
 import type { ScoringSystem } from '../scoringSystems/scoringSystems.service'
 import type { Player } from '../players/players.service'
-import type { LiberoSubstitutionScoutEventJson, ReceiveScoutEventResult, VolleyballPhase, VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints, VolleyballScoutEventJson } from './volleyball'
-import type { ScoutEventPlayer } from "lionn-common";
+import type { ReceiveScoutEventResult, VolleyballPlayersPosition, VolleyballPoints, VolleyballScoutEventJson } from './volleyball'
+import type { ScoutEventPlayer, VolleyballScoutStash } from "lionn-common";
 
 export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
@@ -17,30 +17,6 @@ export const ROLES = [
 export type VolleyballRole = typeof VOLLEYBALL_ROLES[number]
 export type BasketballRole = typeof BASKETBALL_ROLES[number]
 export type Role = typeof ROLES[number]
-
-export type VolleyballScoutStash = {
-  points: VolleyballPoints,
-  playersServePositions?: VolleyballPlayersPosition,
-  playersReceivePositions?: VolleyballPlayersDynamicPosition,
-  playersDefenseBreakPositions?: VolleyballPlayersPosition,
-  playersDefenseSideOutPositions?: VolleyballPlayersPosition,
-  currentSetSubstitutionsMade: {
-    friends: {
-      playerIn: ScoutEventPlayer,
-      playerOut: ScoutEventPlayer
-    }[]
-    enemy: {
-      playerIn: ScoutEventPlayer,
-      playerOut: ScoutEventPlayer
-    }[]
-  },
-  currentSetOpenLiberoSubstitution?: LiberoSubstitutionScoutEventJson[],
-  currentSetTimeoutsCalled: {
-    friends: number
-    enemy: number
-  },
-  phase?: VolleyballPhase
-}
 
 export type Scout = {
   id: number

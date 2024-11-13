@@ -1,16 +1,16 @@
 import User from "App/Models/User"
 import Scout from "App/Models/Scout"
 import { AuthorizationHelpers } from "../authorization.manager"
-import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT, VolleyballScoutEventJsonAddParameters } from "./events/volleyball/VolleyballScoutEvent"
+import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT } from "./events/volleyball/VolleyballScoutEvent"
 import ScoutsManager from "./scouts.manager"
-import { FIRST_POINT } from "./events/volleyball/common"
 import Ws from "App/Services/Ws"
 import { Context, withTransaction, withUser } from "../base.manager"
 import PlayersManager from "../players.manager"
 import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database"
+import { FIRST_POINT, type VolleyballScoutEventParameters } from 'lionn-common'
 
 export type ScoutSocketEventMapping = {
-  'scout:add': VolleyballScoutEventJsonAddParameters,
+  'scout:add': VolleyballScoutEventParameters,
   'scout:stashReload': {
     scout: Scout
   },
@@ -185,9 +185,9 @@ class ScoutSocket {
 
   @withUser
   @withTransaction
-  private async handleAdd(params: {
+  public async handleAdd(params: {
     data: {
-      scoutEvent: VolleyballScoutEventJsonAddParameters
+      scoutEvent: VolleyballScoutEventParameters
       scout: Scout
     },
     context?: Context

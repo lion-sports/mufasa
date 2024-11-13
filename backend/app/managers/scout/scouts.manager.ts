@@ -9,23 +9,27 @@ import Event from "App/Models/Event";
 import { DateTime } from "luxon";
 import { CreateScoutValidator, UpdateScoutValidator } from "App/Validators/scouts";
 import PlayersManager from "../players.manager";
-import { ScoutInfoGeneral, ScoutInfoSettings } from "App/Models/ScoutInfo";
 import Mongo from "App/Services/Mongo";
 import { SCOUT_EVENT_COLLECTION_NAME } from "./ScoutEvent";
-import { FIRST_POINT, VolleyballPlayersPosition, VolleyballPoints } from "./events/volleyball/common";
-import TeamRotationScoutEvent from "./events/volleyball/TeamRotationScoutEvent";
-import { TimeoutScoutEventJson } from "./events/volleyball/TimeoutScoutEvent";
-import { PlayerSubstitutionScoutEventJson } from "./events/volleyball/PlayerSubstitutionScoutEvent";
-import type { ScoutEventPlayer } from "lionn-common";
 import scoutsSocket from "./scouts.socket";
-import { ManualPhaseScoutEventJson } from "./events/volleyball/ManualPhaseScoutEvent";
-import { LiberoSubstitutionScoutEventJson } from "./events/volleyball/LiberoSubstitutionScoutEvent";
-import { VolleyballScoutEventJson } from "./events/volleyball/VolleyballScoutEvent";
-import { ReceiveScoutEventResult } from "./events/volleyball/ReceiveScoutEvent";
 import { lastPlayerPositionAggregation } from "./aggregations/lastPlayerPosition.aggregation";
 import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation";
 import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database";
-import { getPlayersPositions } from "lionn-common";
+import { 
+  getPlayersPositions, 
+  FIRST_POINT,
+  type VolleyballScoutEventJson, 
+  type LiberoSubstitutionScoutEventJson, 
+  type ReceiveScoutEventResult,
+  type TimeoutScoutEventJson,
+  type PlayerSubstitutionScoutEventJson,
+  type ScoutEventPlayer,
+  type ManualPhaseScoutEventJson,
+  type VolleyballPlayersPosition, 
+  type VolleyballPoints,
+  type ScoutInfoGeneral, 
+  type ScoutInfoSettings
+} from "lionn-common";
 
 export type ScoutStudio = {
   scout: Scout,

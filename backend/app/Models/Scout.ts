@@ -3,38 +3,12 @@ import { DateTime } from 'luxon'
 import { belongsTo, BelongsTo, hasMany, HasMany, column, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
 import Event from 'App/Models/Event'
 import Player from './Player'
-import type { ScoutEventPlayer } from 'lionn-common'
 import ScoringSystem from './ScoringSystem'
 import ScoutInfo from './ScoutInfo'
-import { VolleyballPhase, VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballPoints } from 'App/managers/scout/events/volleyball/common'
-import { LiberoSubstitutionScoutEventJson } from 'App/managers/scout/events/volleyball/LiberoSubstitutionScoutEvent'
+import type { VolleyballScoutStash } from 'lionn-common'
 
 export const SPORTS = ['volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
-
-export type VolleyballScoutStash = {
-  points?: VolleyballPoints
-  playersServePositions?: VolleyballPlayersPosition
-  playersReceivePositions?: VolleyballPlayersDynamicPosition
-  playersDefenseBreakPositions?: VolleyballPlayersPosition
-  playersDefenseSideOutPositions?: VolleyballPlayersPosition
-  currentSetSubstitutionsMade?: {
-    friends: {
-      playerIn: ScoutEventPlayer,
-      playerOut: ScoutEventPlayer
-    }[]
-    enemy: {
-      playerIn: ScoutEventPlayer,
-      playerOut: ScoutEventPlayer
-    }[]
-  }
-  currentSetOpenLiberoSubstitution?: LiberoSubstitutionScoutEventJson[],
-  currentSetTimeoutsCalled?: {
-    friends: number
-    enemy: number
-  }
-  phase?: VolleyballPhase
-}
 
 export default class Scout extends CamelCaseBaseModel {
   @column({ isPrimary: true })

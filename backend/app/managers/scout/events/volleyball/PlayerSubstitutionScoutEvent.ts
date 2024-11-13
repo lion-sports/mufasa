@@ -1,19 +1,8 @@
-import type { ScoutEventPlayer } from "lionn-common";
-import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
-import { VolleyballPoints, VolleyballScoutEventPosition } from "./common";
+import type { PlayerSubstitutionScoutExtraProperties, VolleyballPoints } from "lionn-common";
+import ScoutEvent from "../../ScoutEvent";
 import scoutsSocket from "../../scouts.socket";
 import { Context } from "App/managers/base.manager";
 import Scout from "App/Models/Scout";
-
-export type PlayerSubstitutionScoutExtraProperties = {
-  playerIsOpponent: boolean,
-  playerId: number,
-  player: ScoutEventPlayer,
-  position: VolleyballScoutEventPosition
-  playerIn: ScoutEventPlayer
-  playerIdIn: number
-}
-export type PlayerSubstitutionScoutEventJson = ScoutEventJson<'playerSubstitution', 'volleyball'> & PlayerSubstitutionScoutExtraProperties
 
 export default class PlayerSubstitutionScoutEvent extends ScoutEvent<PlayerSubstitutionScoutExtraProperties, 'playerSubstitution', VolleyballPoints> {
   public type = 'playerSubstitution' as const

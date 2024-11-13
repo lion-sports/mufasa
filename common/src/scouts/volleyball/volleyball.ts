@@ -1,4 +1,5 @@
 import { ScoutEventPlayer } from "../common"
+import { LiberoSubstitutionScoutEventJson } from "../events"
 
 export type VolleyballPhase = 'serve' | 'receive' | 'defenseBreak' | 'defenseSideOut'
 export type VolleyballScoutEventPosition = 1 | 2 | 3 | 4 | 5 | 6
@@ -68,4 +69,28 @@ export const FIRST_POINT: VolleyballPoints = {
     points: 0,
     sets: 0
   }
+}
+
+export type VolleyballScoutStash = {
+  points?: VolleyballPoints,
+  playersServePositions?: VolleyballPlayersPosition,
+  playersReceivePositions?: VolleyballPlayersDynamicPosition,
+  playersDefenseBreakPositions?: VolleyballPlayersPosition,
+  playersDefenseSideOutPositions?: VolleyballPlayersPosition,
+  currentSetSubstitutionsMade?: {
+    friends: {
+      playerIn: ScoutEventPlayer,
+      playerOut: ScoutEventPlayer
+    }[]
+    enemy: {
+      playerIn: ScoutEventPlayer,
+      playerOut: ScoutEventPlayer
+    }[]
+  },
+  currentSetOpenLiberoSubstitution?: LiberoSubstitutionScoutEventJson[],
+  currentSetTimeoutsCalled?: {
+    friends: number
+    enemy: number
+  },
+  phase?: VolleyballPhase
 }

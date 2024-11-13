@@ -3,6 +3,7 @@ import type { ScoutEventPlayer } from 'lionn-common'
 import { OPPOSITE_POSITIONS, ORDERED_POSITIONS, type BlockScoutEventResult, type ReceiveScoutEventResult, type RotationType, type ServeScoutEventResult, type SpikeScoutEventResult, type VolleyballPhase, type VolleyballPlayersPosition, type VolleyballScoutEventJson, type VolleyballScoutEventParameters, type VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
 import { get, writable } from 'svelte/store'
 import socketService from '$lib/services/common/socket.service';
+import ScoutEventsService from '@/lib/services/scouts/scoutEvents.service';
 
 const studio = writable<ScoutStudio | undefined>(undefined)
 export default studio
@@ -109,7 +110,8 @@ export async function restart() {
 export async function add(params: {
   event: VolleyballScoutEventParameters
 }) {
-  socketService.io?.emit(`teams:${params.event.teamId}:scout:add`, params.event)
+  let service = new ScoutEventsService({ fetch })
+  await service.add({ event: params.event })
 }
 
 export async function playerInPosition(params: {

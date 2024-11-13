@@ -99,6 +99,7 @@ Route.get('/scouts/:id/studio', 'ScoutsController.studio').middleware('auth:api'
 Route.get('/scouts/:id/getFirstSetStartingSix', 'ScoutsController.getFirstSetStartingSix').middleware('auth:api')
 Route.get('/scouts/:id/exportXlsx', 'ScoutsController.exportXlsx').middleware('auth:api')
 Route.post('/scouts/:id/importTeammates', 'ScoutsController.importTeammates').middleware('auth:api')
+Route.post('/scouts/:id/events/add', 'ScoutEventsController.add').middleware('auth:api')
 Route.resource('scouts', 'ScoutsController')
   .only(['index', 'store', 'update', 'show', 'destroy'])
   .middleware({

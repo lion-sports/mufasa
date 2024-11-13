@@ -1,20 +1,8 @@
-import type { ScoutEventPlayer } from "lionn-common";
-import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
-import { VolleyballPoints, VolleyballScoutEventPosition } from "./common";
+import ScoutEvent from "../../ScoutEvent";
 import { Context } from "App/managers/base.manager";
 import Scout from "App/Models/Scout";
 import scoutsSocket from "../../scouts.socket";
-import User from "App/Models/User";
-
-export type BlockScoutEventResult = 'handsOut' | 'point' | 'touch' | 'putBack'
-
-export type BlockScoutExtraProperties = {
-  playerId: number,
-  player: ScoutEventPlayer,
-  result: BlockScoutEventResult,
-  position: VolleyballScoutEventPosition
-}
-export type BlockScoutEventJson = ScoutEventJson<'block', 'volleyball'> & BlockScoutExtraProperties
+import type { BlockScoutExtraProperties, VolleyballPoints } from "lionn-common";
 
 export default class BlockScoutEvent extends ScoutEvent<BlockScoutExtraProperties, 'block', VolleyballPoints> {
   public type = 'block' as const

@@ -1,26 +1,15 @@
-import BlockScoutEvent, { BlockScoutEventJson } from "./BlockScoutEvent";
-import LiberoSubstitutionScoutEvent, { LiberoSubstitutionScoutEventJson } from "./LiberoSubstitutionScoutEvent";
-import ManualPhaseScoutEvent, { ManualPhaseScoutEventJson } from "./ManualPhaseScoutEvent";
-import PlayerInPositionScoutEvent, { PlayerInPositionScoutEventJson } from "./PlayerInPositionScoutEvent";
-import PlayerSubstitutionScoutEvent, { PlayerSubstitutionScoutEventJson } from "./PlayerSubstitutionScoutEvent";
-import PointScoredScoutEvent, { PointScoredScoutEventAddParameters, PointScoredScoutEventJson } from "./PointScoredScoutEvent";
-import ReceiveScoutEvent, { ReceiveScoutEventJson } from "./ReceiveScoutEvent";
-import ServeScoutEvent, { ServeScoutEventJson } from "./ServeScoutEvent";
-import SpikeScoutEvent, { SpikeScoutEventJson } from "./SpikeScoutEvent";
-import TeamRotationScoutEvent, { TeamRotationScoutEventAddParamters, TeamRotationScoutEventJson } from "./TeamRotationScoutEvent";
-import TimeoutScoutEvent, { TimeoutScoutEventJson } from "./TimeoutScoutEvent";
-
-export type VolleyballScoutEventJson = BlockScoutEventJson | LiberoSubstitutionScoutEventJson |
-  PlayerInPositionScoutEventJson | PointScoredScoutEventJson | ReceiveScoutEventJson | 
-  ServeScoutEventJson | SpikeScoutEventJson | TimeoutScoutEventJson | PlayerSubstitutionScoutEventJson |
-  TeamRotationScoutEventJson | ManualPhaseScoutEventJson
-
-export type VolleyballScoutEventJsonAddParameters = BlockScoutEventJson | LiberoSubstitutionScoutEventJson |
-  PlayerInPositionScoutEventJson | PointScoredScoutEventAddParameters | ReceiveScoutEventJson |
-  ServeScoutEventJson | SpikeScoutEventJson | TimeoutScoutEventJson | PlayerSubstitutionScoutEventJson |
-  TeamRotationScoutEventAddParamters | ManualPhaseScoutEventJson
-
-export type VolleyballScoutEventType = VolleyballScoutEventJson['type']
+import BlockScoutEvent from "./BlockScoutEvent";
+import LiberoSubstitutionScoutEvent from "./LiberoSubstitutionScoutEvent";
+import ManualPhaseScoutEvent from "./ManualPhaseScoutEvent";
+import PlayerInPositionScoutEvent from "./PlayerInPositionScoutEvent";
+import PlayerSubstitutionScoutEvent from "./PlayerSubstitutionScoutEvent";
+import PointScoredScoutEvent from "./PointScoredScoutEvent";
+import ReceiveScoutEvent from "./ReceiveScoutEvent";
+import ServeScoutEvent from "./ServeScoutEvent";
+import SpikeScoutEvent from "./SpikeScoutEvent";
+import TeamRotationScoutEvent from "./TeamRotationScoutEvent";
+import TimeoutScoutEvent from "./TimeoutScoutEvent";
+import type { VolleyballScoutEventType } from 'lionn-common'
 
 export const TYPE_TO_VOLLEYBALL_SCOUT_EVENT: {
   [Key in VolleyballScoutEventType]: typeof BlockScoutEvent |

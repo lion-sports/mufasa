@@ -1,10 +1,5 @@
-import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
-import { VolleyballPhase, VolleyballPoints } from "./common";
-
-export type ManualPhaseScoutExtraProperties = {
-  phase: VolleyballPhase
-}
-export type ManualPhaseScoutEventJson = ScoutEventJson<'manualPhase', 'volleyball'> & ManualPhaseScoutExtraProperties
+import ScoutEvent from "../../ScoutEvent";
+import type { ManualPhaseScoutExtraProperties, VolleyballPoints, VolleyballPhase } from 'lionn-common'
 
 export default class ManualPhaseScoutEvent extends ScoutEvent<ManualPhaseScoutExtraProperties, 'manualPhase', VolleyballPoints> {
   public type = 'manualPhase' as const

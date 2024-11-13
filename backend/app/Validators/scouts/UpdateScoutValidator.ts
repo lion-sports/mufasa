@@ -1,7 +1,7 @@
 import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { SPORTS } from 'App/Models/Scout'
-import { FRIENDS_FIELD_SIDES, POSSIBLE_AUTO_PAHSE_EVENTS, POSSIBLE_AUTO_POINT_ENEMY_EVENTS, POSSIBLE_AUTO_POINT_FRIENDS_EVENTS } from 'App/Models/ScoutInfo'
+import { FRIENDS_FIELD_SIDES, POSSIBLE_AUTO_PAHSE_EVENTS, POSSIBLE_AUTO_POINT_ENEMY_EVENTS, POSSIBLE_AUTO_POINT_FRIENDS_EVENTS } from 'lionn-common'
 
 export default class UpdateScoutValidator {
   constructor(protected ctx?: HttpContextContract) { }

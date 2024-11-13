@@ -1,17 +1,8 @@
-import { ScoringSystemConfig } from "App/Models/ScoringSystem";
-import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
-import { VolleyballPoints } from "./common";
+import ScoutEvent from "../../ScoutEvent";
 import { Context, withTransaction } from "App/managers/base.manager";
 import Scout from "App/Models/Scout";
 import scoutsSocket from "../../scouts.socket";
-import { incrementScore } from "lionn-common";
-
-export type PointScoredScoutExtraProperties = {
-  opponent: boolean,
-  newPoints: VolleyballPoints
-}
-export type PointScoredScoutEventJson = ScoutEventJson<'pointScored', 'volleyball'> & PointScoredScoutExtraProperties
-export type PointScoredScoutEventAddParameters = Omit<PointScoredScoutEventJson, 'newPoints'>
+import { incrementScore, type PointScoredScoutExtraProperties, type VolleyballPoints } from "lionn-common";
 
 export default class PointScoredScoutEvent extends ScoutEvent<
   {

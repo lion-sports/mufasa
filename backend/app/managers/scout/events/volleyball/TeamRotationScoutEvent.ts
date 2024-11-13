@@ -1,21 +1,14 @@
 import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
-import { VolleyballPoints, VolleyballPlayersPosition } from "./common";
 import Scout from "App/Models/Scout";
 import User from "App/Models/User";
 import scoutsSocket from "../../scouts.socket";
-import { rotate } from "lionn-common";
-
-export type TeamRotationScoutExtraProperties = {
-  opponent: boolean,
-  rotationType: RotationType
-  newPositions: VolleyballPlayersPosition
-}
-export type TeamRotationScoutEventJson = ScoutEventJson<'teamRotation', 'volleyball'> & TeamRotationScoutExtraProperties
-export type TeamRotationScoutEventAddParamters = Omit<TeamRotationScoutEventJson, 'newPositions'> & {
-  fromPositions: VolleyballPlayersPosition
-}
-
-export type RotationType = 'backward' | 'forward'
+import { 
+  rotate,
+  type VolleyballPoints, 
+  type VolleyballPlayersPosition,
+  type TeamRotationScoutExtraProperties,
+  type RotationType
+} from "lionn-common";
 
 export default class TeamRotationScoutEvent extends ScoutEvent<
   {

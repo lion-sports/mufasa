@@ -13,7 +13,7 @@ import Convocation from "App/Models/Convocation";
 import Shirt from "App/Models/Shirt";
 import Mongo from "App/Services/Mongo";
 import { SCOUT_EVENT_COLLECTION_NAME } from "./scout/ScoutEvent";
-import { VolleyballScoutEventJson } from "./scout/events/volleyball/VolleyballScoutEvent";
+import type { VolleyballScoutEventJson } from 'lionn-common'
 
 export default class PlayersManager {
   @withTransaction

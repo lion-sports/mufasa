@@ -1,8 +1,7 @@
 import { Role, ScoutEventPlayer } from "../common"
+import { RotationType } from "../events"
 import { VolleyballPlayersDynamicPosition, VolleyballPlayersPosition, VolleyballScoutEventAnchor, VolleyballScoutEventPosition } from "./volleyball"
 import lodash from 'lodash'
-
-export type RotationType = 'backward' | 'forward'
 
 export const SETTER_POSITION_TO_ROLES_POSITIONS: {
   [Key in VolleyballScoutEventPosition]?: {

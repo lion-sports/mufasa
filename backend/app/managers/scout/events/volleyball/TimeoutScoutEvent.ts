@@ -1,10 +1,5 @@
-import ScoutEvent, { ScoutEventJson } from "../../ScoutEvent";
-import { VolleyballPoints } from "./common";
-
-export type TimeoutScoutExtraProperties = {
-  opponent: boolean
-}
-export type TimeoutScoutEventJson = ScoutEventJson<'timeout', 'volleyball'> & TimeoutScoutExtraProperties
+import ScoutEvent from "../../ScoutEvent";
+import type { TimeoutScoutExtraProperties, VolleyballPoints } from 'lionn-common'
 
 export default class TimeoutScoutEvent extends ScoutEvent<
   TimeoutScoutExtraProperties, 
