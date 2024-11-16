@@ -1,4 +1,4 @@
-import { ServeScoutEventParameters } from "dist/src/main"
+import { ServeScoutEventParameters } from "src/main"
 import { ScoringSystemConfig } from "../common"
 import { BlockScoutEventParameters, PlayerSubstitutionScoutEventParameters, PointScoredScoutEventParameters, ReceiveScoutEventParameters, SpikeScoutEventParameters, TeamRotationScoutEventParameters, VolleyballScoutEventParameters } from "../events"
 import { ScoutInfoGeneral, ScoutInfoSettings } from "../info"
