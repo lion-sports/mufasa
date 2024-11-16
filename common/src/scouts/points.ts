@@ -1,13 +1,13 @@
 import { ScoringSystemConfig } from "./common"
 import { VolleyballPoints } from "./volleyball/volleyball"
 
-export async function incrementScore(params: {
+export function incrementScore(params: {
   data: {
     currentScore: VolleyballPoints,
     opponent: boolean,
     scoringSystemConfig: ScoringSystemConfig
   }
-}): Promise<VolleyballPoints> {
+}): VolleyballPoints {
   let newScore = params.data.currentScore
 
   if (params.data.opponent) newScore.enemy.points += 1

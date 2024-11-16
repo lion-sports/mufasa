@@ -84,7 +84,6 @@ export default class ReceiveScoutEvent extends ScoutEvent<ReceiveScoutExtraPrope
           data: {
             type: 'manualPhase',
             phase: 'defenseSideOut',
-            opponent: false,
             date: new Date(),
             scoutId: this.scoutId,
             sport: 'volleyball',
@@ -105,7 +104,6 @@ export default class ReceiveScoutEvent extends ScoutEvent<ReceiveScoutExtraPrope
           data: {
             type: 'manualPhase',
             phase: 'defenseBreak',
-            opponent: false,
             date: new Date(),
             scoutId: this.scoutId,
             sport: 'volleyball',

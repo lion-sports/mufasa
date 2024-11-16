@@ -90,7 +90,7 @@ export default class PointScoredScoutEvent extends ScoutEvent<
             sport: 'volleyball',
             teamId: this.teamId,
             createdByUserId: this.createdByUserId,
-            points: this.points
+            points: this.event.newPoints
           },
         },
         context: params.context
@@ -102,13 +102,12 @@ export default class PointScoredScoutEvent extends ScoutEvent<
           data: {
             type: 'manualPhase',
             phase: 'serve',
-            opponent: false,
             date: new Date(),
             scoutId: this.scoutId,
             sport: 'volleyball',
             teamId: this.teamId,
             createdByUserId: this.createdByUserId,
-            points: this.points
+            points: this.event.newPoints
           },
         },
         context: params.context
@@ -136,7 +135,7 @@ export default class PointScoredScoutEvent extends ScoutEvent<
             sport: 'volleyball',
             teamId: this.teamId,
             createdByUserId: this.createdByUserId,
-            points: this.points
+            points: this.event.newPoints
           },
         },
         context: params.context
@@ -148,13 +147,12 @@ export default class PointScoredScoutEvent extends ScoutEvent<
           data: {
             type: 'manualPhase',
             phase: 'receive',
-            opponent: false,
             date: new Date(),
             scoutId: this.scoutId,
             sport: 'volleyball',
             teamId: this.teamId,
             createdByUserId: this.createdByUserId,
-            points: this.points
+            points: this.event.newPoints
           },
         },
         context: params.context
@@ -168,13 +166,12 @@ export default class PointScoredScoutEvent extends ScoutEvent<
           data: {
             type: 'manualPhase',
             phase: 'receive',
-            opponent: false,
             date: new Date(),
             scoutId: this.scoutId,
             sport: 'volleyball',
             teamId: this.teamId,
             createdByUserId: this.createdByUserId,
-            points: this.points
+            points: this.event.newPoints
           },
         },
         context: params.context
@@ -186,13 +183,12 @@ export default class PointScoredScoutEvent extends ScoutEvent<
           data: {
             type: 'manualPhase',
             phase: 'serve',
-            opponent: false,
             date: new Date(),
             scoutId: this.scoutId,
             sport: 'volleyball',
             teamId: this.teamId,
             createdByUserId: this.createdByUserId,
-            points: this.points
+            points: this.event.newPoints
           },
         },
         context: params.context
