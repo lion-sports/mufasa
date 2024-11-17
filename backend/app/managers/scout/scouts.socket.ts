@@ -188,7 +188,8 @@ class ScoutSocket {
   public async handleAdd(params: {
     data: {
       scoutEvent: VolleyballScoutEventParameters
-      scout: Scout
+      scout: Scout,
+      avoidRecalculateStash?: boolean
     },
     context?: Context
   }) {
@@ -217,11 +218,13 @@ class ScoutSocket {
       context: { user, trx }
     })
 
-    let scoutManager = new ScoutsManager()
-    await scoutManager.recalculateStash({
-      data: { id: params.data.scout.id },
-      context: { user, trx }
-    })
+    if(!params.data.avoidRecalculateStash) {
+      let scoutManager = new ScoutsManager()
+      await scoutManager.recalculateStash({
+        data: { id: params.data.scout.id },
+        context: { user, trx }
+      })
+    }
   }
 
   private async handleUndo(params: {

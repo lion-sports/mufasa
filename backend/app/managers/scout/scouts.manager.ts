@@ -187,8 +187,13 @@ export default class ScoutsManager {
       .preload('convocations', b => b.preload('teammate', tb => tb.preload('shirts')))
       .firstOrFail()
 
+    let generalScoutInfo = scoutInfo?.general || { 
+      friendsFieldSide: 'left'
+    }
+    if (!generalScoutInfo.friendsFieldSide) generalScoutInfo.friendsFieldSide = 'left'
+
     await scout.related('scoutInfo').create({
-      general: scoutInfo?.general || {},
+      general: generalScoutInfo,
       settings: scoutInfo?.settings || {}
     }, {
       client: trx

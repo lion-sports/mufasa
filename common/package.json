@@ -15,8 +15,8 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/lionn-common.cjs",
-  "module": "./dist/lionn-common.cjs",
+  "main": "./dist/lionn-common.umd.cjs",
+  "module": "./dist/lionn-common.js",
   "types": "./dist/src/main.d.ts",
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",

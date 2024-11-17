@@ -1,6 +1,6 @@
 import { ServeScoutEventParameters } from "src/main"
 import { ScoringSystemConfig } from "../common"
-import { BlockScoutEventParameters, PlayerSubstitutionScoutEventParameters, PointScoredScoutEventParameters, ReceiveScoutEventParameters, SpikeScoutEventParameters, TeamRotationScoutEventParameters, VolleyballScoutEventParameters } from "../events"
+import { BlockScoutEventParameters, LiberoSubstitutionScoutEventParameters, PlayerInPositionScoutEventParameters, PlayerSubstitutionScoutEventParameters, PointScoredScoutEventParameters, ReceiveScoutEventParameters, SpikeScoutEventParameters, TeamRotationScoutEventParameters, VolleyballScoutEventParameters } from "../events"
 import { ScoutInfoGeneral, ScoutInfoSettings } from "../info"
 import { incrementScore } from "../points"
 import { FIRST_POINT, VolleyballScoutEventPosition, VolleyballScoutStash } from "./volleyball"
@@ -74,10 +74,104 @@ export function getNextAutomatedEvents(params: {
     })
     events = [...playerSubstitutionEventResults.events]
     params.context = playerSubstitutionEventResults.context
+  } else if (params.event.type == 'liberoSubstitution') {
+    let playerSubstitutionEventResults = handleLiberoSubstitutionEvent({
+      event: params.event,
+      context: params.context
+    })
+    events = [...playerSubstitutionEventResults.events]
+    params.context = playerSubstitutionEventResults.context
+  } else if(params.event.type == 'playerInPosition') {
+    let playerSubstitutionEventResults = handlePlayerInPositionEvent({
+      event: params.event,
+      context: params.context
+    })
+    events = [...playerSubstitutionEventResults.events]
+    params.context = playerSubstitutionEventResults.context
   }
 
   return {
     events,
+    context: params.context
+  }
+}
+
+function handleLiberoSubstitutionEvent(params: {
+  event: LiberoSubstitutionScoutEventParameters
+  context: ScoutContext
+}): {
+  events: VolleyballScoutEventParameters[],
+  context: ScoutContext
+} {
+  let currentPlayerPosition: VolleyballScoutEventPosition | undefined = undefined
+
+  if (params.event.player.isOpponent && !!params.context.stash?.playersServePositions?.enemy) {
+    for (const [key, value] of Object.entries(params.context.stash?.playersServePositions.enemy)) {
+      if (
+        (params.event.inOrOut == 'in' && value.player.id == params.event.playerId) ||
+        (params.event.inOrOut == 'out' && value.player.id == params.event.liberoId)
+      ) {
+        currentPlayerPosition = key as any as VolleyballScoutEventPosition
+        break
+      }
+    }
+  } else if (!!params.context.stash?.playersServePositions?.friends) {
+    for (const [key, value] of Object.entries(params.context.stash?.playersServePositions.friends)) {
+      if (
+        (params.event.inOrOut == 'in' && value.player.id == params.event.playerId) ||
+        (params.event.inOrOut == 'out' && value.player.id == params.event.liberoId)
+      ) {
+        currentPlayerPosition = key as any as VolleyballScoutEventPosition
+        break
+      }
+    }
+  }
+
+  if (currentPlayerPosition !== undefined && !!params.context.stash?.playersServePositions) {
+    params.context.stash.playersServePositions[params.event.player.isOpponent ? 'enemy' : 'friends'][currentPlayerPosition] = {
+      player: params.event.inOrOut == 'in' ? params.event.libero : params.event.player
+    }
+
+    let playersPositions = getPlayersPositions({
+      positions: params.context.stash.playersServePositions
+    })
+
+    params.context.stash.playersDefenseBreakPositions = playersPositions.playersDefenseBreakPositions
+    params.context.stash.playersDefenseSideOutPositions = playersPositions.playersDefenseSideoutPositions
+    params.context.stash.playersReceivePositions = playersPositions.playersReceivePositions
+    params.context.stash.playersServePositions = playersPositions.playersServePositions
+  }
+
+  return {
+    events: [],
+    context: params.context
+  }
+}
+
+function handlePlayerInPositionEvent(params: {
+  event: PlayerInPositionScoutEventParameters
+  context: ScoutContext
+}): {
+  events: VolleyballScoutEventParameters[],
+  context: ScoutContext
+} {
+  if (!!params.context.stash?.playersServePositions) {
+    params.context.stash.playersServePositions[params.event.player.isOpponent ? 'enemy' : 'friends'][params.event.position] = {
+      player: params.event.player
+    }
+
+    let playersPositions = getPlayersPositions({
+      positions: params.context.stash.playersServePositions
+    })
+
+    params.context.stash.playersDefenseBreakPositions = playersPositions.playersDefenseBreakPositions
+    params.context.stash.playersDefenseSideOutPositions = playersPositions.playersDefenseSideoutPositions
+    params.context.stash.playersReceivePositions = playersPositions.playersReceivePositions
+    params.context.stash.playersServePositions = playersPositions.playersServePositions
+  }
+
+  return {
+    events: [],
     context: params.context
   }
 }
@@ -111,7 +205,17 @@ function handlePlayerSubstitutionEvent(params: {
     params.context.stash.playersServePositions[params.event.player.isOpponent ? 'enemy' : 'friends'][currentPlayerPosition] = {
       player: params.event.playerIn
     }
+
+    let playersPositions = getPlayersPositions({
+      positions: params.context.stash.playersServePositions
+    })
+  
+    params.context.stash.playersDefenseBreakPositions = playersPositions.playersDefenseBreakPositions
+    params.context.stash.playersDefenseSideOutPositions = playersPositions.playersDefenseSideoutPositions
+    params.context.stash.playersReceivePositions = playersPositions.playersReceivePositions
+    params.context.stash.playersServePositions = playersPositions.playersServePositions
   }
+
 
   return {
     events: [],

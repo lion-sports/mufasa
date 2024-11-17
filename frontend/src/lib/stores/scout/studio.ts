@@ -1,9 +1,9 @@
 import ScoutService, { type Scout, type ScoutAnalysis, type ScoutStudio, type VolleyballRole } from '$lib/services/scouts/scouts.service'
-import type { ScoutEventPlayer } from 'lionn-common'
+import { getNextAutomatedEvents, type ScoutEventPlayer } from 'lionn-common'
 import { OPPOSITE_POSITIONS, ORDERED_POSITIONS, type BlockScoutEventResult, type ReceiveScoutEventResult, type RotationType, type ServeScoutEventResult, type SpikeScoutEventResult, type VolleyballPhase, type VolleyballPlayersPosition, type VolleyballScoutEventJson, type VolleyballScoutEventParameters, type VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
 import { get, writable } from 'svelte/store'
 import socketService from '$lib/services/common/socket.service';
-import ScoutEventsService from '@/lib/services/scouts/scoutEvents.service';
+import ScoutEventsService, { eventsPendingNumber } from '@/lib/services/scouts/scoutEvents.service';
 
 const studio = writable<ScoutStudio | undefined>(undefined)
 export default studio
@@ -21,6 +21,8 @@ export async function reload() {
 const handleStashReload = (data: {
   scout: Scout
 }) => {
+  if (eventsPendingNumber > 1) return
+
   studio.update(v => {
     if (!!v) {
       v.scout.stash = data.scout.stash
@@ -110,8 +112,25 @@ export async function restart() {
 export async function add(params: {
   event: VolleyballScoutEventParameters
 }) {
+  let currentStudio = get(studio)
+  if (!currentStudio) throw new Error('cannot call without a studio')
+
+  let { context } = getNextAutomatedEvents({
+    event: params.event,
+    context: {
+      scoringSystem: currentStudio.scout.scoringSystem.config,
+      scoutInfo: currentStudio.scout.scoutInfo,
+      stash: currentStudio.scout.stash
+    }
+  })
+
+  studio.update((ss) => {
+    if(!!ss) ss.scout.stash = context.stash
+    return ss
+  })
+
   let service = new ScoutEventsService({ fetch })
-  await service.add({ event: params.event })
+  service.enqueueAdd({ event: params.event })
 }
 
 export async function playerInPosition(params: {

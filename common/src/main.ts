@@ -22,6 +22,9 @@ export {
   POSSIBLE_AUTO_POINT_ENEMY_EVENTS,
   POSSIBLE_AUTO_PAHSE_EVENTS
 } from './scouts/info'
+export {
+  getNextAutomatedEvents
+} from './scouts/volleyball/automations'
 
 export type { 
   ScoringSystemConfig,

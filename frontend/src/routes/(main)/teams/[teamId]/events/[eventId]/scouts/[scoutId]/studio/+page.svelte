@@ -10,7 +10,7 @@
 	import StudioField from '@/lib/components/scouts/studio/StudioField.svelte'
 	import StudioStartingSixSetter from '@/lib/components/scouts/studio/StudioStartingSixSetter.svelte'
 	import type { VolleyballScoutEventPosition } from '@/lib/services/scouts/volleyball'
-  import type { ScoutEventPlayer } from 'lionn-common'
+  import type { ScoutEventPlayer, VolleyballPlayersPosition } from 'lionn-common'
 	import StudioScoreBoard from '@/lib/components/scouts/studio/StudioScoreBoard.svelte'
   import { PaneGroup, Pane, PaneResizer } from "paneforge";
 	import StudioPhaseSwitch from '@/lib/components/scouts/studio/StudioPhaseSwitch.svelte'
@@ -55,6 +55,16 @@
     insertStartingSixDialog = true
     insertStartingSixSelectedTab = tab
     reloadFirstSetStartingSix = true
+
+    startingSixPositions = {
+      friends: {},
+      enemy: {}
+    }
+  }
+
+  let startingSixPositions: VolleyballPlayersPosition = {
+    friends: {},
+    enemy: {}
   }
 </script>
 
@@ -352,7 +362,7 @@
       bind:selectedTab={insertStartingSixSelectedTab}
       bind:reloadFirstSetStartingSix
       players={$studio?.scout.players}
-      playersPosition={$studio?.scout.stash?.playersServePositions}
+      playersPosition={startingSixPositions}
       on:change={handleStartingSixSet}
     ></StudioStartingSixSetter>
   </StandardDialog>

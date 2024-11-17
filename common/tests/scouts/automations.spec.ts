@@ -14,6 +14,28 @@ describe('automations', () => {
     isOpponent: false
   }
 
+  let otherFriendScoutEventPlayer: ScoutEventPlayer = {
+    id: 3,
+    scoutId: 1,
+    aliases: ['Alias 2'],
+    role: 'center',
+    shirtNumber: 11,
+    shirtPrimaryColor: undefined,
+    shirtSecondaryColor: undefined,
+    isOpponent: false
+  }
+
+  let friendLiberoScoutEventPlayer: ScoutEventPlayer = {
+    id: 3,
+    scoutId: 1,
+    aliases: ['Alias 2'],
+    role: 'libero',
+    shirtNumber: 11,
+    shirtPrimaryColor: undefined,
+    shirtSecondaryColor: undefined,
+    isOpponent: false
+  }
+
   let enemyScoutEventPlayer: ScoutEventPlayer = {
     id: 2,
     scoutId: 1,
@@ -248,6 +270,83 @@ describe('automations', () => {
       }
     })
 
-    assert.equal(automatedEvents.context.stash?.playersServePositions?.friends[6]?.player.id, 1, 'should have rotated friends players')
+    assert.equal(automatedEvents.context.stash?.playersServePositions?.friends[6]?.player.id, friendScoutEventPlayer.id, 'should have rotated friends players')
+  })
+
+  test('player substitution', async () => {
+    let automatedEvents = getNextAutomatedEvents({
+      event: {
+        type: 'playerSubstitution',
+        date: new Date(),
+        scoutId: scoutId,
+        sport: 'volleyball',
+        teamId: teamId,
+        createdByUserId,
+        points: FIRST_POINT,
+        playerIsOpponent: friendScoutEventPlayer.isOpponent,
+        playerId: friendScoutEventPlayer.id,
+        player: friendScoutEventPlayer,
+        position: 1,
+        playerIn: otherFriendScoutEventPlayer,
+        playerIdIn: otherFriendScoutEventPlayer.id
+      },
+      context: {
+        scoutInfo,
+        scoringSystem: scoringSystemConfig,
+        stash: {
+          points: FIRST_POINT,
+          phase: 'defenseBreak',
+          playersServePositions: {
+            enemy: {
+              '1': { player: enemyScoutEventPlayer }
+            },
+            friends: {
+              '1': { player: friendScoutEventPlayer }
+            }
+          }
+        }
+      }
+    })
+
+    assert.equal(automatedEvents.context.stash?.playersServePositions?.friends[1]?.player.id, otherFriendScoutEventPlayer.id, 'should have substituted friends players')
+  })
+
+  test('libero substitution', async () => {
+    let automatedEvents = getNextAutomatedEvents({
+      event: {
+        type: 'liberoSubstitution',
+        date: new Date(),
+        scoutId: scoutId,
+        sport: 'volleyball',
+        teamId: teamId,
+        createdByUserId,
+        points: FIRST_POINT,
+        playerId: friendScoutEventPlayer.id,
+        player: friendScoutEventPlayer,
+        position: 1,
+        libero: friendLiberoScoutEventPlayer,
+        liberoId: friendLiberoScoutEventPlayer.id,
+        opponent: friendScoutEventPlayer.isOpponent,
+        inOrOut: 'in'
+      },
+      context: {
+        scoutInfo,
+        scoringSystem: scoringSystemConfig,
+        stash: {
+          points: FIRST_POINT,
+          phase: 'defenseBreak',
+          playersServePositions: {
+            enemy: {
+              '1': { player: enemyScoutEventPlayer }
+            },
+            friends: {
+              '1': { player: friendScoutEventPlayer }
+            }
+          }
+        }
+      }
+    })
+
+    assert.equal(automatedEvents.context.stash?.playersServePositions?.friends[1]?.player.id, friendLiberoScoutEventPlayer.id, 'should have substituted friends libero players')
   })
 })
