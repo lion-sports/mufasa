@@ -7,9 +7,11 @@ WORKDIR /home/node/app
 USER node
 
 FROM base AS dependencies
-COPY --chown=node:node ./package*.json ./
+COPY --chown=node:node ./common ../common
+RUN cd ../common; npm ci; npm run build; cd ../app
+COPY --chown=node:node ./frontend/package*.json ./
 RUN npm ci
-COPY --chown=node:node . .
+COPY --chown=node:node ./frontend .
 
 RUN chmod +x docker-entrypoint.sh
 
