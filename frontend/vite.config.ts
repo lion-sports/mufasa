@@ -6,5 +6,12 @@ export default defineConfig({
 	plugins: [sveltekit() as any],
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']
-	}
+	},
+  build: {
+    rollupOptions: {
+      external: [
+        'lionn-common'
+      ]
+    }
+  }
 })
