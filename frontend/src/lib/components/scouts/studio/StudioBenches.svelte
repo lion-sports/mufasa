@@ -20,6 +20,7 @@
 
     if(!!scout.stash?.playersServePositions.enemy) {
       for(const [position, value] of Object.entries(scout.stash?.playersServePositions.enemy)) {
+        if(!value?.player) continue
         insidePlayers = [
           ...insidePlayers,
           value.player
@@ -29,6 +30,7 @@
 
     if(!!scout.stash?.playersServePositions.friends) {
       for(const [position, value] of Object.entries(scout.stash?.playersServePositions.friends)) {
+        if(!value?.player) continue
         insidePlayers = [
           ...insidePlayers,
           value.player

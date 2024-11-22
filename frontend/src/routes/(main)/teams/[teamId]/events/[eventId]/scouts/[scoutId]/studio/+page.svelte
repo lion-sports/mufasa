@@ -296,6 +296,7 @@
               <Tabs.Content value="analysis" class="w-full overflow-auto py-2 px-4">
                 <StudioAnalysis
                   analysis={$studio?.analysis}
+                  dashboard={data.dashboard}
                 ></StudioAnalysis>
               </Tabs.Content>
             </Tabs.Root>

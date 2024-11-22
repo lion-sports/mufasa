@@ -19,7 +19,7 @@
       positionToLoop = studio.scout.stash.playersServePositions.enemy
 
     for(const [pos, v] of Object.entries(positionToLoop)) {
-      if(v.player.id == studio.selectedPlayer.id) selectedPlayerFieldPosition = pos as any as VolleyballScoutEventPosition
+      if(!!v?.player && v.player.id == studio.selectedPlayer.id) selectedPlayerFieldPosition = pos as any as VolleyballScoutEventPosition
     }
   }
 
