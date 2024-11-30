@@ -1,5 +1,6 @@
 import { ScoringSystemConfig } from "./common"
 import { VolleyballPoints } from "./volleyball/volleyball"
+import lodash from 'lodash'
 
 export function incrementScore(params: {
   data: {
@@ -8,7 +9,7 @@ export function incrementScore(params: {
     scoringSystemConfig: ScoringSystemConfig
   }
 }): VolleyballPoints {
-  let newScore = params.data.currentScore
+  let newScore = lodash.cloneDeep(params.data.currentScore)
 
   if (params.data.opponent) newScore.enemy.points += 1
   else newScore.friends.points += 1

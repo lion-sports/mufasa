@@ -1,6 +1,6 @@
 import { ServeScoutEventParameters } from "src/main"
 import { ScoringSystemConfig } from "../common"
-import { BlockScoutEventParameters, LiberoSubstitutionScoutEventParameters, PlayerInPositionScoutEventParameters, PlayerSubstitutionScoutEventParameters, PointScoredScoutEventParameters, ReceiveScoutEventParameters, SpikeScoutEventParameters, TeamRotationScoutEventParameters, VolleyballScoutEventParameters } from "../events"
+import { BlockScoutEventParameters, LiberoSubstitutionScoutEventParameters, ManualPhaseScoutEventParameters, PlayerInPositionScoutEventParameters, PlayerSubstitutionScoutEventParameters, PointScoredScoutEventParameters, ReceiveScoutEventParameters, SpikeScoutEventParameters, TeamRotationScoutEventParameters, VolleyballScoutEventParameters } from "../events"
 import { ScoutInfoGeneral, ScoutInfoSettings } from "../info"
 import { incrementScore } from "../points"
 import { FIRST_POINT, VolleyballScoutEventPosition, VolleyballScoutStash } from "./volleyball"
@@ -88,6 +88,13 @@ export function getNextAutomatedEvents(params: {
     })
     events = [...playerSubstitutionEventResults.events]
     params.context = playerSubstitutionEventResults.context
+  } else if(params.event.type == 'manualPhase') {
+    let manualPhaseEventResults = handleManualPhaseEvent({
+      event: params.event,
+      context: params.context
+    })
+    events = [...manualPhaseEventResults.events]
+    params.context = manualPhaseEventResults.context
   }
 
   return {
@@ -169,6 +176,22 @@ function handlePlayerInPositionEvent(params: {
     params.context.stash.playersReceivePositions = playersPositions.playersReceivePositions
     params.context.stash.playersServePositions = playersPositions.playersServePositions
   }
+
+  return {
+    events: [],
+    context: params.context
+  }
+}
+
+function handleManualPhaseEvent(params: {
+  event: ManualPhaseScoutEventParameters
+  context: ScoutContext
+}): {
+  events: VolleyballScoutEventParameters[],
+  context: ScoutContext
+} {
+  if (!!params.context.stash)
+    params.context.stash.phase = params.event.phase
 
   return {
     events: [],

@@ -1,4 +1,4 @@
-import type { ScoutEventPlayer, ReceiveScoutEventResult, ReceiveScoutExtraProperties } from "lionn-common";
+import type { ReceiveScoutExtraProperties } from "lionn-common";
 import ScoutEvent from "../../ScoutEvent";
 import type { VolleyballPoints } from "lionn-common";
 import Scout from "App/Models/Scout";
@@ -53,67 +53,5 @@ export default class ReceiveScoutEvent extends ScoutEvent<ReceiveScoutExtraPrope
       },
       context: params.context
     })
-
-    if (
-      this.event.result == 'x' &&
-      params.data.scout.scoutInfo.settings?.automations?.autoPoint?.enemy?.includes('receiveError')
-    ) {
-      await scoutsSocket.handleEvent({
-        data: {
-          event: 'scout:add',
-          data: {
-            type: 'pointScored',
-            opponent: !this.event.player.isOpponent,
-            date: new Date(),
-            scoutId: this.scoutId,
-            sport: 'volleyball',
-            teamId: this.teamId,
-            createdByUserId: this.createdByUserId,
-            points: this.points
-          },
-        },
-        context: params.context
-      })
-    } else if (
-      !this.event.player.isOpponent &&
-      params.data.scout.scoutInfo.settings?.automations?.autoPhase?.friends?.includes('receive')
-    ) {
-      await scoutsSocket.handleEvent({
-        data: {
-          event: 'scout:add',
-          data: {
-            type: 'manualPhase',
-            phase: 'defenseSideOut',
-            date: new Date(),
-            scoutId: this.scoutId,
-            sport: 'volleyball',
-            teamId: this.teamId,
-            createdByUserId: this.createdByUserId,
-            points: this.points
-          },
-        },
-        context: params.context
-      })
-    } else if (
-      this.event.player.isOpponent &&
-      params.data.scout.scoutInfo.settings?.automations?.autoPhase?.enemy?.includes('receive')
-    ) {
-      await scoutsSocket.handleEvent({
-        data: {
-          event: 'scout:add',
-          data: {
-            type: 'manualPhase',
-            phase: 'defenseBreak',
-            date: new Date(),
-            scoutId: this.scoutId,
-            sport: 'volleyball',
-            teamId: this.teamId,
-            createdByUserId: this.createdByUserId,
-            points: this.points
-          },
-        },
-        context: params.context
-      })
-    }
   }
 }

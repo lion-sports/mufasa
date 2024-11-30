@@ -7,7 +7,7 @@ import Ws from "App/Services/Ws"
 import { Context, withTransaction, withUser } from "../base.manager"
 import PlayersManager from "../players.manager"
 import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database"
-import { FIRST_POINT, type VolleyballScoutEventParameters } from 'lionn-common'
+import { FIRST_POINT, getNextAutomatedEvents, type VolleyballScoutEventParameters } from 'lionn-common'
 
 export type ScoutSocketEventMapping = {
   'scout:add': VolleyballScoutEventParameters,
@@ -154,6 +154,7 @@ class ScoutSocket {
       let scout = await Scout.query({ client: trx })
         .preload('event')
         .preload('scoutInfo')
+        .preload('scoringSystem')
         .where('id', data.scoutId)
         .firstOrFail()
 
@@ -188,8 +189,9 @@ class ScoutSocket {
   public async handleAdd(params: {
     data: {
       scoutEvent: VolleyballScoutEventParameters
-      scout: Scout,
+      scout: Scout
       avoidRecalculateStash?: boolean
+      avoidAutomations?: boolean
     },
     context?: Context
   }) {
@@ -217,6 +219,32 @@ class ScoutSocket {
       },
       context: { user, trx }
     })
+
+    if (!params.data.avoidAutomations) {
+      let { events: automatedEvents } = getNextAutomatedEvents({
+        event: params.data.scoutEvent,
+        context: {
+          scoutInfo: params.data.scout.scoutInfo,
+          scoringSystem: params.data.scout.scoringSystem.config,
+          stash: params.data.scout.stash
+        }
+      })
+  
+      if(!!automatedEvents && automatedEvents.length > 0) {
+        for(let i = 0; i < automatedEvents.length; i += 1) {
+          let automatedEvent = automatedEvents[i]
+          await this.handleAdd({
+            data: {
+              scoutEvent: automatedEvent,
+              scout: params.data.scout,
+              avoidRecalculateStash: true,
+              avoidAutomations: true
+            },
+            context: { user, trx }
+          })
+        }
+      }
+    }
 
     if(!params.data.avoidRecalculateStash) {
       let scoutManager = new ScoutsManager()

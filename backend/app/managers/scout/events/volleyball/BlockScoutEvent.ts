@@ -52,48 +52,5 @@ export default class BlockScoutEvent extends ScoutEvent<BlockScoutExtraPropertie
       },
       context: params.context
     })
-
-    if(
-      this.event.result == 'handsOut' &&
-      params.data.scout.scoutInfo.settings?.automations?.autoPoint?.enemy?.includes('blockHandsOut')
-    ) {
-      await scoutsSocket.handleEvent({
-        data: {
-          event: 'scout:add',
-          data: {
-            type: 'pointScored',
-            opponent: !this.event.player.isOpponent,
-            date: new Date(),
-            scoutId: this.scoutId,
-            sport: 'volleyball',
-            teamId: this.teamId,
-            createdByUserId: this.createdByUserId,
-            points: this.points
-          },
-        },
-        context: params.context
-      })
-    } else if (
-      this.event.result == 'point' &&
-      params.data.scout.scoutInfo.settings?.automations?.autoPoint?.friends?.includes('blockPoint')
-    ) {
-      await scoutsSocket.handleEvent({
-        data: {
-          event: 'scout:add',
-          data: {
-            type: 'pointScored',
-            opponent: this.event.player.isOpponent,
-            date: new Date(),
-            scoutId: this.scoutId,
-            sport: 'volleyball',
-            teamId: this.teamId,
-            createdByUserId: this.createdByUserId,
-            points: this.points
-          }
-        },
-        context: params.context
-      })
-    }
-
   }
 }
