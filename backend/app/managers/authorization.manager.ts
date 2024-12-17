@@ -12,6 +12,7 @@ import Shirt from 'App/Models/Shirt'
 import Scout from 'App/Models/Scout'
 import ScoringSystem from 'App/Models/ScoringSystem'
 import { Context } from './base.manager'
+import WidgetSetting from 'App/Models/WidgetSetting'
 
 export type GroupedPermissions<Type = boolean> = {
   team: {
@@ -59,6 +60,9 @@ export type GroupedPermissions<Type = boolean> = {
   convocation: {
     confirm: Type,
     deny: Type,
+  },
+  widgetSetting: {
+    set: Type
   }
 }
 
@@ -78,6 +82,7 @@ export type Entities = {
   shirt?: Pick<Shirt, 'id'>,
   scout?: Pick<Scout, 'id'>,
   scoringSystem?: Pick<ScoringSystem, 'id'>
+  widget?: Pick<WidgetSetting, 'id'>
 }
 
 type CanFunction = (params: {
@@ -139,6 +144,9 @@ export default class AuthorizationManager {
     convocation: {
       confirm: AuthorizationManager._canConfirmConvocation,
       deny: AuthorizationManager._canDenyConvocation
+    },
+    widgetSetting: {
+      set: AuthorizationManager._canSetWidgetSetting,
     }
   }
 
@@ -802,6 +810,22 @@ export default class AuthorizationManager {
       },
       context
     })
+  }
+
+  private static async _canSetWidgetSetting(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.widget?.id) throw new Error('widget setting id must be defined')
+
+    let usersFromWidget = await User.query({ client: context?.trx })
+      .whereHas('dashboards', b => {
+        b.whereHas('widgets', b => {
+          b.where('id', params.entities.widget?.id!)
+        })
+      })
+
+    return usersFromWidget.some((ufw) => ufw.id == params.actor.id)
   }
 }
 

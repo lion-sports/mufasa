@@ -5,7 +5,7 @@
 	import DashboardShaper from './DashboardShaper.svelte'
 	import { createId } from '@paralleldrive/cuid2'
 	import { Icon } from '@likable-hair/svelte'
-	import type { ComponentProps } from 'svelte'
+	import { onMount, type ComponentProps } from 'svelte'
 	import * as WidgetComponents from './widgets'
 	import * as WidgetAddButton from './widgets/addButtons'
 
@@ -19,11 +19,46 @@
 		preview: boolean = false,
 		canDelete: boolean = true,
 		canAdd: boolean = true,
-		widgetLoading: Record<string, boolean> = {}
+		widgetLoading: Record<number | string, boolean> = {},
+    selectedSet: number[] = [],
+    scoutId: number | undefined = undefined,
+    sets: number[] = []
 
-	let localWidgets: NonNullable<ComponentProps<DashboardShaper>['widgets']> = []
+	let localWidgets: NonNullable<ComponentProps<DashboardShaper>['widgets']> = [],
+    mounted: boolean = false
 
-	$: if (!!widgets) calculateLocalWidgetsFromWidgets()
+  onMount(() => {
+    mounted = true
+  })
+
+  $: if(mounted && sets) loadWidgetData()
+
+	$: if (!!widgets) {
+    calculateLocalWidgetsFromWidgets()
+  }
+
+  async function loadWidgetData() {
+    for(let i = 0; i < widgets.length; i += 1) {
+      let widget = widgets[i]
+      let widgetSpec = DashboardService.availableWidget.find(
+				(aw) => aw.name === widget.componentName
+			)
+
+      if(!!widgetSpec?.fetchData) {
+        widgetLoading[Number(widget.id)] = true
+        widgets[i].data = await widgetSpec.fetchData(
+          {
+            fetch,
+            widget: widgets[i],
+            scoutId,
+            sets
+          },
+          i
+        )
+        widgetLoading[Number(widget.id)] = false
+      }
+    }
+  }
 
 	async function handleAddWidget(
 		event: CustomEvent<{
@@ -50,7 +85,9 @@
 					widgets[widgetIndex].data = await widgetSpec.fetchData(
 						{
 							fetch,
-							options: widgets[widgetIndex].options
+							widget: widgets[widgetIndex],
+              scoutId,
+              sets
 						},
 						widgetIndex
 					)
@@ -71,6 +108,7 @@
 				left: lw.widget.data.left,
 				top: lw.widget.data.top,
 				data: lw.widget.data.data,
+        widgetSetting: lw.widget.data.widgetSetting,
 				options: lw.widget.data.options
 			}
 		})
@@ -89,7 +127,8 @@
 						left: w.left,
 						top: w.top,
 						data: w.data,
-						options: w.options
+						options: w.options,
+            widgetSetting: w.widgetSetting,
 					}
 				},
 				columnSpanFrom: w.left,
@@ -112,6 +151,28 @@
 
 	let allWidgetsAvailable = DashboardService.availableWidget,
 		filteredWidgets = allWidgetsAvailable
+
+  async function handleReloadWidget(params: { widget: Widget }) {
+    let widgetSpec = DashboardService.availableWidget.find(
+      (aw) => aw.name === params.widget.componentName
+    )
+    let widgetIndex = widgets.findIndex((w) => w.id === params.widget.id)
+    if(widgetIndex === -1) return
+
+    if(!!widgetSpec?.fetchData) {
+      widgetLoading[Number(params.widget.id)] = true
+      widgets[widgetIndex].data = await widgetSpec.fetchData(
+        {
+          fetch,
+          widget: widgets[widgetIndex],
+          scoutId,
+          sets
+        },
+        widgetIndex
+      )
+      widgetLoading[Number(params.widget.id)] = false
+    }
+  }
 </script>
 
 <DashboardShaper
@@ -175,8 +236,10 @@
 			<div class="w-full h-full p-1">
 				<svelte:component
 					this={componentMap[widget.widget?.data.componentName]}
-					widget={widget.widget}
+					widget={widget.widget?.data}
 					loadingData={widgetLoading[widget.widget?.name || '']}
+          {selectedSet}
+          on:reload={() => handleReloadWidget({ widget: widget.widget?.data })}
 				/>
 			</div>
 		{:else}

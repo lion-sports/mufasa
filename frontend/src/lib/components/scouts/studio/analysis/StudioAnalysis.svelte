@@ -1,11 +1,27 @@
 <script lang="ts">
-	import type { ScoutAnalysis } from "$lib/services/scouts/scouts.service"
+	import type { ScoutAnalysis, ScoutStudio } from "$lib/services/scouts/scouts.service"
 	import type { Dashboard } from "@/lib/services/dashboards/dashboard.service"
 	import DashboardEditor from "@/lib/components/dashboard/DashboardEditor.svelte"
-	import { Icon } from "@likable-hair/svelte"
+	import { Icon, ToggleList } from "@likable-hair/svelte"
+  import studio from "@/lib/stores/scout/studio";
 
   export let analysis: ScoutAnalysis | undefined,
     dashboard: Dashboard | undefined = undefined
+
+  $: totalSets = Math.min(($studio?.scout.stash?.points?.enemy.sets || 0) + ($studio?.scout.stash?.points?.friends.sets || 0) + 1, 5)
+
+  let selectedSets: {
+    value: number
+  }[] = [
+    ...Array.from(Array(
+      Math.min(($studio?.scout.stash?.points?.enemy.sets || 0) + ($studio?.scout.stash?.points?.friends.sets || 0) + 1, 5)
+    ).keys()).map((i) => {
+      return {
+        value: i + 1,
+        label: 'Set ' + (i + 1)
+      }
+    })
+  ]
 </script>
 
 {#if analysis}
@@ -19,12 +35,28 @@
           </a>
         </div>
       </div>
+      <div class="py-1">
+        <ToggleList
+          items={Array.from(Array(totalSets).keys()).map((i) => {
+            return {
+              value: i + 1,
+              label: 'Set ' + (i + 1)
+            }
+          })}
+          bind:values={selectedSets}
+        ></ToggleList>
+      </div>
       <div class="flex justify-center items-center">
-        <DashboardEditor
-          widgets={dashboard?.widgets}
-          canDelete={false}
-          canAdd={false}
-        />
+        {#if !!$studio}
+          <DashboardEditor
+            widgets={dashboard?.widgets}
+            canDelete={false}
+            canAdd={false}
+            selectedSet={selectedSets.map((e) => e.value)}
+            scoutId={$studio.scout.id}
+            sets={selectedSets.map((e) => e.value)}
+          />
+        {/if}
       </div>
     </div>
   {:else}

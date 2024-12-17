@@ -2,32 +2,14 @@ import { DateTime } from 'luxon'
 import { column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
 import { CamelCaseBaseModel } from './CamelCaseBaseModel'
 import Widget from './Widget'
+import { TeamFilter } from 'App/managers/scout/analysis/scoutAnalysis.manager'
 
-type WidgetSettingStructureCustomers = {
-  widget:
-    | 'ReportsByCustomers'
-    | 'TotalReportsByCustomerLastYear'
-    | 'CustomersUboEarnings'
-    | 'TotalSalesByTimespan'
-  customers: string[]
-  timespan?: string
+type VolleyballDistributionWidgetSetting = {
+  widget: 'VolleyballDistribution',
+  team?: TeamFilter
 }
 
-type WidgetSettingStructureStatuses = {
-  widget: 'ReportsByStatus' | 'CustomersByStatus' | 'RequestsByStatus'
-  activeStatuses: string[]
-}
-
-type WidgetSettingStructureDates = {
-  widget: 'date'
-  fromDate: Date
-  toDate: Date
-}
-
-export type WidgetSettingStructure =
-  | WidgetSettingStructureStatuses
-  | WidgetSettingStructureDates
-  | WidgetSettingStructureCustomers
+export type WidgetSettingStructure = VolleyballDistributionWidgetSetting
 
 export default class WidgetSetting extends CamelCaseBaseModel {
   @column({ isPrimary: true })

@@ -19,9 +19,9 @@ export default class DashboardManager {
     if (!params.data.perPage) params.data.perPage = 100
 
     let query = Dashboard.query({
-      client: trx,
-    })
-      .preload('widgets')
+        client: trx,
+      })
+      .preload('widgets', b => b.preload('widgetSetting'))
       .where('userId', user.id)
 
     if (!!params.data.filtersBuilder && !!params.data.filtersBuilder.modifiers) {
@@ -92,7 +92,7 @@ export default class DashboardManager {
       })
     }
 
-    await dashboard.load('widgets')
+    await dashboard.load('widgets', b => b.preload('widgetSetting'))
     return dashboard
   }
 
@@ -176,7 +176,7 @@ export default class DashboardManager {
       })
     }
 
-    await dashboard.load('widgets')
+    await dashboard.load('widgets', b => b.preload('widgetSetting'))
     return dashboard
   }
 

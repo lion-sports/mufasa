@@ -4,6 +4,7 @@ import Hash from '@ioc:Adonis/Core/Hash'
 import Encryption from '@ioc:Adonis/Core/Encryption'
 import { column, beforeSave, manyToMany, ManyToMany, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import Team from 'App/Models/Team';
+import Dashboard from './Dashboard';
 
 export default class User extends CamelCaseBaseModel {
 
@@ -66,6 +67,12 @@ export default class User extends CamelCaseBaseModel {
     foreignKey: 'ownerId',
   })
   public ownedTeams: HasMany<typeof Team>
+
+  @hasMany(() => Dashboard, {
+    localKey: 'id',
+    foreignKey: 'userId',
+  })
+  public dashboards: HasMany<typeof Dashboard>
 
   @beforeSave()
   public static async hashPassword (user: User) {

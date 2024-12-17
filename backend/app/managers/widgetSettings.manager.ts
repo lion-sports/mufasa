@@ -1,8 +1,11 @@
 import { Context, withTransaction, withUser } from './base.manager'
-import WidgetSettings, { WidgetSettingStructure } from 'App/Models/WidgetSettings'
+import WidgetSettings, { WidgetSettingStructure } from 'App/Models/WidgetSetting'
 import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
 import { ModelObject } from '@ioc:Adonis/Lucid/Orm'
 import FilterModifierApplier, { Modifier } from 'App/Services/FilterModifierApplier'
+import AuthorizationManager from './authorization.manager'
+import Widget from 'App/Models/Widget'
+import WidgetSetting from 'App/Models/WidgetSetting'
 
 
 export default class WidgetSettingsManager {
@@ -130,76 +133,37 @@ export default class WidgetSettingsManager {
       widget: {
         id: number
       }
-      widgetSettings: WidgetSettings[]
+      settings: WidgetSettingStructure
     }
     context?: Context
-  }): Promise<{
-    deleteWidgetSettingIds?: number[]
-    createdWidgetSettingIds?: number[]
-  }> {
+  }): Promise<WidgetSetting> {
     const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user!
 
-    let existingWidgetSettings = await WidgetSettings.query({ client: trx }).where(
-      'widgetId',
-      params.data.widget.id
-    )
-
-    let createWidgetSettings: (typeof params)['data']['widgetSettings'] =
-      params.data.widgetSettings.filter(
-        (ws) =>
-          !ws.id || existingWidgetSettings.every((es) => es.id.toString() !== ws.id?.toString())
-      )
-
-    let updateWidgetSettings: (typeof params)['data']['widgetSettings'] =
-      params.data.widgetSettings.filter((ws) =>
-        existingWidgetSettings.some((us) => us.id.toString() === ws.id?.toString())
-      )
-
-    let createdWidgetSettingIds: number[] = []
-
-    let deleteWidgetSettingIds: number[] = existingWidgetSettings
-      .filter((es) =>
-        params.data.widgetSettings.every((ws) => ws.id?.toString() !== es.id?.toString())
-      )
-      .map((s) => s.id)
-
-    for (let i = 0; i < createWidgetSettings.length; i += 1) {
-      let createWidgetSetting = createWidgetSettings[i]
-
-      let widgetSetting = await WidgetSettings.create(
-        {
-          widgetId: params.data.widget.id,
-          settings: createWidgetSetting.settings,
-        },
-        {
-          client: trx,
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'set',
+        resource: 'widgetSetting',
+        entities: {
+          widget: {
+            id: params.data.widget.id
+          }
         }
-      )
-
-      createdWidgetSettingIds.push(widgetSetting.id)
-    }
-
-    for (let i = 0; i < updateWidgetSettings.length; i++) {
-      let updateWidgetSetting = updateWidgetSettings[i]
-
-      let widgetSetting = existingWidgetSettings.find((es) => es.id == updateWidgetSetting.id)
-
-      if (!!widgetSetting) {
-        widgetSetting.merge({
-          widgetId: params.data.widget.id,
-          settings: updateWidgetSetting.settings,
-        })
-        await widgetSetting.useTransaction(trx).save()
+      },
+      context: {
+        trx
       }
-    }
+    })
 
-    if (!!deleteWidgetSettingIds) {
-      await WidgetSettings.query({ client: trx }).whereIn('id', deleteWidgetSettingIds).delete()
-    }
+    let widgetSetting = await WidgetSettings.updateOrCreate({
+        widgetId: params.data.widget.id
+      }, {
+        settings: params.data.settings
+      }, {
+        client: trx
+      })
 
-    return {
-      deleteWidgetSettingIds: deleteWidgetSettingIds,
-      createdWidgetSettingIds,
-    }
+    return widgetSetting
   }
 }

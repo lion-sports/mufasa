@@ -81,6 +81,17 @@
   }
 
   function handleAcceptSuggestion(position: VolleyballScoutEventPosition, suggestion: ScoutEventPlayer) {
+    if(!!playersPosition) {
+      if(selectedTab == 'opponents') {
+        playersPosition.enemy[position] = {
+          player: suggestion
+        }
+      } else {
+        playersPosition.friends[position] = {
+          player: suggestion
+        }
+      }
+    }
     dispatch('change', {
       position: position,
       player: suggestion

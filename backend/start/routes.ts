@@ -95,6 +95,10 @@ Route.resource('shirts', 'ShirtsController')
     '*': ['auth:api']
   })
 
+Route.post('/scouts/analysis/totalSpikeForPosition', 'ScoutAnalysisController.totalSpikeForPosition').middleware('auth:api')
+Route.post('/scouts/analysis/totalSpikeForPlayer', 'ScoutAnalysisController.totalSpikeForPlayer').middleware('auth:api')
+Route.post('/scouts/analysis/totalSpikeForPlayerAndPosition', 'ScoutAnalysisController.totalSpikeForPlayerAndPosition').middleware('auth:api')
+
 Route.get('/scouts/:id/studio', 'ScoutsController.studio').middleware('auth:api')
 Route.get('/scouts/:id/getFirstSetStartingSix', 'ScoutsController.getFirstSetStartingSix').middleware('auth:api')
 Route.get('/scouts/:id/exportXlsx', 'ScoutsController.exportXlsx').middleware('auth:api')
@@ -124,6 +128,10 @@ Route.resource('dashboards', 'DashboardsController')
   .middleware({
     '*': ['auth:api'],
   })
+
+Route.get('/widgets/loadDistribution', 'WidgetsController.loadDistribution').middleware('auth:api')
+
+Route.post('/widgetSettings/set', 'WidgetSettingsController.set').middleware('auth:api')
 
 Route.post('/convocations/:id/confirm', 'ConvocationsController.confirm').middleware('auth:api')
 Route.post('/convocations/:id/deny', 'ConvocationsController.deny').middleware('auth:api')

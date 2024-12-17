@@ -1,23 +1,36 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import InvitationsManager from 'App/managers/invitations.manager'
+import ScoutAnalysisManager from 'App/managers/scout/analysis/scoutAnalysis.manager'
 
 export default class ScoutAnalysisController {
-  public async inviteUser({ request }: HttpContextContract) {
-    const manager = new InvitationsManager()
+  public async totalSpikeForPosition({ request }: HttpContextContract) {
+    const manager = new ScoutAnalysisManager()
 
-    const user = request.input('user')
-    const team = request.input('team')
-    const group = request.input('group')
-
-    return await manager.inviteUser({
+    return await manager.totalSpikeForPosition({
       data: {
-        user: {
-          email: user.email
-        },
-        team: {
-          id: team.id
-        },
-        group: group
+        scoutId: request.input('scoutId'),
+        sets: request.input('sets')
+      }
+    })
+  }
+
+  public async totalSpikeForPlayer({ request }: HttpContextContract) {
+    const manager = new ScoutAnalysisManager()
+
+    return await manager.totalSpikeForPlayer({
+      data: {
+        scoutId: request.input('scoutId'),
+        sets: request.input('sets')
+      }
+    })
+  }
+
+  public async totalSpikeForPlayerAndPosition({ request }: HttpContextContract) {
+    const manager = new ScoutAnalysisManager()
+
+    return await manager.totalSpikeForPlayerAndPosition({
+      data: {
+        scoutId: request.input('scoutId'),
+        sets: request.input('sets')
       }
     })
   }

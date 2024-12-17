@@ -1,8 +1,9 @@
 import Team from 'App/Models/Team';
 import { CamelCaseBaseModel } from './CamelCaseBaseModel'
 import { DateTime } from 'luxon'
-import { BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import { BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import type { Action, Resource } from 'App/managers/authorization.manager';
+import Teammate from './Teammate';
 
 export type GroupCans = {
   [resource in Resource]?: {
@@ -30,6 +31,11 @@ export default class Group extends CamelCaseBaseModel {
     foreignKey: 'teamId'
   })
   public team: BelongsTo<typeof Team>
+
+  @hasMany(() => Teammate, {
+    foreignKey: 'groupId'
+  })
+  public teammates: HasMany<typeof Teammate>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

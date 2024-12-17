@@ -2,6 +2,8 @@ import { DateTime } from 'luxon'
 import { FetchBasedService } from '../common/fetchBased.service'
 import { FilterBuilder } from '@likable-hair/svelte'
 import type { User } from '../auth/auth.service'
+import WidgetsService from '../widgets/widget.service'
+import type { TeamFilter, WidgetSetting } from '../widgets/widgetSettings.service'
 
 export type Dashboard = {
 	id: number
@@ -20,8 +22,9 @@ export type Widget<Data = any> = {
 	width: number
 	left: number
 	top: number
-	options?: Record<string, any>
+	options?: any // TODO deprecate the property, use widget settings instead
 	data?: Data
+  widgetSetting?: WidgetSetting
 }
 
 export type PaginatedDashboard = {
@@ -137,7 +140,9 @@ export default class DashboardService extends FetchBasedService {
 				token?: string
 				fetch: typeof fetch
 				user?: User
-				options?: any
+        widget?: (Omit<Widget, 'id'> & { id: string | number }),
+        scoutId?: number,
+        sets?: number[]
 			},
 			widgetId?: number
 		) => Promise<any>
@@ -158,7 +163,31 @@ export default class DashboardService extends FetchBasedService {
 				fetchData: async (params) => {
 					return ['placeholder']
 				}
-			},
+      }, {
+        name: 'VolleyballDistribution',
+        label: 'Volleyball distribution',
+        availableSizes: [
+          [2, 2],
+          [2, 3],
+          [2, 4],
+          [3, 2],
+        ],
+        fetchData: async (params) => {
+          let settings = params.widget?.widgetSetting?.settings
+          let team: TeamFilter = 'both'
+          if (
+            !!settings && settings.widget == 'VolleyballDistribution' && !!settings.team
+          ) team = settings.team
+
+          let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
+          let results = await widgetService.loadDistribution({
+            scoutId: params.scoutId,
+            sets: params.sets,
+            team
+          })
+          return results
+        }
+      }
     ]
 	}
 

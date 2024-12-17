@@ -4,9 +4,11 @@
 	import DashboardEditor from "@/lib/components/dashboard/DashboardEditor.svelte"
 	import type { Dashboard } from "@/lib/services/dashboards/dashboard.service"
 	import DashboardService from "@/lib/services/dashboards/dashboard.service"
+	import type { ScoutStudio } from "@/lib/services/scouts/scouts.service"
 	import { Icon } from "@likable-hair/svelte"
 
-  export let dashboards: Dashboard[] = []
+  export let dashboards: Dashboard[] = [],
+    studio: ScoutStudio
 
   let loadingActiveDashboard: boolean = false
 	async function activeDashboard(dashboard: Dashboard) {
@@ -69,6 +71,7 @@
           <DashboardEditor
             widgets={dashboard.widgets}
             preview
+            scoutId={studio.scout.id}
             --dashboard-shaper-widget-height="calc(140px/8)"
             --dashboard-shaper-widget-preview-border-radius="2px"
             --dashboard-shaper-gap="4px"
