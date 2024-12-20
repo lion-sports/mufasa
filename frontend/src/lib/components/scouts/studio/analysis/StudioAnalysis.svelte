@@ -12,16 +12,24 @@
 
   let selectedSets: {
     value: number
-  }[] = [
-    ...Array.from(Array(
-      Math.min(($studio?.scout.stash?.points?.enemy.sets || 0) + ($studio?.scout.stash?.points?.friends.sets || 0) + 1, 5)
-    ).keys()).map((i) => {
-      return {
-        value: i + 1,
-        label: 'Set ' + (i + 1)
-      }
-    })
-  ]
+  }[] | undefined = undefined
+
+  $: if(selectedSets === undefined) {
+    selectedSets = [
+      ...Array.from(Array(
+        Math.min(($studio?.scout.stash?.points?.enemy.sets || 0) + ($studio?.scout.stash?.points?.friends.sets || 0) + 1, 5)
+      ).keys()).map((i) => {
+        return {
+          value: i + 1,
+          label: 'Set ' + (i + 1)
+        }
+      })
+    ]
+  }
+
+  function handleSetChange(ev: CustomEvent<{ selection: NonNullable<typeof selectedSets>}>) {
+    selectedSets = ev.detail.selection
+  }
 </script>
 
 {#if analysis}
@@ -43,7 +51,8 @@
               label: 'Set ' + (i + 1)
             }
           })}
-          bind:values={selectedSets}
+          values={selectedSets}
+          on:change={handleSetChange}
         ></ToggleList>
       </div>
       <div class="flex justify-center items-center">
@@ -52,9 +61,8 @@
             widgets={dashboard?.widgets}
             canDelete={false}
             canAdd={false}
-            selectedSet={selectedSets.map((e) => e.value)}
+            selectedSet={(selectedSets || []).map((e) => e.value)}
             scoutId={$studio.scout.id}
-            sets={selectedSets.map((e) => e.value)}
           />
         {/if}
       </div>

@@ -48,6 +48,24 @@ export default class WidgetManager {
 
   @withTransaction
   @withUser
+  public async get(params: {
+    data: {
+      id: number
+    }
+    context?: Context
+  }): Promise<Widget> {
+    let trx = params.context?.trx
+    let user = params.context?.user as User
+
+    return await Widget.query({ client: trx })
+      .whereHas('dashboard', b => b.where('userId', user.id))
+      .where('id', params.data.id)
+      .preload('widgetSetting')
+      .firstOrFail()
+  }
+
+  @withTransaction
+  @withUser
   public async set(params: {
     data: {
       dashboard: {

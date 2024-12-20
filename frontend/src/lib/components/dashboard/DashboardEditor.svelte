@@ -8,6 +8,7 @@
 	import { onMount, type ComponentProps } from 'svelte'
 	import * as WidgetComponents from './widgets'
 	import * as WidgetAddButton from './widgets/addButtons'
+	import WidgetsService from '@/lib/services/widgets/widget.service'
 
 	let addButtonComponentMap: Record<string, ConstructorOfATypedSvelteComponent> = {
 		...WidgetAddButton
@@ -21,8 +22,7 @@
 		canAdd: boolean = true,
 		widgetLoading: Record<number | string, boolean> = {},
     selectedSet: number[] = [],
-    scoutId: number | undefined = undefined,
-    sets: number[] = []
+    scoutId: number | undefined = undefined
 
 	let localWidgets: NonNullable<ComponentProps<DashboardShaper>['widgets']> = [],
     mounted: boolean = false
@@ -31,7 +31,7 @@
     mounted = true
   })
 
-  $: if(mounted && sets) loadWidgetData()
+  $: if(mounted && selectedSet) loadWidgetData()
 
 	$: if (!!widgets) {
     calculateLocalWidgetsFromWidgets()
@@ -46,12 +46,22 @@
 
       if(!!widgetSpec?.fetchData) {
         widgetLoading[Number(widget.id)] = true
+      }
+    }
+    
+    for(let i = 0; i < widgets.length; i += 1) {
+      let widget = widgets[i]
+      let widgetSpec = DashboardService.availableWidget.find(
+				(aw) => aw.name === widget.componentName
+			)
+
+      if(!!widgetSpec?.fetchData) {
         widgets[i].data = await widgetSpec.fetchData(
           {
             fetch,
             widget: widgets[i],
             scoutId,
-            sets
+            sets: selectedSet
           },
           i
         )
@@ -87,7 +97,7 @@
 							fetch,
 							widget: widgets[widgetIndex],
               scoutId,
-              sets
+              sets: selectedSet
 						},
 						widgetIndex
 					)
@@ -159,6 +169,12 @@
     let widgetIndex = widgets.findIndex((w) => w.id === params.widget.id)
     if(widgetIndex === -1) return
 
+    let widgetService = new WidgetsService({ fetch })
+    let fetchedWidget = await widgetService.get({
+      id: params.widget.id
+    })
+    widgets[widgetIndex] = fetchedWidget
+
     if(!!widgetSpec?.fetchData) {
       widgetLoading[Number(params.widget.id)] = true
       widgets[widgetIndex].data = await widgetSpec.fetchData(
@@ -166,7 +182,7 @@
           fetch,
           widget: widgets[widgetIndex],
           scoutId,
-          sets
+          sets: selectedSet
         },
         widgetIndex
       )

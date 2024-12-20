@@ -98,6 +98,8 @@ Route.resource('shirts', 'ShirtsController')
 Route.post('/scouts/analysis/totalSpikeForPosition', 'ScoutAnalysisController.totalSpikeForPosition').middleware('auth:api')
 Route.post('/scouts/analysis/totalSpikeForPlayer', 'ScoutAnalysisController.totalSpikeForPlayer').middleware('auth:api')
 Route.post('/scouts/analysis/totalSpikeForPlayerAndPosition', 'ScoutAnalysisController.totalSpikeForPlayerAndPosition').middleware('auth:api')
+Route.post('/scouts/analysis/totalServe', 'ScoutAnalysisController.totalServe').middleware('auth:api')
+Route.post('/scouts/analysis/totalServeByPlayer', 'ScoutAnalysisController.totalServeByPlayer').middleware('auth:api')
 
 Route.get('/scouts/:id/studio', 'ScoutsController.studio').middleware('auth:api')
 Route.get('/scouts/:id/getFirstSetStartingSix', 'ScoutsController.getFirstSetStartingSix').middleware('auth:api')
@@ -130,6 +132,8 @@ Route.resource('dashboards', 'DashboardsController')
   })
 
 Route.get('/widgets/loadDistribution', 'WidgetsController.loadDistribution').middleware('auth:api')
+Route.get('/widgets/loadServeSummary', 'WidgetsController.loadServeSummary').middleware('auth:api')
+Route.get('/widgets/:id', 'WidgetsController.show').middleware('auth:api')
 
 Route.post('/widgetSettings/set', 'WidgetSettingsController.set').middleware('auth:api')
 

@@ -1,7 +1,19 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import ScoutAnalysisManager from 'App/managers/scout/analysis/scoutAnalysis.manager'
+import WidgetManager from 'App/managers/widget.manager'
 
 export default class WidgetsController {
+  public async show({ params }: HttpContextContract) {
+    let id = params.id
+
+    let manager = new WidgetManager()
+    return manager.get({
+      data: {
+        id
+      }
+    })
+  }
+
   public async loadDistribution({ request }: HttpContextContract) {
     let scoutId = request.input('scoutId')
     let sets = request.input('sets')
@@ -71,6 +83,49 @@ export default class WidgetsController {
       previousTotalSpikeForPosition,
       previousTotalSpikeForPlayer,
       previousTotalSpikeForPlayerAndPosition
+    }
+  }
+
+  public async loadServeSummary({ request }: HttpContextContract) {
+    let scoutId = request.input('scoutId')
+    let sets = request.input('sets')
+    let team = request.input('team')
+
+    const manager = new ScoutAnalysisManager()
+    let totalServe = await manager.totalServe({
+      data: {
+        scoutId,
+        sets,
+        team
+      }
+    })
+
+    let totalServeByPlayer = await manager.totalServeByPlayer({
+      data: {
+        scoutId,
+        sets,
+        team
+      }
+    })
+
+    let previousTotalServeByPlayer: typeof totalServeByPlayer = []
+
+    let previousSet = Math.min(...(sets || []))
+    if (previousSet !== Infinity && previousSet !== 1 && sets.length === 1) {
+      previousSet -= 1
+      previousTotalServeByPlayer = await manager.totalServeByPlayer({
+        data: {
+          scoutId,
+          sets: [previousSet],
+          team
+        }
+      })
+    }
+
+    return {
+      totalServe,
+      totalServeByPlayer,
+      previousTotalServeByPlayer
     }
   }
 }

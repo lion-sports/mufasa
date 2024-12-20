@@ -8,7 +8,8 @@ export default class ScoutAnalysisController {
     return await manager.totalSpikeForPosition({
       data: {
         scoutId: request.input('scoutId'),
-        sets: request.input('sets')
+        sets: request.input('sets'),
+        team: request.input('team')
       }
     })
   }
@@ -19,7 +20,8 @@ export default class ScoutAnalysisController {
     return await manager.totalSpikeForPlayer({
       data: {
         scoutId: request.input('scoutId'),
-        sets: request.input('sets')
+        sets: request.input('sets'),
+        team: request.input('team')
       }
     })
   }
@@ -30,7 +32,32 @@ export default class ScoutAnalysisController {
     return await manager.totalSpikeForPlayerAndPosition({
       data: {
         scoutId: request.input('scoutId'),
-        sets: request.input('sets')
+        sets: request.input('sets'),
+        team: request.input('team')
+      }
+    })
+  }
+
+  public async totalServe({ request }: HttpContextContract) {
+    const manager = new ScoutAnalysisManager()
+
+    return await manager.totalServe({
+      data: {
+        scoutId: request.input('scoutId'),
+        sets: request.input('sets'),
+        team: request.input('team')
+      }
+    })
+  }
+
+  public async totalServeByPlayer({ request }: HttpContextContract) {
+    const manager = new ScoutAnalysisManager()
+
+    return await manager.totalServeByPlayer({
+      data: {
+        scoutId: request.input('scoutId'),
+        sets: request.input('sets'),
+        team: request.input('team')
       }
     })
   }

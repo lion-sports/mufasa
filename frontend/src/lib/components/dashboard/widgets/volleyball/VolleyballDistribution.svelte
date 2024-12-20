@@ -5,7 +5,7 @@
 	import ValueChangeIndicator from "@/lib/components/common/ValueChangeIndicator.svelte"
 	import PlayerMarker from "@/lib/components/scouts/PlayerMarker.svelte"
 	import type { Widget } from "@/lib/services/dashboards/dashboard.service"
-	import type { TotalSpikeForPlayerAndPosition, TotalSpikeForPlayerResult, TotalSpikeForPositionResult } from "@/lib/services/scouts/scoutAnalysis.service"
+	import type { TotalSpikeForPlayerAndPositionResult, TotalSpikeForPlayerResult, TotalSpikeForPositionResult } from "@/lib/services/scouts/scoutAnalysis.service"
 	import TeammatesService from "@/lib/services/teammates/teammates.service"
 	import type { TeamFilter } from "@/lib/services/widgets/widgetSettings.service"
 	import WidgetSettingsService from "@/lib/services/widgets/widgetSettings.service"
@@ -21,14 +21,12 @@
     widget: Widget<{
       totalSpikeForPosition: TotalSpikeForPositionResult
       totalSpikeForPlayer: TotalSpikeForPlayerResult
-      totalSpikeForPlayerAndPosition: TotalSpikeForPlayerAndPosition
+      totalSpikeForPlayerAndPosition: TotalSpikeForPlayerAndPositionResult
       previousTotalSpikeForPosition: TotalSpikeForPositionResult
       previousTotalSpikeForPlayer: TotalSpikeForPlayerResult
-      previousTotalSpikeForPlayerAndPosition: TotalSpikeForPlayerAndPosition
+      previousTotalSpikeForPlayerAndPosition: TotalSpikeForPlayerAndPositionResult
     }>,
     loadingData: boolean = false
-
-  let settingsOpened: boolean = false
   
   function getPositionStats(params: {
     position: number,
@@ -48,6 +46,12 @@
   $: totalSpike = widget.data?.totalSpikeForPlayer.reduce((p, c, i, a) => {
     return p + c.total
   }, 0) || 0
+  $: totalPoints = widget.data?.totalSpikeForPlayer.reduce((p, c, i, a) => {
+    return p + c.points
+  }, 0) || 0
+  $: totalErrors = widget.data?.totalSpikeForPlayer.reduce((p, c, i, a) => {
+    return p + c.errors
+  }, 0) || 0
   $: selectedPositionStats = !!selectedPosition ? widget.data?.totalSpikeForPlayerAndPosition.filter((el) => el.position === selectedPosition) : undefined
   $: selectedPositionPoints = !!selectedPositionStats ? selectedPositionStats.reduce((p, c, i, a) => {
     return p + c.points
@@ -57,6 +61,7 @@
   }, 0) : undefined
 
 
+  let settingsOpened: boolean = false
   let selectedTeamFilter: TeamFilter | undefined = undefined
   $: selectedTeamFilter = widget.widgetSetting?.settings?.widget == 'VolleyballDistribution' ? widget.widgetSetting?.settings.team : undefined
   
@@ -72,26 +77,6 @@
         team: selectedTeamFilter
       }
     })
-    
-    if(!widget.widgetSetting) {
-      widget.widgetSetting = {
-        id: Math.random(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        settings: {
-          widget: 'VolleyballDistribution',
-          team: selectedTeamFilter
-        },
-        widgetId: widget.id
-      }
-    } else if(!!widget.widgetSetting && !widget.widgetSetting?.settings) {
-      widget.widgetSetting.settings = {
-        widget: 'VolleyballDistribution',
-        team: selectedTeamFilter
-      }
-    } else if(!!widget.widgetSetting && !!widget.widgetSetting?.settings) {
-      widget.widgetSetting.settings.team = selectedTeamFilter
-    }
 
     loadingSaveSetting = false
     dispatch('reload')
@@ -313,7 +298,24 @@
           </div>
         {:else}
           {#if !!widget.data?.totalSpikeForPlayer && widget.data.totalSpikeForPlayer.length > 0}
-            <div class="flex flex-col gap-2 h-full overflow-auto">
+            <div class="mb-4">
+              <HorizontalStackedProgress
+                progresses={[
+                  {
+                    label: 'Punti',
+                    value: totalPoints || 0,
+                    color: 'rgb(34 197 94)'
+                  },
+                  {
+                    label: 'Errori',
+                    value: totalErrors || 0,
+                    color: 'rgb(var(--global-color-error-500))'
+                  },
+                ]}
+              />
+            </div>
+            <hr class="mt-2 mb-0"/>
+            <div class="flex flex-col gap-2 h-[calc(100%-52px)] overflow-auto pt-2">
               {#each widget.data?.totalSpikeForPlayer as playerStats}
                 {@const previousStat = widget.data.previousTotalSpikeForPlayer.find((e) => e.player.id == playerStats.player.id)}
                 {@const previousStatPercentageDifference = Number((playerStats.percentage - (previousStat?.percentage || 0)).toFixed(0))}
@@ -402,7 +404,6 @@
   </div>
 </div>
 
-<!-- 'friend' | 'opponent' | 'both' -->
 <StandardDialog
   title="Impostazioni"
   bind:open={settingsOpened}

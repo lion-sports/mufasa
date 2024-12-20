@@ -9,7 +9,12 @@ type VolleyballDistributionWidgetSetting = {
   team?: TeamFilter
 }
 
-export type WidgetSettingStructure = VolleyballDistributionWidgetSetting
+type VolleyballServeSummaryWidgetSetting = {
+  widget: 'VolleyballServeSummary',
+  team?: TeamFilter
+}
+
+export type WidgetSettingStructure = VolleyballDistributionWidgetSetting | VolleyballServeSummaryWidgetSetting
 
 export default class WidgetSetting extends CamelCaseBaseModel {
   @column({ isPrimary: true })

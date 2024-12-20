@@ -544,4 +544,385 @@ export default class ScoutAnalysisManager {
 
     return result
   }
+
+  @withTransaction
+  @withUser
+  public async totalServe(params: {
+    data: {
+      scoutId?: number
+      sets?: number[]
+      team?: TeamFilter
+    },
+    context?: Context
+  }): Promise<{
+    opponent: boolean
+    total: number
+    points: number
+    errors: number
+    pointsPercentage: number
+    errorsPercentage: number
+  }[]> {
+    let user = params.context?.user!
+    let trx = params.context?.trx!
+
+    await Mongo.init()
+
+    let scoutIds = await this.getViewableScoutIds({
+      data: {
+        scoutId: params.data.scoutId
+      },
+      context: { user, trx }
+    })
+
+    let totalAggregation: any[] = analysis({
+      scoutIds,
+      sets: params.data.sets,
+      team: params.data.team
+    })
+
+    let result = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        opponent: boolean
+        total: number
+        points: number
+        errors: number
+        pointsPercentage: number
+        errorsPercentage: number
+      }>([
+        ...totalAggregation,
+        {
+          $match: {
+            type: 'serve'
+          },
+        },
+        {
+          $group: {
+            _id: ["$isOpponent"],
+            total: {
+              $count: {}
+            },
+            opponent: {
+              $last: "$isOpponent"
+            },
+            points: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "point"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            errors: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "error"] },
+                  1,
+                  0
+                ]
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            pointsPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$points",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+            errorsPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$errors",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+          }
+        },
+      ])
+      .toArray()
+
+    return result
+  }
+
+  @withTransaction
+  @withUser
+  public async totalServeByPlayer(params: {
+    data: {
+      scoutId?: number
+      sets?: number[]
+      team?: TeamFilter
+    },
+    context?: Context
+  }): Promise<{
+    player: ScoutEventPlayer
+    total: number
+    points: number
+    errors: number
+    pointsPercentage: number
+    errorsPercentage: number
+  }[]> {
+    let user = params.context?.user!
+    let trx = params.context?.trx!
+
+    await Mongo.init()
+
+    let scoutIds = await this.getViewableScoutIds({
+      data: {
+        scoutId: params.data.scoutId
+      },
+      context: { user, trx }
+    })
+
+    let totalAggregation: any[] = analysis({
+      scoutIds,
+      sets: params.data.sets,
+      team: params.data.team
+    })
+
+    let result = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        player: ScoutEventPlayer
+        total: number
+        points: number
+        errors: number
+        pointsPercentage: number
+        errorsPercentage: number
+      }>([
+        ...totalAggregation,
+        {
+          $match: {
+            type: 'serve'
+          },
+        },
+        {
+          $group: {
+            _id: "$playerId",
+            total: {
+              $count: {}
+            },
+            player: {
+              $last: "$player"
+            },
+            points: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "point"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            errors: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "error"] },
+                  1,
+                  0
+                ]
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            playerId: "$_id",
+            opponent: "$player.isOpponent",
+            total: "$total",
+            player: "$player",
+            points: "$points",
+            errors: "$errors"
+          }
+        },
+        {
+          $facet: {
+            totalNumber: [
+              {
+                $group: {
+                  _id: "",
+                  total: {
+                    $sum: "$total"
+                  },
+                  friendsErrorsTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$errors",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsErrorsTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$errors",
+                        0
+                      ]
+                    }
+                  },
+                  friendsPointsTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$points",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsPointsTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$points",
+                        0
+                      ]
+                    }
+                  },
+                }
+              }
+            ],
+            documents: []
+          }
+        },
+        {
+          $addFields: {
+            totalNumber: {
+              $arrayElemAt: ["$totalNumber", 0]
+            },
+          }
+        },
+        {
+          $addFields: {
+            totalNumber: "$totalNumber.total",
+            friendsErrorsTotal: "$totalNumber.friendsErrorsTotal",
+            opponentsErrorsTotal: "$totalNumber.opponentsErrorsTotal",
+            friendsPointsTotal: "$totalNumber.friendsPointsTotal",
+            opponentsPointsTotal: "$totalNumber.opponentsPointsTotal",
+          }
+        },
+        {
+          $unwind: {
+            path: "$documents"
+          }
+        },
+        {
+          $project: {
+            player: "$documents.player",
+            total: "$documents.total",
+            points: "$documents.points",
+            errors: "$documents.errors",
+            percentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$documents.total",
+                    "$totalNumber"
+                  ]
+                },
+                100
+              ]
+            },
+            errorsPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsErrorsTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.errors",
+                            "$friendsErrorsTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsErrorsTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.errors",
+                            "$opponentsErrorsTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+            pointsPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsPointsTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.points",
+                            "$friendsPointsTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsPointsTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.points",
+                            "$opponentsPointsTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+          }
+        }, {
+          $sort: {
+            percentage: -1
+          }
+        }
+      ])
+      .toArray()
+
+    return result
+  }
 }

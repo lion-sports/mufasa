@@ -38,7 +38,7 @@
 		"vitest": "^0.25.3"
 	},
 	"dependencies": {
-		"@likable-hair/svelte": "^3.2.6",
+		"@likable-hair/svelte": "^3.2.8",
 		"@paralleldrive/cuid2": "^2.2.0",
 		"@solana/web3.js": "^1.94.0",
 		"@sveltejs/adapter-node": "^4.0.1",
