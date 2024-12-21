@@ -109,4 +109,16 @@ export default class ScoutAnalysisController {
       }
     })
   }
+
+  public async pointsHistory({ request }: HttpContextContract) {
+    const manager = new ScoutAnalysisManager()
+
+    return await manager.pointsHistory({
+      data: {
+        scoutId: request.input('scoutId'),
+        sets: request.input('sets'),
+        team: request.input('team')
+      }
+    })
+  }
 }

@@ -3,3 +3,4 @@ export { default as VolleyballDistributionAddButton } from './VolleyballDistribu
 export { default as VolleyballServeSummaryAddButton } from './VolleyballServeSummaryAddButton.svelte'
 export { default as VolleyballBlockSummaryAddButton } from './VolleyballBlockSummaryAddButton.svelte'
 export { default as VolleyballReceiveSummaryAddButton } from './VolleyballReceiveSummaryAddButton.svelte'
+export { default as VolleyballPointsHistoryAddButton } from './VolleyballPointsHistoryAddButton.svelte'

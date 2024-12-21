@@ -1,5 +1,5 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
-import type { ScoutEventPlayer, VolleyballScoutEventPosition } from 'lionn-common'
+import type { ScoutEventPlayer, VolleyballPoints, VolleyballScoutEventPosition } from 'lionn-common'
 import type { TeamFilter } from '../widgets/widgetSettings.service'
 
 export type TotalSpikeForPositionResult = {
@@ -250,6 +250,23 @@ export default class ScoutAnalysisService extends FetchBasedService {
   }): Promise<TotalReceiveByPlayerResult> {
     let response = await this.client.post({
       url: `/scouts/analysis/totalReceiveByPlayer`,
+      body: {
+        scoutId: params.scoutId,
+        sets: params.sets,
+        team: params.team
+      }
+    })
+
+    return response
+  }
+
+  public async pointsHistory(params: {
+    scoutId?: number
+    sets?: number[]
+    team?: TeamFilter
+  }): Promise<VolleyballPoints[]> {
+    let response = await this.client.post({
+      url: `/scouts/analysis/pointsHistory`,
       body: {
         scoutId: params.scoutId,
         sets: params.sets,

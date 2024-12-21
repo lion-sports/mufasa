@@ -109,7 +109,7 @@
 
 <div class="@container w-full h-full rounded-md max-h-full">
   <div class="flex justify-between h-[24px]">
-    <div class="ml-4 text-lg font-bold">
+    <div class="text-lg font-bold">
       Receive summary
     </div>
     <div>

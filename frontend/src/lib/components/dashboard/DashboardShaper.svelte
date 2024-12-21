@@ -17,7 +17,7 @@
 			availableWidth?: number
 		}[] = [],
 		layoutWidth: number = 6,
-		layoutHeight: number = 6,
+		layoutHeight: number | undefined = undefined,
 		someRowSlotEmpty: boolean = true,
 		preview: boolean = false,
 		canAdd: boolean = true
@@ -78,9 +78,10 @@
 			for (let c = 0; c < normalizedRow.length; c += 1) {
 				let rowItem = normalizedRow[c]
 				if (rowItem === undefined && (normalizedRow[c - 1] !== undefined || c === 0)) {
-					let availableHeight: number = 1
+					let availableHeight: number = layoutHeight === undefined ? Infinity : 1
 					while (
 						normalizedWidgetGrid[r + availableHeight]?.[c] === undefined &&
+            layoutHeight !== undefined &&
 						r + availableHeight < layoutHeight
 					)
 						availableHeight += 1
@@ -170,7 +171,7 @@
 <div
 	class="shaper"
 	style:--dashboard-shaper-grid-template-columns={`repeat(${layoutWidth}, 1fr)`}
-	style:--dashboard-shaper-grid-template-rows={`repeat(${layoutHeight}, var(--dashboard-shaper-widget-height, 200px))`}
+	style:--dashboard-shaper-grid-template-rows={`repeat(${Math.min(layoutHeight || Infinity, normalizedWidgetGrid.length)}, var(--dashboard-shaper-widget-height, 200px))`}
 >
 	{#each filledWidgetGrid as widget}
 		{#if !!widget.widget}
@@ -195,7 +196,7 @@
 			</div>
 		{/if}
 	{/each}
-	{#if normalizedWidgetGrid.length < layoutHeight && !preview && canAdd}
+	{#if (layoutHeight === undefined || normalizedWidgetGrid.length < layoutHeight) && !preview && canAdd}
 		<div style:grid-column={`1 / ${layoutWidth + 1}`}>
 			<DashboardAddButton
 				on:click={() =>
@@ -205,7 +206,7 @@
 							columnSpanTo: layoutWidth + 1,
 							rowSpanFrom: normalizedWidgetGrid.length + 1,
 							rowSpanTo: normalizedWidgetGrid.length + 2,
-							availableHeight: layoutHeight - normalizedWidgetGrid.length,
+							availableHeight: layoutHeight === undefined ? Infinity : layoutHeight - normalizedWidgetGrid.length,
 							availableWidth: layoutWidth
 						}
 					})}

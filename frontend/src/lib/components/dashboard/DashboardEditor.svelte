@@ -250,7 +250,7 @@
 	>
 		{#if !!componentMap[widget.widget?.data.componentName]}
 			<div class="w-full h-full p-2">
-        <div class="w-full h-[calc(100%)] overflow-auto border-[rgb(var(--global-color-contrast-200),.1)] rounded border py-2 px-1">
+        <div class="w-full h-[calc(100%)] overflow-auto border-[rgb(var(--global-color-contrast-200),.1)] rounded border py-2 px-2">
           <svelte:component
             this={componentMap[widget.widget?.data.componentName]}
             widget={widget.widget?.data}

@@ -1,4 +1,4 @@
-import { ScoutEventPlayer, VolleyballScoutEventPosition } from "lionn-common"
+import { ScoutEventPlayer, VolleyballPoints, VolleyballScoutEventPosition } from "lionn-common"
 import { analysis } from "../aggregations/analysis.aggregation"
 import { SCOUT_EVENT_COLLECTION_NAME } from "../ScoutEvent"
 import Mongo from "App/Services/Mongo"
@@ -2159,6 +2159,56 @@ export default class ScoutAnalysisManager {
         }, {
           $sort: {
             percentage: -1
+          }
+        }
+      ])
+      .toArray()
+
+    return result
+  }
+
+
+  @withTransaction
+  @withUser
+  public async pointsHistory(params: {
+    data: {
+      scoutId?: number
+      sets?: number[]
+      team?: TeamFilter
+    },
+    context?: Context
+  }): Promise<VolleyballPoints[]> {
+    let user = params.context?.user!
+    let trx = params.context?.trx!
+
+    await Mongo.init()
+
+    let scoutIds = await this.getViewableScoutIds({
+      data: {
+        scoutId: params.data.scoutId
+      },
+      context: { user, trx }
+    })
+
+    let totalAggregation: any[] = analysis({
+      scoutIds,
+      sets: params.data.sets,
+      team: params.data.team
+    })
+
+    let result = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<VolleyballPoints>([
+        ...totalAggregation,
+        {
+          $match: {
+            type: 'pointScored'
+          },
+        },
+        {
+          $replaceRoot:
+          {
+            newRoot: "$newPoints"
           }
         }
       ])

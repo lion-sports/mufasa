@@ -4,6 +4,7 @@ import { FilterBuilder } from '@likable-hair/svelte'
 import type { User } from '../auth/auth.service'
 import WidgetsService from '../widgets/widget.service'
 import type { TeamFilter, WidgetSetting } from '../widgets/widgetSettings.service'
+import ScoutAnalysisService from '../scouts/scoutAnalysis.service'
 
 export type Dashboard = {
 	id: number
@@ -258,6 +259,25 @@ export default class DashboardService extends FetchBasedService {
             team
           })
           return results
+        }
+      }, {
+        name: 'VolleyballPointsHistory',
+        label: 'Volleyball Points History',
+        availableSizes: [
+          [2, 2],
+          [2, 3],
+          [2, 4],
+          [3, 2],
+        ],
+        fetchData: async (params) => {
+          let scoutAnalysisService = new ScoutAnalysisService({ fetch: params.fetch, token: params.token })
+          let points = await scoutAnalysisService.pointsHistory({
+            scoutId: params.scoutId,
+            sets: params.sets
+          })
+          return {
+            points
+          }
         }
       }
     ]

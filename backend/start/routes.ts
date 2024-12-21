@@ -104,6 +104,7 @@ Route.post('/scouts/analysis/totalBlock', 'ScoutAnalysisController.totalBlock').
 Route.post('/scouts/analysis/totalBlockByPlayer', 'ScoutAnalysisController.totalBlockByPlayer').middleware('auth:api')
 Route.post('/scouts/analysis/totalReceive', 'ScoutAnalysisController.totalReceive').middleware('auth:api')
 Route.post('/scouts/analysis/totalReceiveByPlayer', 'ScoutAnalysisController.totalReceiveByPlayer').middleware('auth:api')
+Route.post('/scouts/analysis/pointsHistory', 'ScoutAnalysisController.pointsHistory').middleware('auth:api')
 
 Route.get('/scouts/:id/studio', 'ScoutsController.studio').middleware('auth:api')
 Route.get('/scouts/:id/getFirstSetStartingSix', 'ScoutsController.getFirstSetStartingSix').middleware('auth:api')

@@ -3,3 +3,4 @@ export { default as VolleyballDistribution } from './volleyball/VolleyballDistri
 export { default as VolleyballServeSummary } from './volleyball/VolleyballServeSummary.svelte'
 export { default as VolleyballBlockSummary } from './volleyball/VolleyballBlockSummary.svelte'
 export { default as VolleyballReceiveSummary } from './volleyball/VolleyballReceiveSummary.svelte'
+export { default as VolleyballPointsHistory } from './volleyball/VolleyballPointsHistory.svelte'
