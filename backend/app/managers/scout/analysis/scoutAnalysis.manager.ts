@@ -1503,4 +1503,667 @@ export default class ScoutAnalysisManager {
 
     return result
   }
+
+  @withTransaction
+  @withUser
+  public async totalReceive(params: {
+    data: {
+      scoutId?: number
+      sets?: number[]
+      team?: TeamFilter
+    },
+    context?: Context
+  }): Promise<{
+    opponent: boolean
+    total: number
+    perfect: number
+    plus: number
+    minus: number
+    slash: number
+    error: number
+    perfectPercentage: number
+    plusPercentage: number
+    minusPercentage: number
+    slashPercentage: number
+    errorPercentage: number
+  }[]> {
+    let user = params.context?.user!
+    let trx = params.context?.trx!
+
+    await Mongo.init()
+
+    let scoutIds = await this.getViewableScoutIds({
+      data: {
+        scoutId: params.data.scoutId
+      },
+      context: { user, trx }
+    })
+
+    let totalAggregation: any[] = analysis({
+      scoutIds,
+      sets: params.data.sets,
+      team: params.data.team
+    })
+
+    let result = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        opponent: boolean
+        total: number
+        perfect: number
+        plus: number
+        minus: number
+        slash: number
+        error: number
+        perfectPercentage: number
+        plusPercentage: number
+        minusPercentage: number
+        slashPercentage: number
+        errorPercentage: number
+      }>([
+        ...totalAggregation,
+        {
+          $match: {
+            type: 'receive'
+          },
+        },
+        {
+          $group: {
+            _id: ["$isOpponent"],
+            total: {
+              $count: {}
+            },
+            opponent: {
+              $last: "$isOpponent"
+            },
+            perfect: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "++"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            plus: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "+"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            minus: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "-"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            slash: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "/"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            error: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "x"] },
+                  1,
+                  0
+                ]
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            perfectPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$perfect",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+            plusPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$plus",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+            minusPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$minus",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+            slashPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$slash",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+            errorPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$error",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+          }
+        },
+      ])
+      .toArray()
+
+    return result
+  }
+
+  @withTransaction
+  @withUser
+  public async totalReceiveByPlayer(params: {
+    data: {
+      scoutId?: number
+      sets?: number[]
+      team?: TeamFilter
+    },
+    context?: Context
+  }): Promise<{
+    player: ScoutEventPlayer
+    total: number
+    perfect: number
+    plus: number
+    minus: number
+    slash: number
+    error: number
+    perfectPercentage: number
+    plusPercentage: number
+    minusPercentage: number
+    slashPercentage: number
+    errorPercentage: number
+  }[]> {
+    let user = params.context?.user!
+    let trx = params.context?.trx!
+
+    await Mongo.init()
+
+    let scoutIds = await this.getViewableScoutIds({
+      data: {
+        scoutId: params.data.scoutId
+      },
+      context: { user, trx }
+    })
+
+    let totalAggregation: any[] = analysis({
+      scoutIds,
+      sets: params.data.sets,
+      team: params.data.team
+    })
+
+    let result = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        player: ScoutEventPlayer
+        total: number
+        perfect: number
+        plus: number
+        minus: number
+        slash: number
+        error: number
+        perfectPercentage: number
+        plusPercentage: number
+        minusPercentage: number
+        slashPercentage: number
+        errorPercentage: number
+      }>([
+        ...totalAggregation,
+        {
+          $match: {
+            type: 'receive'
+          },
+        },
+        {
+          $group: {
+            _id: "$playerId",
+            total: {
+              $count: {}
+            },
+            player: {
+              $last: "$player"
+            },
+            perfect: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "++"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            plus: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "+"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            minus: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "-"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            slash: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "/"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            error: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "x"] },
+                  1,
+                  0
+                ]
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            playerId: "$_id",
+            opponent: "$player.isOpponent",
+            total: "$total",
+            player: "$player",
+            perfect: "$perfect",
+            plus: "$plus",
+            minus: "$minus",
+            slash: "$slash",
+            error: "$error"
+          }
+        },
+        {
+          $facet: {
+            totalNumber: [
+              {
+                $group: {
+                  _id: "",
+                  total: {
+                    $sum: "$total"
+                  },
+                  friendsPerfectTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$perfect",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsPerfectTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$perfect",
+                        0
+                      ]
+                    }
+                  },
+                  friendsPlusTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$plus",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsPlusTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$plus",
+                        0
+                      ]
+                    }
+                  },
+                  friendsMinusTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$minus",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsMinusTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$minus",
+                        0
+                      ]
+                    }
+                  },
+                  friendsSlashTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$slash",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsSlashTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$slash",
+                        0
+                      ]
+                    }
+                  },
+                  friendsErrorTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$error",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsErrorTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$error",
+                        0
+                      ]
+                    }
+                  },
+                }
+              }
+            ],
+            documents: []
+          }
+        },
+        {
+          $addFields: {
+            totalNumber: {
+              $arrayElemAt: ["$totalNumber", 0]
+            },
+          }
+        },
+        {
+          $addFields: {
+            totalNumber: "$totalNumber.total",
+            friendsPerfectTotal: "$totalNumber.friendsPerfectTotal",
+            opponentsPerfectTotal: "$totalNumber.opponentsPerfectTotal",
+            friendsPlusTotal: "$totalNumber.friendsPlusTotal",
+            opponentsPlusTotal: "$totalNumber.opponentsPlusTotal",
+            friendsMinusTotal: "$totalNumber.friendsMinusTotal",
+            opponentsMinusTotal: "$totalNumber.opponentsMinusTotal",
+            friendsSlashTotal: "$totalNumber.friendsSlashTotal",
+            opponentsSlashTotal: "$totalNumber.opponentsSlashTotal",
+            friendsErrorTotal: "$totalNumber.friendsErrorTotal",
+            opponentsErrorTotal: "$totalNumber.opponentsErrorTotal"
+          }
+        },
+        {
+          $unwind: {
+            path: "$documents"
+          }
+        },
+        {
+          $project: {
+            player: "$documents.player",
+            perfect: "$documents.perfect",
+            plus: "$documents.plus",
+            minus: "$documents.minus",
+            slash: "$documents.slash",
+            error: "$documents.error",
+            perfectPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsPerfectTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.handsOut",
+                            "$friendsPerfectTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsPerfectTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.perfect",
+                            "$opponentsPerfectTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+            plusPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsPlusTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.plus",
+                            "$friendsPlusTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsPlusTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.plus",
+                            "$opponentsPlusTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+            minusPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsMinusTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.minus",
+                            "$friendsMinusTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsMinusTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.minus",
+                            "$opponentsMinusTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+            slashPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsSlashTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.slash",
+                            "$friendsSlashTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsSlashTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.slash",
+                            "$opponentsSlashTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+            errorPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsErrorTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.error",
+                            "$friendsErrorTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsErrorTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.error",
+                            "$opponentsErrorTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+          }
+        }, {
+          $sort: {
+            percentage: -1
+          }
+        }
+      ])
+      .toArray()
+
+    return result
+  }
 }

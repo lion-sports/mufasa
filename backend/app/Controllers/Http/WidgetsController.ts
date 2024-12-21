@@ -171,4 +171,48 @@ export default class WidgetsController {
       previousTotalBlockByPlayer
     }
   }
+
+
+  public async loadReceiveSummary({ request }: HttpContextContract) {
+    let scoutId = request.input('scoutId')
+    let sets = request.input('sets')
+    let team = request.input('team')
+
+    const manager = new ScoutAnalysisManager()
+    let totalReceive = await manager.totalReceive({
+      data: {
+        scoutId,
+        sets,
+        team
+      }
+    })
+
+    let totalReceiveByPlayer = await manager.totalReceiveByPlayer({
+      data: {
+        scoutId,
+        sets,
+        team
+      }
+    })
+
+    let previousTotalReceiveByPlayer: typeof totalReceiveByPlayer = []
+
+    let previousSet = Math.min(...(sets || []))
+    if (previousSet !== Infinity && previousSet !== 1 && sets.length === 1) {
+      previousSet -= 1
+      previousTotalReceiveByPlayer = await manager.totalReceiveByPlayer({
+        data: {
+          scoutId,
+          sets: [previousSet],
+          team
+        }
+      })
+    }
+
+    return {
+      totalReceive,
+      totalReceiveByPlayer,
+      previousTotalReceiveByPlayer
+    }
+  }
 }

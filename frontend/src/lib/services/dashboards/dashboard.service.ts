@@ -235,6 +235,30 @@ export default class DashboardService extends FetchBasedService {
           })
           return results
         }
+      }, {
+        name: 'VolleyballReceiveSummary',
+        label: 'Volleyball Receive Summary',
+        availableSizes: [
+          [2, 2],
+          [2, 3],
+          [2, 4],
+          [3, 2],
+        ],
+        fetchData: async (params) => {
+          let settings = params.widget?.widgetSetting?.settings
+          let team: TeamFilter = 'both'
+          if (
+            !!settings && settings.widget == 'VolleyballReceiveSummary' && !!settings.team
+          ) team = settings.team
+
+          let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
+          let results = await widgetService.loadReceiveSummary({
+            scoutId: params.scoutId,
+            sets: params.sets,
+            team
+          })
+          return results
+        }
       }
     ]
 	}

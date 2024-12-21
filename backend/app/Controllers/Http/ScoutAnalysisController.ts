@@ -85,4 +85,28 @@ export default class ScoutAnalysisController {
       }
     })
   }
+
+  public async totalReceive({ request }: HttpContextContract) {
+    const manager = new ScoutAnalysisManager()
+
+    return await manager.totalReceive({
+      data: {
+        scoutId: request.input('scoutId'),
+        sets: request.input('sets'),
+        team: request.input('team')
+      }
+    })
+  }
+
+  public async totalReceiveByPlayer({ request }: HttpContextContract) {
+    const manager = new ScoutAnalysisManager()
+
+    return await manager.totalReceiveByPlayer({
+      data: {
+        scoutId: request.input('scoutId'),
+        sets: request.input('sets'),
+        team: request.input('team')
+      }
+    })
+  }
 }

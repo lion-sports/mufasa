@@ -1,5 +1,4 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
-import type { TotalSpikeForPlayerAndPositionResult, TotalSpikeForPlayerResult, TotalSpikeForPositionResult } from '../scouts/scoutAnalysis.service'
 
 export type TeamFilter = 'friend' | 'opponent' | 'both'
 
@@ -18,10 +17,16 @@ type VolleyballBlockSummaryWidgetSetting = {
   team?: TeamFilter
 }
 
+type VolleyballReceiveSummaryWidgetSetting = {
+  widget: 'VolleyballReceiveSummary',
+  team?: TeamFilter
+}
+
 export type WidgetSettingStructure =
   VolleyballDistributionWidgetSetting |
   VolleyballServeSummaryWidgetSetting |
-  VolleyballBlockSummaryWidgetSetting
+  VolleyballBlockSummaryWidgetSetting |
+  VolleyballReceiveSummaryWidgetSetting
 
 export type WidgetSetting = {
   id: number

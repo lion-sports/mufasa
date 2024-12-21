@@ -5,7 +5,7 @@
 	import ValueChangeIndicator from "@/lib/components/common/ValueChangeIndicator.svelte"
 	import PlayerMarker from "@/lib/components/scouts/PlayerMarker.svelte"
 	import type { Widget } from "@/lib/services/dashboards/dashboard.service"
-	import type { TotalServeByPlayerResult, TotalServeResult, TotalSpikeForPlayerAndPositionResult, TotalSpikeForPlayerResult, TotalSpikeForPositionResult } from "@/lib/services/scouts/scoutAnalysis.service"
+	import type { TotalReceiveByPlayerResult, TotalReceiveResult } from "@/lib/services/scouts/scoutAnalysis.service"
 	import TeammatesService from "@/lib/services/teammates/teammates.service"
 	import type { TeamFilter } from "@/lib/services/widgets/widgetSettings.service"
 	import WidgetSettingsService from "@/lib/services/widgets/widgetSettings.service"
@@ -18,9 +18,9 @@
 
   export let selectedSet: number[] = [],
     widget: Widget<{
-      totalServe: TotalServeResult
-      totalServeByPlayer: TotalServeByPlayerResult
-      previousTotalServeByPlayer: TotalServeByPlayerResult
+      totalReceive: TotalReceiveResult
+      totalReceiveByPlayer: TotalReceiveByPlayerResult
+      previousTotalReceiveByPlayer: TotalReceiveByPlayerResult
     }>,
     loadingData: boolean = false
 
@@ -31,9 +31,9 @@
 
   $: setting = widget.widgetSetting?.settings?.widget == 'VolleyballServeSummary' ? widget.widgetSetting?.settings : undefined
 
-  $: if(!!widget.data?.totalServe) {
+  $: if(!!widget.data?.totalReceive) {
     data = {
-      labels: ['Punti', 'Errori', 'Ricevuti'],
+      labels: ['++', '+', '-', '/', 'x'],
       datasets: []
     }
 
@@ -63,26 +63,30 @@
       ]
     }
 
-    for(let i = 0; i < widget.data.totalServe.length; i += 1) {
-      let totalServeRow = widget.data.totalServe[i]
+    for(let i = 0; i < widget.data.totalReceive.length; i += 1) {
+      let totalReceiveRow = widget.data.totalReceive[i]
 
       let datasetIndex = -1
-      if(totalServeRow.opponent) {
+      if(totalReceiveRow.opponent) {
         datasetIndex = data.datasets.findIndex((d) => d.label == 'Avversari')
       } else {
         datasetIndex = data.datasets.findIndex((d) => d.label == 'Amici')
       }
 
       if(datasetIndex === -1) continue
-
-      let received = totalServeRow.total - (totalServeRow.points || 0) - (totalServeRow.errors || 0)
-      data.datasets[datasetIndex].data = [ totalServeRow.points, totalServeRow.errors, received ]
+      data.datasets[datasetIndex].data = [ 
+        totalReceiveRow.perfect, 
+        totalReceiveRow.plus, 
+        totalReceiveRow.minus,
+        totalReceiveRow.slash,
+        totalReceiveRow.error
+      ]
     }
   }
 
   let settingsOpened: boolean = false
   let selectedTeamFilter: TeamFilter | undefined = undefined
-  $: selectedTeamFilter = widget.widgetSetting?.settings?.widget == 'VolleyballServeSummary' ? widget.widgetSetting?.settings.team : undefined
+  $: selectedTeamFilter = widget.widgetSetting?.settings?.widget == 'VolleyballReceiveSummary' ? widget.widgetSetting?.settings.team : undefined
   
   let loadingSaveSetting: boolean = false
 
@@ -92,7 +96,7 @@
     await widgetSettingService.set({
       widgetId: widget.id,
       settings: {
-        widget: 'VolleyballServeSummary',
+        widget: 'VolleyballReceiveSummary',
         team: selectedTeamFilter
       }
     })
@@ -106,7 +110,7 @@
 <div class="@container w-full h-full rounded-md max-h-full">
   <div class="flex justify-between h-[24px]">
     <div class="ml-4 text-lg font-bold">
-      Serve summary
+      Receive summary
     </div>
     <div>
       <button on:click={() => settingsOpened = true}>
@@ -132,7 +136,7 @@
           lineWidth={0}
           maintainAspectRatio={false}
           xTickLabel={(value) => {
-            return ['Punti', 'Errori', 'Ricevuti'][Number(value)]
+            return ['++', '+', '-', '/', 'x'][Number(value)]
           }}
         ></GanymedeBarChart>
       {/if}
@@ -154,13 +158,20 @@
           {/each}
         </div>
       {:else}
-        {#if !!widget.data?.totalServeByPlayer && widget.data.totalServeByPlayer.length > 0}
+        {#if !!widget.data?.totalReceiveByPlayer && widget.data.totalReceiveByPlayer.length > 0}
           <div class="flex flex-col gap-2 h-full overflow-auto">
-            {#each widget.data.totalServeByPlayer as playerStats}
-              {@const previousStat = widget.data.previousTotalServeByPlayer.find((e) => e.player.id == playerStats.player.id)}
-              {@const previousStatPointsPercentageDifference = Number((playerStats.pointsPercentage - (previousStat?.pointsPercentage || 0)).toFixed(0))}
-              {@const previousStatErrorsPercentageDifference = Number((playerStats.errorsPercentage - (previousStat?.errorsPercentage || 0)).toFixed(0))}
-              {@const previousStatPointsDifference = Number((playerStats.points - (previousStat?.points || 0)).toFixed(0))}
+            {#each widget.data.totalReceiveByPlayer as playerStats}
+              {@const previousStat = widget.data.previousTotalReceiveByPlayer.find((e) => e.player.id == playerStats.player.id)}
+              {@const previousStatPerfectPercentageDifference = Number((playerStats.perfectPercentage - (previousStat?.perfectPercentage || 0)).toFixed(0))}
+              {@const previousStatPlusPercentageDifference = Number((playerStats.plusPercentage - (previousStat?.plusPercentage || 0)).toFixed(0))}
+              {@const previousStatMinusPercentageDifference = Number((playerStats.minusPercentage - (previousStat?.minusPercentage || 0)).toFixed(0))}
+              {@const previousStatSlashPercentageDifference = Number((playerStats.slashPercentage - (previousStat?.slashPercentage || 0)).toFixed(0))}
+              {@const previousStatErrorPercentageDifference = Number((playerStats.errorPercentage - (previousStat?.errorPercentage || 0)).toFixed(0))}
+              {@const previousStatPerfectDifference = Number((playerStats.perfect - (previousStat?.perfect || 0)).toFixed(0))}
+              {@const previousStatPlusDifference = Number((playerStats.plus - (previousStat?.plus || 0)).toFixed(0))}
+              {@const previousStatMinusDifference = Number((playerStats.minus - (previousStat?.minus || 0)).toFixed(0))}
+              {@const previousStatSlashDifference = Number((playerStats.slash - (previousStat?.slash || 0)).toFixed(0))}
+              {@const previousStatErrorDifference = Number((playerStats.error - (previousStat?.error || 0)).toFixed(0))}
               <div class="flex gap-2">
                 <div>
                   <PlayerMarker 
@@ -183,56 +194,76 @@
                     <HorizontalStackedProgress
                       progresses={[
                         {
-                          label: 'Punti',
-                          value: playerStats.points,
+                          label: '++',
+                          value: playerStats.perfect,
                           color: 'rgb(34 197 94)'
                         },
                         {
-                          label: 'Errori',
-                          value: playerStats.errors,
+                          label: '+',
+                          value: playerStats.plus,
+                          color: 'rgb(34 197 94)'
+                        },
+                        {
+                          label: '-',
+                          value: playerStats.minus,
+                          color: 'grey'
+                        },
+                        {
+                          label: '/',
+                          value: playerStats.slash,
                           color: 'rgb(var(--global-color-error-500))'
                         },
                         {
-                          label: 'Ricevuti',
-                          value: playerStats.total - playerStats.points - playerStats.errors,
-                          color: 'grey'
+                          label: 'x',
+                          value: playerStats.error,
+                          color: 'rgb(var(--global-color-error-500))'
                         }
                       ]}
                       legendVisible={false}
                       labelVisible={false}
                     />
                   </div>
-                  <div class="grid grid-cols-2">
-                    <div class="flex flex-col gap-1">
-                      <div class="font-light mb-1">
-                        # {playerStats.total}
-                      </div>
+                  <div class="grid grid-cols-1">
+                    <div class="grid grid-cols-5 gap-1">
                       <div class="mb-1 flex gap-2">
-                        Punti: {playerStats.points}
+                        ++: {playerStats.perfect}
                         {#if previousStat !== undefined}
                           <ValueChangeIndicator
-                            difference={previousStatPointsDifference}
-                          ></ValueChangeIndicator>
-                        {/if}
-                      </div>
-                      <div class="mb-1">
-                        Errori: {playerStats.errors}
-                      </div>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                      <div class="mb-1 flex gap-2">
-                        % Punti (su sq.): {playerStats.pointsPercentage.toFixed(2)}
-                        {#if previousStat !== undefined}
-                          <ValueChangeIndicator
-                            difference={previousStatPointsPercentageDifference}
+                            difference={previousStatPerfectDifference}
                           ></ValueChangeIndicator>
                         {/if}
                       </div>
                       <div class="mb-1 flex gap-2">
-                        % Errori (su sq.): {playerStats.errorsPercentage.toFixed(2)}
+                        +: {playerStats.plus}
                         {#if previousStat !== undefined}
                           <ValueChangeIndicator
-                            difference={previousStatErrorsPercentageDifference}
+                            difference={previousStatPlusDifference}
+                          ></ValueChangeIndicator>
+                        {/if}
+                      </div>
+                      <div class="mb-1 flex gap-2">
+                        -: {playerStats.minus}
+                        {#if previousStat !== undefined}
+                          <ValueChangeIndicator
+                            difference={previousStatMinusDifference}
+                            invertPositivity
+                          ></ValueChangeIndicator>
+                        {/if}
+                      </div>
+                      <div class="mb-1 flex gap-2">
+                        /: {playerStats.slash}
+                        {#if previousStat !== undefined}
+                          <ValueChangeIndicator
+                            difference={previousStatSlashDifference}
+                            invertPositivity
+                          ></ValueChangeIndicator>
+                        {/if}
+                      </div>
+                      <div class="mb-1 flex gap-2">
+                        x: {playerStats.slash}
+                        {#if previousStat !== undefined}
+                          <ValueChangeIndicator
+                            difference={previousStatSlashDifference}
                             invertPositivity
                           ></ValueChangeIndicator>
                         {/if}
