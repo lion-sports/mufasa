@@ -133,6 +133,7 @@ Route.resource('dashboards', 'DashboardsController')
 
 Route.get('/widgets/loadDistribution', 'WidgetsController.loadDistribution').middleware('auth:api')
 Route.get('/widgets/loadServeSummary', 'WidgetsController.loadServeSummary').middleware('auth:api')
+Route.get('/widgets/loadBlockSummary', 'WidgetsController.loadBlockSummary').middleware('auth:api')
 Route.get('/widgets/:id', 'WidgetsController.show').middleware('auth:api')
 
 Route.post('/widgetSettings/set', 'WidgetSettingsController.set').middleware('auth:api')

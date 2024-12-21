@@ -50,6 +50,32 @@ export type TotalServeByPlayerResult = {
   errorsPercentage: number
 }[]
 
+export type TotalBlockResult = {
+  opponent: boolean
+  total: number
+  points: number
+  handsOut: number
+  touch: number
+  putBack: number
+  pointsPercentage: number
+  handsOutPercentage: number
+  touchPercentage: number
+  putBackPercentage: number
+}[]
+
+export type TotalBlockByPlayerResult = {
+  player: ScoutEventPlayer
+  total: number
+  points: number
+  handsOut: number
+  touch: number
+  putBack: number
+  pointsPercentage: number
+  handsOutPercentage: number
+  touchPercentage: number
+  putBackPercentage: number
+}[]
+
 export default class ScoutAnalysisService extends FetchBasedService {
   public async totalSpikeForPosition(params: {
     scoutId?: number
@@ -126,6 +152,40 @@ export default class ScoutAnalysisService extends FetchBasedService {
   }): Promise<TotalServeByPlayerResult> {
     let response = await this.client.post({
       url: `/scouts/analysis/totalServeByPlayer`,
+      body: {
+        scoutId: params.scoutId,
+        sets: params.sets,
+        team: params.team
+      }
+    })
+
+    return response
+  }
+
+  public async totalBlock(params: {
+    scoutId?: number
+    sets?: number[]
+    team?: TeamFilter
+  }): Promise<TotalBlockResult> {
+    let response = await this.client.post({
+      url: `/scouts/analysis/totalBlock`,
+      body: {
+        scoutId: params.scoutId,
+        sets: params.sets,
+        team: params.team
+      }
+    })
+
+    return response
+  }
+
+  public async totalBlockByPlayer(params: {
+    scoutId?: number
+    sets?: number[]
+    team?: TeamFilter
+  }): Promise<TotalBlockByPlayerResult> {
+    let response = await this.client.post({
+      url: `/scouts/analysis/totalBlockByPlayer`,
       body: {
         scoutId: params.scoutId,
         sets: params.sets,

@@ -1,5 +1,5 @@
 import Mongo from "App/Services/Mongo"
-import { ObjectId } from "mongodb"
+import { Document, ObjectId, WithId } from "mongodb"
 import { Context } from "../base.manager"
 import Scout from "App/Models/Scout"
 import User from "App/Models/User"
@@ -15,6 +15,7 @@ export type ScoutEventJson<Type = string, S extends Sport = Sport> = {
   type: Type
   createdByUserId: number
   points: any
+  clientIdentifier?: string
 }
 
 export const SCOUT_EVENT_COLLECTION_NAME = 'scout_events'
@@ -32,6 +33,7 @@ export default abstract class ScoutEvent<
   public sport: Sport
   public event: Event
   public createdByUserId: number
+  public clientIdentifier?: string
   public points: Points
   public abstract type: Type
 
@@ -43,6 +45,7 @@ export default abstract class ScoutEvent<
     sport: Sport
     type: Type
     points: Points
+    clientIdentifier?: string
     createdByUserId: number
   } & Event) {
     this.date = new Date(params.date)
@@ -51,11 +54,12 @@ export default abstract class ScoutEvent<
     this.sport = params.sport
     this.createdByUserId = params.createdByUserId
     this.points = params.points
+    this.clientIdentifier = params.clientIdentifier
     this._id = params._id
     
     this.event = {} as Event
     for(const [key, value] of Object.entries(params)) {
-      if (['_id', 'date', 'scoutId', 'teamId', 'sport', 'type', 'createdByUserId'].includes(key)) continue
+      if (['_id', 'date', 'scoutId', 'teamId', 'sport', 'type', 'clientIdentifier', 'createdByUserId'].includes(key)) continue
       else this.event[key] = value
     }
   }
@@ -73,6 +77,7 @@ export default abstract class ScoutEvent<
       type: this.type,
       createdByUserId: this.createdByUserId,
       points: this.points,
+      clientIdentifier: this.clientIdentifier,
       ...extraProperties,
     }
   }
@@ -85,10 +90,19 @@ export default abstract class ScoutEvent<
     await Mongo.init()
 
     if(!this.persisted) {
-      await Mongo.insertOne({
-        collectionName: SCOUT_EVENT_COLLECTION_NAME,
-        item: this.toJson()
-      })
+      let existingEvent: WithId<Document>[] | undefined = undefined
+      if(!!this.clientIdentifier) {
+        existingEvent = await Mongo.db.collection(SCOUT_EVENT_COLLECTION_NAME).find({
+          clientIdentifier: this.clientIdentifier
+        }).toArray()
+      }
+
+      if (existingEvent === undefined || existingEvent.length == 0) {
+        await Mongo.insertOne({
+          collectionName: SCOUT_EVENT_COLLECTION_NAME,
+          item: this.toJson()
+        })
+      }
     } else {
       if(!this._id) throw new Error('must have the id')
 

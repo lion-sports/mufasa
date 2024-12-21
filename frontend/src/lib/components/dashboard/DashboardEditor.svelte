@@ -249,14 +249,16 @@
 		let:removeWidget
 	>
 		{#if !!componentMap[widget.widget?.data.componentName]}
-			<div class="w-full h-full p-1">
-				<svelte:component
-					this={componentMap[widget.widget?.data.componentName]}
-					widget={widget.widget?.data}
-					loadingData={widgetLoading[widget.widget?.name || '']}
-          {selectedSet}
-          on:reload={() => handleReloadWidget({ widget: widget.widget?.data })}
-				/>
+			<div class="w-full h-full p-2">
+        <div class="w-full h-[calc(100%)] overflow-auto border-[rgb(var(--global-color-contrast-200),.1)] rounded border py-2 px-1">
+          <svelte:component
+            this={componentMap[widget.widget?.data.componentName]}
+            widget={widget.widget?.data}
+            loadingData={widgetLoading[widget.widget?.name || '']}
+            {selectedSet}
+            on:reload={() => handleReloadWidget({ widget: widget.widget?.data })}
+          />
+        </div>
 			</div>
 		{:else}
 			<div class="w-full flex items-center justify-center text-sm font-light h-full">

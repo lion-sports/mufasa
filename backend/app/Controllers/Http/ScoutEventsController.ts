@@ -5,12 +5,14 @@ import scoutsSocket from 'App/managers/scout/scouts.socket'
 export default class ScoutEventsController {
   public async add({ request }: HttpContextContract) {
     let trx = await Database.transaction()
+    let clientIdentifier = request.input('clientIdentifier')
 
     try {
       let results = await scoutsSocket.handleEvent({
         data: {
           data: request.input('event'),
           event: 'scout:add',
+          clientIdentifier
         },
         context: {
           trx

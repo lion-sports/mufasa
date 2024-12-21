@@ -128,4 +128,47 @@ export default class WidgetsController {
       previousTotalServeByPlayer
     }
   }
+
+  public async loadBlockSummary({ request }: HttpContextContract) {
+    let scoutId = request.input('scoutId')
+    let sets = request.input('sets')
+    let team = request.input('team')
+
+    const manager = new ScoutAnalysisManager()
+    let totalBlock = await manager.totalBlock({
+      data: {
+        scoutId,
+        sets,
+        team
+      }
+    })
+
+    let totalBlockByPlayer = await manager.totalBlockByPlayer({
+      data: {
+        scoutId,
+        sets,
+        team
+      }
+    })
+
+    let previousTotalBlockByPlayer: typeof totalBlockByPlayer = []
+
+    let previousSet = Math.min(...(sets || []))
+    if (previousSet !== Infinity && previousSet !== 1 && sets.length === 1) {
+      previousSet -= 1
+      previousTotalBlockByPlayer = await manager.totalBlockByPlayer({
+        data: {
+          scoutId,
+          sets: [previousSet],
+          team
+        }
+      })
+    }
+
+    return {
+      totalBlock,
+      totalBlockByPlayer,
+      previousTotalBlockByPlayer
+    }
+  }
 }

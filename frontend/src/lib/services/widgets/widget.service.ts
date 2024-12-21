@@ -1,6 +1,6 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Widget } from '../dashboards/dashboard.service'
-import type { TotalServeByPlayerResult, TotalServeResult, TotalSpikeForPlayerAndPositionResult, TotalSpikeForPlayerResult, TotalSpikeForPositionResult } from '../scouts/scoutAnalysis.service'
+import type { TotalBlockByPlayerResult, TotalBlockResult, TotalServeByPlayerResult, TotalServeResult, TotalSpikeForPlayerAndPositionResult, TotalSpikeForPlayerResult, TotalSpikeForPositionResult } from '../scouts/scoutAnalysis.service'
 import type { TeamFilter } from './widgetSettings.service'
 
 export default class WidgetsService extends FetchBasedService {
@@ -39,6 +39,27 @@ export default class WidgetsService extends FetchBasedService {
   }> {
     let response = await this.client.get({
       url: `/widgets/loadServeSummary`,
+      params: {
+        scoutId: params.scoutId,
+        sets: params.sets,
+        team: params.team
+      }
+    })
+
+    return response
+  }
+
+  public async loadBlockSummary(params: {
+    scoutId?: number
+    sets?: number[]
+    team?: TeamFilter
+  }): Promise<{
+    totalBlock: TotalBlockResult
+    totalBlockByPlayer: TotalBlockByPlayerResult
+    previousTotalBlockByPlayer: TotalBlockByPlayerResult
+  }> {
+    let response = await this.client.get({
+      url: `/widgets/loadBlockSummary`,
       params: {
         scoutId: params.scoutId,
         sets: params.sets,

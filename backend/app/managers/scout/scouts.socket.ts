@@ -141,6 +141,7 @@ class ScoutSocket {
     data: {
       event: Event,
       data: EventData,
+      clientIdentifier?: string
     },
     context?: Context
   }) {
@@ -175,7 +176,7 @@ class ScoutSocket {
       }
 
       if (params.data.event == 'scout:add') {
-        await this.handleAdd({ data: { scoutEvent: data, scout }, context: { user, trx } })
+        await this.handleAdd({ data: { scoutEvent: data, scout, clientIdentifier: params.data.clientIdentifier }, context: { user, trx } })
       } else if (params.data.event == 'scout:undo') {
         await this.handleUndo({ user, scout })
       } else if (params.data.event == 'scout:restart') {
@@ -192,6 +193,7 @@ class ScoutSocket {
       scout: Scout
       avoidRecalculateStash?: boolean
       avoidAutomations?: boolean
+      clientIdentifier?: string
     },
     context?: Context
   }) {
@@ -204,7 +206,8 @@ class ScoutSocket {
     let Cl = TYPE_TO_VOLLEYBALL_SCOUT_EVENT[params.data.scoutEvent.type]
     let event = new Cl({
       ...params.data.scoutEvent,
-      createdByUserId: user.id
+      createdByUserId: user.id,
+      clientIdentifier: params.data.clientIdentifier
     })
     await event.preReceived({
       data: {

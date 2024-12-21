@@ -88,7 +88,9 @@
 	class="@container w-full h-full rounded-md max-h-full"
 >
   <div class="flex justify-between h-[24px]">
-    <div></div>
+    <div class="ml-4 text-lg font-bold">
+      Distribution
+    </div>
     <div>
       <button on:click={() => settingsOpened = true}>
         <Icon name="mdi-cog"></Icon>
@@ -103,7 +105,7 @@
           --skeleton-card-width="100%"
         ></Skeleton>
       {:else}
-        <div class="border border-[rgb(var(--global-color-contrast-300),.3)] h-full min-h-[300px] max-h-[400px]">
+        <div class="border border-[rgb(var(--global-color-contrast-300),.3)] h-full min-h-[300px] max-h-[350px]">
           <div class="h-1/2 grid grid-cols-3 border-b border-[rgb(var(--global-color-contrast-300),.3)]">
             {#each [4, 3, 2] as position}
               {@const friendsStat = getPositionStats({ position, teamFilter: 'friend' })}
@@ -203,7 +205,7 @@
         </div>
       {/if}
     </div>
-    <div class="@md:col-span-6 @2xl:col-span-8 p-2 @md:h-[350px]">
+    <div class="@md:col-span-6 @2xl:col-span-8 p-2 @md:h-[320px]">
       {#if loadingData}
         <div class="flex flex-col gap-4">
           {#each Array.from(Array(3).keys()) as i}

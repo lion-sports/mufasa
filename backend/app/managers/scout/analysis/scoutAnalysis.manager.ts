@@ -925,4 +925,582 @@ export default class ScoutAnalysisManager {
 
     return result
   }
+
+  @withTransaction
+  @withUser
+  public async totalBlock(params: {
+    data: {
+      scoutId?: number
+      sets?: number[]
+      team?: TeamFilter
+    },
+    context?: Context
+  }): Promise<{
+    opponent: boolean
+    total: number
+    points: number
+    handsOut: number
+    touch: number
+    putBack: number
+    pointsPercentage: number
+    handsOutPercentage: number
+    touchPercentage: number
+    putBackPercentage: number
+  }[]> {
+    let user = params.context?.user!
+    let trx = params.context?.trx!
+
+    await Mongo.init()
+
+    let scoutIds = await this.getViewableScoutIds({
+      data: {
+        scoutId: params.data.scoutId
+      },
+      context: { user, trx }
+    })
+
+    let totalAggregation: any[] = analysis({
+      scoutIds,
+      sets: params.data.sets,
+      team: params.data.team
+    })
+
+    // 'handsOut' | 'point' | 'touch' | 'putBack';
+
+    let result = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        opponent: boolean
+        total: number
+        points: number
+        handsOut: number
+        touch: number
+        putBack: number
+        pointsPercentage: number
+        handsOutPercentage: number
+        touchPercentage: number
+        putBackPercentage: number
+      }>([
+        ...totalAggregation,
+        {
+          $match: {
+            type: 'block'
+          },
+        },
+        {
+          $group: {
+            _id: ["$isOpponent"],
+            total: {
+              $count: {}
+            },
+            opponent: {
+              $last: "$isOpponent"
+            },
+            points: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "point"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            handsOut: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "handsOut"] },
+                  1,
+                  0
+                ]
+              }
+            }, 
+            touch: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "touch"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            putBack: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "putBack"] },
+                  1,
+                  0
+                ]
+              }
+            }
+          }
+        },
+        {
+          $addFields: {
+            pointsPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$points",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+            handsOutPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$handsOut",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+            touchPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$touch",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+            putBackPercentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$putBack",
+                    "$total"
+                  ]
+                },
+                100
+              ]
+            },
+          }
+        },
+      ])
+      .toArray()
+
+    return result
+  }
+
+  @withTransaction
+  @withUser
+  public async totalBlockByPlayer(params: {
+    data: {
+      scoutId?: number
+      sets?: number[]
+      team?: TeamFilter
+    },
+    context?: Context
+  }): Promise<{
+    player: ScoutEventPlayer
+    total: number
+    points: number
+    handsOut: number
+    touch: number
+    putBack: number
+    pointsPercentage: number
+    handsOutPercentage: number
+    touchPercentage: number
+    putBackPercentage: number
+  }[]> {
+    let user = params.context?.user!
+    let trx = params.context?.trx!
+
+    await Mongo.init()
+
+    let scoutIds = await this.getViewableScoutIds({
+      data: {
+        scoutId: params.data.scoutId
+      },
+      context: { user, trx }
+    })
+
+    let totalAggregation: any[] = analysis({
+      scoutIds,
+      sets: params.data.sets,
+      team: params.data.team
+    })
+
+    let result = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        player: ScoutEventPlayer
+        total: number
+        points: number
+        handsOut: number
+        touch: number
+        putBack: number
+        pointsPercentage: number
+        handsOutPercentage: number
+        touchPercentage: number
+        putBackPercentage: number
+      }>([
+        ...totalAggregation,
+        {
+          $match: {
+            type: 'block'
+          },
+        },
+        {
+          $group: {
+            _id: "$playerId",
+            total: {
+              $count: {}
+            },
+            player: {
+              $last: "$player"
+            },
+            points: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "point"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            handsOut: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "handsOut"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            touch: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "touch"] },
+                  1,
+                  0
+                ]
+              }
+            },
+            putBack: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$result", "putBack"] },
+                  1,
+                  0
+                ]
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            playerId: "$_id",
+            opponent: "$player.isOpponent",
+            total: "$total",
+            player: "$player",
+            points: "$points",
+            handsOut: "$handsOut",
+            touch: "$touch",
+            putBack: "$putBack"
+          }
+        },
+        {
+          $facet: {
+            totalNumber: [
+              {
+                $group: {
+                  _id: "",
+                  total: {
+                    $sum: "$total"
+                  },
+                  friendsHandsOutTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$handsOut",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsHandsOutTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$handsOut",
+                        0
+                      ]
+                    }
+                  },
+                  friendsPointsTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$points",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsPointsTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$points",
+                        0
+                      ]
+                    }
+                  },
+                  friendsTouchTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$touch",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsTouchTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$touch",
+                        0
+                      ]
+                    }
+                  },
+                  friendsPutBackTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", false] },
+                        "$putBack",
+                        0
+                      ]
+                    }
+                  },
+                  opponentsPutBackTotal: {
+                    $sum: {
+                      $cond: [
+                        { $eq: ["$opponent", true] },
+                        "$putBack",
+                        0
+                      ]
+                    }
+                  },
+                }
+              }
+            ],
+            documents: []
+          }
+        },
+        {
+          $addFields: {
+            totalNumber: {
+              $arrayElemAt: ["$totalNumber", 0]
+            },
+          }
+        },
+        {
+          $addFields: {
+            totalNumber: "$totalNumber.total",
+            friendsHandsOutTotal: "$totalNumber.friendsHandsOutTotal",
+            opponentsHandsOutTotal: "$totalNumber.opponentsHandsOutTotal",
+            friendsPointsTotal: "$totalNumber.friendsPointsTotal",
+            opponentsPointsTotal: "$totalNumber.opponentsPointsTotal",
+            friendsTouchTotal: "$totalNumber.friendsTouchTotal",
+            opponentsTouchTotal: "$totalNumber.opponentsTouchTotal",
+            friendsPutBackTotal: "$totalNumber.friendsPutBackTotal",
+            opponentsPutBackTotal: "$totalNumber.opponentsPutBackTotal"
+          }
+        },
+        {
+          $unwind: {
+            path: "$documents"
+          }
+        },
+        {
+          $project: {
+            player: "$documents.player",
+            total: "$documents.total",
+            points: "$documents.points",
+            handsOut: "$documents.handsOut",
+            putBack: "$documents.putBack",
+            percentage: {
+              $multiply: [
+                {
+                  $divide: [
+                    "$documents.total",
+                    "$totalNumber"
+                  ]
+                },
+                100
+              ]
+            },
+            handsOutPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsHandsOutTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.handsOut",
+                            "$friendsHandsOutTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsHandsOutTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.handsOut",
+                            "$opponentsHandsOutTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+            pointsPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsPointsTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.points",
+                            "$friendsPointsTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsPointsTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.points",
+                            "$opponentsPointsTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+            touchPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsTouchTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.touch",
+                            "$friendsTouchTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsTouchTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.touch",
+                            "$opponentsTouchTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+            putBackPercentage: {
+              $cond: [
+                { $eq: ["$documents.opponent", false] },
+                {
+                  $cond: [
+                    { $eq: ["$friendsPutBackTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.putBack",
+                            "$friendsPutBackTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                },
+                {
+                  $cond: [
+                    { $eq: ["$opponentsPutBackTotal", 0] },
+                    0,
+                    {
+                      $multiply: [
+                        {
+                          $divide: [
+                            "$documents.putBack",
+                            "$opponentsPutBackTotal"
+                          ]
+                        },
+                        100
+                      ]
+                    }
+                  ]
+                }
+              ],
+            },
+          }
+        }, {
+          $sort: {
+            percentage: -1
+          }
+        }
+      ])
+      .toArray()
+
+    return result
+  }
 }
