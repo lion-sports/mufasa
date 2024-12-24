@@ -1,6 +1,6 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Widget } from '../dashboards/dashboard.service'
-import type { TotalBlockByPlayerResult, TotalBlockResult, TotalReceiveByPlayerResult, TotalReceiveResult, TotalServeByPlayerResult, TotalServeResult, TotalSpikeForPlayerAndPositionResult, TotalSpikeForPlayerResult, TotalSpikeForPositionResult } from '../scouts/scoutAnalysis.service'
+import type { TotalBlockByPlayerResult, TotalBlockResult, TotalReceiveByPlayerResult, TotalReceiveResult, TotalServeByPlayerResult, TotalServeResult, TotalSpikeForPlayerAndPositionResult, TotalSpikeForPlayerResult, TotalSpikeForPositionResult, TrendResult } from '../scouts/scoutAnalysis.service'
 import type { TeamFilter } from './widgetSettings.service'
 
 export default class WidgetsService extends FetchBasedService {
@@ -85,6 +85,32 @@ export default class WidgetsService extends FetchBasedService {
         scoutId: params.scoutId,
         sets: params.sets,
         team: params.team
+      }
+    })
+
+    return response
+  }
+
+  public async loadTrend(params: {
+    scoutId?: number
+    sets?: number[]
+    team?: TeamFilter
+    type?: ('block' | 'serve' | 'spike' | 'receive')[]
+    window?: number
+  }): Promise<{
+    totalTrend: TrendResult
+    trendForType: {
+      [Key in 'block' | 'serve' | 'spike' | 'receive']?: TrendResult
+    }
+  }> {
+    let response = await this.client.get({
+      url: `/widgets/loadTrend`,
+      params: {
+        scoutId: params.scoutId,
+        sets: params.sets,
+        team: params.team,
+        type: params.type,
+        window: params.window
       }
     })
 

@@ -121,4 +121,18 @@ export default class ScoutAnalysisController {
       }
     })
   }
+
+  public async trend({ request }: HttpContextContract) {
+    const manager = new ScoutAnalysisManager()
+
+    return await manager.trend({
+      data: {
+        scoutId: request.input('scoutId'),
+        sets: request.input('sets'),
+        team: request.input('team'),
+        type: request.input('type'),
+        window: request.input('window')
+      }
+    })
+  }
 }

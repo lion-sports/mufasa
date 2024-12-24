@@ -22,11 +22,19 @@ type VolleyballReceiveSummaryWidgetSetting = {
   team?: TeamFilter
 }
 
+type VolleyballTrendWidgetSetting = {
+  widget: 'VolleyballTrend',
+  team?: TeamFilter,
+  window?: number
+  type?: ('block' | 'serve' | 'spike' | 'receive')[]
+}
+
 export type WidgetSettingStructure =
   VolleyballDistributionWidgetSetting |
   VolleyballServeSummaryWidgetSetting |
   VolleyballBlockSummaryWidgetSetting |
-  VolleyballReceiveSummaryWidgetSetting
+  VolleyballReceiveSummaryWidgetSetting |
+  VolleyballTrendWidgetSetting
 
 export type WidgetSetting = {
   id: number

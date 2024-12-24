@@ -215,4 +215,47 @@ export default class WidgetsController {
       previousTotalReceiveByPlayer
     }
   }
+
+  public async loadTrend({ request }: HttpContextContract) {
+    let scoutId = request.input('scoutId')
+    let sets = request.input('sets')
+    let team = request.input('team')
+    let type = request.input('type')
+    let window = request.input('window')
+
+    const manager = new ScoutAnalysisManager()
+    let totalTrend = await manager.trend({
+      data: {
+        scoutId,
+        sets,
+        team,
+        type,
+        window
+      }
+    })
+
+    let trendForType: {
+      [Key in 'block' | 'serve' | 'spike' | 'receive']?: Awaited<ReturnType<ScoutAnalysisManager['trend']>>
+    } = {}
+
+    if(!!type && type.length >= 0) {
+      for(let i = 0; i < type.length; i += 1) {
+        let currentType = type[i]
+        trendForType[currentType] = await manager.trend({
+          data: {
+            scoutId,
+            sets,
+            team,
+            type: [currentType],
+            window
+          }
+        })
+      }
+    }
+
+    return {
+      totalTrend,
+      trendForType
+    }
+  }
 }

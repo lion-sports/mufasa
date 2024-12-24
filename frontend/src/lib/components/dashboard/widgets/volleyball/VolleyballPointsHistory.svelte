@@ -40,8 +40,6 @@
     dispatch('reload')
     settingsOpened = false
   }
-
-  $: console.log(widget.data?.points)
 </script>
 
 <div class="@container w-full h-full rounded-md max-h-full">

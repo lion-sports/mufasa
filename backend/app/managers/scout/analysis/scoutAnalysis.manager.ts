@@ -2216,4 +2216,236 @@ export default class ScoutAnalysisManager {
 
     return result
   }
+
+  @withTransaction
+  @withUser
+  public async trend(params: {
+    data: {
+      scoutId?: number
+      sets?: number[]
+      team?: TeamFilter
+      type?: ('block' | 'serve' | 'spike' | 'receive')[]
+      window?: number
+    },
+    context?: Context
+  }): Promise<{
+    type: 'block' | 'serve' | 'spike' | 'receive'
+    rating: number
+    windowAverageRating: number
+  }[]> {
+    let user = params.context?.user!
+    let trx = params.context?.trx!
+
+    await Mongo.init()
+
+    let scoutIds = await this.getViewableScoutIds({
+      data: {
+        scoutId: params.data.scoutId
+      },
+      context: { user, trx }
+    })
+
+    let totalAggregation: any[] = analysis({
+      scoutIds,
+      sets: params.data.sets,
+      team: params.data.team
+    })
+
+    let types = params.data.type || ['block', 'serve', 'spike', 'receive']
+    let window = Math.abs(params.data.window || 5)
+
+    let result = await Mongo.db
+      .collection(SCOUT_EVENT_COLLECTION_NAME)
+      .aggregate<{
+        type: 'block' | 'serve' | 'spike' | 'receive'
+        rating: number
+        windowAverageRating: number
+      }>([
+        ...totalAggregation,
+        {
+          $match: {
+            type: {
+              $in: types
+            }
+          },
+        },
+        {
+          $addFields: {
+            rating: {
+              $switch: {
+                branches: [
+                  {
+                    case: { $eq: ["$type", "serve"] },
+                    then: {
+                      $switch: {
+                        branches: [
+                          {
+                            case: {
+                              $eq: ["$result", "error"]
+                            },
+                            then: 0
+                          },
+                          {
+                            case: {
+                              $eq: [
+                                "$result",
+                                "received"
+                              ]
+                            },
+                            then: 50
+                          },
+                          {
+                            case: {
+                              $eq: ["$result", "point"]
+                            },
+                            then: 100
+                          }
+                        ],
+                        default: 0
+                      }
+                    }
+                  },
+                  {
+                    case: { $eq: ["$type", "spike"] },
+                    then: {
+                      $switch: {
+                        branches: [
+                          {
+                            case: {
+                              $eq: ["$result", "error"]
+                            },
+                            then: 0
+                          },
+                          {
+                            case: {
+                              $eq: [
+                                "$result",
+                                "defense"
+                              ]
+                            },
+                            then: 50
+                          },
+                          {
+                            case: {
+                              $eq: ["$result", "point"]
+                            },
+                            then: 100
+                          }
+                        ],
+                        default: 0
+                      }
+                    }
+                  },
+                  {
+                    case: { $eq: ["$type", "block"] },
+                    then: {
+                      $switch: {
+                        branches: [
+                          {
+                            case: {
+                              $eq: ["$result", "handsOut"]
+                            },
+                            then: 0
+                          },
+                          {
+                            case: {
+                              $eq: [
+                                "$result",
+                                "touch"
+                              ]
+                            },
+                            then: 33
+                          },
+                          {
+                            case: {
+                              $eq: ["$result", "putBack"]
+                            },
+                            then: 66
+                          },
+                          {
+                            case: {
+                              $eq: ["$result", "point"]
+                            },
+                            then: 100
+                          }
+                        ],
+                        default: 0
+                      }
+                    }
+                  },
+                  {
+                    case: { $eq: ["$type", "receive"] },
+                    then: {
+                      $switch: {
+                        branches: [
+                          {
+                            case: {
+                              $eq: ["$result", "x"]
+                            },
+                            then: 0
+                          },
+                          {
+                            case: {
+                              $eq: [
+                                "$result",
+                                "/"
+                              ]
+                            },
+                            then: 25
+                          },
+                          {
+                            case: {
+                              $eq: ["$result", "-"]
+                            },
+                            then: 50
+                          },
+                          {
+                            case: {
+                              $eq: ["$result", "+"]
+                            },
+                            then: 75
+                          },
+                          {
+                            case: {
+                              $eq: ["$result", "++"]
+                            },
+                            then: 100
+                          }
+                        ],
+                        default: 0
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          $setWindowFields: {
+            sortBy: {
+              date: 1
+            },
+            output: {
+              windowAverageRating: {
+                $avg: "$rating",
+                window: {
+                  documents: [-window, 0]
+                }
+              }
+            }
+          }
+        }, {
+          $project: {
+            date: "$date",
+            type: "$type",
+            rating: "$rating",
+            windowAverageRating: "$windowAverageRating"
+          }
+        }
+      ])
+      .toArray()
+
+    return result
+  }
 }

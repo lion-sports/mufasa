@@ -106,6 +106,12 @@ export type TotalReceiveByPlayerResult = {
   errorPercentage: number
 }[]
 
+export type TrendResult = {
+  type: 'block' | 'serve' | 'spike' | 'receive'
+  rating: number
+  windowAverageRating: number
+}[]
+
 export default class ScoutAnalysisService extends FetchBasedService {
   public async totalSpikeForPosition(params: {
     scoutId?: number
@@ -271,6 +277,27 @@ export default class ScoutAnalysisService extends FetchBasedService {
         scoutId: params.scoutId,
         sets: params.sets,
         team: params.team
+      }
+    })
+
+    return response
+  }
+
+  public async trend(params: {
+    scoutId?: number
+    sets?: number[]
+    team?: TeamFilter
+    type?: ('block' | 'serve' | 'spike' | 'receive')[]
+    window?: number
+  }): Promise<TrendResult[]> {
+    let response = await this.client.post({
+      url: `/scouts/analysis/trend`,
+      body: {
+        scoutId: params.scoutId,
+        sets: params.sets,
+        team: params.team,
+        type: params.type,
+        window: params.window
       }
     })
 
