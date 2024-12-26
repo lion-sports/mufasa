@@ -122,6 +122,7 @@ export default class DashboardManager {
       name: string
       active: boolean
       widgets: {
+        id?: string | number
         componentName: string
         height: number
         width: number
@@ -134,6 +135,11 @@ export default class DashboardManager {
   }): Promise<Dashboard> {
     let trx = params.context?.trx as TransactionClientContract
     let user = params.context?.user as User
+
+    params.data.widgets = params.data.widgets.map((e) => {
+      if (!Number(e.id)) delete e.id
+      return e
+    })
 
     let validatedData = await validator.validate({
       schema: new UpdateDashboardValidator().schema,
