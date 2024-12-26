@@ -110,7 +110,7 @@ export default class DashboardManager {
     return await Dashboard.query({ client: trx })
       .where('userId', user.id)
       .where('id', params.data.id)
-      .preload('widgets')
+      .preload('widgets', b => b.preload('widgetSetting'))
       .firstOrFail()
   }
 

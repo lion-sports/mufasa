@@ -2230,6 +2230,8 @@ export default class ScoutAnalysisManager {
     context?: Context
   }): Promise<{
     type: 'block' | 'serve' | 'spike' | 'receive'
+    pointIdentifier: string
+    _id: string
     rating: number
     windowAverageRating: number
   }[]> {
@@ -2258,6 +2260,8 @@ export default class ScoutAnalysisManager {
       .collection(SCOUT_EVENT_COLLECTION_NAME)
       .aggregate<{
         type: 'block' | 'serve' | 'spike' | 'receive'
+        pointIdentifier: string
+        _id: string
         rating: number
         windowAverageRating: number
       }>([
@@ -2438,8 +2442,10 @@ export default class ScoutAnalysisManager {
         }, {
           $project: {
             date: "$date",
+            pointIdentifier: "$pointIdentifier",
             type: "$type",
             rating: "$rating",
+            id: "$id",
             windowAverageRating: "$windowAverageRating"
           }
         }

@@ -10,6 +10,7 @@ export default class UpdateDashboardValidator {
     active: schema.boolean.optional(),
     widgets: schema.array.optional().members(
       schema.object().members({
+        id: schema.number.optional(),
         componentName: schema.string.optional(),
         height: schema.number.optional(),
         width: schema.number.optional(),

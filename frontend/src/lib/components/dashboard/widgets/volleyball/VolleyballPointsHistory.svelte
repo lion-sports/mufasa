@@ -53,7 +53,7 @@
       </button>
     </div>
   </div>
-  <div class="h-[calc(100%-32px)] w-full">
+  <div class="h-[calc(100%-32px)] w-full max-h-[400px] overflow-auto">
       {#if loadingData}
         <Skeleton
           --skeleton-card-height="100%"

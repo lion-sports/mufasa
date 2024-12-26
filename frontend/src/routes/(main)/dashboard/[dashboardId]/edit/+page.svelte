@@ -16,6 +16,7 @@
 	async function saveDashboard() {
 		loadingSave = true
 
+    console.log(data.dashboard.widgets)
 		let service = new DashboardService({ fetch })
 		await service.update({
 			id: data.dashboard.id,

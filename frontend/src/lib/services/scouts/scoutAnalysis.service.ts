@@ -108,6 +108,8 @@ export type TotalReceiveByPlayerResult = {
 
 export type TrendResult = {
   type: 'block' | 'serve' | 'spike' | 'receive'
+  pointIdentifier: string
+  _id: string
   rating: number
   windowAverageRating: number
 }[]

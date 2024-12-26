@@ -107,6 +107,12 @@ export default class WidgetManager {
       params.data.widgets.every((pw) => pw.id !== w.id)
     )
 
+    console.log({
+      createWidgets,
+      updateWidgets,
+      deleteWidgets
+    })
+
     let createdWidgetsIds: number[] = []
     const createdWidgets = await dashboard.related('widgets').createMany(
       createWidgets.map((pw) => {

@@ -45,17 +45,63 @@
         data: [],
         backgroundColor: 'rgb(239, 71, 110, .6)',
         borderColor: 'rgb(239, 71, 110, .6)',
-        tension: 0.3
+        tension: 0.3,
+        spanGaps: true
       }
     ]
+
+    let typeToColors: Record<string, string> = {
+      'block': '#d81159',
+      'serve': '#ffbc42',
+      'spike': '#0496ff',
+      'receive': '#006ba6'
+    }
+
+    for(const [key, value] of Object.entries(widget.data.trendForType)) {
+      let type = key
+      data.datasets = [
+        ...data.datasets,
+        {
+          label: type,
+          data: [],
+          backgroundColor: typeToColors[type],
+          borderColor: typeToColors[type],
+          tension: 0.3,
+          spanGaps: true
+        }
+      ]
+    }
 
     for(let i = 0; i < widget.data.totalTrend.length; i += 1) {
       let trendRow = widget.data.totalTrend[i]
       data.labels = [...data.labels, '']
+
       data.datasets[0].data = [
         ...data.datasets[0].data,
         trendRow.windowAverageRating
       ]
+
+      let datasetIndex = data.datasets.findIndex((d) => d.label === trendRow.type)
+      if(datasetIndex === -1) continue
+
+      let typeTrend = widget.data.trendForType[trendRow.type]
+      if(!!typeTrend) {
+        let rowIndex = typeTrend.findIndex((e) => e._id === trendRow._id)
+        if(rowIndex !== -1) {
+          data.datasets[datasetIndex].data = [
+            ...data.datasets[datasetIndex].data,
+            typeTrend[rowIndex].windowAverageRating
+          ]
+        }
+      }
+
+      for(let k = 0; k < data.datasets.length; k += 1) {
+        if(data.datasets[k].label === trendRow.type) continue
+        data.datasets[k].data = [
+          ...data.datasets[k].data,
+          null
+        ]
+      }
     }
   }
 
@@ -102,8 +148,8 @@
       </button>
     </div>
   </div>
-  <div class="h-[calc(100%-24px)] w-full grid grid-cols-1 @md:grid-cols-12 gap-3">
-    <div class="@md:col-span-6 p-2 min-h-[320px]">
+  <div class="h-[calc(100%-24px)] w-full grid grid-cols-1 gap-3">
+    <div class="p-2 min-h-[320px]">
       {#if loadingData}
         <Skeleton
           --skeleton-card-height="100%"
@@ -112,32 +158,20 @@
       {:else}
         <GanymedeLineChart
           data={data}
-          showXTicks={true}
-          showYTicks={true}
-          lineWidth={0}
+          showXTicks={false}
+          showYTicks={false}
+          lineWidth={2}
+          gridLineWidth={0.3}
           maintainAspectRatio={false}
           enableZoom={false}
-          yMax={100}
+          yMax={102}
+          yMin={0}
+          showLegend={true}
+          pointRadius={0}
+          hitRadius={0}
+          hoverRadius={0}
+          tooltipsDisabled={false}
         ></GanymedeLineChart>
-      {/if}
-    </div>
-    <div class="@md:col-span-6 p-2 @md:h-[350px]">
-      {#if loadingData}
-        <div class="flex flex-col gap-4">
-          {#each Array.from(Array(3).keys()) as i}
-            <div class="flex flex-col gap-2">
-              <Skeleton
-                --skeleton-card-height="32px"
-                --skeleton-card-width="100%"
-              ></Skeleton>
-              <Skeleton
-                --skeleton-card-height="24px"
-                --skeleton-card-width="64%"
-              ></Skeleton>
-            </div>
-          {/each}
-        </div>
-      {:else}
       {/if}
     </div>
   </div>

@@ -240,7 +240,7 @@
     </div>
   {/if}
 
-  <div class="h-[calc(100dvh-155px)]">
+  <div class={selectedSection !== 'analysis' ? "h-[calc(100dvh-155px)]" : "h-[calc(100dvh-60px)]"}>
     {#key selectedSection !== 'analysis'}
       <PaneGroup direction="vertical">
         {#if selectedSection !== 'analysis'}
@@ -294,10 +294,12 @@
                 ></StudioPlayerView>
               </Tabs.Content>
               <Tabs.Content value="analysis" class="w-full overflow-auto py-2 px-4">
-                <StudioAnalysis
-                  analysis={$studio?.analysis}
-                  dashboard={data.dashboard}
-                ></StudioAnalysis>
+                {#if selectedSection === 'analysis'}
+                  <StudioAnalysis
+                    analysis={$studio?.analysis}
+                    dashboard={data.dashboard}
+                  ></StudioAnalysis>
+                {/if}
               </Tabs.Content>
             </Tabs.Root>
           </div>
