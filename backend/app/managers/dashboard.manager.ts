@@ -121,7 +121,7 @@ export default class DashboardManager {
       id: number
       name: string
       active: boolean
-      widgets: {
+      widgets?: {
         id?: string | number
         componentName: string
         height: number
@@ -136,10 +136,12 @@ export default class DashboardManager {
     let trx = params.context?.trx as TransactionClientContract
     let user = params.context?.user as User
 
-    params.data.widgets = params.data.widgets.map((e) => {
-      if (!Number(e.id)) delete e.id
-      return e
-    })
+    if (!!params.data.widgets) {
+      params.data.widgets = params.data.widgets.map((e) => {
+        if (!Number(e.id)) delete e.id
+        return e
+      })
+    }
 
     let validatedData = await validator.validate({
       schema: new UpdateDashboardValidator().schema,
