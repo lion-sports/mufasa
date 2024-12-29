@@ -31,8 +31,7 @@
 		teammates: Teammate[] | undefined = undefined,
 		groups: Group[] = []
 
-	let date: Date | undefined = event.start,
-		startTime: string,
+	let startTime: string,
 		endTime: string
 
 	$: {
@@ -41,7 +40,7 @@
 		}
 
 		if (!event.end) {
-			event.end = DateTime.fromJSDate(event.start).plus({ hours: 1 }).toJSDate()
+			event.end = new Date()
 		}
 
 		if (!!event.start) {
@@ -56,74 +55,16 @@
 	function selectAll() {
 		if (!!teammates) {
 			convocations = {}
-			for (let i = 0; i < teammates.filter((t) => !t.group || t.group.convocable).length; i += 1) {
-				convocations[teammates[i].id] = true
+      let convocableTeammates = teammates.filter((t) => !t.group || t.group.convocable)
+			for (let i = 0; i < convocableTeammates.length; i += 1) {
+				convocations[convocableTeammates[i].id] = true
 			}
 		}
 	}
 
-	function handleDatePickerClick(
-		e: CustomEvent<{
-			dateStat: {
-				dayOfMonth: number
-				dayOfWeek: number
-				month: number
-				year: number
-			}
-		}>
-	) {
-		let newDateStart = event.start
-		if (!newDateStart) newDateStart = new Date()
-
-		event.start = DateTime.fromJSDate(newDateStart)
-			.set({
-				month: e.detail.dateStat.month + 1,
-				year: e.detail.dateStat.year,
-				day: e.detail.dateStat.dayOfMonth
-			})
-			.toJSDate()
-
-		let newDateEnd = event.end
-		if (!newDateEnd) newDateEnd = new Date()
-
-		event.end = DateTime.fromJSDate(newDateEnd)
-			.set({
-				month: e.detail.dateStat.month + 1,
-				year: e.detail.dateStat.year,
-				day: e.detail.dateStat.dayOfMonth
-			})
-			.toJSDate()
-	}
-
-	function handleDatePickerInput(
-		e: CustomEvent<{
-			datetime: Date | undefined
-		}>
-	) {
-		if (!!e.detail.datetime) {
-			let newDateStart = event.start
-			if (!newDateStart) newDateStart = new Date()
-
-			event.start = DateTime.fromJSDate(newDateStart)
-				.set({
-					month: e.detail.datetime.getMonth() + 1,
-					year: e.detail.datetime.getFullYear(),
-					day: e.detail.datetime.getDate()
-				})
-				.toJSDate()
-
-			let newDateEnd = event.end
-			if (!newDateEnd) newDateEnd = new Date()
-
-			event.end = DateTime.fromJSDate(newDateEnd)
-				.set({
-					month: e.detail.datetime.getMonth() + 1,
-					year: e.detail.datetime.getFullYear(),
-					day: e.detail.datetime.getDate()
-				})
-				.toJSDate()
-		}
-	}
+  function unselectAll() {
+    convocations = {}
+  }
 
 	function handleStartTimeChange(e: any) {
 		if (!event.start) event.start = new Date()
@@ -153,29 +94,53 @@
 </script>
 
 <div style:padding style:margin style:width style:height>
-	<div class="duration-infos">
-		<div>
-			<StandardDatepicker
-				placeholder="Data "
-				bind:value={date}
-				on:day-click={handleDatePickerClick}
-				on:input={handleDatePickerInput}
-			/>
-		</div>
-		<div>
-			<StandardTimePicker value={startTime} name="startTime" on:input={handleStartTimeChange} />
-		</div>
-		<div>
-			<StandardTimePicker value={endTime} name="endTime" on:input={handleEndTimeChange} />
-		</div>
-	</div>
-	<LabelAndTextfield label="Titolo" name="title" bind:value={event.name} />
-	<LabelAndTextarea label="Descrizione" name="description" bind:value={event.description} />
+  <div 
+    class="grid grid-cols-1 md:grid-cols-2 duration-infos"
+  >
+    <div>
+      <div class="mb-2">Inizio</div>
+      <div>
+        <StandardDatepicker
+          placeholder="Inizio"
+          bind:value={event.start}
+        />
+      </div>
+      <div>
+        <StandardTimePicker value={startTime} name="startTime" on:input={handleStartTimeChange} />
+      </div>
+    </div>
+    <div>
+      <div class="mb-2">Fine</div>
+      <div>
+        <StandardDatepicker
+          placeholder="Fine"
+          bind:value={event.end}
+        />
+      </div>
+      <div>
+        <StandardTimePicker value={endTime} name="endTime" on:input={handleEndTimeChange} />
+      </div>
+    </div>
+  </div>
+  <div class="w-full">
+    <LabelAndTextfield 
+      label="Titolo" 
+      name="title" 
+      bind:value={event.name} 
+      --simple-textfield-width="100%"
+    />
+  </div>
+  <div>
+    <LabelAndTextarea label="Descrizione" name="description" bind:value={event.description} />
+  </div>
 	{#if mode == 'create' && teammates}
 		<div style:margin-top="20px">
 			<CollapsableSection title="Convocazioni">
-				<button on:click={selectAll} style:color="rgb(var(--global-color-primary-500))"
+				<button on:click={selectAll} class="text-[rgb(var(--global-color-primary-500))]"
 					>Seleziona tutti</button
+				>
+        <button on:click={unselectAll} class="text-[rgb(var(--global-color-primary-500))] ml-2"
+					>Deseleziona tutti</button
 				>
 				<TeammatesChecklist
 					bind:value={convocations}
@@ -190,14 +155,11 @@
 
 <style>
 	@media (max-width: 768px) {
+    .duration-infos {
+      --simple-textfield-width: 100%
+    }
 	}
 
 	@media (min-width: 769px) {
-	}
-
-	.duration-infos {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 10px;
 	}
 </style>

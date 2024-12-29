@@ -105,7 +105,12 @@ export default class EventsService extends FetchBasedService {
 		return response
 	}
 
-	public async update(params: { id: number; name?: string }): Promise<Event> {
+	public async update(params: { 
+    id: number
+    name?: string
+    start?: Date
+    end?: Date
+  }): Promise<Event> {
 		let response = await this.client.put({
 			url: '/events/' + params.id,
 			body: params

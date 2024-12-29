@@ -5,12 +5,9 @@
 
 <script lang="ts">
 	import { DateTime } from 'luxon'
-	import { onMount } from 'svelte'
-	import EventsService from '$lib/services/events/events.service'
-	import EventsViewer from '$lib/components/events/EventsViewer.svelte'
+	import EventsCalendar from '../events/EventsCalendar.svelte'
 
 	export let team: Team,
-		teammate: Teammate | undefined = undefined,
 		selectedDate: Date = new Date(),
 		selectedEvents: Event[] = [],
 		visibleMonth: number = DateTime.now().get('month') - 1,
@@ -18,55 +15,25 @@
 		events: Event[] = [],
     canCreate: boolean = false
 
-	function loadEvents() {
-		let service = new EventsService({ fetch })
-		service
-			.list({
-				filters: {
-					from: DateTime.now()
-						.set({
-							month: visibleMonth + 1,
-							year: visibleYear
-						})
-						.startOf('month')
-						.startOf('day')
-						.startOf('hour')
-						.startOf('minute')
-						.startOf('millisecond')
-						.minus({ days: 7 })
-						.toJSDate(),
-					to: DateTime.now()
-						.set({
-							month: visibleMonth + 1,
-							year: visibleYear
-						})
-						.endOf('month')
-						.endOf('day')
-						.endOf('hour')
-						.endOf('minute')
-						.endOf('millisecond')
-						.plus({ days: 7 })
-						.toJSDate(),
-					team: {
-						id: team.id
-					}
-				}
-			})
-			.then((loadedEvents) => {
-				events = loadedEvents
-			})
-	}
+  function calculateSelectedEvents() {
+    selectedEvents = events.filter((e) => {
+      if(!selectedDate) return false
+      let startOfDayMillis = DateTime.fromJSDate(selectedDate).startOf('day').toMillis()
+      let endOfDayMillis = DateTime.fromJSDate(selectedDate).endOf('day').toMillis()
+      let eventMillis = DateTime.fromJSDate(e.start).toMillis()
+      return eventMillis < endOfDayMillis && eventMillis >= startOfDayMillis
+    })
+  }
+
+  $: if(!!selectedDate) calculateSelectedEvents()
+    else calculateSelectedEvents()
 </script>
 
-<EventsViewer
-	bind:events
+<EventsCalendar
 	bind:selectedDate
 	bind:team
-	bind:teammate
-	bind:selectedEvents
+  bind:events
 	bind:visibleMonth
 	bind:visibleYear
   bind:canCreate
-	on:nextMonth={loadEvents}
-	on:previousMonth={loadEvents}
 />

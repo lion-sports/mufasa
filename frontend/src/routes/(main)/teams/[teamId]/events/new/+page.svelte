@@ -19,9 +19,14 @@
 	onMount(async () => {
 		let startParams: string | null = $page.url.searchParams.get('start')
 		if (!!startParams) {
-			event = {
-				start: DateTime.fromISO(startParams).toJSDate()
-			}
+      if(!event) event = {}
+      event.start = DateTime.fromISO(startParams).toJSDate()
+		}
+
+    let endParams: string | null = $page.url.searchParams.get('end')
+    if (!!endParams) {
+      if(!event) event = {}
+      event.end = DateTime.fromISO(endParams).toJSDate()
 		}
 	})
 

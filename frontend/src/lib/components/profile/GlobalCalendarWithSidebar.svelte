@@ -25,7 +25,9 @@
 
 <MediaQuery let:mAndDown>
 	<div class="calendar-container">
-		<GlobalCalendar bind:selectedDate bind:selectedEvents bind:events bind:canCreate />
+    <div class="w-full">
+      <GlobalCalendar bind:selectedDate bind:selectedEvents bind:events bind:canCreate />
+    </div>
 		{#if !mAndDown}
 			<div class="event-drawer" class:opened={!!selectedDate} class:closed={!selectedDate}>
 				<div class="title-container">
@@ -70,6 +72,7 @@
 	.event-drawer {
 		transition: all 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
 		height: 100%;
+    flex-grow: 1;
 	}
 
 	.events-list {

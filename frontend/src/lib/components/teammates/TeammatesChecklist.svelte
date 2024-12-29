@@ -72,7 +72,7 @@
 			>
 				<svelte:fragment slot="text">
 					<span>{teammate.alias || teammate.user.firstname + ' ' + teammate.user.lastname}</span>
-					<span style:margin-left="10px" style:font-weight="200" style:font-size="0.9rem"
+					<span class="font-thin text-xs ml-2"
 						>{teammate.group?.name || ''}</span
 					>
 				</svelte:fragment>

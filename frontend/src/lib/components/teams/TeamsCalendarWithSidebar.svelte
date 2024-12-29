@@ -26,11 +26,13 @@
 <MediaQuery let:mAndDown>
 	{#if team}
 		<div class="calendar-container">
-			<TeamsCalendar bind:selectedDate bind:selectedEvents bind:events {team} {teammate} {canCreate} />
+      <div class="w-full">
+        <TeamsCalendar bind:selectedDate bind:selectedEvents bind:events {team} {canCreate} />
+      </div>
 			{#if !mAndDown}
 				<div class="event-drawer" class:opened={!!selectedDate} class:closed={!selectedDate}>
 					<div class="title-container">
-						<div class="title">
+						<div class="title ml-2">
 							{formattedDate}
 						</div>
 						<div class="close-button">
@@ -75,6 +77,7 @@
 	.event-drawer {
 		transition: all 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
 		height: 100%;
+    flex-grow: 1;
 	}
 
 	.events-list {

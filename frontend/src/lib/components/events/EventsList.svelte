@@ -29,7 +29,7 @@
 	function handlePlusClick() {
 		if (!!team) {
 			if (!!precompiledDate) {
-				goto(`/teams/${team.id}/events/new?${qs.stringify({ start: precompiledDate.toJSDate() })}`)
+				goto(`/teams/${team.id}/events/new?${qs.stringify({ start: precompiledDate.toJSDate(), end: precompiledDate.toJSDate() })}`)
 			} else {
 				goto('/teams/' + team.id + '/events/new')
 			}
@@ -105,7 +105,13 @@
 		{/if}
 	{:else}
 		<slot name="no-data">
-			<div class="no-data">Nessun evento</div>
+			<div class="no-data">
+        Nessun evento, 
+        <button 
+          on:click={handlePlusClick}
+          class="inline underline text-[rgb(var(--global-color-primary-500))]"
+        >creane uno</button>
+      </div>
 		</slot>
 	{/if}
 </div>
