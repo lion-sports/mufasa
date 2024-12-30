@@ -56,7 +56,7 @@ export const SETTER_POSITION_TO_ROLES_POSITIONS: {
       2: 'setter',
       3: 'middleBlocker:2',
       4: 'outsideHitter:1',
-      5: 'middleBlocker:2',
+      5: 'middleBlocker:1',
       6: 'outsideHitter:2'
     },
     defenseSideOut: {
