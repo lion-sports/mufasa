@@ -1,5 +1,5 @@
 import ScoutService, { type Scout, type ScoutAnalysis, type ScoutStudio, type VolleyballRole } from '$lib/services/scouts/scouts.service'
-import { getNextAutomatedEvents, type ScoutEventPlayer } from 'lionn-common'
+import { getNextAutomatedEvents, type ScoutEventPlayer, FRIENDS_FIELD_SIDES, FIELD_RENDER_ENGINES } from 'lionn-common'
 import { OPPOSITE_POSITIONS, ORDERED_POSITIONS, type BlockScoutEventResult, type ReceiveScoutEventResult, type RotationType, type ServeScoutEventResult, type SpikeScoutEventResult, type VolleyballPhase, type VolleyballPlayersPosition, type VolleyballScoutEventJson, type VolleyballScoutEventParameters, type VolleyballScoutEventPosition } from '$lib/services/scouts/volleyball'
 import { get, writable } from 'svelte/store'
 import socketService from '$lib/services/common/socket.service';
@@ -488,7 +488,7 @@ export function suggestPlayer(params: {
 }
 
 export async function updateFriendsFieldSide(params: {
-  side: 'right' | 'left'
+  side: typeof FRIENDS_FIELD_SIDES[number]
 }) {
   let currentStudio = get(studio)
   if (!currentStudio) throw new Error('cannot call without a studio')
@@ -507,6 +507,33 @@ export async function updateFriendsFieldSide(params: {
 
       if (!!studio.scout.scoutInfo.general) {
         studio.scout.scoutInfo.general.friendsFieldSide = params.side
+      }
+    }
+
+    return studio
+  })
+}
+
+export async function updateFieldRenderEngine(params: {
+  renderEngine: typeof FIELD_RENDER_ENGINES[number]
+}) {
+  let currentStudio = get(studio)
+  if (!currentStudio) throw new Error('cannot call without a studio')
+
+  let scoutService = new ScoutService({ fetch })
+  await scoutService.updateGeneralInfo({
+    id: currentStudio.scout.id,
+    general: {
+      fieldRenderEngine: params.renderEngine
+    }
+  })
+
+  studio.update((studio) => {
+    if (!!studio) {
+      if (!studio.scout.scoutInfo.general) studio.scout.scoutInfo.general = {}
+
+      if (!!studio.scout.scoutInfo.general) {
+        studio.scout.scoutInfo.general.fieldRenderEngine = params.renderEngine
       }
     }
 

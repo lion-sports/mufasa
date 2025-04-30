@@ -1,14 +1,11 @@
 <script lang="ts">
 	import type {
-	POSSIBLE_AUTO_PAHSE_EVENTS,
-		POSSIBLE_AUTO_POINT_ENEMY_EVENTS,
-		Scout,
-		ScoutInfoSettings
+		Scout
 	} from '@/lib/services/scouts/scouts.service'
 	import LabelAndCheckbox from '../../common/LabelAndCheckbox.svelte'
-	import ScoutsService, {
-		POSSIBLE_AUTO_POINT_FRIENDS_EVENTS
-	} from '@/lib/services/scouts/scouts.service'
+	import type { POSSIBLE_AUTO_PAHSE_EVENTS, POSSIBLE_AUTO_POINT_ENEMY_EVENTS, POSSIBLE_AUTO_POINT_FRIENDS_EVENTS } from 'lionn-common'
+	import ScoutsService from '@/lib/services/scouts/scouts.service'
+
 
 	export let scout: Scout
 

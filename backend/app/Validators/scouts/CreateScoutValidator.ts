@@ -1,7 +1,7 @@
 import { schema, CustomMessages } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { SPORTS } from 'App/Models/Scout'
-import { FRIENDS_FIELD_SIDES, POSSIBLE_AUTO_PAHSE_EVENTS, POSSIBLE_AUTO_POINT_ENEMY_EVENTS, POSSIBLE_AUTO_POINT_FRIENDS_EVENTS } from 'lionn-common'
+import { FIELD_RENDER_ENGINES, FRIENDS_FIELD_SIDES, POSSIBLE_AUTO_PAHSE_EVENTS, POSSIBLE_AUTO_POINT_ENEMY_EVENTS, POSSIBLE_AUTO_POINT_FRIENDS_EVENTS } from 'lionn-common'
 
 export default class CreateScoutValidator {
   constructor(protected ctx?: HttpContextContract) { }
@@ -17,7 +17,8 @@ export default class CreateScoutValidator {
         opponent: schema.object.optional().members({
           name: schema.string.optional()
         }),
-        friendsFieldSide: schema.enum.optional(FRIENDS_FIELD_SIDES)
+        friendsFieldSide: schema.enum.optional(FRIENDS_FIELD_SIDES),
+        fieldRenderEngine: schema.enum.optional(FIELD_RENDER_ENGINES)
       }),
       settings: schema.object.optional().members({
         automations: schema.object.optional().members({

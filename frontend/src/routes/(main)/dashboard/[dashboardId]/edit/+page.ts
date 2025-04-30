@@ -6,8 +6,7 @@ export const load = (async ({ parent, fetch, params }) => {
 
 	let service = new DashboardService({
 		fetch,
-		token: parentData.token,
-		customerInUse: parentData.customerInUse
+		token: parentData.token
 	})
 	let dashboard = await service.get({ id: Number(params.dashboardId) })
 
@@ -18,7 +17,6 @@ export const load = (async ({ parent, fetch, params }) => {
 		if (!!widgetSpec?.fetchData) {
 			widget.data = await widgetSpec.fetchData({
 				fetch,
-				options: widget.options,
 				token: parentData.token,
 				user: parentData.user
 			})

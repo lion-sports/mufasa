@@ -5,7 +5,7 @@
 	import { Drawer, Icon } from '@likable-hair/svelte'
 	import StandardDialog from '$lib/components/common/StandardDialog.svelte'
 	import StudioPlayerAdd from '$lib/components/scouts/studio/StudioPlayerAdd.svelte'
-  import studio, { manualPhase, playerInPosition, pointScored, restart, selectPlayer, teamRotation, undo, updateFriendsFieldSide } from '$lib/stores/scout/studio';
+  import studio, { manualPhase, playerInPosition, pointScored, restart, selectPlayer, teamRotation, undo, updateFieldRenderEngine, updateFriendsFieldSide } from '$lib/stores/scout/studio';
 	import type { Player } from '@/lib/services/players/players.service'
 	import StudioField from '@/lib/components/scouts/studio/StudioField.svelte'
 	import StudioStartingSixSetter from '@/lib/components/scouts/studio/StudioStartingSixSetter.svelte'
@@ -48,6 +48,12 @@
   async function changeSides() {
     await updateFriendsFieldSide({
       side: $studio?.scout.scoutInfo.general?.friendsFieldSide == 'right' ? 'left' : 'right'
+    })
+  }
+
+  async function changeFieldRenderMode() {
+    await updateFieldRenderEngine({
+      renderEngine: $studio?.scout.scoutInfo.general?.fieldRenderEngine == '2d' ? '3d' : '2d'
     })
   }
 
@@ -131,6 +137,19 @@
             <span class="ml-2">
               Cambia lato
             </span>
+          </Menubar.Item>
+          <Menubar.Item on:click={() => { changeFieldRenderMode() }}>
+            {#if $studio.scout.scoutInfo.general?.fieldRenderEngine == '3d'}
+              <Icon name="mdi-cube-off-outline"></Icon>
+              <span class="ml-2">
+                Attiva campo 2D
+              </span>
+            {:else}
+              <Icon name="mdi-cube-outline"></Icon>
+              <span class="ml-2">
+                Attiva campo 3D
+              </span>
+            {/if}
           </Menubar.Item>
         </Menubar.Content>
       </Menubar.Menu>
@@ -250,6 +269,7 @@
                 scout={$studio?.scout}
                 phase={$studio?.scout.stash?.phase || 'serve'}
                 friendSides={$studio?.scout.scoutInfo.general?.friendsFieldSide}
+                fieldRenderEngine={$studio.scout.scoutInfo.general?.fieldRenderEngine}
                 on:playerClick={(e) => {
                   selectPlayer({ player: e.detail.player })
                   selectedSection = 'player'
