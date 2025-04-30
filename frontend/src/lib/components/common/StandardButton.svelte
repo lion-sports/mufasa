@@ -30,7 +30,7 @@
 	else if (style == 'danger') backgroundColor = 'rgb(var(--global-color-error-500))'
 
 	let color: string
-	$: if (style == 'primary') color = 'rgb(var(--global-color-grey-50))'
+	$: if (style == 'primary') color = 'rgb(var(--global-color-primary-foreground))'
 	else if (style == 'secondary') color = 'rgb(var(--global-color-contrast-900))'
 	else if (style == 'danger') color = 'rgb(var(--global-color-grey-50))'
 

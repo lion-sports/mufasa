@@ -32,6 +32,7 @@
 	on:input
 	on:focus
 	class={clazz}
+	--simple-textfield-height="40px"
 	--simple-textfield-border={localError
 		? '1px solid rgb(var(--global-color-error-600))'
 		: undefined}
