@@ -14,15 +14,14 @@
 
 	export let connectWalletDialog: boolean = false
 
-	let 
-		error: boolean = false,
+	let error: boolean = false,
 		errorMessage: string | undefined = undefined,
 		generateRefreshToken: boolean = false
 
 	const walletAvail = writable(false)
 
 	const connected = writable(false)
-	let currentPublicKey : string = ''
+	let currentPublicKey: string = ''
 
 	onMount(() => {
 		currentPublicKey = ''
@@ -121,8 +120,9 @@
 </script>
 
 <StandardDialog bind:open={connectWalletDialog}>
-	<div class="px-4 pt-2 gap-2" style="overflow:hidden">
+	<div class="w-full px-4 pt-2 gap-2" style="overflow:hidden">
 		<div class="font-bold text-2xl">Connetti un Wallet</div>
+
 		{#if $walletAvail}
 			{#if $connected}
 				<p>Your public key is</p>
@@ -136,19 +136,23 @@
 			</p>
 		{/if}
 
-		<div class="w-full mt-10" style={"display: flex; justify-content: space-between;"}>
+		<div class="w-full mt-10 flex justify-between">
 			{#if $connected}
 				<button disabled={!$connected} on:click={handleDisconnectPhantom}>Disconnect</button>
 				<StandardButton disabled={!$connected} on:click={loginOrSignup}>Log In</StandardButton>
-
 			{:else}
-				<Card width="400px" --color="rgb(var(--global-color-contract-900))">
-					<div class="flex items-center justify-between gap-2">
-						<SolanaLogo></SolanaLogo>
+				<Card borderRadius="999px" width="100%" --color="rgb(var(--global-color-contract-900))">
+					<div class="w-full px-4 py-1.5 flex items-center justify-between gap-2">
+						<div class="rounded-full overflow-hidden">
+							<SolanaLogo width="35px" height="auto" />
+						</div>
+
 						<StandardButton
 							on:click={handleConnectPhantom}
-							--button-background-color="rgb(var(--global-color-grey-950))">Phantom</StandardButton
-						>
+							--button-background-color="rgb(var(--global-color-grey-950))"
+							--button-height="35px"
+							>Phantom
+						</StandardButton>
 					</div>
 					<!-- <div class="flex items-center justify-between gap-2">
 						<MetamaskLogo></MetamaskLogo>

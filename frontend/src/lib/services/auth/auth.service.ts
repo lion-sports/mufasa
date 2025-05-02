@@ -49,7 +49,8 @@ export type SignupParams = {
 		email: string
 		password: string
 		firstname: string
-		lastname: string,
+		lastname: string
+		birthday: Date
 		solanaPublicKey?: string
 	}
 	context?: {}
@@ -91,6 +92,7 @@ export default class AuthService extends FetchBasedService {
 					email: params.data.email,
 					password: params.data.password,
 					firstname: params.data.firstname,
+					birthday: params.data.birthday,
 					lastname: params.data.lastname,
 					solanaPublicKey: params.data.solanaPublicKey
 				}
@@ -254,7 +256,6 @@ export default class AuthService extends FetchBasedService {
 		user.set(undefined)
 	}
 
-
 	async loginWithMetamask() {
 		if (window.ethereum) {
 			console.log('pippo')
@@ -264,51 +265,49 @@ export default class AuthService extends FetchBasedService {
 				.catch((error: any) => {
 					console.log(error.code)
 					if (error.code === 4001) {
-						alert('Please connect to MetaMask.');
-						return;
+						alert('Please connect to MetaMask.')
+						return
 					} else {
-						console.error(error);
-						return;
+						console.error(error)
+						return
 					}
-				});
-				console.log(accounts)
-
+				})
+			console.log(accounts)
 
 			if (accounts.length > 0) {
-				let expired_at: Date = new Date();
+				let expired_at: Date = new Date()
 				JsCookies.set(this.cookieWalletAddress, accounts[0], {
 					expires: expired_at.setDate(expired_at.getDate() + 1),
 					sameSite: 'strict'
-				});
-
+				})
 
 				return {
 					data: {
 						address: accounts[0],
 						name: ''
 					}
-				};
+				}
 			} else {
-				alert('No accounts found');
+				alert('No accounts found')
 				return {
 					data: {
 						address: '',
 						name: ''
 					}
-				};
+				}
 			}
 		} else {
-			alert('No ethereum wallet found');
+			alert('No ethereum wallet found')
 			return {
 				data: {
 					address: '',
 					name: ''
 				}
-			};
+			}
 		}
 	}
 
-	async connectPhantom(){
+	async connectPhantom() {
 		try {
 			await get(phantom)?.connect()
 		} catch (err) {
@@ -316,12 +315,11 @@ export default class AuthService extends FetchBasedService {
 		}
 	}
 
-	async disconnectPhantom(){
+	async disconnectPhantom() {
 		try {
 			await get(phantom)?.disconnect()
 		} catch (err) {
 			console.error('connect ERROR:', err)
 		}
 	}
-	
 }

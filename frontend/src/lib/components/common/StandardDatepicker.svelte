@@ -1,12 +1,19 @@
 <script lang="ts">
-	import { DateTime } from 'luxon'
-	import { DatePickerTextField } from '@likable-hair/svelte'
+	import { DatePickerTextField, SimpleTextField } from '@likable-hair/svelte'
+	import type { ComponentProps } from 'svelte'
 
-	export let value: Date | undefined = undefined,
-		placeholder: string | undefined = undefined
+	let clazz: {
+		activator?: string | undefined
+		textfield?: ComponentProps<SimpleTextField>['class']
+	} = {}
+	export { clazz as class }
+
+	export let value: Date | undefined = undefined
+	export let placeholder: string | undefined = undefined
 </script>
 
 <DatePickerTextField
+	class={clazz}
 	selectedDate={value}
 	bind:placeholder
 	--simple-text-field-width="fit-content"

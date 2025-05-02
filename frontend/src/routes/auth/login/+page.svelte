@@ -2,56 +2,47 @@
 	import AuthService from '$lib/services/auth/auth.service'
 	import { goto } from '$app/navigation'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
-	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
-	import { Checkbox, Icon } from '@likable-hair/svelte'
-	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
+	import { Icon } from '@likable-hair/svelte'
 	import ConnectWallet from '$lib/components/wallet/ConnectWallet.svelte'
-	import SolanaLogo from '$lib/components/wallet/SolanaLogo.svelte'
-	import CredentialForm from '@/lib/components/auth/CredentialForm.svelte'
 	import StandardTextfield from '@/lib/components/common/StandardTextfield.svelte'
-	import StandardCheckbox from '@/lib/components/common/StandardCheckbox.svelte'
+	import { slide } from 'svelte/transition'
+	import { onMount } from 'svelte'
 
-	let email: string = '',
-		password: string = '',
-		error: boolean = false,
-		errorMessage: string | undefined = undefined,
-		loading: boolean = false,
-		generateRefreshToken: boolean = false,
-		showPassword: boolean = false
+	let email: string = ''
+	let password: string = ''
+	let error: boolean = false
+	let errorMessage: string | undefined = undefined
+	let loading: boolean = false
+	let generateRefreshToken: boolean = false
+	let showPassword: boolean = false
 
 	function login() {
+		if (!email || !password) {
+			error = true
+			errorMessage = 'Fill in all the required fields.'
+			return
+		}
+
 		error = false
 		errorMessage = undefined
 		loading = true
 
 		const service = new AuthService({ fetch })
 		service
-			.login({
-				data: {
-					email,
-					password,
-					generateRefreshToken
-				}
-			})
-			.then(() => {
-				setTimeout(() => {
-					goto('/')
-				}, 200)
-			})
+			.login({ data: { email, password, generateRefreshToken } })
+			.then(() => setTimeout(() => goto('/'), 200))
 			.catch((err) => {
 				if (!!err.message && err.message.includes('E_INVALID_AUTH_PASSWORD')) {
-					errorMessage = 'Credenziali errate'
-				} else if (!!err.message && err.message.includes('E_ROW_NOT_FOUND')) {
-					errorMessage = "Sembra che l'utenta non esista"
+					errorMessage = 'Wrong email or password.'
+				} else if (!!err.message && err.message.includes('E_INVALID_AUTH_UID')) {
+					errorMessage = "This user doesn't exists."
 				} else {
-					errorMessage = 'Ops, qualcosa è andato storto'
+					errorMessage = 'Ops, something went wrong.'
 				}
 
 				error = true
 			})
-			.finally(() => {
-				loading = false
-			})
+			.finally(() => (loading = false))
 	}
 
 	function loginWithGoogle() {
@@ -64,6 +55,16 @@
 	}
 
 	let openConnectWallet: boolean = false
+
+	onMount(() => {
+		// Listening for enter events to login with email & password
+		const handleEnterKeyPressed = (e: KeyboardEvent) => {
+			if (e.key == 'Enter' && email && password) login()
+		}
+
+		addEventListener('keydown', handleEnterKeyPressed)
+		return () => removeEventListener('keydown', handleEnterKeyPressed)
+	})
 </script>
 
 <div
@@ -81,42 +82,64 @@
 				<div class="h-full flex flex-col">
 					<div class="flex justify-between">
 						<div>LioNN</div>
-						<div>@ en</div>
+						<div
+							class="px-2.5 py-1 flex justify-center items-center gap-1.5 border border-[rgb(var(--global-color-background-400))] rounded-full"
+						>
+							<div class="w-3 h-3 flex justify-center items-center rounded-full overflow-hidden">
+								<img width="12px" height="auto" src="/flag-uk.jpg" alt="uk-flag" />
+							</div>
+							<span class="text-xs"> EN </span>
+						</div>
 					</div>
 
 					<!-- Credentials Box -->
 					<div class="w-full flex-grow flex justify-center items-center">
 						<div class="w-full flex flex-col items-center justify-center">
-							<div class="text-2xl mb-5">Welcome to LiONN</div>
+							<div class="text-2xl my-3">Welcome to LiONN</div>
 
-							<StandardTextfield
-								{error}
-								type="text"
-								bind:value={email}
-								placeholder="Email"
-								--simple-textfield-width="100%"
-							/>
+							<div class="w-full mt-5">
+								<StandardTextfield
+									{error}
+									type="text"
+									bind:value={email}
+									placeholder="Email"
+									--simple-textfield-width="100%"
+								/>
 
-							<StandardTextfield
-								{error}
-								type={showPassword ? 'text' : 'password'}
-								bind:value={password}
-								placeholder="Password"
-								--simple-textfield-width="100%"
-							>
-								<svelte:fragment slot="append-inner">
-									<button on:click={() => (showPassword = !showPassword)}>
-										<Icon name={showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'} />
-									</button>
-								</svelte:fragment>
-							</StandardTextfield>
+								<StandardTextfield
+									{error}
+									type={showPassword ? 'text' : 'password'}
+									bind:value={password}
+									placeholder="Password"
+									--simple-textfield-width="100%"
+								>
+									<svelte:fragment slot="append-inner">
+										<button
+											on:click={() => (showPassword = !showPassword)}
+											class="flex items-center"
+										>
+											<Icon name={showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'} />
+										</button>
+									</svelte:fragment>
+								</StandardTextfield>
+							</div>
 
-							<a class="mt-2 ml-auto text-xs tracking-tight" href="/"> Forgot password? </a>
+							<div class="mt-2 flex items-center w-full text-xs">
+								{#if error && errorMessage}
+									<span
+										transition:slide={{ axis: 'y' }}
+										class="text-[rgb(var(--global-color-error-500))]">{errorMessage}</span
+									>
+								{/if}
+								<a class="ml-auto tracking-tight" href="/"> Forgot password? </a>
+							</div>
 
 							<!-- Next Button -->
 							<div class="w-full mt-5">
-								<StandardButton --button-border-radius="999px" --button-width="100%"
-									>Login</StandardButton
+								<StandardButton
+									on:click={login}
+									--button-border-radius="999px"
+									--button-width="100%">Login</StandardButton
 								>
 							</div>
 
@@ -130,21 +153,28 @@
 								></div>
 							</div>
 
-							<div>
+							<div class="flex justify-center items-center gap-4 mb-4">
 								<button
+									class="w-10 h-10 rounded-full bg-[rgb(var(--global-color-background-400))] hover:bg-[rgb(var(--global-color-background-500))] transition-all"
 									on:click={loginWithGoogle}
-									class="mt-2 mb-4 w-10 h-10 rounded-full bg-[rgb(var(--global-color-background-400))] hover:bg-[rgb(var(--global-color-background-500))] transition-all"
 								>
 									<Icon name="mdi-google" --icon-size="12pt" />
+								</button>
+
+								<button
+									class="w-10 h-10 rounded-full bg-[rgb(var(--global-color-background-400))] hover:bg-[rgb(var(--global-color-background-500))] transition-all"
+									on:click={openWallet}
+								>
+									<Icon name="mdi-wallet" --icon-size="12pt" />
 								</button>
 							</div>
 						</div>
 					</div>
 					<div
-						class="mx-auto mt-5 pt-5 flex sm:flex-col md:flex-row items-center gap-2 sm:gap-0 md:gap-2 text-sm"
+						class="mx-auto flex sm:flex-col md:flex-row items-center gap-2 sm:gap-0 md:gap-2 text-sm"
 					>
 						<div>Don't have an account?</div>
-						<a class="text-[rgb(var(--global-color-primary-500))]" href="/"> Sign up </a>
+						<a class="text-[rgb(var(--global-color-primary-500))]" href="/auth/signup"> Sign up </a>
 					</div>
 				</div>
 			</div>
@@ -171,6 +201,8 @@
 	</div>
 </div>
 
+<ConnectWallet bind:connectWalletDialog={openConnectWallet} />
+
 <style>
 	.gradient-box {
 		background: linear-gradient(200deg, #3cb2ab 50%, rgb(var(--global-color-primary-500)) 90%);
@@ -179,9 +211,9 @@
 
 	@media (min-width: 640px) {
 		.login-box-container {
-			max-width: 75vw;
-			width: 75vw;
-			height: 65vh;
+			max-width: 65vw;
+			width: 65vw;
+			height: 70vh;
 		}
 	}
 
