@@ -1,10 +1,12 @@
-import { CamelCaseBaseModel } from './CamelCaseBaseModel'
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime, } from 'luxon'
-import { column, belongsTo, hasMany, HasMany, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
-import User from 'App/Models/User'
-import Team from 'App/Models/Team'
-import Group from 'App/Models/Group'
-import Shirt from './Shirt'
+import { column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import User from '#app/Models/User'
+import Team from '#app/Models/Team'
+import Group from '#app/Models/Group'
+import Shirt from './Shirt.js'
+import { type HasMany } from "@adonisjs/lucid/types/relations";
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
 
 export const VOLLEYBALL_ROLES = ['setter', 'outsideHitter', 'oppositeHitter', 'middleBlocker', 'libero'] as const
 export const BASKETBALL_ROLES = ['pointGuard', 'shootingGuard', 'smallForward', 'powerForward', 'center'] as const

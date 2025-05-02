@@ -1,13 +1,13 @@
-import User from "App/Models/User"
-import Scout from "App/Models/Scout"
-import { AuthorizationHelpers } from "../authorization.manager"
-import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT } from "./events/volleyball/VolleyballScoutEvent"
-import ScoutsManager from "./scouts.manager"
-import Ws from "App/Services/Ws"
-import { Context, withTransaction, withUser } from "../base.manager"
-import PlayersManager from "../players.manager"
-import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database"
+import User from "#app/Models/User"
+import Scout from "#app/Models/Scout"
+import { AuthorizationHelpers } from "../authorization.manager.js"
+import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT } from "./events/volleyball/VolleyballScoutEvent.js"
+import ScoutsManager from "./scouts.manager.js"
+import Ws from "#app/Services/Ws"
+import { Context, withTransaction, withUser } from "../base.manager.js"
+import PlayersManager from "../players.manager.js"
 import { FIRST_POINT, getNextAutomatedEvents, type VolleyballScoutEventParameters } from 'lionn-common'
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export type ScoutSocketEventMapping = {
   'scout:add': VolleyballScoutEventParameters,

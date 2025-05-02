@@ -1,10 +1,10 @@
-import { CreateUserValidator, UpdateUserValidator } from 'App/Validators/users'
-import { validator } from '@ioc:Adonis/Core/Validator'
-import User from 'App/Models/User'
-import { ModelObject } from '@ioc:Adonis/Lucid/Orm'
-import { Context, withTransaction, withUser } from './base.manager'
-import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import SolanaManager from './solana.manager'
+import { CreateUserValidator, UpdateUserValidator } from '#app/Validators/users/index'
+import { validator } from '@adonisjs/validator'
+import User from '#app/Models/User'
+import { Context, withTransaction, withUser } from './base.manager.js'
+import SolanaManager from './solana.manager.js'
+import { ModelObject } from "@adonisjs/lucid/types/model";
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export type CreateParams = {
   data: {

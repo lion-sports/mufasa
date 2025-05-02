@@ -1,5 +1,5 @@
 import { Db, MongoClient, CreateCollectionOptions } from 'mongodb'
-import Env from '@ioc:Adonis/Core/Env'
+import env from '#start/env'
 
 class MongoService {
   public client: MongoClient
@@ -12,10 +12,10 @@ class MongoService {
       if(!!this.client) return
 
       let connString =
-        params?.connectionString || Env.get('MONGO_URL') || 'mongodb://localhost:27017'
+        params?.connectionString || env.get('MONGO_URL') || 'mongodb://localhost:27017'
       this.client = new MongoClient(connString)
       await this.client.connect()
-      this.db = this.client.db(params?.dbName || Env.get('MONGO_DB'))
+      this.db = this.client.db(params?.dbName || env.get('MONGO_DB'))
     } catch (err) {
       console.error('mongodb client failed to connect')
       console.log(err)

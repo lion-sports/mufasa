@@ -1,6 +1,7 @@
-import { string } from '@ioc:Adonis/Core/Helpers'
-import { SnakeCaseNamingStrategy, LucidModel } from '@ioc:Adonis/Lucid/Orm'
-import { SimplePaginatorMetaKeys } from '@ioc:Adonis/Lucid/Database'
+import { SnakeCaseNamingStrategy } from '@adonisjs/lucid/orm'
+import string from '@adonisjs/core/helpers/string';
+import { LucidModel, } from "@adonisjs/lucid/types/model";
+import { SimplePaginatorMetaKeys } from '@adonisjs/lucid/types/querybuilder';
 
 export class CamelCaseNameStrategy extends SnakeCaseNamingStrategy {
   public tableName(model: LucidModel) {

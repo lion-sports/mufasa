@@ -1,7 +1,7 @@
-import Team from 'App/Models/Team'
-import Factory from '@ioc:Adonis/Lucid/Factory'
-import UserFactory from './UserFactory'
-import TeammateFactory from './TeammateFactory'
+import Team from '#app/Models/Team'
+import Factory from '@adonisjs/lucid/factories'
+import UserFactory from './UserFactory.js'
+import TeammateFactory from './TeammateFactory.js'
 
 export default Factory.define(Team, ({ faker }) => {
     return {

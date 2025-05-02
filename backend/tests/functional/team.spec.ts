@@ -1,8 +1,8 @@
-import User from 'App/Models/User'
-import TeamsManager from 'App/managers/teams.manager';
-import Team from 'App/Models/Team'
+import User from '#app/Models/User'
+import TeamsManager from '#app/managers/teams.manager';
+import Team from '#app/Models/Team'
 import { test } from '@japa/runner'
-import { TeamFactory } from 'Database/factories'
+import { TeamFactory } from '#database/factories/index'
 
 test.group('Teams', (group) => {
   let loggedInUser: User
@@ -89,6 +89,7 @@ test.group('Teams', (group) => {
         preference: 'pippo',
         value: true
       }).loginAs(loggedInUser)
+      error = response.status() == 500
     } catch {
       error = true
     }

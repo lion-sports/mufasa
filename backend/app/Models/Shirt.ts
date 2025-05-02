@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
-import { CamelCaseBaseModel } from './CamelCaseBaseModel';
-import { BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
-import Teammate from './Teammate'
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js';
+import { belongsTo, column } from '@adonisjs/lucid/orm'
+import Teammate from './Teammate.js'
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
 
 export default class Shirt extends CamelCaseBaseModel {
   @column({ isPrimary: true })

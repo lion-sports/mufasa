@@ -1,2 +1,2 @@
-export { default as CreateGroupValidator } from './CreateGroupValidator'
-export { default as UpdateGroupValidator } from './UpdateGroupValidator'
+export { default as CreateGroupValidator } from './CreateGroupValidator.js'
+export { default as UpdateGroupValidator } from './UpdateGroupValidator.js'

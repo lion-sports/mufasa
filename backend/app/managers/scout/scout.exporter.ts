@@ -1,14 +1,14 @@
-import Mongo from "App/Services/Mongo"
-import { Context, withTransaction, withUser } from "../base.manager"
+import Mongo from "#app/Services/Mongo"
+import { Context, withTransaction, withUser } from "../base.manager.js"
 import excelJS from 'exceljs'
-import { SCOUT_EVENT_COLLECTION_NAME } from "./ScoutEvent"
+import { SCOUT_EVENT_COLLECTION_NAME } from "./ScoutEvent.js"
 import type { ScoutEventPlayer } from "lionn-common";
-import { SummarizedPlayerStats } from "./scouts.manager"
-import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation"
-import TeammatesManager from "../teammates.manager"
-import Scout from "App/Models/Scout"
-import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database"
-import User from "App/Models/User";
+import { SummarizedPlayerStats } from "./scouts.manager.js"
+import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation.js"
+import TeammatesManager from "../teammates.manager.js"
+import Scout from "#app/Models/Scout"
+import User from "#app/Models/User";
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export default class ScoutExporter {
   @withTransaction
@@ -152,6 +152,7 @@ export default class ScoutExporter {
     event.description += `---\n${finalText}`
     event.useTransaction(trx).save()
 
+    // @ts-ignore
     return await workbook.xlsx.writeBuffer() as Buffer
   }
 

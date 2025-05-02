@@ -1,8 +1,8 @@
 import { test } from '@japa/runner'
 import { assert } from 'chai'
-import { UserFactory, DashboardFactory } from 'Database/factories'
-import Dashboard from 'App/Models/Dashboard'
-import User from 'App/Models/User'
+import { UserFactory, DashboardFactory } from '#database/factories/index'
+import Dashboard from '#app/Models/Dashboard'
+import User from '#app/Models/User'
 
 test.group('Dashboard', (group) => {
   let loggedInUser: User

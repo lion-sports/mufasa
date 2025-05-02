@@ -1,8 +1,8 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import UsersManager from 'App/managers/user.manager'
+import type { HttpContext } from '@adonisjs/core/http'
+import UsersManager from '#app/managers/user.manager'
 
 export default class UsersController {
-  public async index({ request }: HttpContextContract) {
+  public async index({ request }: HttpContext) {
     const manager = new UsersManager()
     return await manager.list({
       data: {
@@ -13,7 +13,7 @@ export default class UsersController {
     })
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request }: HttpContext) {
     const manager = new UsersManager()
     return await manager.create({
       data: {
@@ -26,7 +26,7 @@ export default class UsersController {
     })
   }
 
-  public async show({ params }: HttpContextContract) {
+  public async show({ params }: HttpContext) {
     const manager = new UsersManager()
     return await manager.get({
       data: {
@@ -35,7 +35,7 @@ export default class UsersController {
     })
   }
 
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params }: HttpContext) {
     const manager = new UsersManager()
     return await manager.update({
       data: {
@@ -48,5 +48,5 @@ export default class UsersController {
     })
   }
 
-  public async destroy({ }: HttpContextContract) { }
+  public async destroy({ }: HttpContext) { }
 }

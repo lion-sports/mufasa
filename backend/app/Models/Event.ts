@@ -1,11 +1,13 @@
-import { CamelCaseBaseModel } from './CamelCaseBaseModel'
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime } from 'luxon'
-import { column, belongsTo, BelongsTo, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
-import Frequency from 'App/Models/Frequency'
-import Team from 'App/Models/Team'
-import User from 'App/Models/User'
-import Convocation from 'App/Models/Convocation'
-import Scout from './Scout'
+import { column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import Frequency from '#app/Models/Frequency'
+import Team from '#app/Models/Team'
+import User from '#app/Models/User'
+import Convocation from '#app/Models/Convocation'
+import Scout from './Scout.js'
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
+import { type HasMany } from "@adonisjs/lucid/types/relations";
 
 export default class Event extends CamelCaseBaseModel {
   @column({ isPrimary: true })

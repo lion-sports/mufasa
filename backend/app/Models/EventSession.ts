@@ -1,8 +1,9 @@
-import User from 'App/Models/User';
+import User from '#app/Models/User';
 import { DateTime } from 'luxon'
-import { column, beforeCreate, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
-import { cuid } from '@ioc:Adonis/Core/Helpers'
-import { CamelCaseBaseModel } from './CamelCaseBaseModel';
+import { column, beforeCreate, belongsTo } from '@adonisjs/lucid/orm'
+import { cuid } from '@adonisjs/core/helpers'
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js';
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
 
 export default class EventSession extends CamelCaseBaseModel {
   @column({ isPrimary: true })

@@ -188,6 +188,14 @@
         selectedDate = info.date
       }
     },
+    eventClick: (info: Calendar.EventClickInfo) => {
+      if (!!team && !!info.event.extendedProps.originalEvent) {
+        goto(`/teams/${team.id}/events/${info.event.id}`)
+      } else {
+        let originalEvent: Event = info.event.extendedProps.originalEvent as Event
+        goto(`/teams/${originalEvent.teamId}/events/${originalEvent.id}`)
+      }
+    },
     views: {
       'timeGridWeek': {
         pointer: true

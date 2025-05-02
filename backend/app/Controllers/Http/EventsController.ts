@@ -1,10 +1,10 @@
 import { DateTime } from 'luxon';
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import EventsManager from 'App/managers/events.manager'
-import ConvocationsManager from 'App/managers/convocations.manager';
+import type { HttpContext } from '@adonisjs/core/http'
+import EventsManager from '#app/managers/events.manager'
+import ConvocationsManager from '#app/managers/convocations.manager';
 
 export default class EventsController {
-  public async index({ request }: HttpContextContract) {
+  public async index({ request }: HttpContext) {
     const filters = request.input('filters')
 
     if(!!filters) {
@@ -20,7 +20,7 @@ export default class EventsController {
     })
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request }: HttpContext) {
     const event = request.input('event')
     
     const manager = new EventsManager()
@@ -29,7 +29,7 @@ export default class EventsController {
     })
   }
 
-  public async createWithFrequency({ request }: HttpContextContract) {
+  public async createWithFrequency({ request }: HttpContext) {
     const event = request.input('event')
     const rule = request.input('rule')
 
@@ -48,7 +48,7 @@ export default class EventsController {
     })
   }
 
-  public async copyWeek({ request }: HttpContextContract) {
+  public async copyWeek({ request }: HttpContext) {
     const fromWeekNumber = request.input('fromWeekNumber')
     const fromWeekYear = request.input('fromWeekYear')
     const toWeekNumber = request.input('toWeekNumber')
@@ -67,7 +67,7 @@ export default class EventsController {
     })
   }
 
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params }: HttpContext) {
     const data = request.body()
 
     const manager = new EventsManager()
@@ -79,7 +79,7 @@ export default class EventsController {
     })
   }
 
-  public async show({ params }: HttpContextContract) {
+  public async show({ params }: HttpContext) {
     const manager = new EventsManager()
     return await manager.get({
       data: {
@@ -88,7 +88,7 @@ export default class EventsController {
     })
   }
 
-  public async destroy({ params, request }: HttpContextContract) {
+  public async destroy({ params, request }: HttpContext) {
     const manager = new EventsManager()
     return await manager.delete({
       data: {
@@ -98,7 +98,7 @@ export default class EventsController {
     })
   }
 
-  public async convocate({ request, params }: HttpContextContract) {
+  public async convocate({ request, params }: HttpContext) {
     let manager = new ConvocationsManager()
     return await manager.convocate({
       data: {
@@ -111,7 +111,7 @@ export default class EventsController {
     })
   }
 
-  public async unConvocate({ request, params }: HttpContextContract) {
+  public async unConvocate({ request, params }: HttpContext) {
     let manager = new ConvocationsManager()
     return await manager.unConvocate({
       data: {

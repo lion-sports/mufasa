@@ -1,5 +1,5 @@
-import Widget from 'App/Models/Widget'
-import Factory from '@ioc:Adonis/Lucid/Factory'
+import Widget from '#app/Models/Widget'
+import Factory from '@adonisjs/lucid/factories'
 
 export default Factory.define(Widget, ({ faker }) => {
   return {

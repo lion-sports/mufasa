@@ -1,5 +1,5 @@
-import { column } from "@ioc:Adonis/Lucid/Orm";
-import { CamelCaseBaseModel } from "./CamelCaseBaseModel";
+import { column } from "@adonisjs/lucid/orm";
+import { CamelCaseBaseModel } from "./CamelCaseBaseModel.js";
 import { DateTime } from "luxon";
 
 export default class SolanaConfig extends CamelCaseBaseModel {

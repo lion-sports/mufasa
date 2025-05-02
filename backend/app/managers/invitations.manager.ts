@@ -1,12 +1,12 @@
-import { ModelObject } from '@ioc:Adonis/Lucid/Orm';
-import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import Invitation from 'App/Models/Invitation'
-import User from 'App/Models/User'
-import TeamsManager from './teams.manager'
-import Team from 'App/Models/Team'
-import Group from 'App/Models/Group'
-import AuthorizationManager from './authorization.manager';
-import { Context, withTransaction, withUser } from './base.manager';
+import Invitation from '#app/Models/Invitation'
+import User from '#app/Models/User'
+import TeamsManager from './teams.manager.js'
+import Team from '#app/Models/Team'
+import Group from '#app/Models/Group'
+import AuthorizationManager from './authorization.manager.js';
+import { Context, withTransaction, withUser } from './base.manager.js';
+import { ModelObject } from "@adonisjs/lucid/types/model";
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export type InviteUserParams = {
   data: {

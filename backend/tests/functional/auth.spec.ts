@@ -1,6 +1,6 @@
 import { test } from '@japa/runner'
-import User from 'App/Models/User'
-import { UserFactory } from 'Database/factories'
+import User from '#app/Models/User'
+import { UserFactory } from '#database/factories/index'
 
 test.group('Auth', () => {
   test('return a token for a user', async ({ client }) => {

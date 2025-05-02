@@ -1,11 +1,11 @@
-import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import Convocation from 'App/Models/Convocation'
-import AuthorizationManager from './authorization.manager'
-import { ConvocateValidator } from 'App/Validators/convocations'
-import { validator } from "@ioc:Adonis/Core/Validator"
+import Convocation from '#app/Models/Convocation'
+import AuthorizationManager from './authorization.manager.js'
+import { ConvocateValidator } from '#app/Validators/convocations/index'
+import { validator } from "@adonisjs/validator"
 import { DateTime } from 'luxon'
-import { Context, withTransaction, withUser } from './base.manager'
-import User from 'App/Models/User'
+import { Context, withTransaction, withUser } from './base.manager.js'
+import User from '#app/Models/User'
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export type ConvocateParams = {
   data: {

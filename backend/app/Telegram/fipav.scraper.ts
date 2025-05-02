@@ -1,4 +1,5 @@
 import XRay from 'x-ray'
+
 const x = XRay({
   filters: {
     substituteUselessTags: function(value) {

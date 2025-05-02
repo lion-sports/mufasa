@@ -106,7 +106,7 @@ export default class AuthService extends FetchBasedService {
 		const response: {
 			type: 'bearer'
 			token: string
-			expires_at: Date
+			expiresAt: Date
 			userId: number
 			refreshToken: string
 			refreshTokenExpiration: Date
@@ -120,12 +120,12 @@ export default class AuthService extends FetchBasedService {
 				}
 			})
 			.then((r) => {
-				r.expires_at = new Date(r.expires_at)
+        r.expiresAt = new Date(r.expiresAt)
 				r.refreshTokenExpiration = new Date(r.refreshTokenExpiration)
 				return r
 			})
 
-		const tokenExpiresIn = DateTime.fromJSDate(response.expires_at).diffNow('seconds')
+		const tokenExpiresIn = DateTime.fromJSDate(response.expiresAt).diffNow('seconds')
 		this.cookies?.set(this.cookieName, response.token, {
 			path: '/',
 			httpOnly: false,

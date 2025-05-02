@@ -1,8 +1,7 @@
-import Mongo from "App/Services/Mongo"
+import Mongo from "#app/Services/Mongo"
 import { Document, ObjectId, WithId } from "mongodb"
-import { Context } from "../base.manager"
-import Scout from "App/Models/Scout"
-import User from "App/Models/User"
+import { Context } from "../base.manager.js"
+import Scout from "#app/Models/Scout"
 
 export type Sport = 'none' | 'volleyball' | 'basketball'
 
@@ -19,6 +18,18 @@ export type ScoutEventJson<Type = string, S extends Sport = Sport> = {
 }
 
 export const SCOUT_EVENT_COLLECTION_NAME = 'scout_events'
+
+export type ScoutEventConstructorsParameters<Type extends string, Points = any, ExtraProps = any> = {
+  _id?: ObjectId
+  date: Date
+  scoutId: number
+  teamId: number
+  sport: Sport
+  type: Type
+  points: Points
+  clientIdentifier?: string
+  createdByUserId: number
+} & ExtraProps
 
 export default abstract class ScoutEvent<
   Event = '', 
@@ -37,17 +48,7 @@ export default abstract class ScoutEvent<
   public points: Points
   public abstract type: Type
 
-  constructor(params: {
-    _id?: ObjectId
-    date: Date
-    scoutId: number
-    teamId: number
-    sport: Sport
-    type: Type
-    points: Points
-    clientIdentifier?: string
-    createdByUserId: number
-  } & Event) {
+  constructor(params: ScoutEventConstructorsParameters<Type, Points, ExtraProperties>) {
     this.date = new Date(params.date)
     this.scoutId = params.scoutId
     this.teamId = params.teamId
@@ -59,8 +60,9 @@ export default abstract class ScoutEvent<
     
     this.event = {} as Event
     for(const [key, value] of Object.entries(params)) {
+      let eventKey = key as keyof typeof this.event
       if (['_id', 'date', 'scoutId', 'teamId', 'sport', 'type', 'clientIdentifier', 'createdByUserId'].includes(key)) continue
-      else this.event[key] = value
+      else this.event[eventKey] = value as any
     }
   }
 

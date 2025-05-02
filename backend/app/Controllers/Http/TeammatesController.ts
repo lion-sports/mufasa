@@ -1,8 +1,8 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import TeammatesManager from 'App/managers/teammates.manager'
+import type { HttpContext } from '@adonisjs/core/http'
+import TeammatesManager from '#app/managers/teammates.manager'
 
 export default class TeammatesController {
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params }: HttpContext) {
     const manager = new TeammatesManager()
     return await manager.update({
       data: {
@@ -15,7 +15,7 @@ export default class TeammatesController {
     })
   }
 
-  public async mostAbsenceForTeammates({ }: HttpContextContract) {
+  public async mostAbsenceForTeammates({ }: HttpContext) {
     const manager = new TeammatesManager()
     return await manager.mostAbsenceForTeammates()
   }
