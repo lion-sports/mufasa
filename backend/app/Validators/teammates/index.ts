@@ -1,1 +1,1 @@
-export { default as UpdateTeammateValidator } from './UpdateTeammateValidator'
+export { default as UpdateTeammateValidator } from './UpdateTeammateValidator.js'

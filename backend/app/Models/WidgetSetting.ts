@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
-import { column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
-import { CamelCaseBaseModel } from './CamelCaseBaseModel'
-import Widget from './Widget'
-import { TeamFilter } from 'App/managers/scout/analysis/scoutAnalysis.manager'
+import { column, belongsTo } from '@adonisjs/lucid/orm'
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
+import Widget from './Widget.js'
+import { TeamFilter } from '#app/managers/scout/analysis/scoutAnalysis.manager'
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
 
 type VolleyballDistributionWidgetSetting = {
   widget: 'VolleyballDistribution',

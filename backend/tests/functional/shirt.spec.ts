@@ -1,10 +1,10 @@
-import User from 'App/Models/User'
-import Team from 'App/Models/Team'
+import User from '#app/Models/User'
+import Team from '#app/Models/Team'
 import { test } from '@japa/runner'
-import { TeamFactory } from 'Database/factories'
-import Teammate from 'App/Models/Teammate';
-import TeammateFactory from 'Database/factories/TeammateFactory';
-import Shirt from 'App/Models/Shirt';
+import { TeamFactory } from '#database/factories/index'
+import Teammate from '#app/Models/Teammate';
+import TeammateFactory from '#database/factories/TeammateFactory';
+import Shirt from '#app/Models/Shirt';
 
 test.group('Shirts', (group) => {
   let loggedInUser: User

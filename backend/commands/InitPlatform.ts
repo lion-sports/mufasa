@@ -1,25 +1,25 @@
-import { BaseCommand } from '@adonisjs/core/build/standalone'
-import SolanaManager, { ConfigParams, MintParams, TokenParams } from 'App/managers/solana.manager'
+import SolanaManager, { ConfigParams, MintParams, TokenParams } from '#app/managers/solana.manager'
 import { Keypair, PublicKey } from '@solana/web3.js'
-import Database from '@ioc:Adonis/Lucid/Database'
-import SolanaConfig from 'App/Models/SolanaConfig'
+import db from '@adonisjs/lucid/services/db'
+import SolanaConfig from '#app/Models/SolanaConfig'
+import { BaseCommand } from "@adonisjs/core/ace";
+import { CommandOptions } from "@adonisjs/core/types/ace";
 
 export default class InitPlatform extends BaseCommand {
   public static commandName = 'init:platform'
 
   public static description = 'Initiialize platform'
+    static options: CommandOptions = {
+          loadApp: true,
+          staysAlive: false,
+        };
 
-  public static settings = {
-    loadApp: true,
-    stayAlive: false,
-  }
-
-  public async timeout(ms) {
+  public async timeout(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   public async run() {
-    let trx = await Database.transaction()
+    let trx = await db.transaction()
     try {
       this.logger.info('Initializing platform on Solana...')
 

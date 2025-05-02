@@ -1,9 +1,9 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import ConvocationsManager from 'App/managers/convocations.manager'
+import type { HttpContext } from '@adonisjs/core/http'
+import ConvocationsManager from '#app/managers/convocations.manager'
 
 export default class ConvocationsController {
 
-  public async confirm({ params }: HttpContextContract) {
+  public async confirm({ params }: HttpContext) {
     let manager = new ConvocationsManager()
     return await manager.confirm({
       data: {
@@ -14,7 +14,7 @@ export default class ConvocationsController {
     })
   }
 
-  public async deny({ params }: HttpContextContract) {
+  public async deny({ params }: HttpContext) {
     let manager = new ConvocationsManager()
     return await manager.deny({
       data: {

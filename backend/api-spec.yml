@@ -34,9 +34,6 @@ components:
         textColor:
           type: string
           nullable: true
-        rememberMeToken:
-          type: string
-          nullable: true
         createdAt:
           type: string
           format: date-time

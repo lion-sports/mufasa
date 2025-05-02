@@ -1,1 +1,1 @@
-export { default as ConvocateValidator } from './ConvocateValidator'
+export { default as ConvocateValidator } from './ConvocateValidator.js'

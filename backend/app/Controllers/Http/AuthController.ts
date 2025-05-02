@@ -1,21 +1,24 @@
-import Env from '@ioc:Adonis/Core/Env';
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import User from 'App/Models/User';
-import SolanaManager from 'App/managers/solana.manager';
-import UsersManager from 'App/managers/user.manager';
+import env from '#start/env';
+import type { HttpContext } from '@adonisjs/core/http'
+import User from '#app/Models/User';
+import SolanaManager from '#app/managers/solana.manager';
+import UsersManager from '#app/managers/user.manager';
 import { OAuth2Client } from 'google-auth-library';
 
 export default class AuthController {
-  public async login({ auth, request }: HttpContextContract) {
-
-    await User.query().where('email', 'ILIKE', request.input('email'))
+  public async login({ auth, request }: HttpContext) {
     let generateRefresh = request.input('generateRefresh')
 
-    const token = await auth.use('api').attempt(
-      request.input('email'), 
-      request.input('password'), 
+    let user = await User.query().where('email', 'ILIKE', request.input('email'))
+      .firstOrFail()
+
+    user = await User.verifyCredentials(user.email, request.input('password'))
+
+    const token = await User.accessTokens.create(
+      user,
+      ['*'],
       {
-        expiresIn: '7days'
+        expiresIn: '7 days'
       }
     )
 
@@ -24,8 +27,9 @@ export default class AuthController {
     }
 
     if (generateRefresh) {
-      const refreshToken = await auth.use('refresh').generate(
-        token.user,
+      const refreshToken = await User.rememberMeTokens.create(
+        user,
+        ['*'],
         {
           expiresIn: '180days'
         }
@@ -33,28 +37,32 @@ export default class AuthController {
 
       finalToken = {
         ...finalToken,
-        userId: refreshToken.user.id,
-        refreshToken: refreshToken.token,
-        refreshTokenExpiration: refreshToken.expiresAt?.toJSDate()
+        userId: user.id,
+        refreshToken: refreshToken.toJSON().token,
+        refreshTokenExpiration: refreshToken.expiresAt
       }
     }
 
     return finalToken
   }
 
-  public async logout({ auth }: HttpContextContract) {
-    await auth.use('api').revoke()
+  public async logout({ auth }: HttpContext) {
+    let user = auth.use('api').user
+    if (!user) return { revoked: false }
+
+    await User.accessTokens.delete(user, user.currentAccessToken.identifier)
+
     return {
-      revoked: true
+      revoked: true,
     }
   }
 
-  public async me({ auth }: HttpContextContract) {
+  public async me({ auth }: HttpContext) {
     await auth.use('api')
     return auth.user
   }
 
-  public async signup({ request }: HttpContextContract) {
+  public async signup({ request }: HttpContext) {
     if(!request.input('email')) throw new Error('email required')
 
     let existingUser = await User.query()
@@ -77,11 +85,11 @@ export default class AuthController {
     return true
   }
 
-  public async googleRedirect({ ally }: HttpContextContract) {
+  public async googleRedirect({ ally }: HttpContext) {
     return ally.use('google').redirect()
   }
 
-  public async googleCallback({ auth, ally, response }: HttpContextContract) {
+  public async googleCallback({ auth, ally, response }: HttpContext) {
     const google = ally.use('google')
 
 
@@ -112,43 +120,52 @@ export default class AuthController {
       await manager.keygen( { data: {userId: user.id}})
     }
 
-    const token = await auth.use('api').login(user, {
-      expiresIn: '7days'
-    })
+    const token = await User.accessTokens.create(
+      user,
+      ['*'],
+      {
+        expiresIn: '7 days'
+      }
+    )
 
-    const refreshToken = await auth.use('refresh').generate(user, {
-      expiresIn: '180days'
-    })
+    const refreshToken = await User.rememberMeTokens.create(
+      user,
+      ['*']
+    )
 
     const tokenJson = token.toJSON()
     const finalToken = {
       ...tokenJson,
-      userId: token.user.id,
-      refreshToken: refreshToken.token,
-      refreshTokenExpiration: refreshToken.expiresAt?.toJSDate()
+      userId: user.id,
+      refreshToken: refreshToken.toJSON().token,
+      refreshTokenExpiration: refreshToken.expiresAt
     }
 
-    response.redirect().withQs(finalToken).toPath(Env.get('GOOGLE_FRONTEND_CALLBACK_URL') || 'http://localhost:3000/auth/google/callback')
+    response.redirect().withQs(finalToken).toPath(env.get('GOOGLE_FRONTEND_CALLBACK_URL') || 'http://localhost:3000/auth/google/callback')
   }
 
-  public async refreshToken({ auth }: HttpContextContract) {
+  public async refreshToken({ auth, request }: HttpContext) {
     let user = await auth.use('refresh').authenticate()
     
-    let apiToken = await auth.use('api').generate(user, {
-      expiresIn: '7days'
-    })
+    const token = await User.accessTokens.create(
+      user,
+      ['*'],
+      {
+        expiresIn: '7 days'
+      }
+    )
 
-    return apiToken
+    return token
   }
 
-  public async loginWithIosGoogleToken({ request, auth }: HttpContextContract) {
+  public async loginWithIosGoogleToken({ request, auth }: HttpContext) {
     let googleToken = request.input('token')
-    const client = new OAuth2Client(Env.get('GOOGLE_IOS_CLIENT_ID'))
+    const client = new OAuth2Client(env.get('GOOGLE_IOS_CLIENT_ID'))
 
     try {
       let ticket = await client.verifyIdToken({
         idToken: googleToken,
-        audience: [Env.get('GOOGLE_IOS_CLIENT_ID'), Env.get('GOOGLE_CLIENT_ID')]
+        audience: [env.get('GOOGLE_IOS_CLIENT_ID', 'some_ios_client_id'), env.get('GOOGLE_CLIENT_ID', 'some_client_id')]
       })
 
       let googleUser = ticket.getPayload()
@@ -162,20 +179,25 @@ export default class AuthController {
           googleToken: googleToken
         })
 
-        const token = await auth.use('api').login(user, {
-          expiresIn: '7days'
-        })
+        const token = await User.accessTokens.create(
+          user,
+          ['*'],
+          {
+            expiresIn: '7 days'
+          }
+        )
 
-        const refreshToken = await auth.use('refresh').generate(user, {
-          expiresIn: '180days'
-        })
+        const refreshToken = await User.rememberMeTokens.create(
+          user,
+          ['*']
+        )
 
         const tokenJson = token.toJSON()
         const finalToken = {
           ...tokenJson,
-          userId: token.user.id,
-          refreshToken: refreshToken.token,
-          refreshTokenExpiration: refreshToken.expiresAt?.toJSDate()
+          userId: user.id,
+          refreshToken: refreshToken.toJSON().token,
+          refreshTokenExpiration: refreshToken.expiresAt
         }
 
         return finalToken

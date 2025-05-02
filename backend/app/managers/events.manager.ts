@@ -1,14 +1,14 @@
 import { DateTime } from 'luxon';
-import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import { CreateEventValidator, CreateEventWithFrequencyValidator, UpdateEventValidator } from 'App/Validators/events'
-import Team from 'App/Models/Team'
-import Event from 'App/Models/Event'
-import Frequency from 'App/Models/Frequency';
-import { validator } from "@ioc:Adonis/Core/Validator"
-import AuthorizationManager from './authorization.manager';
-import ConvocationManager from './convocations.manager';
-import { withUser, Context, withTransaction } from './base.manager';
-import User from 'App/Models/User';
+import { CreateEventValidator, CreateEventWithFrequencyValidator, UpdateEventValidator } from '#app/Validators/events/index'
+import Team from '#app/Models/Team'
+import Event from '#app/Models/Event'
+import Frequency from '#app/Models/Frequency';
+import { validator } from "@adonisjs/validator"
+import AuthorizationManager from './authorization.manager.js';
+import ConvocationManager from './convocations.manager.js';
+import { withUser, Context, withTransaction } from './base.manager.js';
+import User from '#app/Models/User';
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export type ListParams = {
   data: {
@@ -369,7 +369,7 @@ export default class EventsManager {
         .preload('team')
     }
 
-    return results
+    return results || []
   }
 
   @withTransaction

@@ -1,21 +1,14 @@
-import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { ROLES } from 'App/Models/Teammate'
+import vine from '@vinejs/vine';
+import { ROLES } from '#app/Models/Teammate';
 
-export default class UpdatePlayerValidator {
-  constructor(protected ctx?: HttpContextContract) { }
-
-  public schema = schema.create({
-    aliases: schema.array.optional().members(schema.string.optional([
-      rules.maxLength(255)
-    ])),
-    shirtId: schema.number.optional(),
-    role: schema.enum.optional(ROLES),
-    shirtNumber: schema.number.optional(),
-    shirtPrimaryColor: schema.string.optional(),
-    shirtSecondaryColor: schema.string.optional(),
-    isOpponent: schema.boolean.optional()
+export const updatePlayerValidator = vine.compile(
+  vine.object({
+    aliases: vine.array(vine.string().maxLength(255)).optional(),
+    shirtId: vine.number().optional(),
+    role: vine.enum(Object.values(ROLES)).optional(),
+    shirtNumber: vine.number().optional(),
+    shirtPrimaryColor: vine.string().optional(),
+    shirtSecondaryColor: vine.string().optional(),
+    isOpponent: vine.boolean().optional(),
   })
-
-  public messages: CustomMessages = {}
-}
+);

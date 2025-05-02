@@ -1,65 +1,41 @@
-/**
- * Config source: https://git.io/JY0mp
- *
- * Feel free to let us know via PR, if you find something broken in this config
- * file.
- */
+import { defineConfig } from '@adonisjs/auth'
+import { tokensGuard, tokensUserProvider } from '@adonisjs/auth/access_tokens'
+import { basicAuthGuard, basicAuthUserProvider } from '@adonisjs/auth/basic_auth'
+import { sessionGuard, sessionUserProvider } from '@adonisjs/auth/session'
+import type { InferAuthEvents, Authenticators } from '@adonisjs/auth/types'
 
-import { AuthConfig } from '@ioc:Adonis/Addons/Auth'
-
-/*
-|--------------------------------------------------------------------------
-| Authentication Mapping
-|--------------------------------------------------------------------------
-|
-| List of available authentication mapping. You must first define them
-| inside the `contracts/auth.ts` file before mentioning them here.
-|
-*/
-const authConfig: AuthConfig = {
-  guard: 'api',
+const authConfig = defineConfig({
+  default: 'api',
   guards: {
-    api: {
-      driver: 'oat',
-      tokenProvider: {
-        type: 'api',
-        driver: 'database',
-        table: 'api_tokens',
-        foreignKey: 'userId',
-      },
-      provider: {
-        driver: 'lucid',
-        identifierKey: 'id',
-        uids: ['email'],
-        model: () => import('App/Models/User'),
-      },
-    },
-    refresh: {
-      driver: 'oat',
-      tokenProvider: {
-        type: 'refresh',
-        driver: 'database',
-        table: 'api_tokens',
-        foreignKey: 'userId',
-      },
-      provider: {
-        driver: 'lucid',
-        identifierKey: 'id',
-        uids: ['email'],
-        model: () => import('App/Models/User'),
-      },
-    },
-    basic: {
-      driver: 'basic',
-      realm: 'Login',
-      provider: {
-        driver: 'lucid',
-        identifierKey: 'id',
-        uids: ['email'],
-        model: () => import('App/Models/User'),
-      },
-    },
+    api: tokensGuard({
+      provider: tokensUserProvider({
+        tokens: 'accessTokens',
+        model: () => import('#models/User')
+      }),
+    }),
+    refresh: tokensGuard({
+      provider: tokensUserProvider({
+        tokens: 'rememberMeTokens',
+        model: () => import('#models/User')
+      }),
+    }),
+    basic: basicAuthGuard({
+      provider: basicAuthUserProvider({
+        model: () => import('#models/User')
+      }),
+    })
   },
-}
+})
 
 export default authConfig
+
+/**
+ * Inferring types from the configured auth
+ * guards.
+ */
+declare module '@adonisjs/auth/types' {
+  export interface Authenticators extends InferAuthenticators<typeof authConfig> { }
+}
+declare module '@adonisjs/core/types' {
+  interface EventsList extends InferAuthEvents<Authenticators> { }
+}

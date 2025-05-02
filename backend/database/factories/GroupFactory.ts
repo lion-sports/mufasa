@@ -1,5 +1,5 @@
-import Group from 'App/Models/Group'
-import Factory from '@ioc:Adonis/Lucid/Factory'
+import Group from '#app/Models/Group'
+import Factory from '@adonisjs/lucid/factories'
 
 export default Factory.define(Group, (_params) => {
   return {

@@ -1,10 +1,10 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import Database from '@ioc:Adonis/Lucid/Database'
-import scoutsSocket from 'App/managers/scout/scouts.socket'
+import type { HttpContext } from '@adonisjs/core/http'
+import db from '@adonisjs/lucid/services/db'
+import scoutsSocket from '#app/managers/scout/scouts.socket'
 
 export default class ScoutEventsController {
-  public async add({ request }: HttpContextContract) {
-    let trx = await Database.transaction()
+  public async add({ request }: HttpContext) {
+    let trx = await db.transaction()
     let clientIdentifier = request.input('clientIdentifier')
 
     try {

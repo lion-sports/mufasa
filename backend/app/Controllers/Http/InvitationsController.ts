@@ -1,8 +1,8 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import InvitationsManager from 'App/managers/invitations.manager'
+import type { HttpContext } from '@adonisjs/core/http'
+import InvitationsManager from '#app/managers/invitations.manager'
 
 export default class InvitationsController {
-  public async inviteUser({ request }: HttpContextContract) {
+  public async inviteUser({ request }: HttpContext) {
     const manager = new InvitationsManager()
 
     const user = request.input('user')
@@ -22,13 +22,13 @@ export default class InvitationsController {
     })
   }
 
-  public async list({ }: HttpContextContract) {
+  public async list({ }: HttpContext) {
     const manager = new InvitationsManager()
 
     return await manager.getUserInvitations()
   }
 
-  public async accept({ request }: HttpContextContract) {
+  public async accept({ request }: HttpContext) {
     const manager = new InvitationsManager()
 
     const invitation = request.input('invitation')
@@ -40,7 +40,7 @@ export default class InvitationsController {
     })
   }
 
-  public async reject({ request }: HttpContextContract) {
+  public async reject({ request }: HttpContext) {
     const manager = new InvitationsManager()
 
     const invitation = request.input('invitation')
@@ -52,7 +52,7 @@ export default class InvitationsController {
     })
   }
 
-  public async discard({ request }: HttpContextContract) {
+  public async discard({ request }: HttpContext) {
     const manager = new InvitationsManager()
 
     const invitation = request.input('invitation')

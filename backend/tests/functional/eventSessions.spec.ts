@@ -1,7 +1,7 @@
-import EventSessionModel from 'App/Models/EventSession'
-import type User from 'App/Models/User'
+import EventSessionModel from '#app/Models/EventSession'
+import type User from '#app/Models/User'
 import { test } from '@japa/runner'
-import { UserFactory } from 'Database/factories'
+import { UserFactory } from '#database/factories/index'
 
 test.group('EventSessions', (group) => {
   let loggedInUser: User

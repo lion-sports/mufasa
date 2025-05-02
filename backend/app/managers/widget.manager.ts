@@ -1,8 +1,8 @@
-import { Context, withTransaction, withUser } from './base.manager'
-import Widget from 'App/Models/Widget'
-import Dashboard from 'App/Models/Dashboard'
-import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import User from 'App/Models/User'
+import { Context, withTransaction, withUser } from './base.manager.js'
+import Widget from '#app/Models/Widget'
+import Dashboard from '#app/Models/Dashboard'
+import User from '#app/Models/User'
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export default class WidgetManager {
   @withTransaction

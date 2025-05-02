@@ -1,9 +1,10 @@
 import { test } from '@japa/runner'
 import { assert } from 'chai'
-import { UserFactory } from 'Database/factories'
+import { UserFactory } from '#database/factories/index'
+import User from '#models/User'
 
 test.group('Users', (group) => {
-  let loggedInUser
+  let loggedInUser: User
 
   group.setup(async () => {
     loggedInUser = await UserFactory.create()

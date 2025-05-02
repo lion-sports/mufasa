@@ -18,135 +18,232 @@
 |
 */
 
-import Route from '@ioc:Adonis/Core/Route'
-import AutoSwagger from "adonis-autoswagger";
-import swagger from "Config/swagger";
+import router from '@adonisjs/core/services/router'
+import { middleware } from './kernel.js'
 
-// returns swagger in YAML
-Route.get("/swagger", async () => {
-  return AutoSwagger.docs(Route.toJSON(), swagger);
-});
+const AuthController = () => import('#controllers/Http/AuthController')
+const TeamsController = () => import('#controllers/Http/TeamsController')
+const GroupsController = () => import('#controllers/Http/GroupsController')
+const UsersController = () => import('#controllers/Http/UsersController')
+const InvitationsController = () => import('#controllers/Http/InvitationsController')
+const EventsController = () => import('#controllers/Http/EventsController')
+const EventSessionsController = () => import('#controllers/Http/EventSessionsController')
+const ShirtsController = () => import('#controllers/Http/ShirtsController')
+const ScoutAnalysisController = () => import('#controllers/Http/ScoutAnalysisController')
+const ScoutsController = () => import('#controllers/Http/ScoutsController')
+const ScoutEventsController = () => import('#controllers/Http/ScoutEventsController')
+const PlayersController = () => import('#controllers/Http/PlayersController')
+const ScoringSystemsController = () => import('#controllers/Http/ScoringSystemsController')
+const DashboardController = () => import('#controllers/Http/DashboardsController')
+const WidgetsController = () => import('#controllers/Http/WidgetsController')
+const WidgetSettingsController = () => import('#controllers/Http/WidgetSettingsController')
+const ConvocationsController = () => import('#controllers/Http/ConvocationsController')
+const SolanaController = () => import('#controllers/Http/SolanaController')
+const TeammatesController = () => import('#controllers/Http/TeammatesController')
 
-// Renders Swagger-UI and passes YAML-output of /swagger
-Route.get("/docs", async () => {
-  return AutoSwagger.ui("/swagger", swagger);
-});
+router.post('/auth/login', [AuthController, 'login'])
+router.post('/auth/refreshToken', [AuthController, 'refreshToken'])
+router.post('/auth/signup', [AuthController, 'signup'])
+router.post('/auth/logout', [AuthController, 'logout']).use(middleware.auth({
+  guards: ['api']
+}))
+router.get('/auth/me', [AuthController, 'me']).use(middleware.auth({
+  guards: ['api']
+}))
+router.get('/auth/google/redirect', [AuthController, 'googleRedirect'])
+router.get('/auth/google/callback', [AuthController, 'googleCallback'])
+router.post('/auth/google/loginWithIosGoogleToken', [AuthController, 'loginWithIosGoogleToken'])
 
-Route.post('/auth/login', 'AuthController.login')
-Route.post('/auth/refreshToken', 'AuthController.refreshToken')
-Route.post('/auth/signup', 'AuthController.signup')
-Route.post('/auth/logout', 'AuthController.logout').middleware('auth:api')
-Route.get('/auth/me', 'AuthController.me').middleware('auth:api')
-Route.get('/auth/google/redirect', 'AuthController.googleRedirect')
-Route.get('/auth/google/callback', 'AuthController.googleCallback')
+router.group(() => {
+  router.get('/absencesInLatestEvents', [TeamsController, 'absencesInLatestEvents'])
+  router.post('/:id/removeUser', [TeamsController, 'removeUser'])
+  router.post('/:id/exit', [TeamsController, 'exit'])
+  router.post('/:id/updatePreference', [TeamsController, 'updatePreference'])
+  router.get('/:teamId/groups', [GroupsController, 'index'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/teams')
 
-Route.post('/auth/google/loginWithIosGoogleToken', 'AuthController.loginWithIosGoogleToken')
-
-Route.get('/teams/absencesInLatestEvents', 'TeamsController.absencesInLatestEvents').middleware('auth:api')
-Route.resource('teams', 'TeamsController')
+router.resource('teams', TeamsController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
-  .middleware({
-    '*': ['auth:api']
-  })
-Route.post('/teams/:id/removeUser', 'TeamsController.removeUser').middleware('auth:api')
-Route.post('/teams/:id/exit', 'TeamsController.exit').middleware('auth:api')
-Route.post('/teams/:id/updatePreference', 'TeamsController.updatePreference').middleware('auth:api')
+  .middleware(
+    '*', middleware.auth({
+      guards: ['api']
+    })
+  )
 
-Route.get('/teammates/mostAbsenceForTeammates', 'TeammatesController.mostAbsenceForTeammates').middleware('auth:api')
-Route.put('/teammates/:id', 'TeammatesController.update').middleware('auth:api')
+router.group(() => {
+  router.get('/mostAbsenceForTeammates', [TeammatesController, 'mostAbsenceForTeammates'])
+  router.put('/:id', [TeammatesController, 'update'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/teammates')
 
-Route.post('/groups', 'GroupsController.store').middleware('auth:api')
-Route.get('/teams/:teamId/groups', 'GroupsController.index').middleware('auth:api')
-Route.put('/groups/:id', 'GroupsController.update').middleware('auth:api')
-Route.delete('/groups/:id', 'GroupsController.destroy').middleware('auth:api')
-Route.get('/groups/:id', 'GroupsController.show').middleware('auth:api')
+
+router.group(() => {
+  router.post('/', [GroupsController, 'store'])
+  router.put('/:id', [GroupsController, 'update'])
+  router.delete('/:id', [GroupsController, 'destroy'])
+  router.get('/:id', [GroupsController, 'show'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/groups')
   
-Route.resource('users', 'UsersController')
-  .only([ 'index', 'store', 'update', 'show', 'destroy' ])
-  .middleware({
-    '*': ['auth:api']
-  })
-
-Route.post('/invitations/inviteUser', 'InvitationsController.inviteUser').middleware('auth:api')
-Route.get('/invitations/list', 'InvitationsController.list').middleware('auth:api')
-Route.post('/invitations/accept', 'InvitationsController.accept').middleware('auth:api')
-Route.post('/invitations/reject', 'InvitationsController.reject').middleware('auth:api')
-Route.post('/invitations/discard', 'InvitationsController.discard').middleware('auth:api')
-
-Route.post('/events', 'EventsController.store').middleware('auth:api')
-Route.post('/events/createWithFrequency', 'EventsController.createWithFrequency').middleware('auth:api')
-Route.post('/events/copyWeek', 'EventsController.copyWeek').middleware('auth:api')
-Route.get('/events', 'EventsController.index').middleware('auth:api')
-Route.put('/events/:id', 'EventsController.update').middleware('auth:api')
-Route.delete('/events/:id', 'EventsController.destroy').middleware('auth:api')
-Route.get('/events/:id', 'EventsController.show').middleware('auth:api')
-Route.post('/events/:id/convocate', 'EventsController.convocate').middleware('auth:api')
-Route.post('/events/:id/unConvocate', 'EventsController.unConvocate').middleware('auth:api')
-
-Route.resource('eventSessions', 'EventSessionsController')
+router.resource('users', UsersController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
-  .middleware({
-    '*': ['auth:api']
-  })
+  .middleware(
+    '*', middleware.auth({
+      guards: ['api']
+    })
+  )
 
-Route.resource('shirts', 'ShirtsController')
+router.group(() => {
+  router.post('/inviteUser', [InvitationsController, 'inviteUser'])
+  router.get('/list', [InvitationsController, 'list'])
+  router.post('/accept', [InvitationsController, 'accept'])
+  router.post('/reject', [InvitationsController, 'reject'])
+  router.post('/discard', [InvitationsController, 'discard'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/invitations')
+
+router.group(() => {
+  router.post('/', [EventsController, 'store'])
+  router.post('/createWithFrequency', [EventsController, 'createWithFrequency'])
+  router.post('/copyWeek', [EventsController, 'copyWeek'])
+  router.get('/', [EventsController, 'index'])
+  router.put('/:id', [EventsController, 'update'])
+  router.delete('/:id', [EventsController, 'destroy'])
+  router.get('/:id', [EventsController, 'show'])
+  router.post('/:id/convocate', [EventsController, 'convocate'])
+  router.post('/:id/unConvocate', [EventsController, 'unConvocate'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/events')
+
+router.resource('eventSessions', EventSessionsController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
-  .middleware({
-    '*': ['auth:api']
-  })
+  .middleware(
+    '*', middleware.auth({
+      guards: ['api']
+    })
+  )
 
-Route.post('/scouts/analysis/totalSpikeForPosition', 'ScoutAnalysisController.totalSpikeForPosition').middleware('auth:api')
-Route.post('/scouts/analysis/totalSpikeForPlayer', 'ScoutAnalysisController.totalSpikeForPlayer').middleware('auth:api')
-Route.post('/scouts/analysis/totalSpikeForPlayerAndPosition', 'ScoutAnalysisController.totalSpikeForPlayerAndPosition').middleware('auth:api')
-Route.post('/scouts/analysis/totalServe', 'ScoutAnalysisController.totalServe').middleware('auth:api')
-Route.post('/scouts/analysis/totalServeByPlayer', 'ScoutAnalysisController.totalServeByPlayer').middleware('auth:api')
-Route.post('/scouts/analysis/totalBlock', 'ScoutAnalysisController.totalBlock').middleware('auth:api')
-Route.post('/scouts/analysis/totalBlockByPlayer', 'ScoutAnalysisController.totalBlockByPlayer').middleware('auth:api')
-Route.post('/scouts/analysis/totalReceive', 'ScoutAnalysisController.totalReceive').middleware('auth:api')
-Route.post('/scouts/analysis/totalReceiveByPlayer', 'ScoutAnalysisController.totalReceiveByPlayer').middleware('auth:api')
-Route.post('/scouts/analysis/pointsHistory', 'ScoutAnalysisController.pointsHistory').middleware('auth:api')
-Route.post('/scouts/analysis/trend', 'ScoutAnalysisController.trend').middleware('auth:api')
-
-Route.get('/scouts/:id/studio', 'ScoutsController.studio').middleware('auth:api')
-Route.get('/scouts/:id/getFirstSetStartingSix', 'ScoutsController.getFirstSetStartingSix').middleware('auth:api')
-Route.get('/scouts/:id/exportXlsx', 'ScoutsController.exportXlsx').middleware('auth:api')
-Route.post('/scouts/:id/importTeammates', 'ScoutsController.importTeammates').middleware('auth:api')
-Route.post('/scouts/:id/events/add', 'ScoutEventsController.add').middleware('auth:api')
-Route.resource('scouts', 'ScoutsController')
+router.resource('shirts', ShirtsController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
-  .middleware({
-    '*': ['auth:api']
-  })
+  .middleware(
+    '*', middleware.auth({
+      guards: ['api']
+    })
+  )
 
-Route.get('/players/:id/lastScoutEvents', 'PlayersController.lastScoutEvents').middleware('auth:api')
-Route.resource('players', 'PlayersController')
+router.group(() => {
+  router.group(() => {
+    router.post('/totalSpikeForPosition', [ScoutAnalysisController, 'totalSpikeForPosition'])
+    router.post('/totalSpikeForPlayer', [ScoutAnalysisController, 'totalSpikeForPlayer'])
+    router.post('/totalSpikeForPlayerAndPosition', [ScoutAnalysisController, 'totalSpikeForPlayerAndPosition'])
+    router.post('/totalServe', [ScoutAnalysisController, 'totalServe'])
+    router.post('/totalServeByPlayer', [ScoutAnalysisController, 'totalServeByPlayer'])
+    router.post('/totalBlock', [ScoutAnalysisController, 'totalBlock'])
+    router.post('/totalBlockByPlayer', [ScoutAnalysisController, 'totalBlockByPlayer'])
+    router.post('/totalReceive', [ScoutAnalysisController, 'totalReceive'])
+    router.post('/totalReceiveByPlayer', [ScoutAnalysisController, 'totalReceiveByPlayer'])
+    router.post('/pointsHistory', [ScoutAnalysisController, 'pointsHistory'])
+    router.post('/trend', [ScoutAnalysisController, 'trend'])
+  }).prefix('/analysis')
+  
+  router.get('/:id/studio', [ScoutsController, 'studio'])
+  router.get('/:id/getFirstSetStartingSix', [ScoutsController, 'getFirstSetStartingSix'])
+  router.get('/:id/exportXlsx', [ScoutsController, 'exportXlsx'])
+  router.post('/:id/importTeammates', [ScoutsController, 'importTeammates'])
+  router.post('/:id/events/add', [ScoutEventsController, 'add'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/scouts')
+
+router.resource('scouts', ScoutsController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
-  .middleware({
-    '*': ['auth:api']
-  })
+  .middleware(
+    '*', middleware.auth({
+      guards: ['api']
+    })
+  )
 
-Route.resource('scoringSystems', 'ScoringSystemsController')
+router.group(() => {
+  router.get('/:id/lastScoutEvents', [PlayersController, 'lastScoutEvents'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/players')
+
+router.resource('players', PlayersController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
-  .middleware({
-    '*': ['auth:api']
-  })
+  .middleware(
+    '*', middleware.auth({
+      guards: ['api']
+    })
+  )
 
-Route.resource('dashboards', 'DashboardsController')
+router.resource('scoringSystems', ScoringSystemsController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
-  .middleware({
-    '*': ['auth:api'],
-  })
+  .middleware(
+    '*', middleware.auth({
+      guards: ['api']
+    })
+  )
 
-Route.get('/widgets/loadDistribution', 'WidgetsController.loadDistribution').middleware('auth:api')
-Route.get('/widgets/loadServeSummary', 'WidgetsController.loadServeSummary').middleware('auth:api')
-Route.get('/widgets/loadBlockSummary', 'WidgetsController.loadBlockSummary').middleware('auth:api')
-Route.get('/widgets/loadReceiveSummary', 'WidgetsController.loadReceiveSummary').middleware('auth:api')
-Route.get('/widgets/loadTrend', 'WidgetsController.loadTrend').middleware('auth:api')
-Route.get('/widgets/:id', 'WidgetsController.show').middleware('auth:api')
+router.resource('dashboards', DashboardController)
+  .only(['index', 'store', 'update', 'show', 'destroy'])
+  .middleware(
+    '*', middleware.auth({
+      guards: ['api']
+    })
+  )
 
-Route.post('/widgetSettings/set', 'WidgetSettingsController.set').middleware('auth:api')
+router.group(() => {
+  router.get('/loadDistribution', [WidgetsController, 'loadDistribution'])
+  router.get('/loadServeSummary', [WidgetsController, 'loadServeSummary'])
+  router.get('/loadBlockSummary', [WidgetsController, 'loadBlockSummary'])
+  router.get('/loadReceiveSummary', [WidgetsController, 'loadReceiveSummary'])
+  router.get('/loadTrend', [WidgetsController, 'loadTrend'])
+  router.get('/:id', [WidgetsController, 'show'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/widgets')
 
-Route.post('/convocations/:id/confirm', 'ConvocationsController.confirm').middleware('auth:api')
-Route.post('/convocations/:id/deny', 'ConvocationsController.deny').middleware('auth:api')
 
-Route.post('/solana/reward', 'SolanaController.reward').middleware('auth:api')
+router.group(() => {
+  router.post('/set', [WidgetSettingsController, 'set'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/widgetSettings')
+
+router.group(() => {
+  router.post('/:id/confirm', [ConvocationsController, 'confirm'])
+  router.post('/:id/deny', [ConvocationsController, 'deny'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/convocations')
+
+router.post('/solana/reward', [SolanaController, 'reward']).use(middleware.auth({
+  guards: ['api']
+}))

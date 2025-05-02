@@ -1,12 +1,12 @@
-import ScoringSystem, { ScoringSystemConfig } from "App/Models/ScoringSystem";
-import { Context, withTransaction, withUser } from "./base.manager";
-import { validator } from "@ioc:Adonis/Core/Validator"
-import User from "App/Models/User";
-import AuthorizationManager from "./authorization.manager";
-import FilterModifierApplier, { Modifier } from "App/Services/FilterModifierApplier";
-import { ModelObject } from "@ioc:Adonis/Lucid/Orm";
-import { Sport } from "App/Models/Scout";
-import { CreateScoringSystemValidator, UpdateScoringSystemValidator } from "App/Validators/scoringSystems";
+import ScoringSystem, { ScoringSystemConfig } from "#app/Models/ScoringSystem";
+import { Context, withTransaction, withUser } from "./base.manager.js";
+import { validator } from "@adonisjs/validator"
+import User from "#app/Models/User";
+import AuthorizationManager from "./authorization.manager.js";
+import FilterModifierApplier, { Modifier } from "#app/Services/FilterModifierApplier";
+import { Sport } from "#app/Models/Scout";
+import { CreateScoringSystemValidator, UpdateScoringSystemValidator } from "#app/Validators/scoringSystems/index";
+import { ModelObject } from "@adonisjs/lucid/types/model";
 
 export default class ScoringSystemsManager {
   @withTransaction

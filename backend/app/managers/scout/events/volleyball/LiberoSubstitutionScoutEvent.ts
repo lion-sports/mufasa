@@ -1,8 +1,8 @@
 import type { LiberoSubstitutionScoutExtraProperties, VolleyballPoints } from "lionn-common";
-import ScoutEvent from "../../ScoutEvent";
-import scoutsSocket from "../../scouts.socket";
-import Scout from "App/Models/Scout";
-import { Context } from "App/managers/base.manager";
+import ScoutEvent, { ScoutEventConstructorsParameters } from "../../ScoutEvent.js";
+import scoutsSocket from "../../scouts.socket.js";
+import Scout from "#app/Models/Scout";
+import { Context } from "#app/managers/base.manager";
 
 export default class LiberoSubstitutionScoutEvent extends ScoutEvent<
   LiberoSubstitutionScoutExtraProperties, 
@@ -11,7 +11,7 @@ export default class LiberoSubstitutionScoutEvent extends ScoutEvent<
 > {
   public type = 'liberoSubstitution' as const
 
-  constructor(params) {
+  constructor(params: ScoutEventConstructorsParameters<'liberoSubstitution', VolleyballPoints, LiberoSubstitutionScoutExtraProperties>) {
     if (!params.playerId) params.playerId = params.player.id
     if (!params.playerId) throw new Error('playerId must be defined')
 

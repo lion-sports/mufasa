@@ -1,11 +1,11 @@
-import Convocation from 'App/Models/Convocation';
-import Teammate from 'App/Models/Teammate';
+import Convocation from '#app/Models/Convocation';
+import Teammate from '#app/Models/Teammate';
 import { DateTime } from 'luxon';
-import User from 'App/Models/User'
-import Team from 'App/Models/Team'
+import User from '#app/Models/User'
+import Team from '#app/Models/Team'
 import { test } from '@japa/runner'
-import { TeamFactory, UserFactory } from 'Database/factories'
-import EventModel from 'App/Models/Event';
+import { TeamFactory, UserFactory } from '#database/factories/index'
+import Event from '#app/Models/Event';
 
 
 test.group('Events', (group) => {
@@ -272,7 +272,7 @@ test.group('Events', (group) => {
     }).loginAs(loggedInUser)
 
     
-    let copiedEvents = eventListResponse.body()
+    let copiedEvents: Event[]  = eventListResponse.body()
     assert.isTrue(copiedEvents.length > 0, 'should copy the event')
     assert.isTrue(!!copiedEvents.find((event) => event.name == 'Evento da copiare'), 'should copy the event')
   })
@@ -294,7 +294,7 @@ test.group('Events', (group) => {
     let eventToDelete = response.body()
 
     await client.delete('/events/' + eventToDelete.id).loginAs(loggedInUser)
-    const results = await EventModel.query().where('id', eventToDelete.id)
+    const results = await Event.query().where('id', eventToDelete.id)
 
     assert.equal(results.length, 0, 'should have remove the event')
   })

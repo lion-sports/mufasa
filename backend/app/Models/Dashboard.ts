@@ -1,8 +1,10 @@
 import { DateTime } from 'luxon'
-import { column, belongsTo, BelongsTo, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
-import { CamelCaseBaseModel } from './CamelCaseBaseModel'
-import User from './User'
-import Widget from './Widget'
+import { column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
+import User from './User.js'
+import Widget from './Widget.js'
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
+import { type HasMany } from "@adonisjs/lucid/types/relations";
 
 export default class Dashboard extends CamelCaseBaseModel {
   @column({ isPrimary: true })

@@ -1,9 +1,11 @@
-import Team from 'App/Models/Team';
-import { CamelCaseBaseModel } from './CamelCaseBaseModel'
+import Team from '#app/Models/Team';
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime } from 'luxon'
-import { BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
-import type { Action, Resource } from 'App/managers/authorization.manager';
-import Teammate from './Teammate';
+import { belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { Action, Resource } from '#app/managers/authorization.manager';
+import Teammate from './Teammate.js';
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
+import { type HasMany } from "@adonisjs/lucid/types/relations";
 
 export type GroupCans = {
   [resource in Resource]?: {

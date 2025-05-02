@@ -1,6 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api'
-import FipavScraper from './fipav.scraper'
-import Application from '@ioc:Adonis/Core/Application'
+import FipavScraper from './fipav.scraper.js'
+import app from '@adonisjs/core/services/app'
 
 export default class FipavBot {
   public bot: TelegramBot
@@ -24,7 +24,7 @@ Cosa vuoi fare?`,
     token: string,
     webHookUrl?: string
   }) {
-    if(Application.inDev) {
+    if(app.inDev) {
       this.bot = new TelegramBot(params.token, { polling: true })
 
       this.bot.on('message', (message) => {

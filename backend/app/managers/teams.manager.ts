@@ -1,14 +1,15 @@
 import { DateTime } from 'luxon';
-import Database, { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import { CreateTeamValidator, UpdateTeamValidator } from 'App/Validators/teams'
-import { validator } from "@ioc:Adonis/Core/Validator"
-import Team from 'App/Models/Team'
-import User from 'App/Models/User'
-import Teammate from 'App/Models/Teammate';
-import { ModelObject } from '@ioc:Adonis/Lucid/Orm';
-import AuthorizationManager from './authorization.manager';
-import { Context, withTransaction, withUser } from './base.manager';
-import { Sport } from 'App/Models/Scout';
+import db from '@adonisjs/lucid/services/db'
+import { CreateTeamValidator, UpdateTeamValidator } from '#app/Validators/teams/index'
+import { validator } from "@adonisjs/validator"
+import Team from '#app/Models/Team'
+import User from '#app/Models/User'
+import Teammate from '#app/Models/Teammate';
+import AuthorizationManager from './authorization.manager.js';
+import { Context, withTransaction, withUser } from './base.manager.js';
+import { Sport } from '#app/Models/Scout';
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import { ModelObject } from "@adonisjs/lucid/types/model";
 
 export default class TeamsManager {
   constructor() {
@@ -218,14 +219,17 @@ export default class TeamsManager {
     else if (!params.data.value) throw new Error('preference value must be defined')
     else if (![
       'confirmPresenceByDefault'
-    ].includes(params.data.preference)) throw new Error("unknown preference");
+    ].includes(params.data.preference)) { 
+      throw new Error("unknown preference")
+    }
 
     const team = await Team.findOrFail(params.data.id, {
       client: trx
     })
 
     if (!team.preferences) team.preferences = {}
-    team.preferences[params.data.preference] = params.data.value
+    let preferenceKey = params.data.preference as keyof typeof team.preferences
+    team.preferences[preferenceKey] = params.data.value
 
     return await team.save()
   }
@@ -437,7 +441,7 @@ export default class TeamsManager {
     }> = {}
     
 
-    let results = await Database.rawQuery<{
+    let results = await db.rawQuery<{
       rows: {
         id: number
         teamId: number

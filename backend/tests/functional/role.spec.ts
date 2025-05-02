@@ -1,8 +1,8 @@
-import Group from 'App/Models/Group';
-import User from 'App/Models/User'
-import Team from 'App/Models/Team'
+import Group from '#app/Models/Group';
+import User from '#app/Models/User'
+import Team from '#app/Models/Team'
 import { test } from '@japa/runner'
-import { TeamFactory } from 'Database/factories'
+import { TeamFactory } from '#database/factories/index'
 
 test.group('Groups', (group) => {
   let teamsAndOwners: {

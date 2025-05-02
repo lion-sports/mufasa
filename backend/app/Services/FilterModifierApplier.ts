@@ -1,5 +1,7 @@
-import { DatabaseQueryBuilderContract } from '@ioc:Adonis/Lucid/Database'
-import { LucidModel, LucidRow, ModelQueryBuilderContract } from '@ioc:Adonis/Lucid/Orm'
+import { DatabaseQueryBuilderContract } from "@adonisjs/lucid/types/querybuilder";
+import { LucidModel } from "@adonisjs/lucid/types/model";
+import { LucidRow } from "@adonisjs/lucid/types/model";
+import { ModelQueryBuilderContract } from "@adonisjs/lucid/types/model";
 
 export type WhereFilterValue = string | number | Date | boolean
 

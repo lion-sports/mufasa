@@ -1,10 +1,10 @@
-import Teammate from 'App/Models/Teammate';
-import TeamsManager from 'App/managers/teams.manager';
-import User from 'App/Models/User'
-import Team from 'App/Models/Team'
+import Teammate from '#app/Models/Teammate';
+import TeamsManager from '#app/managers/teams.manager';
+import User from '#app/Models/User'
+import Team from '#app/Models/Team'
 import { test } from '@japa/runner'
-import { TeamFactory, UserFactory } from 'Database/factories'
-import GroupFactory from 'Database/factories/GroupFactory';
+import { TeamFactory, UserFactory } from '#database/factories/index'
+import GroupFactory from '#database/factories/GroupFactory';
 
 test.group('Invitations', (group) => {
   let loggedInUser: User

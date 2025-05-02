@@ -1,12 +1,12 @@
-import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import { CreateGroupValidator, UpdateGroupValidator } from 'App/Validators/groups'
-import { validator } from "@ioc:Adonis/Core/Validator"
-import Group from 'App/Models/Group'
-import User from 'App/Models/User';
-import { ModelObject } from '@ioc:Adonis/Lucid/Orm';
-import AuthorizationManager from './authorization.manager';
-import type { GroupCans } from 'App/Models/Group';
-import { withTransaction, type Context, withUser } from './base.manager';
+import { CreateGroupValidator, UpdateGroupValidator } from '#app/Validators/groups/index'
+import { validator } from "@adonisjs/validator"
+import Group from '#app/Models/Group'
+import User from '#app/Models/User';
+import AuthorizationManager, { Action } from './authorization.manager.js';
+import type { GroupCans } from '#app/Models/Group';
+import { withTransaction, type Context, withUser } from './base.manager.js';
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import { ModelObject } from "@adonisjs/lucid/types/model";
 
 export type CreateParams = {
   data: {
@@ -194,10 +194,12 @@ export default class GroupsManager {
     if (!!params.data.cans) {
       let existingCans = group.cans
       for(let [resource, _value] of Object.entries(params.data.cans)) {
-        for (let [action, finalValue] of Object.entries(params.data.cans[resource])) {
+        let resourceKey = resource as keyof GroupCans
+        for (let [action, finalValue] of Object.entries(params.data.cans[resourceKey] || {})) {
           if (!existingCans) existingCans = {}
-          if (!existingCans[resource]) existingCans[resource] = {}
-          existingCans[resource][action] = finalValue
+          if (!existingCans[resourceKey]) existingCans[resourceKey] = {}
+          // @ts-ignore
+          existingCans[resourceKey][action] = finalValue
         }
       }
 

@@ -1,8 +1,8 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import ScoutAnalysisManager from 'App/managers/scout/analysis/scoutAnalysis.manager'
+import type { HttpContext } from '@adonisjs/core/http'
+import ScoutAnalysisManager from '#app/managers/scout/analysis/scoutAnalysis.manager'
 
 export default class ScoutAnalysisController {
-  public async totalSpikeForPosition({ request }: HttpContextContract) {
+  public async totalSpikeForPosition({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.totalSpikeForPosition({
@@ -14,7 +14,7 @@ export default class ScoutAnalysisController {
     })
   }
 
-  public async totalSpikeForPlayer({ request }: HttpContextContract) {
+  public async totalSpikeForPlayer({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.totalSpikeForPlayer({
@@ -26,7 +26,7 @@ export default class ScoutAnalysisController {
     })
   }
 
-  public async totalSpikeForPlayerAndPosition({ request }: HttpContextContract) {
+  public async totalSpikeForPlayerAndPosition({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.totalSpikeForPlayerAndPosition({
@@ -38,7 +38,7 @@ export default class ScoutAnalysisController {
     })
   }
 
-  public async totalServe({ request }: HttpContextContract) {
+  public async totalServe({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.totalServe({
@@ -50,7 +50,7 @@ export default class ScoutAnalysisController {
     })
   }
 
-  public async totalServeByPlayer({ request }: HttpContextContract) {
+  public async totalServeByPlayer({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.totalServeByPlayer({
@@ -62,7 +62,7 @@ export default class ScoutAnalysisController {
     })
   }
 
-  public async totalBlock({ request }: HttpContextContract) {
+  public async totalBlock({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.totalBlock({
@@ -74,7 +74,7 @@ export default class ScoutAnalysisController {
     })
   }
 
-  public async totalBlockByPlayer({ request }: HttpContextContract) {
+  public async totalBlockByPlayer({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.totalBlockByPlayer({
@@ -86,7 +86,7 @@ export default class ScoutAnalysisController {
     })
   }
 
-  public async totalReceive({ request }: HttpContextContract) {
+  public async totalReceive({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.totalReceive({
@@ -98,7 +98,7 @@ export default class ScoutAnalysisController {
     })
   }
 
-  public async totalReceiveByPlayer({ request }: HttpContextContract) {
+  public async totalReceiveByPlayer({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.totalReceiveByPlayer({
@@ -110,7 +110,7 @@ export default class ScoutAnalysisController {
     })
   }
 
-  public async pointsHistory({ request }: HttpContextContract) {
+  public async pointsHistory({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.pointsHistory({
@@ -122,7 +122,7 @@ export default class ScoutAnalysisController {
     })
   }
 
-  public async trend({ request }: HttpContextContract) {
+  public async trend({ request }: HttpContext) {
     const manager = new ScoutAnalysisManager()
 
     return await manager.trend({

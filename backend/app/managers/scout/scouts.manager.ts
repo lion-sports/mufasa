@@ -1,20 +1,18 @@
-import { Context, withTransaction, withUser } from "../base.manager";
-import { validator } from "@ioc:Adonis/Core/Validator"
-import User from "App/Models/User";
-import AuthorizationManager from "../authorization.manager";
-import FilterModifierApplier, { Modifier } from "App/Services/FilterModifierApplier";
-import { ModelObject } from "@ioc:Adonis/Lucid/Orm";
-import Scout, { Sport } from "App/Models/Scout";
-import Event from "App/Models/Event";
+import { Context, withTransaction, withUser } from "../base.manager.js";
+import { validator } from "@adonisjs/validator"
+import User from "#app/Models/User";
+import AuthorizationManager from "../authorization.manager.js";
+import FilterModifierApplier, { Modifier } from "#app/Services/FilterModifierApplier";
+import Scout, { Sport } from "#app/Models/Scout";
+import Event from "#app/Models/Event";
 import { DateTime } from "luxon";
-import { CreateScoutValidator, UpdateScoutValidator } from "App/Validators/scouts";
-import PlayersManager from "../players.manager";
-import Mongo from "App/Services/Mongo";
-import { SCOUT_EVENT_COLLECTION_NAME } from "./ScoutEvent";
-import scoutsSocket from "./scouts.socket";
-import { lastPlayerPositionAggregation } from "./aggregations/lastPlayerPosition.aggregation";
-import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation";
-import { TransactionClientContract } from "@ioc:Adonis/Lucid/Database";
+import { CreateScoutValidator, UpdateScoutValidator } from "#app/Validators/scouts/index";
+import PlayersManager from "../players.manager.js";
+import Mongo from "#app/Services/Mongo";
+import { SCOUT_EVENT_COLLECTION_NAME } from "./ScoutEvent.js";
+import scoutsSocket from "./scouts.socket.js";
+import { lastPlayerPositionAggregation } from "./aggregations/lastPlayerPosition.aggregation.js";
+import { totalAnalysis } from "./aggregations/totalAnalysis.aggregation.js";
 import { 
   getPlayersPositions, 
   FIRST_POINT,
@@ -30,6 +28,8 @@ import {
   type ScoutInfoGeneral, 
   type ScoutInfoSettings
 } from "lionn-common";
+import { ModelObject } from "@adonisjs/lucid/types/model";
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export type ScoutStudio = {
   scout: Scout,
@@ -430,8 +430,8 @@ export default class ScoutsManager {
         { client: trx }
       )
 
-      let ObjectAssign = (target, ...sources) => {
-        sources.forEach(source => {
+      let ObjectAssign = (target: any, ...sources: any) => {
+        sources.forEach((source: any) => {
           Object.keys(source).forEach(key => {
             if(!target) target = {}
 

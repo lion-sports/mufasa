@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon'
-import { CamelCaseBaseModel } from './CamelCaseBaseModel';
-import { belongsTo, BelongsTo, column } from '@ioc:Adonis/Lucid/Orm'
-import { Sport } from './Scout';
-import User from './User';
-import Team from './Team';
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js';
+import { belongsTo, column } from '@adonisjs/lucid/orm'
+import { type Sport } from './Scout.js';
+import User from './User.js';
+import Team from './Team.js';
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
 
 export type ScoringSystemConfigPoints = {
   mode: 'totalPoints'

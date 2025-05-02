@@ -1,15 +1,14 @@
-import HttpContext from '@ioc:Adonis/Core/HttpContext'
-import AuthorizationManager, { Action, Resource } from './authorization.manager'
-import Database, { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import User from 'App/Models/User'
-import FilterModifierApplier, { type Modifier } from 'App/Services/FilterModifierApplier'
-import {
-  LucidModel,
-  ModelAttributes,
-  ModelObject,
-  ModelQueryBuilderContract,
-} from '@ioc:Adonis/Lucid/Orm'
+import { HttpContext } from '@adonisjs/core/http'
+import AuthorizationManager, { Action, Resource } from './authorization.manager.js'
+import db from '@adonisjs/lucid/services/db'
+import User from '#app/Models/User'
+import FilterModifierApplier, { type Modifier } from '#app/Services/FilterModifierApplier'
 import { DateTime } from 'luxon'
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import { LucidModel } from "@adonisjs/lucid/types/model";
+import { ModelAttributes } from "@adonisjs/lucid/types/model";
+import { ModelObject } from "@adonisjs/lucid/types/model";
+import { ModelQueryBuilderContract } from "@adonisjs/lucid/types/model";
 
 //#region Types
 export type Context = {
@@ -322,7 +321,7 @@ function withTransaction(_target: any, _propertyKey: string, descriptor: Propert
   const originalMethod = descriptor.value
   descriptor.value = async function (...args: any[]) {
     let trx = args[0]?.context?.trx
-    if (!trx) trx = await Database.transaction()
+    if (!trx) trx = await db.transaction()
 
     try {
       let res = await originalMethod.apply(this, [

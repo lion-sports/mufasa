@@ -1,10 +1,10 @@
-import Convocation from 'App/Models/Convocation';
-import Teammate from 'App/Models/Teammate';
+import Convocation from '#app/Models/Convocation';
+import Teammate from '#app/Models/Teammate';
 import { DateTime } from 'luxon';
-import User from 'App/Models/User'
-import Team from 'App/Models/Team'
+import User from '#app/Models/User'
+import Team from '#app/Models/Team'
 import { test } from '@japa/runner'
-import { TeamFactory, UserFactory } from 'Database/factories'
+import { TeamFactory, UserFactory } from '#database/factories/index'
 
 
 test.group('Convocations', (group) => {

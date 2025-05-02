@@ -5,10 +5,10 @@
  * file.
  */
 
-import Env from '@ioc:Adonis/Core/Env'
-import { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
+import env from '#start/env'
+import { defineConfig } from "@adonisjs/lucid";
 
-const databaseConfig: DatabaseConfig = {
+const databaseConfig = defineConfig({
   /*
   |--------------------------------------------------------------------------
   | Connection
@@ -19,8 +19,7 @@ const databaseConfig: DatabaseConfig = {
   | file.
   |
   */
-  connection: Env.get('DB_CONNECTION'),
-
+  connection: env.get('DB_CONNECTION', 'pg'),
   connections: {
     /*
     |--------------------------------------------------------------------------
@@ -36,35 +35,37 @@ const databaseConfig: DatabaseConfig = {
     pg: {
       client: 'pg',
       connection: {
-        host: Env.get('PG_HOST'),
-        port: Env.get('PG_PORT'),
-        user: Env.get('PG_USER'),
-        password: Env.get('PG_PASSWORD', ''),
-        database: Env.get('PG_DB_NAME'),
+        host: env.get('PG_HOST'),
+        port: env.get('PG_PORT', 5432),
+        user: env.get('PG_USER'),
+        password: env.get('PG_PASSWORD', ''),
+        database: env.get('PG_DB_NAME'),
       },
       migrations: {
         naturalSort: true,
       },
-      healthCheck: false,
       debug: false,
+      pool: {
+        min: 0,
+        max: 60,
+      },
     },
     test: {
       client: 'pg',
       connection: {
-        host: Env.get('PG_HOST'),
-        port: Env.get('PG_PORT'),
-        user: Env.get('PG_USER'),
-        password: Env.get('PG_PASSWORD', ''),
-        database: Env.get('PG_TEST_DB_NAME'),
+        host: env.get('PG_HOST'),
+        port: env.get('PG_PORT'),
+        user: env.get('PG_USER'),
+        password: env.get('PG_PASSWORD', ''),
+        database: env.get('PG_TEST_DB_NAME'),
       },
       migrations: {
         naturalSort: true,
       },
-      healthCheck: false,
       debug: false,
     },
 
   }
-}
+})
 
 export default databaseConfig

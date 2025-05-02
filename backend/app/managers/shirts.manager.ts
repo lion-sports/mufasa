@@ -1,11 +1,11 @@
-import Shirt from "App/Models/Shirt";
-import { Context, withTransaction, withUser } from "./base.manager";
-import { CreateShirtValidator, UpdateShirtValidator } from "App/Validators/shirts";
-import { validator } from "@ioc:Adonis/Core/Validator"
-import User from "App/Models/User";
-import AuthorizationManager from "./authorization.manager";
-import FilterModifierApplier, { Modifier } from "App/Services/FilterModifierApplier";
-import { ModelObject } from "@ioc:Adonis/Lucid/Orm";
+import Shirt from "#app/Models/Shirt";
+import { Context, withTransaction, withUser } from "./base.manager.js";
+import { CreateShirtValidator, UpdateShirtValidator } from "#app/Validators/shirts/index";
+import { validator } from "@adonisjs/validator"
+import User from "#app/Models/User";
+import AuthorizationManager from "./authorization.manager.js";
+import FilterModifierApplier, { Modifier } from "#app/Services/FilterModifierApplier";
+import { ModelObject } from "@adonisjs/lucid/types/model";
 
 export default class ShirtManager {
   @withTransaction
