@@ -18,5 +18,5 @@
 
 <label style:font-weight="500" style:margin-left="3px" for={name}>{label}</label>
 <div style:margin-top="5px">
-	<StandardTextarea bind:value label={placeholder} on:input />
+	<StandardTextarea bind:value label={placeholder} />
 </div>
