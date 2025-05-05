@@ -80,7 +80,7 @@
 				id={`check-convocation-${teammate.id}`}
 				value={value[teammate.id]}
 				label=""
-				on:change={(event) => handleChange(teammate, event)}
+				onchange={(event) => handleChange(teammate, event)}
 			>
 				{#snippet text()}
 							
