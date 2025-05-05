@@ -21,52 +21,55 @@
 
 	let { data, children }: Props = $props()
 
-	let selectedTab: string = $state('general'),
-		options: ComponentProps<typeof OptionMenu>['options'] = $state([]),
-		tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = $state([])
+	let selectedTab: string = $state('general')
 
-	options = []
+	let options: ComponentProps<typeof OptionMenu>['options'] = $derived.by(() => {
+		let options: ComponentProps<typeof OptionMenu>['options'] = []
+		if (data.groupedPermissions.event.update)
+			options.push({
+				name: 'update',
+				title: 'Modifica',
+				icon: 'mdi-pencil'
+			})
 
-	if (data.groupedPermissions.event.update)
-		options.push({
-			name: 'update',
-			title: 'Modifica',
-			icon: 'mdi-pencil'
-		})
+		if (data.groupedPermissions.event.destroy)
+			options.push({
+				name: 'destroy',
+				title: 'Elimina',
+				icon: 'mdi-delete',
+				style: {
+					color: 'rgb(var(--global-color-error-500))'
+				}
+			})
+		return options
+	})
 
-	if (data.groupedPermissions.event.destroy)
-		options.push({
-			name: 'destroy',
-			title: 'Elimina',
-			icon: 'mdi-delete',
-			style: {
-				color: 'rgb(var(--global-color-error-500))'
-			}
-		})
-
-	tabs = [
-		{
-			name: 'general',
-			label: 'Generale',
-			icon: 'mdi-text'
-		},
-		{
-			name: 'convocations',
-			label: 'Convocazioni',
-			icon: 'mdi-list-status'
-		}
-	]
-
-	if (data.groupedPermissions.scout.view) {
-		tabs = [
-			...tabs,
+	let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = $derived.by(() => {
+		let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = [
 			{
-				name: 'scouts',
-				label: 'Scout',
-				icon: 'mdi-chart-timeline-variant'
+				name: 'general',
+				label: 'Generale',
+				icon: 'mdi-text'
+			},
+			{
+				name: 'convocations',
+				label: 'Convocazioni',
+				icon: 'mdi-list-status'
 			}
 		]
-	}
+
+		if (data.groupedPermissions.scout.view) {
+			tabs = [
+				...tabs,
+				{
+					name: 'scouts',
+					label: 'Scout',
+					icon: 'mdi-chart-timeline-variant'
+				}
+			]
+		}
+		return tabs
+	})
 
 	function handleOptionClick(ev: any) {
 		if (ev.detail?.element?.name == 'update')
