@@ -50,7 +50,7 @@
     playerMarkerDimension = 0.5,
     scout,
     phase = 'serve',
-    selectedPlayer = undefined,
+    selectedPlayer = $bindable(undefined),
     friendSides = 'left'
   }: Props = $props();
 
