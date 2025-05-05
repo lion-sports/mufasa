@@ -1,17 +1,18 @@
 <script lang="ts">
-	import type {
-		Scout
-	} from '@/lib/services/scouts/scouts.service'
+	import type { Scout } from '@/lib/services/scouts/scouts.service'
 	import LabelAndCheckbox from '../../common/LabelAndCheckbox.svelte'
-	import type { POSSIBLE_AUTO_PAHSE_EVENTS, POSSIBLE_AUTO_POINT_ENEMY_EVENTS, POSSIBLE_AUTO_POINT_FRIENDS_EVENTS } from 'lionn-common'
+	import type {
+		POSSIBLE_AUTO_PAHSE_EVENTS,
+		POSSIBLE_AUTO_POINT_ENEMY_EVENTS,
+		POSSIBLE_AUTO_POINT_FRIENDS_EVENTS
+	} from 'lionn-common'
 	import ScoutsService from '@/lib/services/scouts/scouts.service'
 
-
 	interface Props {
-		scout: Scout;
+		scout: Scout
 	}
 
-	let { scout = $bindable() }: Props = $props();
+	let { scout = $bindable() }: Props = $props()
 
 	function initAutoPointObject() {
 		if (!scout.scoutInfo.settings) scout.scoutInfo.settings = {}
@@ -27,22 +28,24 @@
 				enemy: []
 			}
 
-    if(
-      !!scout.scoutInfo.settings &&
+		if (
+			!!scout.scoutInfo.settings &&
 			!!scout.scoutInfo.settings.automations &&
 			!!scout.scoutInfo.settings.automations.autoPoint &&
-      !scout.scoutInfo.settings.automations?.autoPoint?.friends
-    ) scout.scoutInfo.settings.automations.autoPoint.friends = []
+			!scout.scoutInfo.settings.automations?.autoPoint?.friends
+		)
+			scout.scoutInfo.settings.automations.autoPoint.friends = []
 
-    if(
-      !!scout.scoutInfo.settings &&
+		if (
+			!!scout.scoutInfo.settings &&
 			!!scout.scoutInfo.settings.automations &&
 			!!scout.scoutInfo.settings.automations.autoPoint &&
-      !scout.scoutInfo.settings.automations?.autoPoint?.enemy
-    ) scout.scoutInfo.settings.automations.autoPoint.enemy = []
+			!scout.scoutInfo.settings.automations?.autoPoint?.enemy
+		)
+			scout.scoutInfo.settings.automations.autoPoint.enemy = []
 	}
 
-  function initAutoPhaseObject() {
+	function initAutoPhaseObject() {
 		if (!scout.scoutInfo.settings) scout.scoutInfo.settings = {}
 		if (!!scout.scoutInfo.settings && !scout.scoutInfo.settings.automations)
 			scout.scoutInfo.settings.automations = {}
@@ -51,31 +54,33 @@
 			!!scout.scoutInfo.settings.automations &&
 			!scout.scoutInfo.settings.automations.autoPhase
 		)
-			scout.scoutInfo.settings.automations.autoPhase= {
+			scout.scoutInfo.settings.automations.autoPhase = {
 				friends: [],
 				enemy: []
 			}
 
-    if(
-      !!scout.scoutInfo.settings &&
+		if (
+			!!scout.scoutInfo.settings &&
 			!!scout.scoutInfo.settings.automations &&
 			!!scout.scoutInfo.settings.automations.autoPhase &&
-      !scout.scoutInfo.settings.automations?.autoPhase?.friends
-    ) scout.scoutInfo.settings.automations.autoPhase.friends = []
+			!scout.scoutInfo.settings.automations?.autoPhase?.friends
+		)
+			scout.scoutInfo.settings.automations.autoPhase.friends = []
 
-    if(
-      !!scout.scoutInfo.settings &&
+		if (
+			!!scout.scoutInfo.settings &&
 			!!scout.scoutInfo.settings.automations &&
 			!!scout.scoutInfo.settings.automations.autoPhase &&
-      !scout.scoutInfo.settings.automations?.autoPhase?.enemy
-    ) scout.scoutInfo.settings.automations.autoPhase.enemy = []
+			!scout.scoutInfo.settings.automations?.autoPhase?.enemy
+		)
+			scout.scoutInfo.settings.automations.autoPhase.enemy = []
 	}
 
 	async function handleUpdateAutopointFriendsAutomation(
 		value: (typeof POSSIBLE_AUTO_POINT_FRIENDS_EVENTS)[number],
 		selected: boolean
 	) {
-    initAutoPointObject()
+		initAutoPointObject()
 
 		if (
 			!!scout.scoutInfo.settings?.automations?.autoPoint?.friends &&
@@ -114,7 +119,7 @@
 		value: (typeof POSSIBLE_AUTO_POINT_ENEMY_EVENTS)[number],
 		selected: boolean
 	) {
-    initAutoPointObject()
+		initAutoPointObject()
 
 		if (
 			!!scout.scoutInfo.settings?.automations?.autoPoint?.enemy &&
@@ -149,12 +154,12 @@
 		})
 	}
 
-  async function handleUpdateAutoPhaseAutomation(
+	async function handleUpdateAutoPhaseAutomation(
 		value: (typeof POSSIBLE_AUTO_PAHSE_EVENTS)[number],
 		selected: boolean,
-    friendsOrEnemy: 'friends' | 'enemy'
+		friendsOrEnemy: 'friends' | 'enemy'
 	) {
-    initAutoPhaseObject()
+		initAutoPhaseObject()
 
 		if (
 			!!scout.scoutInfo.settings?.automations?.autoPhase?.[friendsOrEnemy] &&
@@ -208,7 +213,7 @@
 						value={scout.scoutInfo.settings?.automations?.autoPoint?.friends?.includes(
 							'blockPoint'
 						)}
-						on:change={(e) => {
+						onchange={(e) => {
 							handleUpdateAutopointFriendsAutomation(
 								'blockPoint',
 								// @ts-ignore
@@ -224,7 +229,7 @@
 						value={scout.scoutInfo.settings?.automations?.autoPoint?.friends?.includes(
 							'servePoint'
 						)}
-						on:change={(e) => {
+						onchange={(e) => {
 							handleUpdateAutopointFriendsAutomation(
 								'servePoint',
 								// @ts-ignore
@@ -240,7 +245,7 @@
 						value={scout.scoutInfo.settings?.automations?.autoPoint?.friends?.includes(
 							'spikePoint'
 						)}
-						on:change={(e) => {
+						onchange={(e) => {
 							handleUpdateAutopointFriendsAutomation(
 								'spikePoint',
 								// @ts-ignore
@@ -259,7 +264,7 @@
 						value={scout.scoutInfo.settings?.automations?.autoPoint?.enemy?.includes(
 							'blockHandsOut'
 						)}
-						on:change={(e) => {
+						onchange={(e) => {
 							handleUpdateAutopointEnemyAutomation(
 								'blockHandsOut',
 								// @ts-ignore
@@ -273,7 +278,7 @@
 						label="Servizio errore"
 						id="automations-serve-error"
 						value={scout.scoutInfo.settings?.automations?.autoPoint?.enemy?.includes('serveError')}
-						on:change={(e) => {
+						onchange={(e) => {
 							handleUpdateAutopointEnemyAutomation(
 								'serveError',
 								// @ts-ignore
@@ -287,7 +292,7 @@
 						label="Attacco errore"
 						id="automations-spike-error"
 						value={scout.scoutInfo.settings?.automations?.autoPoint?.enemy?.includes('spikeError')}
-						on:change={(e) => {
+						onchange={(e) => {
 							handleUpdateAutopointEnemyAutomation(
 								'spikeError',
 								// @ts-ignore
@@ -303,7 +308,7 @@
 						value={scout.scoutInfo.settings?.automations?.autoPoint?.enemy?.includes(
 							'receiveError'
 						)}
-						on:change={(e) => {
+						onchange={(e) => {
 							handleUpdateAutopointEnemyAutomation(
 								'receiveError',
 								// @ts-ignore
@@ -314,11 +319,11 @@
 				</div>
 			</div>
 		</div>
-    <div class="text-lg mt-4">Fase automatica</div>
+		<div class="text-lg mt-4">Fase automatica</div>
 		<div>Specifica quando voglio che venga spostata la fase in automatico.</div>
 		<div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
 			<div class="flex flex-col gap-2">
-        <div>Amici</div>
+				<div>Amici</div>
 				<div>
 					<LabelAndCheckbox
 						label="Servizio"
@@ -326,36 +331,34 @@
 						value={scout.scoutInfo.settings?.automations?.autoPhase?.friends?.includes(
 							'serveReceived'
 						)}
-						on:change={(e) => {
+						onchange={(e) => {
 							handleUpdateAutoPhaseAutomation(
 								'serveReceived',
 								// @ts-ignore
 								e.target?.checked,
-                'friends'
+								'friends'
 							)
 						}}
 					></LabelAndCheckbox>
 				</div>
-        <div>
+				<div>
 					<LabelAndCheckbox
 						label="Ricezione"
 						id="automations-autophase-receive"
-						value={scout.scoutInfo.settings?.automations?.autoPhase?.friends?.includes(
-							'receive'
-						)}
-						on:change={(e) => {
+						value={scout.scoutInfo.settings?.automations?.autoPhase?.friends?.includes('receive')}
+						onchange={(e) => {
 							handleUpdateAutoPhaseAutomation(
 								'receive',
 								// @ts-ignore
 								e.target?.checked,
-                'friends'
+								'friends'
 							)
 						}}
 					></LabelAndCheckbox>
 				</div>
-      </div>
-      <div class="flex flex-col gap-2">
-        <div>Avversari</div>
+			</div>
+			<div class="flex flex-col gap-2">
+				<div>Avversari</div>
 				<div>
 					<LabelAndCheckbox
 						label="Servizio"
@@ -363,34 +366,32 @@
 						value={scout.scoutInfo.settings?.automations?.autoPhase?.enemy?.includes(
 							'serveReceived'
 						)}
-						on:change={(e) => {
+						onchange={(e) => {
 							handleUpdateAutoPhaseAutomation(
 								'serveReceived',
 								// @ts-ignore
 								e.target?.checked,
-                'enemy'
+								'enemy'
 							)
 						}}
 					></LabelAndCheckbox>
 				</div>
-        <div>
+				<div>
 					<LabelAndCheckbox
 						label="Ricezione"
 						id="automations-autophase-receive"
-						value={scout.scoutInfo.settings?.automations?.autoPhase?.enemy?.includes(
-							'receive'
-						)}
-						on:change={(e) => {
+						value={scout.scoutInfo.settings?.automations?.autoPhase?.enemy?.includes('receive')}
+						onchange={(e) => {
 							handleUpdateAutoPhaseAutomation(
 								'receive',
 								// @ts-ignore
 								e.target?.checked,
-                'enemy'
+								'enemy'
 							)
 						}}
 					></LabelAndCheckbox>
 				</div>
-      </div>
-    </div>
+			</div>
+		</div>
 	</div>
 </div>
