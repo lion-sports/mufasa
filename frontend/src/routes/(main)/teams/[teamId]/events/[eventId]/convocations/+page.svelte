@@ -19,6 +19,8 @@
 			let index = $event.convocations.findIndex((el) => el.id == e.detail.convocation.id)
 			if (index != -1) {
 				$event.convocations[index].confirmationStatus = e.detail.convocation.confirmationStatus
+
+				$event = { ...$event }
 			}
 		}
 	}
@@ -60,18 +62,20 @@
 	)
 </script>
 
-<div style:margin-top="20px">
-	<ConvocationList
-		convocations={$event?.convocations}
-		team={$team}
-		canConfirm={data.groupedPermissions.convocation.confirm}
-		canDeny={data.groupedPermissions.convocation.deny}
-		canConvocate={data.groupedPermissions.event.convocate}
-		on:confirm={handleConfirmOrDeny}
-		on:deny={handleConfirmOrDeny}
-		on:unConvocate={handleUnConvocate}
-	/>
-</div>
+{#key $event}
+	<div style:margin-top="20px">
+		<ConvocationList
+			convocations={$event?.convocations}
+			team={$team}
+			canConfirm={data.groupedPermissions.convocation.confirm}
+			canDeny={data.groupedPermissions.convocation.deny}
+			canConvocate={data.groupedPermissions.event.convocate}
+			on:confirm={handleConfirmOrDeny}
+			on:deny={handleConfirmOrDeny}
+			on:unConvocate={handleUnConvocate}
+		/>
+	</div>
+{/key}
 
 {#if data.groupedPermissions.event.convocate}
 	<div

@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 
 	import user from '$lib/stores/auth/user'
 	import UserAvatar from '$lib/components/common/UserAvatar.svelte'
@@ -18,12 +18,12 @@
 	import OptionSelector from '$lib/components/common/OptionSelector.svelte'
 
 	interface Props {
-		convocations?: Convocation[];
-		team: { id: number } | undefined;
-		groups?: Group[];
-		canConfirm?: boolean;
-		canConvocate?: boolean;
-		canDeny?: boolean;
+		convocations?: Convocation[]
+		team: { id: number } | undefined
+		groups?: Group[]
+		canConfirm?: boolean
+		canConvocate?: boolean
+		canDeny?: boolean
 	}
 
 	let {
@@ -33,7 +33,7 @@
 		canConfirm = false,
 		canConvocate = false,
 		canDeny = false
-	}: Props = $props();
+	}: Props = $props()
 
 	let dispatch = createEventDispatcher<{
 		confirm: {
@@ -123,7 +123,6 @@
 			})
 	}
 
-
 	let convocationDetailDialogOpen: boolean = $state(false),
 		editingConvocation: Convocation | undefined = $state()
 	function handleMobileConvocationRowClick(convocation: Convocation) {
@@ -136,10 +135,7 @@
 	run(() => {
 		if (!!editingConvocation) {
 			editConvocationsOptions = []
-			if (
-				canConfirm ||
-				editingConvocation.teammate.userId == $user?.id
-			) {
+			if (canConfirm || editingConvocation.teammate.userId == $user?.id) {
 				editConvocationsOptions.push({
 					label: 'Conferma',
 					name: 'confirm',
@@ -147,10 +143,7 @@
 				})
 			}
 
-			if (
-				canDeny ||
-				editingConvocation.teammate.userId == $user?.id
-			) {
+			if (canDeny || editingConvocation.teammate.userId == $user?.id) {
 				editConvocationsOptions.push({
 					label: 'Rifiuta',
 					name: 'deny',
@@ -168,19 +161,25 @@
 
 			editConvocationsOptions = [...editConvocationsOptions]
 		}
-	});
+	})
 	let totalConvocations = $derived(convocations.length)
-	let deniedConvocations = $derived(convocations.filter((c) => c.confirmationStatus == 'denied').length)
-	let confirmedConvocations = $derived(convocations.filter((c) => c.confirmationStatus == 'confirmed').length)
-	let filteredConvocations = $derived(convocations.filter((c) => {
-		if (!selectedGroups || selectedGroups.length == 0) return true
-		else if (!!c.teammate.groupId)
-			return selectedGroups.map((chip) => chip.value).includes(c.teammate.groupId?.toString())
-		else return false
-	}))
+	let deniedConvocations = $derived(
+		convocations.filter((c) => c.confirmationStatus == 'denied').length
+	)
+	let confirmedConvocations = $derived(
+		convocations.filter((c) => c.confirmationStatus == 'confirmed').length
+	)
+	let filteredConvocations = $derived(
+		convocations.filter((c) => {
+			if (!selectedGroups || selectedGroups.length == 0) return true
+			else if (!!c.teammate.groupId)
+				return selectedGroups.map((chip) => chip.value).includes(c.teammate.groupId?.toString())
+			else return false
+		})
+	)
 </script>
 
-<MediaQuery >
+<MediaQuery>
 	{#snippet defaultSnippet({ lAndUp })}
 		<div>
 			<div class="summary">
@@ -208,7 +207,7 @@
 			<div>
 				{#if !!team}
 					<div style:margin-top="10px" style:margin-bottom="20px">
-						<GroupMultipleSelectorChip groups={groups} bind:value={selectedGroups} onlyConvocable={true} />
+						<GroupMultipleSelectorChip {groups} bind:value={selectedGroups} onlyConvocable={true} />
 					</div>
 				{/if}
 
@@ -234,13 +233,13 @@
 											--chip-hover-background-color={convocation.confirmationStatus == 'denied'
 												? 'red'
 												: convocation.confirmationStatus == 'confirmed'
-												? 'rgb(var(--global-color-primary-500))'
-												: 'rgb(var(--global-color-background-400))'}
+													? 'rgb(var(--global-color-primary-500))'
+													: 'rgb(var(--global-color-background-400))'}
 											--chip-background-color={convocation.confirmationStatus == 'denied'
 												? 'red'
 												: convocation.confirmationStatus == 'confirmed'
-												? 'rgb(var(--global-color-primary-500))'
-												: 'rgb(var(--global-color-background-400))'}
+													? 'rgb(var(--global-color-primary-500))'
+													: 'rgb(var(--global-color-background-400))'}
 										>
 											<span style:font-weight="700"
 												>{translateConfirmationStatus(convocation.confirmationStatus)}</span
@@ -252,10 +251,7 @@
 									<div class="confirm-button-container">
 										{#if !loading}
 											{#if canConfirm || convocation.teammate.userId == $user?.id}
-												<Icon
-													name="mdi-check"
-													onclick={() => confirmConvocation(convocation)}
-												/>
+												<Icon name="mdi-check" onclick={() => confirmConvocation(convocation)} />
 											{/if}
 											{#if canDeny || convocation.teammate.userId == $user?.id}
 												<Icon name="mdi-close" onclick={() => denyConvocation(convocation)} />
@@ -312,13 +308,13 @@
 									--chip-hover-background-color={editingConvocation.confirmationStatus == 'denied'
 										? 'red'
 										: editingConvocation.confirmationStatus == 'confirmed'
-										? 'rgb(var(--global-color-primary-500))'
-										: 'rgb(var(--global-color-background-400))'}
+											? 'rgb(var(--global-color-primary-500))'
+											: 'rgb(var(--global-color-background-400))'}
 									--chip-background-color={editingConvocation.confirmationStatus == 'denied'
 										? 'red'
 										: editingConvocation.confirmationStatus == 'confirmed'
-										? 'rgb(var(--global-color-primary-500))'
-										: 'rgb(var(--global-color-background-400))'}
+											? 'rgb(var(--global-color-primary-500))'
+											: 'rgb(var(--global-color-background-400))'}
 								>
 									<span style:font-weight="700"
 										>{translateConfirmationStatus(editingConvocation.confirmationStatus)}</span
