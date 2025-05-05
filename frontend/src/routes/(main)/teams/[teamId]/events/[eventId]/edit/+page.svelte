@@ -13,12 +13,12 @@
 	import type { PageData } from './$types'
 
 	interface Props {
-		data: PageData;
+		data: PageData
 	}
 
-	let { data }: Props = $props();
+	let { data }: Props = $props()
 
-	let event: Event = $state()
+	let event: Event | undefined = $state()
 
 	onMount(async () => {
 		let service = new EventsService({ fetch })
@@ -27,6 +27,7 @@
 
 	let loading = $state(false)
 	function handleConfirmClick() {
+		if (!event) return
 		loading = true
 
 		let service = new EventsService({ fetch })
@@ -55,27 +56,25 @@
 {#if data.groupedPermissions.event.update}
 	<PageTitle title={event?.name || ''} prependVisible={true}>
 		{#snippet append()}
-			
-				<OptionMenu
-					options={[
-						{
-							name: 'save',
-							title: 'Salva',
-							icon: 'mdi-floppy'
-						},
-						{
-							name: 'delete',
-							title: 'Elimina',
-							icon: 'mdi-delete',
-							style: {
-								color: '#ad0000'
-							}
+			<OptionMenu
+				options={[
+					{
+						name: 'save',
+						title: 'Salva',
+						icon: 'mdi-floppy'
+					},
+					{
+						name: 'delete',
+						title: 'Elimina',
+						icon: 'mdi-delete',
+						style: {
+							color: '#ad0000'
 						}
-					]}
-					on:select={handleOptionClick}
-				/>
-			
-			{/snippet}
+					}
+				]}
+				onselect={(e) => handleOptionClick(e)}
+			/>
+		{/snippet}
 	</PageTitle>
 
 	{#if !!event}
