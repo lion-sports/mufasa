@@ -7,7 +7,7 @@
 		progress?: number | undefined
 		iconClass?: string | undefined
 		children?: import('svelte').Snippet
-		onclick: (event: { detail: { nativeEvent: MouseEvent } }) => void
+		onclick?: (event: MouseEvent) => void
 	}
 
 	let { icon, progress = undefined, iconClass = undefined, children, onclick }: Props = $props()
@@ -15,7 +15,7 @@
 
 <button
 	class="text-left p-2 rounded-md w-full hover:bg-[var(--hover-background-color)] bg-[var(--background-color)] flex items-center gap-2"
-	onclick={(event) => onclick({ detail: { nativeEvent: event } })}
+	{onclick}
 >
 	<div class="mr-2 {iconClass || ''}">
 		<Icon name={icon}></Icon>
