@@ -4,6 +4,7 @@
 	import teammate from '$lib/stores/teams/teamsTeammate'
 	import { onMount } from 'svelte'
 	import type { PageData } from './$types'
+	import { DateTime } from 'luxon'
 
 	interface Props {
 		data: PageData
@@ -11,8 +12,8 @@
 
 	let { data }: Props = $props()
 
-	let visibleWeek: number | undefined = $state()
-	let visibleYear: number | undefined = $state()
+	let visibleWeek: number | undefined = $state(DateTime.now().get('weekNumber'))
+	let visibleYear: number | undefined = $state(DateTime.now().get('year'))
 	let reloadEvents: boolean = $state(true)
 
 	onMount(() => {
