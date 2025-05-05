@@ -3,19 +3,23 @@
 	import type { Item } from '../common/StandardAutocomplete.svelte'
   import ScoringSystemsService, { type ScoringSystem } from '$lib/services/scoringSystems/scoringSystems.service';
 	import { FilterBuilder } from '@likable-hair/svelte'
+	import type { ComponentProps } from 'svelte'
+	import StandardAutocomplete from '../common/StandardAutocomplete.svelte'
 
 	interface Props {
 		values?: Item[];
 		scoringSystems?: ScoringSystem[];
 		multiple?: boolean;
 		disabled?: boolean;
+    onchange?: ComponentProps<typeof StandardAutocomplete>['onchange']
 	}
 
 	let {
 		values = $bindable([]),
 		scoringSystems = [],
 		multiple = $bindable(false),
-		disabled = $bindable(false)
+		disabled = $bindable(false),
+    onchange
 	}: Props = $props();
 
 	async function searchCustomer(params: { searchText: string }): Promise<Item[]> {
@@ -48,6 +52,6 @@
   }))}
 	bind:multiple
   bind:disabled
-	on:change
+	{onchange}
 	placeholder="Continua a scrivere ..."
 />
