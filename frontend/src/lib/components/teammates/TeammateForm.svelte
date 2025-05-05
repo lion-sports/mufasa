@@ -29,7 +29,7 @@
 		availableRoles = $bindable([])
 	}: Props = $props();
 
-	let selectedGroups: NonNullable<ComponentProps<StandardAutocomplete>['values']> = $state([])
+	let selectedGroups: NonNullable<ComponentProps<typeof StandardAutocomplete>['values']> = $state([])
 
 	run(() => {
 		selectedGroups = !!group
@@ -76,7 +76,7 @@
 			<StandardAutocomplete
 				items={selectableGroups}
 				bind:values={selectedGroups}
-				on:change={handleGroupChange}
+				onchange={handleGroupChange}
 				placeholder="Gruppo"
 			/>
 		</div>

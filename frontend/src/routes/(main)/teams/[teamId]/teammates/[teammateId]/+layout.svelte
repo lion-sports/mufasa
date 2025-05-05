@@ -17,9 +17,8 @@
 
   let { data, children }: Props = $props();
 
-  let tabs: NonNullable<ComponentProps<typeof StandardTabSwitcher>['tabs']> = $state([])
-  run(() => {
-    tabs = []
+  let tabs: NonNullable<ComponentProps<typeof StandardTabSwitcher>['tabs']> = $derived.by(() => {
+    let tabs: NonNullable<ComponentProps<typeof StandardTabSwitcher>['tabs']> = []
     if(data.groupedPermissions.teammate.update) {
       tabs = [
         ...tabs,
@@ -41,7 +40,8 @@
         }
       ]
     }
-  });
+    return tabs
+  })
 
 
   let selectedTab: string = $state('')
