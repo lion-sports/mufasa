@@ -24,5 +24,4 @@
 	height="130px"
 	textColor="rgb(var(--global-color-contrast-900))"
 	focusedBoxShadow="rgb(149 157 165 / 20%) 2px 2px 10px"
-	on:input
 />
