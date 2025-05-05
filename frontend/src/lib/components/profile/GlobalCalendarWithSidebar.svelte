@@ -9,30 +9,32 @@
 	import GlobalCalendar from './GlobalCalendar.svelte'
 
 	interface Props {
-		events?: Event[];
-		canCreate?: boolean;
+		events?: Event[]
+		canCreate?: boolean
 	}
 
-	let { events = $bindable([]), canCreate = $bindable(false) }: Props = $props();
+	let { events = $bindable([]), canCreate = $bindable(false) }: Props = $props()
 
 	let selectedDate: Date | undefined = $state(),
 		selectedEvents: Event[] = $state([])
 
-	let formattedDate = $derived(!!selectedDate
-		? DateTime.fromJSDate(selectedDate).setLocale('it').toLocaleString(DateTime.DATE_MED)
-		: '')
+	let formattedDate = $derived(
+		!!selectedDate
+			? DateTime.fromJSDate(selectedDate).setLocale('it').toLocaleString(DateTime.DATE_MED)
+			: ''
+	)
 
 	function handleCloseDrawer() {
 		selectedDate = undefined
 	}
 </script>
 
-<MediaQuery >
-	{#snippet children({ mAndDown })}
+<MediaQuery>
+	{#snippet defaultSnippet({ mAndDown })}
 		<div class="calendar-container">
-	    <div class="w-full">
-	      <GlobalCalendar bind:selectedDate bind:selectedEvents bind:events bind:canCreate />
-	    </div>
+			<div class="w-full">
+				<GlobalCalendar bind:selectedDate bind:selectedEvents bind:events canCreate />
+			</div>
 			{#if !mAndDown}
 				<div class="event-drawer" class:opened={!!selectedDate} class:closed={!selectedDate}>
 					<div class="title-container">
@@ -40,7 +42,7 @@
 							{formattedDate}
 						</div>
 						<div class="close-button">
-							<Icon name="mdi-close" on:click={handleCloseDrawer} click />
+							<Icon name="mdi-close" onclick={handleCloseDrawer} />
 						</div>
 					</div>
 					<div class="events-list">
@@ -48,7 +50,7 @@
 							precompiledDate={selectedDate ? DateTime.fromJSDate(selectedDate) : undefined}
 							events={selectedEvents}
 							showTeamName
-	            bind:canCreate
+							{canCreate}
 						/>
 					</div>
 				</div>
@@ -78,7 +80,7 @@
 	.event-drawer {
 		transition: all 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
 		height: 100%;
-    flex-grow: 1;
+		flex-grow: 1;
 	}
 
 	.events-list {

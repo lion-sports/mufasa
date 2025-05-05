@@ -23,7 +23,7 @@
     visibleMonth = $bindable(DateTime.now().get('month') - 1),
     visibleYear = $bindable(DateTime.now().get('year')),
     events = $bindable(),
-    canCreate = $bindable(false)
+    canCreate = false
   }: Props = $props();
 
   function calculateSelectedEvents() {
