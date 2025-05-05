@@ -23,10 +23,10 @@
   <div class="min-h-[40dvh] relative">
     <Canvas>
       <StudioField3DScene 
-        bind:scout
-        bind:phase
+        {scout}
+        {phase}
         bind:selectedPlayer
-        bind:friendSides
+        {friendSides}
         on:playerClick
       />
     </Canvas>

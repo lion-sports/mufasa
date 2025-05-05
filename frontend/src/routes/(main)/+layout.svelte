@@ -120,7 +120,7 @@
                   description={$user?.email}
                   src={$user?.avatarUrl}
                   showTitleAndDescription={sidebarExpanded || hamburgerVisible}
-                  on:click={handleProfileClick}
+                  onclick={handleProfileClick}
                 />
               </div>
               {#if sidebarExpanded || hamburgerVisible}
