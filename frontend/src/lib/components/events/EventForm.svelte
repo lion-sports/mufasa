@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
 	import StandardDatepicker from '$lib/components/common/StandardDatepicker.svelte'
 	import StandardTimePicker from '$lib/components/common/StandardTimePicker.svelte'
@@ -21,17 +21,17 @@
 	import type { Group } from '$lib/services/groups/groups.service'
 
 	interface Props {
-		event?: Event;
+		event?: Event
 		convocations?: {
 			[key: number]: boolean
-		};
-		mode?: 'create' | 'update';
-		padding?: string | undefined;
-		margin?: string | undefined;
-		width?: string | undefined;
-		height?: string | undefined;
-		teammates?: Teammate[] | undefined;
-		groups?: Group[];
+		}
+		mode?: 'create' | 'update'
+		padding?: string | undefined
+		margin?: string | undefined
+		width?: string | undefined
+		height?: string | undefined
+		teammates?: Teammate[] | undefined
+		groups?: Group[]
 	}
 
 	let {
@@ -44,7 +44,7 @@
 		height = undefined,
 		teammates = $bindable(undefined),
 		groups = $bindable([])
-	}: Props = $props();
+	}: Props = $props()
 
 	let startTime: string | undefined = $state(),
 		endTime: string | undefined = $state()
@@ -65,21 +65,21 @@
 		if (!!event.end) {
 			endTime = DateTime.fromJSDate(new Date(event.end)).toFormat('HH:mm')
 		}
-	});
+	})
 
 	function selectAll() {
 		if (!!teammates) {
 			convocations = {}
-      let convocableTeammates = teammates.filter((t) => !t.group || t.group.convocable)
+			let convocableTeammates = teammates.filter((t) => !t.group || t.group.convocable)
 			for (let i = 0; i < convocableTeammates.length; i += 1) {
 				convocations[convocableTeammates[i].id] = true
 			}
 		}
 	}
 
-  function unselectAll() {
-    convocations = {}
-  }
+	function unselectAll() {
+		convocations = {}
+	}
 
 	function handleStartTimeChange(e: any) {
 		if (!event.start) event.start = new Date()
@@ -109,52 +109,44 @@
 </script>
 
 <div style:padding style:margin style:width style:height>
-  <div 
-    class="grid grid-cols-1 md:grid-cols-2 duration-infos"
-  >
-    <div>
-      <div class="mb-2">Inizio</div>
-      <div>
-        <StandardDatepicker
-          placeholder="Inizio"
-          bind:value={event.start}
-        />
-      </div>
-      <div>
-        <StandardTimePicker value={startTime} name="startTime" oninput={handleStartTimeChange} />
-      </div>
-    </div>
-    <div>
-      <div class="mb-2">Fine</div>
-      <div>
-        <StandardDatepicker
-          placeholder="Fine"
-          bind:value={event.end}
-        />
-      </div>
-      <div>
-        <StandardTimePicker value={endTime} name="endTime" oninput={handleEndTimeChange} />
-      </div>
-    </div>
-  </div>
-  <div class="w-full">
-    <LabelAndTextfield 
-      label="Titolo" 
-      name="title" 
-      bind:value={event.name} 
-      --simple-textfield-width="100%"
-    />
-  </div>
-  <div>
-    <LabelAndTextarea label="Descrizione" name="description" bind:value={event.description} />
-  </div>
+	<div class="grid grid-cols-1 md:grid-cols-2 duration-infos">
+		<div>
+			<div class="mb-2">Inizio</div>
+			<div>
+				<StandardDatepicker placeholder="Inizio" bind:value={event.start} />
+			</div>
+			<div>
+				<StandardTimePicker value={startTime} name="startTime" oninput={handleStartTimeChange} />
+			</div>
+		</div>
+		<div>
+			<div class="mb-2">Fine</div>
+			<div>
+				<StandardDatepicker placeholder="Fine" bind:value={event.end} />
+			</div>
+			<div>
+				<StandardTimePicker value={endTime} name="endTime" oninput={handleEndTimeChange} />
+			</div>
+		</div>
+	</div>
+	<div class="w-full">
+		<LabelAndTextfield
+			label="Titolo"
+			name="title"
+			bind:value={event.name}
+			--simple-textfield-width="100%"
+		/>
+	</div>
+	<div>
+		<LabelAndTextarea label="Descrizione" name="description" bind:value={event.description} />
+	</div>
 	{#if mode == 'create' && teammates}
 		<div style:margin-top="20px">
 			<CollapsableSection title="Convocazioni">
 				<button onclick={selectAll} class="text-[rgb(var(--global-color-primary-500))]"
 					>Seleziona tutti</button
 				>
-        <button onclick={unselectAll} class="text-[rgb(var(--global-color-primary-500))] ml-2"
+				<button onclick={unselectAll} class="text-[rgb(var(--global-color-primary-500))] ml-2"
 					>Deseleziona tutti</button
 				>
 				<TeammatesChecklist
@@ -170,9 +162,9 @@
 
 <style>
 	@media (max-width: 768px) {
-    .duration-infos {
-      --simple-textfield-width: 100%
-    }
+		.duration-infos {
+			--simple-textfield-width: 100%;
+		}
 	}
 
 	@media (min-width: 769px) {

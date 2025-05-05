@@ -2,12 +2,12 @@
 	import { Textarea } from '@likable-hair/svelte'
 
 	interface Props {
-		label?: string;
-		placeholder?: string;
-		value?: string;
+		label?: string
+		placeholder?: string
+		value?: string
 	}
 
-	let { label = '', placeholder = '', value = $bindable('') }: Props = $props();
+	let { label = '', placeholder = '', value = $bindable() }: Props = $props()
 </script>
 
 <Textarea
