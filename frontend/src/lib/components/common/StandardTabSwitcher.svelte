@@ -11,7 +11,7 @@
 	import type { ComponentProps } from 'svelte'
 	interface Props {
 		tabs?: Tab[]
-		selected: string
+		selected?: string
 		marginTop?: string | undefined
 		marginBottom?: string | undefined
 		ontabClick?: ComponentProps<typeof TabSwitcher>['ontabClick']
