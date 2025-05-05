@@ -1,12 +1,14 @@
-<script lang="ts">
+<script lang="ts" generics="Data">
 	import { AsyncAutocomplete } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
 
+  type AutocompleteProps = ComponentProps<typeof AsyncAutocomplete<Data>>
+
 	interface Props {
-		values?: ComponentProps<typeof AsyncAutocomplete>['values']
-		items?: ComponentProps<typeof AsyncAutocomplete>['items']
-		searcher: ComponentProps<typeof AsyncAutocomplete>['searcher']
-		onchange?: ComponentProps<typeof AsyncAutocomplete>['onchange']
+		values?: AutocompleteProps['values']
+		items?: AutocompleteProps['items']
+		searcher: AutocompleteProps['searcher']
+		onchange?: AutocompleteProps['onchange']
 		placeholder?: string
 		multiple?: boolean
 		mobileDrawer?: boolean

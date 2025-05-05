@@ -1,25 +1,17 @@
-<script lang="ts" module>
-	export type Item = {
-		value: string
-		label?: string
-		data?: any
-	}
-</script>
-
-<script lang="ts">
+<script lang="ts" generics="Data">
 	import { Autocomplete } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
+  
+  type AutocompleteProps = ComponentProps<typeof Autocomplete<Data>>
 
-	interface Props extends ComponentProps<typeof Autocomplete> {
-		items: Item[]
+	type Props = {
 		width?: string
 		maxWidth?: string
 		height?: string | undefined
 		multiple?: boolean
 		placeholder?: string | undefined
-		values: Item[]
 		itemLabel?: import('svelte').Snippet<[any]>
-	}
+	} & AutocompleteProps
 
 	let {
 		items,

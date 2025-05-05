@@ -35,7 +35,7 @@
     <div class="mb-1">Sport</div>
     <ScoutSportAutocomplete
       bind:values={selectedSports}
-      on:change={(e) => {
+      onchange={(e) => {
         if(selectedSports.length > 0)
           scout.sport = selectedSports[0].value
         else 
@@ -49,10 +49,10 @@
     <ScoringSystemAsyncAutocomplete
       values={selectedScoringSystem}
       scoringSystems={scoringSystems}
-      on:change={(event) => {
-        if(!!event.detail.selection && event.detail.selection.length > 0) {
-          scout.scoringSystem = event.detail.selection[0].data.scoringSystem
-          scout.scoringSystemId = event.detail.selection[0].value
+      onchange={(event) => {
+        if(!!event.detail.selection && event.detail.selection.length > 0 && !!event.detail.selection[0].value) {
+          scout.scoringSystem = event.detail.selection[0].data?.scoringSystem
+          scout.scoringSystemId = Number(event.detail.selection[0].value)
         } else {
           scout.scoringSystem = undefined
           scout.scoringSystemId = undefined

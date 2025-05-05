@@ -1,17 +1,22 @@
 <script lang="ts">
 	import StandardAsyncAutocomplete from '../common/StandardAsyncAutocomplete.svelte'
-	import type { Item } from '../common/StandardAutocomplete.svelte'
   import ScoringSystemsService, { type ScoringSystem } from '$lib/services/scoringSystems/scoringSystems.service';
 	import { FilterBuilder } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
 	import StandardAutocomplete from '../common/StandardAutocomplete.svelte'
 
+  type AutocompleteData = {
+    scoringSystem: ScoringSystem
+  }
+
+  type Item = NonNullable<ComponentProps<typeof StandardAutocomplete<AutocompleteData>>['items']>[number]
+
 	interface Props {
-		values?: Item[];
+		values?: ComponentProps<typeof StandardAutocomplete<AutocompleteData>>['values'];
 		scoringSystems?: ScoringSystem[];
 		multiple?: boolean;
 		disabled?: boolean;
-    onchange?: ComponentProps<typeof StandardAutocomplete>['onchange']
+    onchange?: ComponentProps<typeof StandardAutocomplete<AutocompleteData>>['onchange']
 	}
 
 	let {
@@ -38,18 +43,20 @@
 			}
 		})
 	}
-</script>
 
-<StandardAsyncAutocomplete
-	searcher={searchCustomer}
-	bind:values
-  items={scoringSystems.map((ss) => ({
+  let scoringSystemsItems: Item[] = $derived(scoringSystems.map((ss) => ({
     label: ss.name,
     value: ss.id.toString(),
     data: {
       scoringSystem: ss
     }
-  }))}
+  })))
+</script>
+
+<StandardAsyncAutocomplete
+	searcher={searchCustomer}
+	bind:values
+  items={scoringSystemsItems}
 	bind:multiple
   bind:disabled
 	{onchange}
