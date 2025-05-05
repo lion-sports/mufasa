@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Team } from '$lib/services/teams/teams.service'
 </script>
 
@@ -15,7 +15,11 @@
   import MostAbsentTeammates from '$lib/components/teammates/MostAbsentTeammates.svelte'
   import TeamsBoxList from '$lib/components/teams/TeamsBoxList.svelte';
 
-	export let data: PageData
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	let teams: Team[] = []
 	async function loadTeams() {

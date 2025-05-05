@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import type { Scout } from '@/lib/services/scouts/scouts.service'
   import type { ScoutEventPlayer } from 'lionn-common'
 	import type {
@@ -20,11 +22,21 @@
 		}
 	}>()
 
-	export let scout: Scout,
-		phase: VolleyballPhase = 'serve',
-    selectedPlayer: ScoutEventPlayer | undefined = undefined,
-    friendSides: 'right' | 'left' = 'left',
-    fieldRenderEngine: '2d' | '3d' = '2d'
+  interface Props {
+    scout: Scout;
+    phase?: VolleyballPhase;
+    selectedPlayer?: ScoutEventPlayer | undefined;
+    friendSides?: 'right' | 'left';
+    fieldRenderEngine?: '2d' | '3d';
+  }
+
+  let {
+    scout = $bindable(),
+    phase = $bindable('serve'),
+    selectedPlayer = $bindable(undefined),
+    friendSides = $bindable('left'),
+    fieldRenderEngine = '2d'
+  }: Props = $props();
 
 	let positionPhaseKeyMapper = {
 		serve: 'playersServePositions',
@@ -32,61 +44,65 @@
 		defenseBreak: 'playersDefenseBreakPositions'
 	} as Record<typeof phase, keyof Scout['stash']>
 
-	$: friendsTotalPositions = scout.stash?.[positionPhaseKeyMapper[phase]] as
+	let friendsTotalPositions = $derived(scout.stash?.[positionPhaseKeyMapper[phase]] as
 		| VolleyballPlayersPosition
-		| undefined
-	$: friendsPosition = friendsTotalPositions?.friends
+		| undefined)
+	let friendsPosition = $derived(friendsTotalPositions?.friends)
 
-	$: enemyTotalPositions =
-		phase == 'receive'
+	let enemyTotalPositions =
+		$derived(phase == 'receive'
 			? scout.stash?.playersServePositions
 			: phase == 'defenseBreak'
 				? scout.stash?.playersDefenseSideOutPositions
 				: phase == 'defenseSideOut'
 					? scout.stash?.playersDefenseBreakPositions
-					: undefined
-	$: enemyPosition = enemyTotalPositions?.enemy
+					: undefined)
+	let enemyPosition = $derived(enemyTotalPositions?.enemy)
 
 	type ReceivePositions = {
 		player: ScoutEventPlayer
 		position: VolleyballScoutEventPosition
 		anchor?: VolleyballScoutEventAnchor
 	}[]
-	let enemyReceivePositions: ReceivePositions = []
-	$: if (!!scout.stash?.playersReceivePositions?.enemy) {
-		enemyReceivePositions = []
-		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.enemy)) {
-			let player = scout.players.find((p) => Number(p.id) === Number(playerId))
-			if (!player) continue
+	let enemyReceivePositions: ReceivePositions = $state([])
+	run(() => {
+    if (!!scout.stash?.playersReceivePositions?.enemy) {
+  		enemyReceivePositions = []
+  		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.enemy)) {
+  			let player = scout.players.find((p) => Number(p.id) === Number(playerId))
+  			if (!player) continue
 
-			enemyReceivePositions = [
-				...enemyReceivePositions,
-				{
-					player: player as ScoutEventPlayer,
-					position: value.position,
-					anchor: value.anchor
-				}
-			]
-		}
-	} else enemyReceivePositions = []
+  			enemyReceivePositions = [
+  				...enemyReceivePositions,
+  				{
+  					player: player as ScoutEventPlayer,
+  					position: value.position,
+  					anchor: value.anchor
+  				}
+  			]
+  		}
+  	} else enemyReceivePositions = []
+  });
 
-	let friendsReceivePositions: ReceivePositions = []
-	$: if (!!scout.stash?.playersReceivePositions?.friends) {
-		friendsReceivePositions = []
-		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.friends)) {
-			let player = scout.players.find((p) => Number(p.id) === Number(playerId))
-			if (!player) continue
+	let friendsReceivePositions: ReceivePositions = $state([])
+	run(() => {
+    if (!!scout.stash?.playersReceivePositions?.friends) {
+  		friendsReceivePositions = []
+  		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.friends)) {
+  			let player = scout.players.find((p) => Number(p.id) === Number(playerId))
+  			if (!player) continue
 
-			friendsReceivePositions = [
-				...friendsReceivePositions,
-				{
-					player: player as ScoutEventPlayer,
-					position: value.position,
-					anchor: value.anchor
-				}
-			]
-		}
-	} else friendsReceivePositions = []
+  			friendsReceivePositions = [
+  				...friendsReceivePositions,
+  				{
+  					player: player as ScoutEventPlayer,
+  					position: value.position,
+  					anchor: value.anchor
+  				}
+  			]
+  		}
+  	} else friendsReceivePositions = []
+  });
 
 	let leftPositionsNumbers: VolleyballScoutEventPosition[] = [5, 4, 6, 3, 1, 2]
 	let rightPositionsNumbers: VolleyballScoutEventPosition[] = [2, 1, 3, 6, 4, 5]
@@ -127,15 +143,17 @@
                     selected={!!selectedPlayer && selectedPlayer?.id ===  positions[position]?.player.id}
                   >
                     {positions[position]?.player.shirtNumber}
-                    <svelte:fragment slot="tooltip">
-                      <div class="font-bold">
-                        {TeammatesService.getTeammateName({
-                          player: positions?.[position]?.player,
-                          teammate: positions?.[position]?.player.teammate
-                        })}
-                      </div>
-                      <div class="font-light text-sm">{PlayersService.translateRole(positions?.[position]?.player.role)}</div>
-                    </svelte:fragment>
+                    {#snippet tooltip()}
+                                      
+                        <div class="font-bold">
+                          {TeammatesService.getTeammateName({
+                            player: positions?.[position]?.player,
+                            teammate: positions?.[position]?.player.teammate
+                          })}
+                        </div>
+                        <div class="font-light text-sm">{PlayersService.translateRole(positions?.[position]?.player.role)}</div>
+                      
+                                      {/snippet}
                   </PlayerMarker>
                 {/if}
               </div>
@@ -170,15 +188,17 @@
                       selected={!!selectedPlayer && selectedPlayer?.id ===  positionSpec?.player.id}
                     >
                       {positionSpec.player.shirtNumber}
-                      <svelte:fragment slot="tooltip">
-                        <div class="font-bold">
-                          {TeammatesService.getTeammateName({
-                            player: positionSpec.player,
-                            teammate: positionSpec.player.teammate
-                          })}
-                        </div>
-                        <div class="font-light text-sm">{PlayersService.translateRole(positionSpec.player.role)}</div>
-                      </svelte:fragment>
+                      {#snippet tooltip()}
+                                          
+                          <div class="font-bold">
+                            {TeammatesService.getTeammateName({
+                              player: positionSpec.player,
+                              teammate: positionSpec.player.teammate
+                            })}
+                          </div>
+                          <div class="font-light text-sm">{PlayersService.translateRole(positionSpec.player.role)}</div>
+                        
+                                          {/snippet}
                     </PlayerMarker>
                   </PlayerAnchorPosition>
                 </div>
@@ -200,15 +220,17 @@
                     selected={!!selectedPlayer && selectedPlayer?.id ===  positions[position]?.player.id}
                   >
                     {positions[position]?.player.shirtNumber}
-                    <svelte:fragment slot="tooltip">
-                      <div class="font-bold">
-                        {TeammatesService.getTeammateName({
-                          player: positions?.[position]?.player,
-                          teammate: positions?.[position]?.player.teammate
-                        })}
-                      </div>
-                      <div class="font-light text-sm">{PlayersService.translateRole(positions?.[position]?.player.role)}</div>
-                    </svelte:fragment>
+                    {#snippet tooltip()}
+                                      
+                        <div class="font-bold">
+                          {TeammatesService.getTeammateName({
+                            player: positions?.[position]?.player,
+                            teammate: positions?.[position]?.player.teammate
+                          })}
+                        </div>
+                        <div class="font-light text-sm">{PlayersService.translateRole(positions?.[position]?.player.role)}</div>
+                      
+                                      {/snippet}
                   </PlayerMarker>
                 {/if}
               </div>
@@ -243,15 +265,17 @@
                       selected={!!selectedPlayer && selectedPlayer?.id ===  positionSpec?.player.id}
                     >
                       {positionSpec.player.shirtNumber}
-                      <svelte:fragment slot="tooltip">
-                        <div class="font-bold">
-                          {TeammatesService.getTeammateName({
-                            player: positionSpec.player,
-                            teammate: positionSpec.player.teammate
-                          })}
-                        </div>
-                        <div class="font-light text-sm">{PlayersService.translateRole(positionSpec.player.role)}</div>
-                      </svelte:fragment>
+                      {#snippet tooltip()}
+                                          
+                          <div class="font-bold">
+                            {TeammatesService.getTeammateName({
+                              player: positionSpec.player,
+                              teammate: positionSpec.player.teammate
+                            })}
+                          </div>
+                          <div class="font-light text-sm">{PlayersService.translateRole(positionSpec.player.role)}</div>
+                        
+                                          {/snippet}
                     </PlayerMarker>
                   </PlayerAnchorPosition>
                 </div>

@@ -1,41 +1,52 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import DashboardService, {
 		type Widget
 	} from '$lib/services/dashboards/dashboard.service'
 	import DashboardShaper from './DashboardShaper.svelte'
 	import { createId } from '@paralleldrive/cuid2'
 	import { Icon } from '@likable-hair/svelte'
-	import { onMount, type ComponentProps } from 'svelte'
+	import { onMount, type Component, type ComponentProps } from 'svelte'
 	import * as WidgetComponents from './widgets'
 	import * as WidgetAddButton from './widgets/addButtons'
 	import WidgetsService from '@/lib/services/widgets/widget.service'
 
-	let addButtonComponentMap: Record<string, ConstructorOfATypedSvelteComponent> = {
+	let addButtonComponentMap: Record<string, Component<any, any, any>> = {
 		...WidgetAddButton
 	}
-	let componentMap: Record<string, ConstructorOfATypedSvelteComponent> = { ...WidgetComponents }
+	let componentMap: Record<string, Component<any, any, any>> = { ...WidgetComponents }
 
-	export let widgets: (Omit<Widget, 'id'> & { id: string | number })[] = [],
-		someRowSlotEmpty: boolean = true,
-		preview: boolean = false,
-		canDelete: boolean = true,
-		canAdd: boolean = true,
-		widgetLoading: Record<number | string, boolean> = {},
-    selectedSet: number[] = [],
-    scoutId: number | undefined = undefined
+	interface Props {
+		widgets?: (Omit<Widget, 'id'> & { id: string | number })[];
+		someRowSlotEmpty?: boolean;
+		preview?: boolean;
+		canDelete?: boolean;
+		canAdd?: boolean;
+		widgetLoading?: Record<number | string, boolean>;
+		selectedSet?: number[];
+		scoutId?: number | undefined;
+	}
 
-	let localWidgets: NonNullable<ComponentProps<DashboardShaper>['widgets']> = [],
-    mounted: boolean = false
+	let {
+		widgets = $bindable([]),
+		someRowSlotEmpty = $bindable(true),
+		preview = $bindable(false),
+		canDelete = true,
+		canAdd = $bindable(true),
+		widgetLoading = $bindable({}),
+		selectedSet = [],
+		scoutId = undefined
+	}: Props = $props();
+
+	let localWidgets: NonNullable<ComponentProps<DashboardShaper>['widgets']> = $state([]),
+    mounted: boolean = $state(false)
 
   onMount(() => {
     mounted = true
   })
 
-  $: if(mounted && selectedSet) loadWidgetData()
 
-	$: if (!!widgets) {
-    calculateLocalWidgetsFromWidgets()
-  }
 
   async function loadWidgetData() {
     for(let i = 0; i < widgets.length; i += 1) {
@@ -189,6 +200,14 @@
       widgetLoading[Number(params.widget.id)] = false
     }
   }
+  run(() => {
+		if(mounted && selectedSet) loadWidgetData()
+	});
+	run(() => {
+		if (!!widgets) {
+	    calculateLocalWidgetsFromWidgets()
+	  }
+	});
 </script>
 
 <DashboardShaper
@@ -199,87 +218,92 @@
 	on:addWidget={handleAddWidget}
 	on:removeWidget={calculateWidgetsFromLocalWidgets}
 >
-	<div slot="add-widget" let:addWidgetInfo let:addWidget let:closeAddWidgetDialog>
-		{#if !!addWidgetInfo}
-			<div class="flex flex-wrap my-2 mobile">
-				{#each filteredWidgets.filter((ws) => availableSizes( { availableHeight: addWidgetInfo.availableHeight, availableWidth: addWidgetInfo.availableWidth, availableSizes: ws.availableSizes } ).length > 0) as widgetSpec}
-					<div class="p-2.5 rounded-md flex flex-col relative basis-1/2">
-						<svelte:component this={addButtonComponentMap[widgetSpec.name + 'AddButton']}>
-							<div slot="label" class="text-xl font-bold">
-								{widgetSpec.label}
+	{#snippet addWidgetSnippet({ addWidgetInfo, addWidget, closeAddWidgetDialog })}
+		<div>
+			{#if !!addWidgetInfo}
+				<div class="flex flex-wrap my-2 mobile">
+					{#each filteredWidgets.filter((ws) => availableSizes( { availableHeight: addWidgetInfo.availableHeight, availableWidth: addWidgetInfo.availableWidth, availableSizes: ws.availableSizes } ).length > 0) as widgetSpec}
+						{@const SvelteComponent = addButtonComponentMap[widgetSpec.name + 'AddButton']}
+						<div class="p-2.5 rounded-md flex flex-col relative basis-1/2">
+							<SvelteComponent>
+								{#snippet label()}
+															<div  class="text-xl font-bold">
+										{widgetSpec.label}
+									</div>
+														{/snippet}
+							</SvelteComponent>
+							<div class="flex gap-2 flex-wrap mt-2">
+								{#each availableSizes( { availableHeight: addWidgetInfo.availableHeight, availableWidth: addWidgetInfo.availableWidth, availableSizes: widgetSpec.availableSizes } ) as sizes}
+									<button
+										onclick={() => {
+											addWidget({
+												widget: {
+													name: createId(),
+													data: {
+														componentName: widgetSpec.name,
+														height: sizes[0],
+														width: sizes[1],
+														top: addWidgetInfo.fromRow,
+														left: addWidgetInfo.fromColumn
+													}
+												},
+												fromColumn: addWidgetInfo.fromColumn,
+												fromRow: addWidgetInfo.fromRow,
+												height: sizes[0],
+												width: sizes[1]
+											})
+											closeAddWidgetDialog()
+										}}
+										class="py-0.5 px-2 bg-[rgb(var(--global-color-primary-500))] hover:bg-[rgb(var(--global-color-primary-500),.7)] rounded text-sm transition-colors text-[rgb(var(--global-color-primary-foreground))]"
+										>{sizes[0]} x {sizes[1]}</button
+									>
+								{/each}
 							</div>
-						</svelte:component>
-						<div class="flex gap-2 flex-wrap mt-2">
-							{#each availableSizes( { availableHeight: addWidgetInfo.availableHeight, availableWidth: addWidgetInfo.availableWidth, availableSizes: widgetSpec.availableSizes } ) as sizes}
-								<button
-									on:click={() => {
-										addWidget({
-											widget: {
-												name: createId(),
-												data: {
-													componentName: widgetSpec.name,
-													height: sizes[0],
-													width: sizes[1],
-													top: addWidgetInfo.fromRow,
-													left: addWidgetInfo.fromColumn
-												}
-											},
-											fromColumn: addWidgetInfo.fromColumn,
-											fromRow: addWidgetInfo.fromRow,
-											height: sizes[0],
-											width: sizes[1]
-										})
-										closeAddWidgetDialog()
-									}}
-									class="py-0.5 px-2 bg-[rgb(var(--global-color-primary-500))] hover:bg-[rgb(var(--global-color-primary-500),.7)] rounded text-sm transition-colors text-[rgb(var(--global-color-primary-foreground))]"
-									>{sizes[0]} x {sizes[1]}</button
-								>
-							{/each}
 						</div>
-					</div>
-				{/each}
-			</div>
-		{/if}
-	</div>
-	<div
-		slot="widget"
-		class="w-full h-full overflow-auto"
-		class:relative={canDelete}
-		let:widget
-		let:removeWidget
-	>
-		{#if !!componentMap[widget.widget?.data.componentName]}
-			<div class="w-full h-full p-2">
-        <div class="w-full h-[calc(100%)] overflow-auto border-[rgb(var(--global-color-contrast-200),.1)] rounded border py-2 px-2">
-          <svelte:component
-            this={componentMap[widget.widget?.data.componentName]}
-            widget={widget.widget?.data}
-            loadingData={widgetLoading[widget.widget?.name || '']}
-            {selectedSet}
-            on:reload={() => handleReloadWidget({ widget: widget.widget?.data })}
-          />
-        </div>
-			</div>
-		{:else}
-			<div class="w-full flex items-center justify-center text-sm font-light h-full">
-				Sorry, this widget is not available anymore
-			</div>
-		{/if}
-		{#if canDelete}
-			<div class="absolute left-0 right-0 top-0 bottom-0 black-glass" />
-			<div class="absolute top-2 right-4">
-				<div
-					class="bin-container w-6 h-6 flex justify-center items-center bg-[rgb(var(--global-color-error-500))] rounded-full"
-				>
-					<Icon
-						click
-						on:click={() => removeWidget({ name: widget.widget?.name || '' })}
-						name="mdi-delete"
-					/>
+					{/each}
 				</div>
-			</div>
-		{/if}
-	</div>
+			{/if}
+		</div>
+	{/snippet}
+	{#snippet widgetSnippet({ widget, removeWidget })}
+		<div
+			class="w-full h-full overflow-auto"
+			class:relative={canDelete}
+			
+			
+		>
+			{#if !!componentMap[widget.widget?.data.componentName]}
+				{@const SvelteComponent_1 = componentMap[widget.widget?.data.componentName]}
+			<div class="w-full h-full p-2">
+	        <div class="w-full h-[calc(100%)] overflow-auto border-[rgb(var(--global-color-contrast-200),.1)] rounded border py-2 px-2">
+	          <SvelteComponent_1
+	            widget={widget.widget?.data}
+	            loadingData={widgetLoading[widget.widget?.name || '']}
+	            {selectedSet}
+	            on:reload={() => handleReloadWidget({ widget: widget.widget?.data })}
+	          />
+	        </div>
+				</div>
+			{:else}
+				<div class="w-full flex items-center justify-center text-sm font-light h-full">
+					Sorry, this widget is not available anymore
+				</div>
+			{/if}
+			{#if canDelete}
+				<div class="absolute left-0 right-0 top-0 bottom-0 black-glass"></div>
+				<div class="absolute top-2 right-4">
+					<div
+						class="bin-container w-6 h-6 flex justify-center items-center bg-[rgb(var(--global-color-error-500))] rounded-full"
+					>
+						<Icon
+							onclick={() => removeWidget({ name: widget.widget?.name || '' })}
+							name="mdi-delete"
+						/>
+					</div>
+				</div>
+			{/if}
+		</div>
+	{/snippet}
 </DashboardShaper>
 
 <style>

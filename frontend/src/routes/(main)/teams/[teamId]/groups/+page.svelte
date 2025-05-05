@@ -3,7 +3,11 @@
 	import type { PageData } from './$types'
 	import { invalidate } from '$app/navigation'
 
-  export let data: PageData
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	async function handleGroupDestroy() {
     await invalidate('teams:[teamId]')

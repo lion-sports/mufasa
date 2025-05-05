@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
   import type { LayoutData } from './$types';
   import TeammatesService from '$lib/services/teammates/teammates.service';
@@ -8,10 +10,15 @@
 	import type { ComponentProps } from 'svelte'
 	import { slide } from 'svelte/transition'
   
-  export let data: LayoutData;
+  interface Props {
+    data: LayoutData;
+    children?: import('svelte').Snippet;
+  }
 
-  let tabs: NonNullable<ComponentProps<StandardTabSwitcher>['tabs']> = []
-  $: {
+  let { data, children }: Props = $props();
+
+  let tabs: NonNullable<ComponentProps<typeof StandardTabSwitcher>['tabs']> = $state([])
+  run(() => {
     tabs = []
     if(data.groupedPermissions.teammate.update) {
       tabs = [
@@ -34,10 +41,10 @@
         }
       ]
     }
-  }
+  });
 
 
-  let selectedTab: string = ''
+  let selectedTab: string = $state('')
   function handleTabClick(event: any) {
 		if (selectedTab == 'edit') {
 			goto(`/teams/${data.team.id}/teammates/${data.teammate.id}/edit`, { replaceState: true })
@@ -46,15 +53,17 @@
 		}
 	}
 
-	$: if ($page.url.href.endsWith('edit')) {
-		selectedTab = 'edit'
-	} else if ($page.url.href.endsWith('shirts')) {
-		selectedTab = 'shirts'
-	}
+	run(() => {
+    if ($page.url.href.endsWith('edit')) {
+  		selectedTab = 'edit'
+  	} else if ($page.url.href.endsWith('shirts')) {
+  		selectedTab = 'shirts'
+  	}
+  });
 
-  $: headerHidden =
-    /shirts\/new/.test($page.url.pathname) ||
-    /shirts\/\d+\/edit/.test($page.url.pathname)
+  let headerHidden =
+    $derived(/shirts\/new/.test($page.url.pathname) ||
+    /shirts\/\d+\/edit/.test($page.url.pathname))
 </script>
 
 {#if !headerHidden}
@@ -72,9 +81,9 @@
       marginTop="10px"
       marginBottom="10px"
       bind:selected={selectedTab}
-      on:tab-click={handleTabClick}
+      ontabClick={handleTabClick}
     />
   </div>
 {/if}
 
-<slot></slot>
+{@render children?.()}

@@ -1,15 +1,29 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { Button } from '@likable-hair/svelte'
 	import { createEventDispatcher } from 'svelte'
 	import { CircularLoader } from '@likable-hair/svelte'
 
-	let clazz: string = ''
-	export { clazz as class }
+	
 
-	export let loading: boolean = false,
-		disabled: boolean = false,
-		style: 'primary' | 'secondary' | 'danger' = 'primary',
-		href: string | undefined = undefined
+	interface Props {
+		class?: string;
+		loading?: boolean;
+		disabled?: boolean;
+		style?: 'primary' | 'secondary' | 'danger';
+		href?: string | undefined;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		class: clazz = '',
+		loading = $bindable(false),
+		disabled = false,
+		style = 'primary',
+		href = undefined,
+		children
+	}: Props = $props();
 
 	let dispatch = createEventDispatcher<{
 		click: {
@@ -17,27 +31,33 @@
 		}
 	}>()
 
-	function handleClick(event: CustomEvent<{ nativeEvent: MouseEvent }>) {
+	function handleClick(event: { detail: { nativeEvent: MouseEvent }}) {
 		if (!disabled && !loading)
 			dispatch('click', {
 				nativeEvent: event.detail.nativeEvent
 			})
 	}
 
-	let backgroundColor: string
-	$: if (style == 'primary') backgroundColor = 'rgb(var(--global-color-primary-500))'
-	else if (style == 'secondary') backgroundColor = 'rgb(var(--global-color-background-600), .4)'
-	else if (style == 'danger') backgroundColor = 'rgb(var(--global-color-error-500))'
+	let backgroundColor: string = $state('')
+	run(() => {
+		if (style == 'primary') backgroundColor = 'rgb(var(--global-color-primary-500))'
+		else if (style == 'secondary') backgroundColor = 'rgb(var(--global-color-background-600), .4)'
+		else if (style == 'danger') backgroundColor = 'rgb(var(--global-color-error-500))'
+	});
 
-	let color: string
-	$: if (style == 'primary') color = 'rgb(var(--global-color-grey-50))'
-	else if (style == 'secondary') color = 'rgb(var(--global-color-contrast-900))'
-	else if (style == 'danger') color = 'rgb(var(--global-color-grey-50))'
+	let color: string = $state('')
+	run(() => {
+		if (style == 'primary') color = 'rgb(var(--global-color-grey-50))'
+		else if (style == 'secondary') color = 'rgb(var(--global-color-contrast-900))'
+		else if (style == 'danger') color = 'rgb(var(--global-color-grey-50))'
+	});
 
-	let activeColor: string
-	$: if (style == 'primary') activeColor = 'rgb(var(--global-color-primary-500), .7)'
-	else if (style == 'secondary') activeColor = 'rgb(var(--global-color-primary-500))'
-	else if (style == 'danger') activeColor = 'rgb(var(--global-color-error-500), .7)'
+	let activeColor: string = $state('')
+	run(() => {
+		if (style == 'primary') activeColor = 'rgb(var(--global-color-primary-500), .7)'
+		else if (style == 'secondary') activeColor = 'rgb(var(--global-color-primary-500))'
+		else if (style == 'danger') activeColor = 'rgb(var(--global-color-error-500), .7)'
+	});
 </script>
 
 {#if !!href}
@@ -53,7 +73,7 @@
 	>
 		<div class="flex items-center justify-center h-full whitespace-nowrap">
 			{#if !loading}
-				<slot />
+				{@render children?.()}
 			{:else}
 				<CircularLoader --circular-loader-height="20px" />
 			{/if}
@@ -61,8 +81,8 @@
 	</a>
 {:else}
 	<Button
-		on:click={handleClick}
-		bind:loading
+		onclick={handleClick}
+		{loading}
 		{disabled}
 		class="!box-border {clazz || ''}"
 		--button-padding="10px 20px 10px 20px"
@@ -80,7 +100,7 @@
 			style:height="100%"
 			style:white-space="nowrap"
 		>
-			<slot />
+			{@render children?.()}
 		</div>
 	</Button>
 {/if}

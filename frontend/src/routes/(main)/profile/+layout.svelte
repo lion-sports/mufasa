@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type { LayoutData } from './$types';
   import UserAvatar from '$lib/components/common/UserAvatar.svelte';
   import user from '$lib/stores/auth/user'
@@ -6,24 +8,31 @@
 	import type { ComponentProps } from 'svelte'
   import { page } from '$app/stores';
   
-  export let data: LayoutData;
+  interface Props {
+    data: LayoutData;
+    children?: import('svelte').Snippet;
+  }
 
-  let tabs: ComponentProps<StandardTabSwitcher>['tabs'] = [
+  let { data, children }: Props = $props();
+
+  let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = [
       {
         name: 'scoringSystems',
         label: 'Sistemi di punteggio',
         icon: 'mdi-scoreboard'
       }
     ],
-    selectedTab: string = 'scoringSystems'
+    selectedTab: string = $state('scoringSystems')
 
-  $: if ($page.url.href.endsWith('scoringSystems')) {
-		selectedTab = 'scoringSystems'
-	}
+  run(() => {
+    if ($page.url.href.endsWith('scoringSystems')) {
+  		selectedTab = 'scoringSystems'
+  	}
+  });
 
-  $: headerHidden =
-		$page.url.pathname.endsWith('/scoringSystems/create') ||
-		/\/scoringSystems\/\d+\/edit$/.test($page.url.pathname)
+  let headerHidden =
+		$derived($page.url.pathname.endsWith('/scoringSystems/create') ||
+		/\/scoringSystems\/\d+\/edit$/.test($page.url.pathname))
 </script>
 
 {#if !headerHidden}
@@ -48,4 +57,4 @@
   ></StandardTabSwitcher>
 {/if}
 
-<slot></slot>
+{@render children?.()}

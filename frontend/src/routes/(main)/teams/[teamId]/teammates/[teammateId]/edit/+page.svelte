@@ -7,7 +7,11 @@
 	import type { PageData } from './$types'
 	import { invalidate } from '$app/navigation'
 
-	export let data: PageData
+	interface Props {
+		data: PageData;
+	}
+
+	let { data = $bindable() }: Props = $props();
 
 	team.subscribe((value) => {
 		if (!!value) {
@@ -18,7 +22,7 @@
 		}
 	})
 
-	let loading = false
+	let loading = $state(false)
 	async function handleConfirmClick() {
 		loading = true
 

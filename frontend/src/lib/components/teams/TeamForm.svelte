@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type Team = {
 		name?: string
 		notes?: string
@@ -9,15 +9,26 @@
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
 	import LabelAndTextarea from '$lib/components/common/LabelAndTextarea.svelte'
 
-	export let team: Team = {
+	interface Props {
+		team?: Team;
+		mode?: 'create' | 'update';
+		padding?: string | undefined;
+		margin?: string | undefined;
+		width?: string | undefined;
+		height?: string | undefined;
+	}
+
+	let {
+		team = $bindable({
 			name: undefined,
 			notes: undefined
-		},
-		mode: 'create' | 'update' = 'create',
-		padding: string | undefined = undefined,
-		margin: string | undefined = undefined,
-		width: string | undefined = undefined,
-		height: string | undefined = undefined
+		}),
+		mode = 'create',
+		padding = undefined,
+		margin = undefined,
+		width = undefined,
+		height = undefined
+	}: Props = $props();
 </script>
 
 <form style:padding style:margin style:width style:height>

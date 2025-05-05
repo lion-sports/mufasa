@@ -1,15 +1,32 @@
 <script lang="ts">
+  import { createBubbler } from 'svelte/legacy';
+
+  const bubble = createBubbler();
 	import { ToolTip } from "@likable-hair/svelte"
 
-  let clazz: string | undefined = undefined;
-	export { clazz as class };
+	
 
-  export let friend: boolean = false,
-    opponent: boolean = false,
-    libero: boolean = false,
-    selected: boolean = false
+  interface Props {
+    class?: string | undefined;
+    friend?: boolean;
+    opponent?: boolean;
+    libero?: boolean;
+    selected?: boolean;
+    tooltip?: import('svelte').Snippet;
+    children?: import('svelte').Snippet;
+  }
 
-  let activator: HTMLElement
+  let {
+    class: clazz = undefined,
+    friend = false,
+    opponent = false,
+    libero = false,
+    selected = false,
+    tooltip,
+    children
+  }: Props = $props();
+
+  let activator: HTMLElement = $state()
 </script>
 
 <ToolTip 
@@ -17,7 +34,7 @@
   appearTimeout={400}
 >
   <div class="bg-[rgb(var(--global-color-background-200))] p-1 rounded-sm {clazz}">
-    <slot name="tooltip"></slot>
+    {@render tooltip?.()}
   </div>
 </ToolTip>
 
@@ -29,9 +46,9 @@
   style:--background-color={friend && !libero ? '#3b82f6' : opponent && !libero ? '#ef4444' : undefined}
   class:selected
   bind:this={activator}
-  on:click
+  onclick={bubble('click')}
 >
-  <slot></slot>
+  {@render children?.()}
 </button>
 
 <style>

@@ -2,7 +2,11 @@
 	import type { Shirt } from "$lib/services/shirts/shirts.service"
 	import LabelAndTextfield from "../common/LabelAndTextfield.svelte"
 
-  export let shirt: DeepPartial<Shirt> = {}
+  interface Props {
+    shirt?: DeepPartial<Shirt>;
+  }
+
+  let { shirt = $bindable({}) }: Props = $props();
 </script>
 
 <div class="flex gap-2">

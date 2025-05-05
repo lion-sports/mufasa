@@ -3,7 +3,12 @@
 	import { SimpleTable } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
 
-	export let users: User[] = []
+	interface Props {
+		users?: User[];
+		rowActions?: import('svelte').Snippet<[any]>;
+	}
+
+	let { users = [], rowActions }: Props = $props();
 
 	let headers: ComponentProps<SimpleTable>['headers'] = [
 		{
@@ -21,12 +26,16 @@
 			}
 		}
 	]
+
+	const rowActions_render = $derived(rowActions);
 </script>
 
 <div style:max-width="100%" style:overflow="auto">
 	<SimpleTable {headers} items={users}>
-		<div style:display="flex" style:justify-content="end" slot="rowActions" let:item>
-			<slot name="rowActions" {item} />
-		</div>
+		{#snippet rowActions({ item })}
+				<div style:display="flex" style:justify-content="end"  >
+				{@render rowActions_render?.({ item, })}
+			</div>
+			{/snippet}
 	</SimpleTable>
 </div>

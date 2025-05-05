@@ -1,7 +1,11 @@
 <script lang="ts">
-  export let primaryColor: string | undefined = undefined,
-    secondaryColor: string | undefined = undefined,
-    number: number | undefined = undefined
+  interface Props {
+    primaryColor?: string | undefined;
+    secondaryColor?: string | undefined;
+    number?: number | undefined;
+  }
+
+  let { primaryColor = undefined, secondaryColor = undefined, number = undefined }: Props = $props();
 </script>
 
 

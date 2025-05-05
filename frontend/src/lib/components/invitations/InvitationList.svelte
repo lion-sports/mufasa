@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Invitation } from '$lib/services/invitations/invitations.service'
 </script>
 
@@ -13,9 +13,13 @@
 		}
 	}>()
 
-	export let invitations: Invitation[] = []
+	interface Props {
+		invitations?: Invitation[];
+	}
 
-	let headers: ComponentProps<SimpleTable>['headers'] = [
+	let { invitations = [] }: Props = $props();
+
+	let headers: ComponentProps<typeof SimpleTable>['headers'] = [
 		{
 			value: 'invitedEmail',
 			label: 'Email',
@@ -46,7 +50,7 @@
 		}
 	]
 
-	let confirmDialogOpen: boolean, discardingInvitation: Invitation | undefined
+	let confirmDialogOpen: boolean = $state(false), discardingInvitation: Invitation | undefined = $state()
 	function handleDeleteClick(teammate: any) {
 		discardingInvitation = teammate
 		confirmDialogOpen = true
@@ -65,27 +69,29 @@
 
 <div style:max-width="100%" style:overflow="auto">
 	<SimpleTable {headers} items={invitations}>
-		<svelte:fragment slot="custom" let:item let:header>
-			{#if header.value == 'status'}
-				{item.status}
-			{:else if header.value == 'invitedBy'}
-				{item.invitedBy.email}
-			{:else if header.value == 'group'}
-				{#if !!item.group?.name}
-					{item.group?.name}
-				{:else}
-					Nessuno
+		{#snippet customSnippet({ item, header })}
+				{#if header.value == 'status'}
+					{item.status}
+				{:else if header.value == 'invitedBy'}
+					{item.invitedBy.email}
+				{:else if header.value == 'group'}
+					{#if !!item.group?.name}
+						{item.group?.name}
+					{:else}
+						Nessuno
+					{/if}
 				{/if}
-			{/if}
-		</svelte:fragment>
-		<div style:display="flex" style:justify-content="end" slot="rowActions" let:item>
-			<Icon
-				name="mdi-delete"
-				click
-				--icon-color="rgb(var(--global-color-error-500))"
-				on:click={() => handleDeleteClick(item)}
-			/>
-		</div>
+			
+			{/snippet}
+		{#snippet rowActionsSnippet({ item })}
+				<div style:display="flex" style:justify-content="end"  >
+				<Icon
+					name="mdi-delete"
+					--icon-color="rgb(var(--global-color-error-500))"
+					onclick={() => handleDeleteClick(item)}
+				/>
+			</div>
+			{/snippet}
 	</SimpleTable>
 </div>
 

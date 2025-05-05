@@ -1,7 +1,11 @@
 <script lang="ts">
-	let clazz: string = ''
-	export { clazz as class }
-	export let collapsed: boolean = false
+	
+	interface Props {
+		class?: string;
+		collapsed?: boolean;
+	}
+
+	let { class: clazz = '', collapsed = false }: Props = $props();
 </script>
 
 <!-- <svg

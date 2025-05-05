@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import { createEventDispatcher } from "svelte"
   import PlayerMarker from "../PlayerMarker.svelte";
 	import type { Scout } from "@/lib/services/scouts/scouts.service"
@@ -12,72 +14,80 @@
   let dispatch = createEventDispatcher<{
   }>()
 
-  export let scout: Scout
+  interface Props {
+    scout: Scout;
+  }
 
-  let insidePlayers: ScoutEventPlayer[] = []
-  $: if(!!scout.stash?.playersServePositions) {
-    insidePlayers = []
+  let { scout }: Props = $props();
 
-    if(!!scout.stash?.playersServePositions.enemy) {
-      for(const [position, value] of Object.entries(scout.stash?.playersServePositions.enemy)) {
-        if(!value?.player) continue
-        insidePlayers = [
-          ...insidePlayers,
-          value.player
+  let insidePlayers: ScoutEventPlayer[] = $state([])
+  run(() => {
+    if(!!scout.stash?.playersServePositions) {
+      insidePlayers = []
+
+      if(!!scout.stash?.playersServePositions.enemy) {
+        for(const [position, value] of Object.entries(scout.stash?.playersServePositions.enemy)) {
+          if(!value?.player) continue
+          insidePlayers = [
+            ...insidePlayers,
+            value.player
+          ]
+        }
+      }
+
+      if(!!scout.stash?.playersServePositions.friends) {
+        for(const [position, value] of Object.entries(scout.stash?.playersServePositions.friends)) {
+          if(!value?.player) continue
+          insidePlayers = [
+            ...insidePlayers,
+            value.player
+          ]
+        }
+      }
+    } else insidePlayers = []
+  });
+
+  let openLiberoSubstitutions = $derived(scout.stash?.currentSetOpenLiberoSubstitution || [])
+
+  let substituted: ScoutEventPlayer[] = $state([]),
+    closedSubstitutions: ScoutEventPlayer[] = $state([]);
+  run(() => {
+    if(!!scout.stash?.currentSetSubstitutionsMade) {
+      substituted = []
+      closedSubstitutions = []
+      for(let i = 0; i < scout.stash.currentSetSubstitutionsMade.enemy.length; i += 1) {
+        let sub = scout.stash.currentSetSubstitutionsMade.enemy[i]
+        let closedSub = scout.stash.currentSetSubstitutionsMade.enemy.find(s => s.playerOut.id == sub.playerIn.id)
+
+        substituted = [
+          ...substituted,
+          sub.playerOut
+        ]
+
+        if(!!closedSub) closedSubstitutions = [
+          ...closedSubstitutions,
+          sub.playerIn
         ]
       }
-    }
 
-    if(!!scout.stash?.playersServePositions.friends) {
-      for(const [position, value] of Object.entries(scout.stash?.playersServePositions.friends)) {
-        if(!value?.player) continue
-        insidePlayers = [
-          ...insidePlayers,
-          value.player
+      for(let i = 0; i < scout.stash.currentSetSubstitutionsMade.friends.length; i += 1) {
+        let sub = scout.stash.currentSetSubstitutionsMade.friends[i]
+        let closedSub = scout.stash.currentSetSubstitutionsMade.friends.find(s => s.playerOut.id == sub.playerIn.id)
+
+        substituted = [
+          ...substituted,
+          sub.playerOut
+        ]
+
+        if(!!closedSub) closedSubstitutions = [
+          ...closedSubstitutions,
+          sub.playerIn
         ]
       }
-    }
-  } else insidePlayers = []
+    } else substituted = []
+  });
 
-  $: openLiberoSubstitutions = scout.stash?.currentSetOpenLiberoSubstitution || []
-
-  let substituted: ScoutEventPlayer[] = [],
-    closedSubstitutions: ScoutEventPlayer[] = [];
-  $: if(!!scout.stash?.currentSetSubstitutionsMade) {
-    substituted = []
-    closedSubstitutions = []
-    for(let i = 0; i < scout.stash.currentSetSubstitutionsMade.enemy.length; i += 1) {
-      let sub = scout.stash.currentSetSubstitutionsMade.enemy[i]
-      let closedSub = scout.stash.currentSetSubstitutionsMade.enemy.find(s => s.playerOut.id == sub.playerIn.id)
-
-      substituted = [
-        ...substituted,
-        sub.playerOut
-      ]
-
-      if(!!closedSub) closedSubstitutions = [
-        ...closedSubstitutions,
-        sub.playerIn
-      ]
-    }
-
-    for(let i = 0; i < scout.stash.currentSetSubstitutionsMade.friends.length; i += 1) {
-      let sub = scout.stash.currentSetSubstitutionsMade.friends[i]
-      let closedSub = scout.stash.currentSetSubstitutionsMade.friends.find(s => s.playerOut.id == sub.playerIn.id)
-
-      substituted = [
-        ...substituted,
-        sub.playerOut
-      ]
-
-      if(!!closedSub) closedSubstitutions = [
-        ...closedSubstitutions,
-        sub.playerIn
-      ]
-    }
-  } else substituted = []
-
-  $: expandedPlayers = scout.players.map((p) => {
+  let expandedPlayers = $derived(scout.players.map((p) => {
     return {
       ...p,
       isInside: insidePlayers.some((ip) => ip.id == p.id),
@@ -85,12 +95,12 @@
       isClosed: closedSubstitutions.some((cs) => cs.id == p.id),
       isOutForLibero: openLiberoSubstitutions.some((ols) => ols.playerId == p.id)
     }
-  }).filter((ep) => !ep.isInside)
-  $: friendsPlayers = expandedPlayers.filter((p) => !p.isOpponent)
-  $: opponentsPlayers = expandedPlayers.filter((p) => p.isOpponent)
+  }).filter((ep) => !ep.isInside))
+  let friendsPlayers = $derived(expandedPlayers.filter((p) => !p.isOpponent))
+  let opponentsPlayers = $derived(expandedPlayers.filter((p) => p.isOpponent))
 
-  let changePlayerDialog: boolean = false,
-    changePlayer: typeof expandedPlayers[number] | undefined = undefined
+  let changePlayerDialog: boolean = $state(false),
+    changePlayer: typeof expandedPlayers[number] | undefined = $state(undefined)
   function handlePlayerClick(player: typeof changePlayer) {
     changePlayerDialog = true
     changePlayer = player
@@ -141,7 +151,7 @@
       <div class="flex flex-col w-full mb-2">
         {#each friendsPlayers.filter(fp => fp.role == 'libero') as libero}
           <button 
-            on:click={() => handlePlayerClick(libero)}
+            onclick={() => handlePlayerClick(libero)}
             class="flex text-left items-center gap-4 hover:bg-[rgb(var(--global-color-background-300))] py-1 px-2 w-full rounded-sm"
           >
             <div>
@@ -170,7 +180,7 @@
       <div class="flex flex-col w-full mb-2">
         {#each opponentsPlayers.filter(fp => fp.role == 'libero') as libero}
           <button 
-            on:click={() => handlePlayerClick(libero)}
+            onclick={() => handlePlayerClick(libero)}
             class="flex text-right items-center justify-end gap-4 hover:bg-[rgb(var(--global-color-background-300))] p-1 w-full rounded-sm"
           >
             <div>
@@ -208,7 +218,7 @@
       <div class="flex flex-col w-full">
         {#each friendsPlayers.filter(fp => fp.role != 'libero') as player}
           <button 
-            on:click={() => handlePlayerClick(player)}
+            onclick={() => handlePlayerClick(player)}
             class="flex text-left items-center gap-4 hover:bg-[rgb(var(--global-color-background-300))] py-1 px-2 w-full rounded-sm"
           >
             <div>
@@ -245,7 +255,7 @@
       <div class="flex flex-col w-full">
         {#each opponentsPlayers.filter(fp => fp.role != 'libero') as player}
           <button 
-            on:click={() => handlePlayerClick(player)}
+            onclick={() => handlePlayerClick(player)}
             class="flex text-right items-center justify-end gap-4 hover:bg-[rgb(var(--global-color-background-300))] p-1 w-full rounded-sm px-2"
           >
             <div class="flex-grow text-left">
@@ -300,7 +310,7 @@
         ))
       ) as player}
         <button 
-          on:click={() => handleOutPlayerClick(player)}
+          onclick={() => handleOutPlayerClick(player)}
           class="flex text-left items-center gap-4 hover:bg-[rgb(var(--global-color-background-400),.3)] py-2 px-2 w-full rounded-sm"
         >
           <div>

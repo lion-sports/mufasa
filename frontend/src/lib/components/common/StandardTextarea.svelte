@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { Textarea } from '@likable-hair/svelte'
 
-	export let label: string = '',
-		placeholder: string = '',
-		value: string = ''
+	interface Props {
+		label?: string;
+		placeholder?: string;
+		value?: string;
+	}
+
+	let { label = '', placeholder = '', value = $bindable('') }: Props = $props();
 </script>
 
 <Textarea

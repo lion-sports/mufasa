@@ -5,9 +5,13 @@
 	import { onMount } from 'svelte'
 	import type { PageData } from './$types'
 
-	export let data: PageData
+	interface Props {
+		data: PageData;
+	}
 
-	let visibleWeek: number, visibleYear: number, reloadEvents: boolean
+	let { data }: Props = $props();
+
+	let visibleWeek: number = $state(), visibleYear: number = $state(), reloadEvents: boolean = $state()
 
 	onMount(() => {
 		let visibleYearCached = localStorage.getItem('teams:weeks:visibleYear')

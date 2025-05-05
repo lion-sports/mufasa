@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type Option = {
 		name: string
 		label: string
@@ -10,12 +10,23 @@
 <script lang="ts">
 	import { Icon } from '@likable-hair/svelte'
 
-	export let options: Option[] = [],
-		padding: string = '0px',
-		optionPadding: string = '0px 20px 0px 10px',
-		optionHeight: string = '35px'
 
 	import { createEventDispatcher } from 'svelte'
+	interface Props {
+		options?: Option[];
+		padding?: string;
+		optionPadding?: string;
+		optionHeight?: string;
+		optionAppend?: import('svelte').Snippet<[any]>;
+	}
+
+	let {
+		options = [],
+		padding = '0px',
+		optionPadding = '0px 20px 0px 10px',
+		optionHeight = '35px',
+		optionAppend
+	}: Props = $props();
 	const dispatch = createEventDispatcher<{
 		'option-click': {
 			nativeEvent: MouseEvent
@@ -42,7 +53,7 @@
 			style:height={optionHeight}
 			style:padding={optionPadding}
 			class="option-container"
-			on:click={(event) => handleOptionClick(event, option)}
+			onclick={(event) => handleOptionClick(event, option)}
 		>
 			{#if !!option.icon}
 				<div style:margin-right="10px">
@@ -54,9 +65,9 @@
 				</div>
 			{/if}
 			<div style:color={option.color}>{option.label}</div>
-			<div class="spacer" />
+			<div class="spacer"></div>
 			<div>
-				<slot name="option-append" {option} />
+				{@render optionAppend?.({ option, })}
 			</div>
 		</button>
 	{/each}

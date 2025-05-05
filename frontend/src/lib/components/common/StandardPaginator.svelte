@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { Icon } from '@likable-hair/svelte'
 	import { createEventDispatcher } from 'svelte'
 	let dispatch = createEventDispatcher<{
@@ -7,8 +9,12 @@
 		}
 	}>()
 
-	export let page: number = 1,
-		maxPage: number | undefined = undefined
+	interface Props {
+		page?: number;
+		maxPage?: number | undefined;
+	}
+
+	let { page = $bindable(1), maxPage = undefined }: Props = $props();
 
 	function goToPage(p: number) {
 		if (p <= 0 || (!!maxPage && p > maxPage)) return
@@ -45,14 +51,16 @@
 		})
 	}
 
-	$: if (!!maxPage && page > maxPage) page = maxPage
+	run(() => {
+		if (!!maxPage && page > maxPage) page = maxPage
+	});
 </script>
 
 <div class="container">
 	<Icon click on:click={hardPrevious} name="mdi-chevron-double-left" />
 	<Icon click on:click={previousPage} name="mdi-chevron-left" />
 	{#if page != 1}
-		<div class="page-button" style:cursor="pointer" on:click={() => goToPage(page - 1)}>
+		<div class="page-button" style:cursor="pointer" onclick={() => goToPage(page - 1)}>
 			{page - 1}
 		</div>
 	{/if}
@@ -60,7 +68,7 @@
 		{page}
 	</div>
 	{#if !maxPage || (!!maxPage && page < maxPage)}
-		<div class="page-button" style:cursor="pointer" on:click={() => goToPage(page + 1)}>
+		<div class="page-button" style:cursor="pointer" onclick={() => goToPage(page + 1)}>
 			{page + 1}
 		</div>
 	{/if}

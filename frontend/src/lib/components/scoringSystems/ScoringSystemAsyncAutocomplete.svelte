@@ -4,10 +4,19 @@
   import ScoringSystemsService, { type ScoringSystem } from '$lib/services/scoringSystems/scoringSystems.service';
 	import { FilterBuilder } from '@likable-hair/svelte'
 
-	export let values: Item[] = [],
-    scoringSystems: ScoringSystem[] = [],
-		multiple: boolean = false,
-    disabled: boolean = false
+	interface Props {
+		values?: Item[];
+		scoringSystems?: ScoringSystem[];
+		multiple?: boolean;
+		disabled?: boolean;
+	}
+
+	let {
+		values = $bindable([]),
+		scoringSystems = [],
+		multiple = $bindable(false),
+		disabled = $bindable(false)
+	}: Props = $props();
 
 	async function searchCustomer(params: { searchText: string }): Promise<Item[]> {
 		let service = new ScoringSystemsService({ fetch })

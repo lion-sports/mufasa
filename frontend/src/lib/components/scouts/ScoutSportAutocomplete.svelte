@@ -3,7 +3,11 @@
 	import type { ComponentProps } from "svelte"
 	import StandardAutocomplete from "../common/StandardAutocomplete.svelte"
 
-  export let values: ComponentProps<StandardAutocomplete>['values'] = []
+  interface Props {
+    values?: ComponentProps<StandardAutocomplete>['values'];
+  }
+
+  let { values = $bindable([]) }: Props = $props();
 
 </script>
 

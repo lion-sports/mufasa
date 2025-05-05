@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import { ORDERED_POSITIONS, type VolleyballPlayersPosition, type VolleyballScoutEventPosition } from "@/lib/services/scouts/volleyball"
 	import StandardTabSwitcher from "../../common/StandardTabSwitcher.svelte"
 	import type { Player } from "@/lib/services/players/players.service"
@@ -19,66 +21,79 @@
     }
   }>()
 
-  export let selectedTab: string = '',
-    playersPosition: VolleyballPlayersPosition | undefined = undefined,
-    players: Player[] = [],
-    showSuggestion: boolean = true,
-    reloadFirstSetStartingSix: boolean = true,
-    firstSetStartingSix: VolleyballPlayersPosition | undefined = undefined
+  interface Props {
+    selectedTab?: string;
+    playersPosition?: VolleyballPlayersPosition | undefined;
+    players?: Player[];
+    showSuggestion?: boolean;
+    reloadFirstSetStartingSix?: boolean;
+    firstSetStartingSix?: VolleyballPlayersPosition | undefined;
+  }
 
-  $: notLiberoPlayers = players.filter((p) => p.role !== 'libero')
+  let {
+    selectedTab = $bindable(''),
+    playersPosition = $bindable(undefined),
+    players = [],
+    showSuggestion = $bindable(true),
+    reloadFirstSetStartingSix = $bindable(true),
+    firstSetStartingSix = $bindable(undefined)
+  }: Props = $props();
 
-  $: friendsPlayer = notLiberoPlayers.filter((p) => !p.isOpponent)
-  $: opponentsPlayer = notLiberoPlayers.filter((p) => p.isOpponent)
+  let notLiberoPlayers = $derived(players.filter((p) => p.role !== 'libero'))
 
-  $: notSelectedFriendsPlayer = friendsPlayer.filter((fp) => {
+  let friendsPlayer = $derived(notLiberoPlayers.filter((p) => !p.isOpponent))
+  let opponentsPlayer = $derived(notLiberoPlayers.filter((p) => p.isOpponent))
+
+  let notSelectedFriendsPlayer = $derived(friendsPlayer.filter((fp) => {
     return !playersPosition || (
       Object.values(playersPosition.friends).filter(v => !!v && !!v.player).every(p => Number(p.player.id) !== Number(fp.id))
     )
-  })
+  }))
 
-  $: notSelectedOpponentsPlayer = opponentsPlayer.filter((fp) => {
+  let notSelectedOpponentsPlayer = $derived(opponentsPlayer.filter((fp) => {
     return !playersPosition || (
       Object.values(playersPosition.enemy).filter(v => !!v && !!v.player).every(p => Number(p.player.id) !== Number(fp.id))
     )
-  })
+  }))
 
   let positions: VolleyballScoutEventPosition[] = [1, 2, 3, 4, 5, 6]
   let playerSuggestion: {
     enemy: Partial<Record<VolleyballScoutEventPosition, ScoutEventPlayer[]>>,
     friends: Partial<Record<VolleyballScoutEventPosition, ScoutEventPlayer[]>>
-  } = {
+  } = $state({
     enemy: {},
     friends: {}
-  }
+  })
 
-  $: if(!!playersPosition) {
-    playerSuggestion = {
-      enemy: {},
-      friends: {}
+  run(() => {
+    if(!!playersPosition) {
+      playerSuggestion = {
+        enemy: {},
+        friends: {}
+      }
+
+      for(let i = 0; i < ORDERED_POSITIONS.length; i += 1) {
+        let position = ORDERED_POSITIONS[i]
+        let suggestions = suggestPlayer({
+          position,
+          players: players.filter((p) => !p.isOpponent),
+          playersPosition: playersPosition.friends,
+          avoidPlayers: Object.values(playersPosition.friends).filter(v => !!v && !!v.player).map((v) => v.player)
+        })
+
+        playerSuggestion.friends[position] = lodash.cloneDeep(suggestions)
+
+        suggestions = suggestPlayer({
+          position,
+          players: players.filter((p) => p.isOpponent),
+          playersPosition: playersPosition.enemy,
+          avoidPlayers: Object.values(playersPosition.enemy).filter(v => !!v && !!v.player).map((v) => v.player)
+        })
+
+        playerSuggestion.enemy[position] = lodash.cloneDeep(suggestions)
+      }
     }
-
-    for(let i = 0; i < ORDERED_POSITIONS.length; i += 1) {
-      let position = ORDERED_POSITIONS[i]
-      let suggestions = suggestPlayer({
-        position,
-        players: players.filter((p) => !p.isOpponent),
-        playersPosition: playersPosition.friends,
-        avoidPlayers: Object.values(playersPosition.friends).filter(v => !!v && !!v.player).map((v) => v.player)
-      })
-
-      playerSuggestion.friends[position] = lodash.cloneDeep(suggestions)
-
-      suggestions = suggestPlayer({
-        position,
-        players: players.filter((p) => p.isOpponent),
-        playersPosition: playersPosition.enemy,
-        avoidPlayers: Object.values(playersPosition.enemy).filter(v => !!v && !!v.player).map((v) => v.player)
-      })
-
-      playerSuggestion.enemy[position] = lodash.cloneDeep(suggestions)
-    }
-  }
+  });
 
   function handleAcceptSuggestion(position: VolleyballScoutEventPosition, suggestion: ScoutEventPlayer) {
     if(!!playersPosition) {
@@ -201,10 +216,12 @@
     firstSetStartingSix = await scoutService.getFirstSetStartingSix({ id: $studio.scout.id })
   }
 
-  $: if(!!reloadFirstSetStartingSix) {
-    loadFirstSetStartingSix()
-    reloadFirstSetStartingSix = false
-  }
+  run(() => {
+    if(!!reloadFirstSetStartingSix) {
+      loadFirstSetStartingSix()
+      reloadFirstSetStartingSix = false
+    }
+  });
 
   function getPlayerValueInPosition(position: VolleyballScoutEventPosition, playersPosition: VolleyballPlayersPosition | undefined): ScoutEventPlayer[] {
     return selectedTab == 'opponents' ?
@@ -229,17 +246,17 @@
   ></StandardTabSwitcher>
   <div class="mt-4 max-h-[80vh] overflow-auto">
     <div class="flex gap-4">
-      <button class="underline" on:click={() => showSuggestion = !showSuggestion}>
+      <button class="underline" onclick={() => showSuggestion = !showSuggestion}>
         {showSuggestion ? 'Nascondi suggerimenti' : 'Mostra suggerimenti'}
       </button>
-      <button class="underline" on:click={handleRotateForward}>
+      <button class="underline" onclick={handleRotateForward}>
         Ruota in avanti
       </button>
-      <button class="underline" on:click={handleRotateBackward}>
+      <button class="underline" onclick={handleRotateBackward}>
         Ruota indietro
       </button>
       {#if !!firstSetStartingSix}
-        <button class="underline" on:click={handleInsertFirstSetStartingSix}>
+        <button class="underline" onclick={handleInsertFirstSetStartingSix}>
           Inserisci sestetto primo set
         </button>
       {/if}
@@ -261,7 +278,7 @@
               --autocomplete-background-color="rgb(var(--global-color-background-400))"
               --autocomplete-width="100%"
               players={selectedTab == 'opponents' ? notSelectedOpponentsPlayer : notSelectedFriendsPlayer}
-              on:change={(e) => {
+              onchange={(e) => {
                 let selection = e.detail.selection[0]
 
                 if(!playersPosition) playersPosition = {
@@ -269,27 +286,28 @@
                   enemy: {}
                 }
 
+                // @ts-ignore
+                let selectedPlayer = selection?.data?.player as Player
+
                 if(selectedTab == 'opponents') {
                   if(!playersPosition.enemy[position]) {
                     playersPosition.enemy[position] = {
-                      player: selection?.data?.player
+                      player: selectedPlayer
                     }
                   } 
-                  //@ts-ignore
-                  else playersPosition.enemy[position].player = selection?.data?.player
+                  else playersPosition.enemy[position].player = selectedPlayer
                 } else {
                   if(!playersPosition.friends[position]) {
                     playersPosition.friends[position] = {
-                      player: selection?.data?.player
+                      player: selectedPlayer
                     }
                   }
-                  //@ts-ignore
-                  else playersPosition.friends[position].player = selection?.data?.player
+                  else playersPosition.friends[position].player = selectedPlayer
                 }
 
                 dispatch('change', {
                   position: position,
-                  player: selection?.data?.player
+                  player: selectedPlayer
                 })
               }}
               values={getPlayerValueInPosition(position, playersPosition)}
@@ -302,7 +320,7 @@
                 (playerSuggestion.enemy[position] || []) :
                 (playerSuggestion.friends[position] || [])
               as suggestion}
-                <button class="flex gap-2 items-center" on:click={() => handleAcceptSuggestion(position, suggestion)}>
+                <button class="flex gap-2 items-center" onclick={() => handleAcceptSuggestion(position, suggestion)}>
                   <PlayerMarker
                     opponent={suggestion.isOpponent}
                     friend={!suggestion.isOpponent}

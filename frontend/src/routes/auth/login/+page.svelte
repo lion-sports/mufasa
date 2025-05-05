@@ -8,12 +8,12 @@
 	import ConnectWallet from '$lib/components/wallet/ConnectWallet.svelte'
 	import SolanaLogo from '$lib/components/wallet/SolanaLogo.svelte'
 
-	let email: string = '',
-		password: string = '',
-		error: boolean = false,
-		errorMessage: string | undefined = undefined,
-		loading: boolean = false,
-		generateRefreshToken: boolean = false
+	let email: string = $state(''),
+		password: string = $state(''),
+		error: boolean = $state(false),
+		errorMessage: string | undefined = $state(undefined),
+		loading: boolean = $state(false),
+		generateRefreshToken: boolean = $state(false)
 
 	function login() {
 		error = false
@@ -59,7 +59,7 @@
 		openConnectWallet = true;
 	}
 
-	let openConnectWallet: boolean = false;
+	let openConnectWallet: boolean = $state(false);
 
 </script>
 
@@ -83,9 +83,6 @@
 					name="email"
 					class={{
 						label: 'box-border w-full',
-						input: {
-							container: '!box-border !w-full'
-						}
 					}}
 					bind:value={email}
 					{error}
@@ -98,9 +95,6 @@
 					type="password"
 					class={{
 						label: 'box-border w-full',
-						input: {
-							container: '!box-border !w-full'
-						}
 					}}
 					bind:value={password}
 					{error}

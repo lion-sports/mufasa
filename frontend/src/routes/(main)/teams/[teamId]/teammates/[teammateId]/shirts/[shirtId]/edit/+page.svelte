@@ -7,7 +7,11 @@
 	import TeammatesService from '$lib/services/teammates/teammates.service'
   import type { PageData } from './$types';
   
-  export let data: PageData;
+  interface Props {
+    data: PageData;
+  }
+
+  let { data = $bindable() }: Props = $props();
 
   let loading: boolean = false
 

@@ -7,7 +7,11 @@
 	import ScoutsService from '@/lib/services/scouts/scouts.service'
 
 
-	export let scout: Scout
+	interface Props {
+		scout: Scout;
+	}
+
+	let { scout = $bindable() }: Props = $props();
 
 	function initAutoPointObject() {
 		if (!scout.scoutInfo.settings) scout.scoutInfo.settings = {}

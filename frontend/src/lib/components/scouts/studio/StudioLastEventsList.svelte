@@ -3,8 +3,12 @@
   import { EVENT_TYPE_TRANSLATIONS, FIRST_POINT } from "@/lib/services/scouts/volleyball";
 	import { DateTime } from "luxon"
 
-  export let events: VolleyballScoutEventJson[] = [],
-    opponent: boolean = false
+  interface Props {
+    events?: VolleyballScoutEventJson[];
+    opponent?: boolean;
+  }
+
+  let { events = [], opponent = false }: Props = $props();
 </script>
 
 {#if events.length > 0}

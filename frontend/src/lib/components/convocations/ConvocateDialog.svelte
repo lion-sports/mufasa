@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import type { Teammate } from '$lib/services/teams/teams.service'
 	import type { Convocation } from '$lib/services/convocations/convocations.service'
 	import StandardDialog from '../common/StandardDialog.svelte'
@@ -8,10 +10,19 @@
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
 	import type { Event } from '$lib/services/events/events.service'
 
-	export let open: boolean = false,
-		teammates: Teammate[] = [],
-		team: { id: number } | undefined = undefined,
-		event: Pick<Event, 'id'>
+	interface Props {
+		open?: boolean;
+		teammates?: Teammate[];
+		team?: { id: number } | undefined;
+		event: Pick<Event, 'id'>;
+	}
+
+	let {
+		open = $bindable(false),
+		teammates = [],
+		team = $bindable(undefined),
+		event
+	}: Props = $props();
 
 	let dispatch = createEventDispatcher<{
 		convocate: {
@@ -20,9 +31,9 @@
 		}
 	}>()
 
-	let loading: boolean = false,
-		selectedTeammates: { [key: number]: boolean } = {},
-		teammatesObjects: { id: number }[] = []
+	let loading: boolean = $state(false),
+		selectedTeammates: { [key: number]: boolean } = $state({}),
+		teammatesObjects: { id: number }[] = $state([])
 	function convocate() {
 		if (cannotConvocate) return
 		loading = true
@@ -44,7 +55,7 @@
 			})
 	}
 
-	$: {
+	run(() => {
 		teammatesObjects = []
 		for (const [key, value] of Object.entries(selectedTeammates)) {
 			if (value) {
@@ -53,8 +64,8 @@
 				})
 			}
 		}
-	}
-	$: cannotConvocate = teammatesObjects.length == 0
+	});
+	let cannotConvocate = $derived(teammatesObjects.length == 0)
 </script>
 
 <StandardDialog bind:open title="Convoca">

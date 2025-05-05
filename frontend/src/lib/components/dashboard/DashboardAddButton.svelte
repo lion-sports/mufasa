@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { createBubbler } from 'svelte/legacy';
+
+	const bubble = createBubbler();
 	import { Icon } from '@likable-hair/svelte'
 </script>
 
-<button class="add-button" on:click>
+<button class="add-button" onclick={bubble('click')}>
 	<Icon name="mdi-plus" --icon-default-size="1.5rem" />
 	<div class="description">Add widget</div>
 </button>

@@ -29,11 +29,15 @@
       )
   }
 
-  export let data: PageData;
+  interface Props {
+    data: PageData;
+  }
 
-  let scoringSystem: NonNullable<ComponentProps<ScoringSystemForm>['scoringSystem']> = {},
-      formValid: boolean = false,
-      loadingSave: boolean = false
+  let { data }: Props = $props();
+
+  let scoringSystem: NonNullable<ComponentProps<ScoringSystemForm>['scoringSystem']> = $state({}),
+      formValid: boolean = $state(false),
+      loadingSave: boolean = $state(false)
 
   async function handleSubmit() {
     loadingSave = true

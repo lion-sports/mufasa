@@ -1,28 +1,31 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { onMount } from 'svelte'
 	import { writable } from 'svelte/store'
-	import { PublicKey, Connection, clusterApiUrl } from '@solana/web3.js'
+	import { PublicKey} from '@solana/web3.js'
 	import StandardDialog from '../common/StandardDialog.svelte'
-	import { Button, Card } from '@likable-hair/svelte'
 	import SolanaLogo from './SolanaLogo.svelte'
 	import { goto } from '$app/navigation'
 	import phantom from '$lib/stores/provider/phantom'
-	import MetamaskLogo from './MetamaskLogo.svelte'
 	import AuthService from '$lib/services/auth/auth.service'
 	import StandardButton from '../common/StandardButton.svelte'
-	import Error from '../../../routes/+error.svelte'
 
-	export let connectWalletDialog: boolean = false
+	interface Props {
+		connectWalletDialog?: boolean;
+	}
+
+	let { connectWalletDialog = $bindable(false) }: Props = $props();
 
 	let 
-		error: boolean = false,
-		errorMessage: string | undefined = undefined,
+		error: boolean = $state(false),
+		errorMessage: string | undefined = $state(undefined),
 		generateRefreshToken: boolean = false
 
 	const walletAvail = writable(false)
 
 	const connected = writable(false)
-	let currentPublicKey : string = ''
+	let currentPublicKey : string = $state('')
 
 	onMount(() => {
 		currentPublicKey = ''
@@ -33,16 +36,18 @@
 		}
 	})
 
-	$: if ($phantom) {
-		$phantom.on('connect', (publicKey: PublicKey) => {
-			connected.set(true)
-			currentPublicKey = publicKey.toBase58()
-		})
-		$phantom.on('disconnect', () => {
-			connected.set(false)
-			currentPublicKey = ''
-		})
-	}
+	run(() => {
+		if ($phantom) {
+			$phantom.on('connect', (publicKey: PublicKey) => {
+				connected.set(true)
+				currentPublicKey = publicKey.toBase58()
+			})
+			$phantom.on('disconnect', () => {
+				connected.set(false)
+				currentPublicKey = ''
+			})
+		}
+	});
 
 	async function handleConnectPhantom() {
 		const authService = new AuthService({ fetch })
@@ -138,11 +143,11 @@
 
 		<div class="w-full mt-10" style={"display: flex; justify-content: space-between;"}>
 			{#if $connected}
-				<button disabled={!$connected} on:click={handleDisconnectPhantom}>Disconnect</button>
+				<button disabled={!$connected} onclick={handleDisconnectPhantom}>Disconnect</button>
 				<StandardButton disabled={!$connected} on:click={loginOrSignup}>Log In</StandardButton>
 
 			{:else}
-				<Card width="400px" --color="rgb(var(--global-color-contract-900))">
+				<div>
 					<div class="flex items-center justify-between gap-2">
 						<SolanaLogo></SolanaLogo>
 						<StandardButton
@@ -157,7 +162,7 @@
 							--button-background-color="rgb(var(--global-color-grey-950))">MetaMask</StandardButton
 						>
 					</div> -->
-				</Card>
+				</div>
 			{/if}
 			{#if error}
 				<div

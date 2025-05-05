@@ -1,11 +1,13 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import type { Shirt } from "$lib/services/shirts/shirts.service"
-  import { Autocomplete, Dropdown, Icon } from "@likable-hair/svelte";
+  import { Autocomplete, Dropdown } from "@likable-hair/svelte";
   import { createEventDispatcher, type ComponentProps } from "svelte";
 	import ShirtIcon from "./ShirtIcon.svelte"
 
   type ShirtWithPartialTeammate = Omit<Shirt, 'teammateId' | 'id'> & { teammateId?: number, id?: number }
-  type Item = NonNullable<ComponentProps<Dropdown>['items']>[number]
+  type Item = NonNullable<ComponentProps<typeof Dropdown<{ shirt: ShirtWithPartialTeammate }>>['items']>[number]
 
   let dispatch = createEventDispatcher<{
     change: {
@@ -15,39 +17,58 @@
     }
   }>()
 
-  export let items: ShirtWithPartialTeammate[] = [],
-    values: ShirtWithPartialTeammate[] = [],
-    disabled: boolean = false,
-    width: string | undefined = "auto",
-    minWidth: string | undefined = "auto",
-    menuWidth: string | undefined = "auto"
+  interface Props {
+    items?: ShirtWithPartialTeammate[];
+    values?: ShirtWithPartialTeammate[];
+    disabled?: boolean;
+    width?: string | undefined;
+    minWidth?: string | undefined;
+    menuWidth?: string | undefined;
+  }
 
-  let dropdownValues: ComponentProps<Dropdown>['items'] = []
+  let {
+    items = [],
+    values = $bindable([]),
+    disabled = $bindable(false),
+    width = "auto",
+    minWidth = "auto",
+    menuWidth = "auto"
+  }: Props = $props();
 
-  $: dropdownValues = values.map((e) => ({
+  let dropdownValues: ComponentProps<typeof Dropdown<{ shirt: ShirtWithPartialTeammate }>>['items'] = $state([])
+
+  run(() => {
+    dropdownValues = values.map((e) => ({
+      value: e.id || `${e.number}_${e.primaryColor}_${e.secondaryColor}`,
+      data: {
+        shirt: e
+      }
+    }))
+  });
+
+  let dropDownItems = $derived(items.map((e) => ({
     value: e.id || `${e.number}_${e.primaryColor}_${e.secondaryColor}`,
     data: {
       shirt: e
     }
-  }))
+  })))
 
-  $: dropDownItems = items.map((e) => ({
-    value: e.id || `${e.number}_${e.primaryColor}_${e.secondaryColor}`,
-    data: {
-      shirt: e
-    }
-  }))
-
-  function handleChange(event: CustomEvent<{
+  function handleChange(event: {detail: {
     unselect: Item | undefined;
     select: Item | undefined;
     selection: Item[];
-  }>) {
-    values = event.detail.selection.map((e) => e.data.shirt)
+  }}) {
+    values = []
+    for(let i = 0; i < event.detail.selection.length; i += 1) {
+      let shirt = event.detail.selection[i].data?.shirt
+      if(!!shirt) {
+        values = [...values, shirt]
+      }
+    }
 
     dispatch('change', {
-      unselect: !!event.detail.unselect ? event.detail.unselect.data.shirt : undefined,
-      select: !!event.detail.select ? event.detail.select.data.shirt : undefined,
+      unselect: !!event.detail.unselect ? event.detail.unselect.data?.shirt : undefined,
+      select: !!event.detail.select ? event.detail.select.data?.shirt : undefined,
       selection: values
     })
   }
@@ -56,51 +77,54 @@
 <Autocomplete
   items={dropDownItems}
   placeholder=""
-  bind:disabled
+  {disabled}
   bind:values={dropdownValues}
-  on:change={handleChange}
+  onchange={handleChange}
   {width}
   {minWidth}
   {menuWidth}
   mobileDrawer
 >
-  <svelte:fragment slot="selection-container" let:openMenu let:handleKeyDown let:values>
-    <button
-      class="unstyled-button"
-      on:click={openMenu}
-      on:keydown={(event) => {
-        handleKeyDown(event)
-        if(event.key == 'ArrowDown' || event.key == 'ArrowUp') {
-          event.stopPropagation()
-          event.preventDefault()
-        }
-      }}
-    >
-      {#if values.length == 1}
+  {#snippet selectionContainerSnippet({ openMenu, handleKeyDown, values })}
+      <button
+        class="unstyled-button"
+        onclick={openMenu}
+        onkeydown={(event) => {
+          handleKeyDown(event)
+          if(event.key == 'ArrowDown' || event.key == 'ArrowUp') {
+            event.stopPropagation()
+            event.preventDefault()
+          }
+        }}
+      >
+        {#if values.length == 1}
+          <ShirtIcon 
+            primaryColor={values[0].data?.shirt.primaryColor}
+            secondaryColor={values[0].data?.shirt.secondaryColor}
+            number={values[0].data?.shirt.number}
+          ></ShirtIcon>
+        {:else}
+          <ShirtIcon 
+            primaryColor="transparent"
+            secondaryColor="transparent"
+            number={undefined}
+          ></ShirtIcon>
+        {/if}
+      </button>
+    
+  {/snippet}
+  {#snippet itemLabelSnippet({ item })}
+  
+      <div class="label-container">
         <ShirtIcon 
-          primaryColor={values[0].data.shirt.primaryColor}
-          secondaryColor={values[0].data.shirt.secondaryColor}
-          number={values[0].data.shirt.number}
+          primaryColor={item.data?.shirt.primaryColor}
+          secondaryColor={item.data?.shirt.secondaryColor}
+          number={item.data?.shirt.number}
         ></ShirtIcon>
-      {:else}
-        <ShirtIcon 
-          primaryColor="transparent"
-          secondaryColor="transparent"
-          number={undefined}
-        ></ShirtIcon>
-      {/if}
-    </button>
-  </svelte:fragment>
-  <svelte:fragment slot="item-label" let:item>
-    <div class="label-container">
-      <ShirtIcon 
-        primaryColor={item.data.shirt.primaryColor}
-        secondaryColor={item.data.shirt.secondaryColor}
-        number={item.data.shirt.number}
-      ></ShirtIcon>
-      <div>{item.data.shirt.name || ''}</div>
-    </div>
-  </svelte:fragment>
+        <div>{item.data?.shirt.name || ''}</div>
+      </div>
+    
+  {/snippet}
 </Autocomplete>
 
 <style>

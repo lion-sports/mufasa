@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
 	import type { ComponentProps } from 'svelte'
 	import StandardAutocomplete from '../common/StandardAutocomplete.svelte'
@@ -6,27 +8,39 @@
   import ScoutRoleAutocomplete from '$lib/components/scouts/ScoutRoleAutocomplete.svelte';
 	import type { Role } from '$lib/services/scouts/scouts.service'
 
-	export let alias: string | undefined,
-		group:
+	interface Props {
+		alias: string | undefined;
+		group: 
 			| {
 					id: number
 					name: string
         }
-			| undefined,
-		teamGroups: Group[] = [],
-    defaultRole: Role | undefined = undefined,
-    availableRoles: Role[] = []
+			| undefined;
+		teamGroups?: Group[];
+		defaultRole?: Role | undefined;
+		availableRoles?: Role[];
+	}
 
-	let selectedGroups: NonNullable<ComponentProps<StandardAutocomplete>['values']> = []
+	let {
+		alias = $bindable(),
+		group = $bindable(),
+		teamGroups = [],
+		defaultRole = $bindable(undefined),
+		availableRoles = $bindable([])
+	}: Props = $props();
 
-	$: selectedGroups = !!group
-		? [
-				{
-					value: group.id.toString(),
-					label: group.name
-				}
-      ]
-		: []
+	let selectedGroups: NonNullable<ComponentProps<StandardAutocomplete>['values']> = $state([])
+
+	run(() => {
+		selectedGroups = !!group
+			? [
+					{
+						value: group.id.toString(),
+						label: group.name
+					}
+	      ]
+			: []
+	});
 
 	function handleGroupChange() {
 		if (selectedGroups.length > 0 && !!selectedGroups[0].label) {
@@ -39,15 +53,17 @@
 		}
 	}
 
-	$: selectableGroups = teamGroups.map((group) => {
+	let selectableGroups = $derived(teamGroups.map((group) => {
 		return {
 			value: group.id.toString(),
 			label: group.name
 		}
-	})
+	}))
 
-  let selectedDefaultRole: Role[] = []
-  $: selectedDefaultRole = !!defaultRole ? [defaultRole] : []
+  let selectedDefaultRole: Role[] = $state([])
+  run(() => {
+		selectedDefaultRole = !!defaultRole ? [defaultRole] : []
+	});
 </script>
 
 <div class="flex flex-wrap gap-4">

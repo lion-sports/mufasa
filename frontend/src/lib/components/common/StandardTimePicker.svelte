@@ -1,8 +1,12 @@
 <script lang="ts">
 	import StandardTextfield from './StandardTextfield.svelte'
 
-	export let value: string = '',
+	interface Props {
+		value?: string;
 		name: string;
+	}
+
+	let { value = $bindable(''), name }: Props = $props();
 </script>
 
 <StandardTextfield

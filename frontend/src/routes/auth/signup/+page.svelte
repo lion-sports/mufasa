@@ -6,15 +6,15 @@
 	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
 	import LinkButton from '$lib/components/common/LinkButton.svelte'
 
-	let email: string = '',
-		password: string = '',
-		passwordConfirmation: string = '',
-		firstname: string = '',
-		lastname: string = '',
-		userCreated: boolean = false,
-		userNotCreated: boolean = false,
-		acceptPrivacy: boolean = false,
-		loading: boolean = false
+	let email: string = $state(''),
+		password: string = $state(''),
+		passwordConfirmation: string = $state(''),
+		firstname: string = $state(''),
+		lastname: string = $state(''),
+		userCreated: boolean = $state(false),
+		userNotCreated: boolean = $state(false),
+		acceptPrivacy: boolean = $state(false),
+		loading: boolean = $state(false)
 
 	function signup() {
 		if (disabled) return
@@ -40,8 +40,8 @@
 			})
 	}
 
-	$: passValid = !!password && !!passwordConfirmation && password == passwordConfirmation
-	$: disabled = !passValid || !lastname || !firstname || !email || !acceptPrivacy
+	let passValid = $derived(!!password && !!passwordConfirmation && password == passwordConfirmation)
+	let disabled = $derived(!passValid || !lastname || !firstname || !email || !acceptPrivacy)
 </script>
 
 <div class="signup-form-container">

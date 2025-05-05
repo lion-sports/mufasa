@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import UserAvatar from "$lib/components/common/UserAvatar.svelte"
 	import type { Scout } from "$lib/services/scouts/scouts.service"
 	import TeammatesService from "$lib/services/teammates/teammates.service"
@@ -19,10 +21,18 @@
     }
   }>()
 
-  export let scout: Scout
+  interface Props {
+    scout: Scout;
+  }
 
-  $: if(!scout.scoutInfo.general) scout.scoutInfo.general = {}
-  $: if(!!scout.scoutInfo.general && !scout.scoutInfo.general?.opponent) scout.scoutInfo.general.opponent = {}
+  let { scout = $bindable() }: Props = $props();
+
+  run(() => {
+    if(!scout.scoutInfo.general) scout.scoutInfo.general = {}
+  });
+  run(() => {
+    if(!!scout.scoutInfo.general && !scout.scoutInfo.general?.opponent) scout.scoutInfo.general.opponent = {}
+  });
 
   function getPlayerFullname(params: { player: Scout['players'][0] }): string {
     return TeammatesService.getTeammateName({
@@ -31,9 +41,9 @@
     })
   }
 
-  let selectedTab: string = 'friends'
+  let selectedTab: string = $state('friends')
 
-  let loadingDelete: number | undefined = undefined
+  let loadingDelete: number | undefined = $state(undefined)
   async function deletePlayer(player: Player) {
     let confirmed = confirm('sei sicuro di voler eliminare il giocatore?')
 
@@ -46,7 +56,7 @@
     }
   }
 
-  let loadingUpdateScoutInfo: boolean = false
+  let loadingUpdateScoutInfo: boolean = $state(false)
   async function updateScoutInfo() {
     loadingUpdateScoutInfo = true
     let service = new ScoutsService({ fetch })
@@ -57,9 +67,9 @@
     loadingUpdateScoutInfo = false
   }
 
-  let editingPlayer: Player | undefined = undefined,
-    editPlayerDialog: boolean = false,
-    loadingSave: boolean = false
+  let editingPlayer: Player | undefined = $state(undefined),
+    editPlayerDialog: boolean = $state(false),
+    loadingSave: boolean = $state(false)
 
   async function handleSaveEditPlayer() {
     if(!editingPlayer) return
@@ -91,7 +101,7 @@
       {#each scout.players.filter((p) => !p.isOpponent) as player}
         <div class="flex items-center gap-4 hover:bg-[rgb(var(--global-color-background-300))] p-1">
           <div class="pl-2">
-            <button on:click={() => deletePlayer(player)} disabled={loadingDelete !== undefined}>
+            <button onclick={() => deletePlayer(player)} disabled={loadingDelete !== undefined}>
               {#if loadingDelete == player.id}
                 <CircularLoader></CircularLoader>
               {:else}
@@ -115,7 +125,7 @@
             ></ShirtIcon>
           </div>
           <div class="flex-shrink pr-4">
-            <button on:click={() => {
+            <button onclick={() => {
               editPlayerDialog = true
               editingPlayer = player
             }}>
@@ -126,7 +136,7 @@
       {/each}
       <div class="flex justify-center">
         <button
-          on:click={() => {
+          onclick={() => {
             dispatch('add', {
               friendsOrOpponents: 'friends'
             })
@@ -151,7 +161,7 @@
             --circular-loader-width="20px"
           ></CircularLoader>
         {:else}
-          <button on:click={updateScoutInfo}>
+          <button onclick={updateScoutInfo}>
             <Icon name="mdi-check"></Icon>
           </button>
         {/if}
@@ -160,7 +170,7 @@
         {#each scout.players.filter((p) => p.isOpponent) as opponentPlayer}
           <div class="flex items-center gap-4 hover:bg-[rgb(var(--global-color-background-300))] p-1">
             <div class="pl-2 flex-shrink">
-              <button on:click={() => deletePlayer(opponentPlayer)} disabled={loadingDelete !== undefined}>
+              <button onclick={() => deletePlayer(opponentPlayer)} disabled={loadingDelete !== undefined}>
                 {#if loadingDelete == opponentPlayer.id}
                   <CircularLoader></CircularLoader>
                 {:else}
@@ -187,7 +197,7 @@
               ></ShirtIcon>
             </div>
             <div class="flex-shrink pr-4">
-              <button on:click={() => {
+              <button onclick={() => {
                 editPlayerDialog = true
                 editingPlayer = opponentPlayer
               }}>
@@ -199,7 +209,7 @@
       </div>
       <div class="flex justify-center">
         <button
-          on:click={() => {
+          onclick={() => {
             dispatch('add', {
               friendsOrOpponents: 'opponents'
             })

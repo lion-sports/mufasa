@@ -6,13 +6,17 @@
 	import ScoutsService from '$lib/services/scouts/scouts.service'
   import type { PageData } from './$types';
   
-  export let data: PageData;
+  interface Props {
+    data: PageData;
+  }
 
-  let scout: Partial<Scout> = {
+  let { data }: Props = $props();
+
+  let scout: Partial<Scout> = $state({
       startedAt: data.event.start,
       eventId: data.event.id
-    },
-    loading: boolean = false
+    }),
+    loading: boolean = $state(false)
 
   async function handleSubmit() {
     if(!!scout.eventId && !!scout.sport && !!scout.startedAt && !!scout.scoringSystemId && !!scout.name) {
@@ -33,7 +37,7 @@
     }
   }
 
-  $: valid = !!scout.eventId && !!scout.sport && !!scout.startedAt && !!scout.scoringSystemId
+  let valid = $derived(!!scout.eventId && !!scout.sport && !!scout.startedAt && !!scout.scoringSystemId)
 </script>
 
 <PageTitle

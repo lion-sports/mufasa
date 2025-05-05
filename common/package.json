@@ -17,7 +17,7 @@
   ],
   "main": "./dist/lionn-common.umd.cjs",
   "module": "./dist/lionn-common.js",
-  "types": "./dist/src/main.d.ts",
+  "types": "./dist/lionn-common.d.ts",
   "exports": {
     ".": {
       "import": "./dist/lionn-common.js",

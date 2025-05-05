@@ -6,17 +6,22 @@
 	import DashboardEditor from '$lib/components/dashboard/DashboardEditor.svelte'
 	import { Icon } from '@likable-hair/svelte'
 
-	export let data: PageData
+	interface Props {
+		data: PageData
+	}
 
-	let someRowSlotEmpty: boolean = false,
-		loadingSave: boolean = false
+	let { data = $bindable() }: Props = $props()
 
-	$: valid = !someRowSlotEmpty && data.dashboard.widgets?.length > 0 && !!data.dashboard.name
+	let someRowSlotEmpty: boolean = $state(false),
+		loadingSave: boolean = $state(false)
+
+	let valid = $derived(
+		!someRowSlotEmpty && data.dashboard.widgets?.length > 0 && !!data.dashboard.name
+	)
 
 	async function saveDashboard() {
 		loadingSave = true
 
-    console.log(data.dashboard.widgets)
 		let service = new DashboardService({ fetch })
 		await service.update({
 			id: data.dashboard.id,
@@ -31,14 +36,14 @@
 </script>
 
 <PageTitle title={data.dashboard.name} prependVisible>
-	<svelte:fragment slot="title">
+	{#snippet titleSnippet()}
 		<div class="flex justify-between items-center mobile-wrap gap-2">
 			<input
 				type="text"
 				class="border-none bg-transparent outline-none
-				focus:bg-[rgb(var(--global-color-primary-500),.2)] rounded-md px-3
-				w-full
-				"
+					focus:bg-[rgb(var(--global-color-primary-500),.2)] rounded-md px-3
+					w-full
+					"
 				bind:value={data.dashboard.name}
 			/>
 			<StandardButton
@@ -52,7 +57,7 @@
 				Save
 			</StandardButton>
 		</div>
-	</svelte:fragment>
+	{/snippet}
 </PageTitle>
 
 <div class="mt-4">

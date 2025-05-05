@@ -2,13 +2,18 @@
 	import { MenuOrDrawerOptions, Icon } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
 
-	export let options: ComponentProps<MenuOrDrawerOptions>['elements'] = []
+	interface Props {
+		options?: ComponentProps<typeof MenuOrDrawerOptions>['elements']
+    onselect: ComponentProps<typeof MenuOrDrawerOptions>['onselect']
+	}
 
-	let activator: HTMLElement,
-		open: boolean = false
+	let { options = [], onselect }: Props = $props();
+
+	let activator: HTMLElement | undefined = $state(),
+		open: boolean = $state(false)
 </script>
 
 <div bind:this={activator}>
-	<Icon name="mdi-dots-horizontal" click on:click={() => (open = !open)} />
+	<Icon name="mdi-dots-horizontal" onclick={() => (open = !open)} />
 </div>
-<MenuOrDrawerOptions elements={options} bind:open bind:activator on:select />
+<MenuOrDrawerOptions elements={options} bind:open bind:activator {onselect} />

@@ -4,8 +4,12 @@
   import { toast } from "svelte-sonner";
 	import { createEventDispatcher } from "svelte"
 
-  export let selectedCategory: 'serve' | 'receive' | 'spike' | 'block' | undefined = undefined,
-    opponent: boolean = false
+  interface Props {
+    selectedCategory?: 'serve' | 'receive' | 'spike' | 'block' | undefined;
+    opponent?: boolean;
+  }
+
+  let { selectedCategory = $bindable(undefined), opponent = false }: Props = $props();
 
   let dispatch = createEventDispatcher<{
     'serve': {
@@ -161,22 +165,22 @@
     <button 
       class="category-button text-left p-3 rounded-md w-full hover:bg-[var(--hover-background-color)] bg-[var(--background-color)] text-lg font-medium"
       class:selected={selectedCategory == 'serve'}
-      on:click={() => toggleCategory('serve')}
+      onclick={() => toggleCategory('serve')}
     >Battuta</button>
     <button 
       class="category-button text-left p-3 rounded-md w-full hover:bg-[var(--hover-background-color)] bg-[var(--background-color)] text-lg font-medium"
       class:selected={selectedCategory == 'receive'}
-      on:click={() => toggleCategory('receive')}
+      onclick={() => toggleCategory('receive')}
     >Ricezione</button>
     <button 
       class="category-button text-left p-3 rounded-md w-full hover:bg-[var(--hover-background-color)] bg-[var(--background-color)] text-lg font-medium"
       class:selected={selectedCategory == 'spike'}
-      on:click={() => toggleCategory('spike')}
+      onclick={() => toggleCategory('spike')}
     >Attacco</button>
     <button 
       class="category-button text-left p-3 rounded-md w-full hover:bg-[var(--hover-background-color)] bg-[var(--background-color)] text-lg font-medium"
       class:selected={selectedCategory == 'block'}
-      on:click={() => toggleCategory('block')}
+      onclick={() => toggleCategory('block')}
     >Muro</button>
   </div>
   <div class="flex flex-col gap-2 @4xl:hidden">

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import { createEventDispatcher, type ComponentProps } from "svelte"
 	import LabelAndTextfield from "$lib/components/common/LabelAndTextfield.svelte"
   import LabelAndCheckbox from "$lib/components/common/LabelAndCheckbox.svelte";
@@ -12,17 +14,30 @@
     }
   }>()
 
-  export let name: string | undefined = undefined,
-    shirtNumber: number | undefined = undefined,
-    shirtPrimaryColor: string | null | undefined = undefined,
-    shirtSecondaryColor: string | null | undefined = undefined,
-    isOpponent: boolean | undefined = undefined,
-    role: Role | undefined = undefined
+  interface Props {
+    name?: string | undefined;
+    shirtNumber?: number | undefined;
+    shirtPrimaryColor?: string | null | undefined;
+    shirtSecondaryColor?: string | null | undefined;
+    isOpponent?: boolean | undefined;
+    role?: Role | undefined;
+  }
 
-  let selectedRoles: ComponentProps<ScoutRoleAutocomplete>['values'] = []
-  $: if(role !== undefined) {
-    selectedRoles = [role] 
-  } else selectedRoles = []
+  let {
+    name = $bindable(undefined),
+    shirtNumber = $bindable(undefined),
+    shirtPrimaryColor = $bindable(undefined),
+    shirtSecondaryColor = $bindable(undefined),
+    isOpponent = $bindable(undefined),
+    role = $bindable(undefined)
+  }: Props = $props();
+
+  let selectedRoles: ComponentProps<ScoutRoleAutocomplete>['values'] = $state([])
+  run(() => {
+    if(role !== undefined) {
+      selectedRoles = [role] 
+    } else selectedRoles = []
+  });
 </script>
 
 
@@ -32,7 +47,7 @@
       bind:value={name}
       name="player-name"
       label="Nome"
-      on:input={() => {
+      oninput={() => {
         dispatch('input', {
           field: 'name',
           value: name

@@ -14,17 +14,26 @@
 	import type { ComponentProps } from 'svelte'
 	import type { PageData } from './$types'
 
-	export let data: PageData
-
-	let searchText: string, results: User[]
-	async function searchUser() {
-		userInvited = false
-		let service = new UserService({ fetch })
-		results = await service.search({ email: searchText })
+	interface Props {
+		data: PageData
 	}
 
-	let userInvited: boolean = false
-	let selectedGroups: NonNullable<ComponentProps<StandardAutocomplete>['values']>
+	let { data }: Props = $props()
+
+	let searchText: string | undefined = $state(),
+		results: User[] = $state([])
+	async function searchUser() {
+		if (!!searchText) {
+			userInvited = false
+			let service = new UserService({ fetch })
+			results = await service.search({ email: searchText })
+		}
+	}
+
+	let userInvited: boolean = $state(false)
+	let selectedGroups: NonNullable<ComponentProps<typeof StandardAutocomplete>['values']> = $state(
+		[]
+	)
 	function inviteUser(user: any) {
 		if (!!$team) {
 			let service = new InvitationsService({ fetch })
@@ -63,81 +72,83 @@
 	}
 </script>
 
-<MediaQuery let:mAndDown>
-  <div
-    style:max-width="100%"
-    style:width="700px"
-    style:margin-bottom="0px"
-    style:display="flex"
-    style:flex-direction={mAndDown ? 'column' : 'row'}
-  >
-    <StandardTextfield bind:value={searchText} placeholder="Email">
-      <svelte:fragment slot="prepend-inner">
-        <div style:margin-right="10px">
-          <Icon name="mdi-email" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
-        </div>
-      </svelte:fragment>
-    </StandardTextfield>
-    {#if !!$team}
-      <div style:margin-left={mAndDown ? '0px' : '10px'}>
-        <StandardAutocomplete
-          items={data.team.groups?.map((group) => ({
-            value: group.id.toString(),
-            label: group.name
-          })) || []}
-          bind:values={selectedGroups}
-          placeholder="Gruppo"
-        />
-      </div>
-    {/if}
-    <div
-      style:margin-left={mAndDown ? '0px' : '10px'}
-      style:margin-top={mAndDown ? '10px' : '0px'}
-    >
-      <StandardButton on:click={searchUser}>Cerca</StandardButton>
-    </div>
-  </div>
+<MediaQuery>
+	{#snippet defaultSnippet({ mAndDown })}
+		<div
+			style:max-width="100%"
+			style:width="700px"
+			style:margin-bottom="0px"
+			style:display="flex"
+			style:flex-direction={mAndDown ? 'column' : 'row'}
+		>
+			<StandardTextfield bind:value={searchText} placeholder="Email">
+				{#snippet prependInner()}
+					<div style:margin-right="10px">
+						<Icon name="mdi-email" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
+					</div>
+				{/snippet}
+			</StandardTextfield>
+			{#if !!$team}
+				<div style:margin-left={mAndDown ? '0px' : '10px'}>
+					<StandardAutocomplete
+						items={data.team.groups?.map((group) => ({
+							value: group.id.toString(),
+							label: group.name
+						})) || []}
+						bind:values={selectedGroups}
+						placeholder="Gruppo"
+					/>
+				</div>
+			{/if}
+			<div
+				style:margin-left={mAndDown ? '0px' : '10px'}
+				style:margin-top={mAndDown ? '10px' : '0px'}
+			>
+				<StandardButton on:click={searchUser}>Cerca</StandardButton>
+			</div>
+		</div>
 
-  {#if !!results && results.length > 0 && !userInvited}
-    <UsersList users={results}>
-      <svelte:fragment slot="rowActions" let:item>
-        <Icon name="mdi-account-plus" click on:click={() => inviteUser(item)} />
-      </svelte:fragment>
-    </UsersList>
-  {:else if !!results && results.length == 0 && !userInvited}
-    <div style:margin-top="20px" style:display="flex" style:justify-content="center">
-      <div style:max-width="100%" style:width="400px" style:text-align="center">
-        Ops, sembra che la mail digitata non esista.
-        <br />
-        <button
-          style:color="rgb(var(--global-color-primary-500))"
-          on:click={() =>
-            inviteUser({
-              email: searchText
-            })}>Vuoi invitare lo stesso la mail?</button
-        >
-        <br />
-        quando l'utente si registrerà con questa mail visualizzerà il tuo invito.
-      </div>
-    </div>
-  {:else if userInvited}
-    <div
-      style:margin-top="20px"
-      style:display="flex"
-      style:justify-content="center"
-      style:align-items="center"
-      style:flex-direction="column"
-    >
-      <div style:max-width="100%" style:width="400px" style:text-align="center">
-        Untente invitato, in attesa della sua conferma
-      </div>
-      <div style:margin-top="10px">
-        <Icon --icon-size="40pt" name="mdi-party-popper" />
-      </div>
-    </div>
-  {/if}
-  <div class="font-bold mt-6">Inviti in attesa</div>
-  <div style:margin-top="10px">
-    <InvitationList invitations={$team?.invitations} on:discard={handleInvitationDiscard} />
-  </div>
+		{#if !!results && results.length > 0 && !userInvited}
+			<UsersList users={results}>
+				{#snippet rowActions({ item })}
+					<Icon name="mdi-account-plus" onclick={() => inviteUser(item)} />
+				{/snippet}
+			</UsersList>
+		{:else if !!results && results.length == 0 && !userInvited}
+			<div style:margin-top="20px" style:display="flex" style:justify-content="center">
+				<div style:max-width="100%" style:width="400px" style:text-align="center">
+					Ops, sembra che la mail digitata non esista.
+					<br />
+					<button
+						style:color="rgb(var(--global-color-primary-500))"
+						onclick={() =>
+							inviteUser({
+								email: searchText
+							})}>Vuoi invitare lo stesso la mail?</button
+					>
+					<br />
+					quando l'utente si registrerà con questa mail visualizzerà il tuo invito.
+				</div>
+			</div>
+		{:else if userInvited}
+			<div
+				style:margin-top="20px"
+				style:display="flex"
+				style:justify-content="center"
+				style:align-items="center"
+				style:flex-direction="column"
+			>
+				<div style:max-width="100%" style:width="400px" style:text-align="center">
+					Untente invitato, in attesa della sua conferma
+				</div>
+				<div style:margin-top="10px">
+					<Icon --icon-size="40pt" name="mdi-party-popper" />
+				</div>
+			</div>
+		{/if}
+		<div class="font-bold mt-6">Inviti in attesa</div>
+		<div style:margin-top="10px">
+			<InvitationList invitations={$team?.invitations} on:discard={handleInvitationDiscard} />
+		</div>
+	{/snippet}
 </MediaQuery>

@@ -8,7 +8,11 @@
 	import { Icon } from '@likable-hair/svelte'
   import type { PageData } from './$types'
 
-  export let data: PageData
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	function handleConfirmOrDeny(e: CustomEvent<{ convocation: Convocation }>) {
 		if (!!$event) {
@@ -19,7 +23,7 @@
 		}
 	}
 
-	let convocationDialogOpen: boolean = false
+	let convocationDialogOpen: boolean = $state(false)
 	function openDialog() {
 		convocationDialogOpen = true
 	}
@@ -46,7 +50,7 @@
 		}
 	}
 
-	$: teammatesToConvocate = !!$team
+	let teammatesToConvocate = $derived(!!$team
 		? $team.teammates.filter((tm) => {
 				return (
 					!!$event &&
@@ -54,7 +58,7 @@
 					(tm.group === undefined || tm.group === null || tm.group?.convocable)
 				)
 		})
-		: []
+		: [])
 </script>
 
 <div style:margin-top="20px">

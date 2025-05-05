@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import LabelAndCheckbox from "../../common/LabelAndCheckbox.svelte"
   import StandardTabSwitcher from "../../common/StandardTabSwitcher.svelte";
   import StandardButton from "../../common/StandardButton.svelte";
@@ -18,17 +20,31 @@
     }
   }>()
 
-  export let selectedTab: string = '',
-    importShirtsActive: boolean = true,
-    importRolesActive: boolean = true,
-    importAbsentsActive: boolean = false,
-    loadingImportAll: boolean = false,
-    loadingImportConvocation: number | undefined = undefined,
-    loadingCreatePlayer: boolean = false,
-    newPlayer: Partial<Player> = {
+  interface Props {
+    selectedTab?: string;
+    importShirtsActive?: boolean;
+    importRolesActive?: boolean;
+    importAbsentsActive?: boolean;
+    loadingImportAll?: boolean;
+    loadingImportConvocation?: number | undefined;
+    loadingCreatePlayer?: boolean;
+    newPlayer?: Partial<Player>;
+    scout: Scout;
+  }
+
+  let {
+    selectedTab = $bindable(''),
+    importShirtsActive = $bindable(true),
+    importRolesActive = $bindable(true),
+    importAbsentsActive = $bindable(false),
+    loadingImportAll = $bindable(false),
+    loadingImportConvocation = $bindable(undefined),
+    loadingCreatePlayer = $bindable(false),
+    newPlayer = $bindable({
       aliases: []
-    },
-    scout: Scout
+    }),
+    scout
+  }: Props = $props();
 
   async function importAllTeammates() {
     let confirmed = confirm('Vuoi davvero importare tutte le convocazioni?')
@@ -61,7 +77,9 @@
     }
   }
 
-  $: newPlayer.scoutId = scout.id
+  run(() => {
+    newPlayer.scoutId = scout.id
+  });
 
   async function createPlayer() {
     let confirmed = confirm('Sei sicuro di voler creare il giocatore?')
@@ -132,10 +150,10 @@
         {#each scout.event.convocations as convocation}
           <button 
             class="flex gap-2 hover:bg-[rgb(var(--global-color-background-400))] p-4 rounded transition-all"
-            on:click={() => importTeammate(convocation)}
+            onclick={() => importTeammate(convocation)}
           >
             <div>
-              {#if convocation.confirmationStatus == 'confirmed' }
+              {#if convocation.confirmationStatus == 'confirmed'}
                 <Icon name="mdi-check" --icon-color="rgb(var(--global-color-success))"></Icon>
               {:else if convocation.confirmationStatus == 'denied'}
                 <Icon name="mdi-close" --icon-color="rgb(var(--global-color-error-500))"></Icon>

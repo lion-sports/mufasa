@@ -1,9 +1,11 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Team, Teammate } from '$lib/services/teams/teams.service'
 	import type { Event } from '$lib/services/events/events.service'
 </script>
 
 <script lang="ts">
+	import { run } from 'svelte/legacy'
+
 	import { DateTime } from 'luxon'
 	import EventsService from '$lib/services/events/events.service'
 	import { createEventDispatcher } from 'svelte'
@@ -18,20 +20,36 @@
 		}
 	}>()
 
-	export let team: Team,
-		teammate: Teammate | undefined = undefined,
-		selectedDate: Date = new Date(),
-		selectedEvents: Event[] = [],
-		visibleYear: number = DateTime.now().get('year'),
-		visibleWeek: number = DateTime.now().get('weekNumber'),
-		events: Event[] = [],
-    reloadEvents: boolean = false,
-    canUpdate: boolean = false,
-    canDestroy: boolean = false,
-    canCreate: boolean = false
+	interface Props {
+		team: Team
+		teammate?: Teammate | undefined
+		selectedDate?: Date
+		selectedEvents?: Event[]
+		visibleYear?: number
+		visibleWeek?: number
+		events?: Event[]
+		reloadEvents?: boolean
+		canUpdate?: boolean
+		canDestroy?: boolean
+		canCreate?: boolean
+	}
 
-	let importFromYear = visibleYear,
-		importFromWeek = visibleWeek
+	let {
+		team = $bindable(),
+		teammate = $bindable(undefined),
+		selectedDate = $bindable(new Date()),
+		selectedEvents = $bindable([]),
+		visibleYear = $bindable(DateTime.now().get('year')),
+		visibleWeek = $bindable(DateTime.now().get('weekNumber')),
+		events = $bindable([]),
+		reloadEvents = $bindable(false),
+		canUpdate = $bindable(false),
+		canDestroy = $bindable(false),
+		canCreate = $bindable(false)
+	}: Props = $props()
+
+	let importFromYear = $state(visibleYear),
+		importFromWeek = $state(visibleWeek)
 
 	async function loadEvents(vw: number, vy: number) {
 		let from: Date = DateTime.fromObject({
@@ -69,13 +87,13 @@
 		events = !!events
 			? events.filter((e) => {
 					return !(e.start > from && e.start < to)
-			  })
+				})
 			: []
 
 		events = [...events, ...newEvents]
 	}
 
-	let openImportWeekDialog: boolean = false
+	let openImportWeekDialog: boolean = $state(false)
 	function handleImportWeekClick() {
 		openImportWeekDialog = true
 	}
@@ -89,39 +107,43 @@
 		})
 	}
 
-  $: if(reloadEvents) {
-    loadEvents(visibleWeek, visibleYear)
-    reloadEvents = false
-  }
+	run(() => {
+		if (reloadEvents) {
+			loadEvents(visibleWeek, visibleYear)
+			reloadEvents = false
+		}
+	})
 </script>
 
 {#if !!events}
 	<EventsWeekList
 		bind:events
 		bind:selectedDate
-		bind:team
-		bind:teammate
+		{team}
+		{teammate}
 		bind:selectedEvents
 		bind:visibleYear
 		bind:visibleWeek
-    bind:canUpdate
-    bind:canDestroy
-    bind:canCreate
+		{canUpdate}
+		{canDestroy}
+		{canCreate}
 		on:nextWeek={() => loadEvents(visibleWeek, visibleYear)}
 		on:nextWeek
 		on:previousWeek={() => loadEvents(visibleWeek, visibleYear)}
 		on:previousWeek
 	>
-		<div style:display="flex" style:gap="15px" slot="options">
-			<div>
-				<Icon name="mdi-calendar-today" click on:click={focusToday} />
+		{#snippet weekListOptions()}
+			<div style:display="flex" style:gap="15px">
+				<div>
+					<Icon name="mdi-calendar-today" onclick={focusToday} />
+				</div>
 			</div>
-		</div>
+		{/snippet}
 	</EventsWeekList>
 
 	<TeamImportWeekDialog
 		bind:open={openImportWeekDialog}
-		bind:team
+		{team}
 		bind:selectedYear={importFromYear}
 		bind:selectedWeek={importFromWeek}
 		bind:toYear={visibleYear}

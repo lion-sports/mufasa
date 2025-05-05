@@ -1,31 +1,39 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import type { ScoutAnalysis, ScoutStudio } from "$lib/services/scouts/scouts.service"
 	import type { Dashboard } from "@/lib/services/dashboards/dashboard.service"
 	import DashboardEditor from "@/lib/components/dashboard/DashboardEditor.svelte"
 	import { Icon, ToggleList } from "@likable-hair/svelte"
   import studio from "@/lib/stores/scout/studio";
 
-  export let analysis: ScoutAnalysis | undefined,
-    dashboard: Dashboard | undefined = undefined
+  interface Props {
+    analysis: ScoutAnalysis | undefined;
+    dashboard?: Dashboard | undefined;
+  }
 
-  $: totalSets = Math.min(($studio?.scout.stash?.points?.enemy.sets || 0) + ($studio?.scout.stash?.points?.friends.sets || 0) + 1, 5)
+  let { analysis, dashboard = undefined }: Props = $props();
+
+  let totalSets = $derived(Math.min(($studio?.scout.stash?.points?.enemy.sets || 0) + ($studio?.scout.stash?.points?.friends.sets || 0) + 1, 5))
 
   let selectedSets: {
     value: number
-  }[] | undefined = undefined
+  }[] | undefined = $state(undefined)
 
-  $: if(selectedSets === undefined) {
-    selectedSets = [
-      ...Array.from(Array(
-        Math.min(($studio?.scout.stash?.points?.enemy.sets || 0) + ($studio?.scout.stash?.points?.friends.sets || 0) + 1, 5)
-      ).keys()).map((i) => {
-        return {
-          value: i + 1,
-          label: 'Set ' + (i + 1)
-        }
-      })
-    ]
-  }
+  run(() => {
+    if(selectedSets === undefined) {
+      selectedSets = [
+        ...Array.from(Array(
+          Math.min(($studio?.scout.stash?.points?.enemy.sets || 0) + ($studio?.scout.stash?.points?.friends.sets || 0) + 1, 5)
+        ).keys()).map((i) => {
+          return {
+            value: i + 1,
+            label: 'Set ' + (i + 1)
+          }
+        })
+      ]
+    }
+  });
 
   function handleSetChange(ev: CustomEvent<{ selection: NonNullable<typeof selectedSets>}>) {
     selectedSets = ev.detail.selection

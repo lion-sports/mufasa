@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import type { ScoutStudio } from "@/lib/services/scouts/scouts.service"
 	import type { BlockScoutEventResult, ReceiveScoutEventResult, ServeScoutEventResult, SpikeScoutEventResult, VolleyballScoutEventPosition } from "@/lib/services/scouts/volleyball"
 	import TeammatesService from "@/lib/services/teammates/teammates.service"
@@ -8,22 +10,28 @@
 	import { block, receive, serve, spike } from "@/lib/stores/scout/studio"
 	import StudioPlayerSubstitutionSuggestion from "./StudioPlayerSubstitutionSuggestion.svelte"
 
-  export let studio: ScoutStudio
-
-  let selectedPlayerFieldPosition: VolleyballScoutEventPosition | undefined = undefined
-  $: if(!!studio.selectedPlayer && !!studio.scout.stash?.playersServePositions) {
-    let positionToLoop: typeof studio.scout.stash.playersServePositions.friends 
-      = studio.scout.stash.playersServePositions.friends
-
-    if(studio.selectedPlayer.isOpponent)
-      positionToLoop = studio.scout.stash.playersServePositions.enemy
-
-    for(const [pos, v] of Object.entries(positionToLoop)) {
-      if(!!v?.player && v.player.id == studio.selectedPlayer.id) selectedPlayerFieldPosition = pos as any as VolleyballScoutEventPosition
-    }
+  interface Props {
+    studio: ScoutStudio;
   }
 
-  $: cardBackgroundClass = studio.selectedPlayer?.isOpponent ? 'bg-red-500/15' : 'bg-blue-500/15'
+  let { studio }: Props = $props();
+
+  let selectedPlayerFieldPosition: VolleyballScoutEventPosition | undefined = $state(undefined)
+  run(() => {
+    if(!!studio.selectedPlayer && !!studio.scout.stash?.playersServePositions) {
+      let positionToLoop: typeof studio.scout.stash.playersServePositions.friends 
+        = studio.scout.stash.playersServePositions.friends
+
+      if(studio.selectedPlayer.isOpponent)
+        positionToLoop = studio.scout.stash.playersServePositions.enemy
+
+      for(const [pos, v] of Object.entries(positionToLoop)) {
+        if(!!v?.player && v.player.id == studio.selectedPlayer.id) selectedPlayerFieldPosition = pos as any as VolleyballScoutEventPosition
+      }
+    }
+  });
+
+  let cardBackgroundClass = $derived(studio.selectedPlayer?.isOpponent ? 'bg-red-500/15' : 'bg-blue-500/15')
 
   function handleBlock(event: CustomEvent<{
     result: BlockScoutEventResult

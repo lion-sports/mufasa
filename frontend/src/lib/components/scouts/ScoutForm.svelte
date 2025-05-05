@@ -6,24 +6,28 @@
 	import ScoringSystemAsyncAutocomplete from "../scoringSystems/ScoringSystemAsyncAutocomplete.svelte"
 	import ScoutSportAutocomplete from "./ScoutSportAutocomplete.svelte"
 
-  export let scout: Partial<Scout> = {},
-    scoringSystems: ScoringSystem[] = []
+  interface Props {
+    scout?: Partial<Scout>;
+    scoringSystems?: ScoringSystem[];
+  }
 
-  $: selectedSports = !!scout.sport ? 
+  let { scout = $bindable({}), scoringSystems = [] }: Props = $props();
+
+  let selectedSports = $derived(!!scout.sport ? 
     [
       { 
         value: scout.sport,
         label: scout.sport
       }
-    ] : []
+    ] : [])
 
-  $: selectedScoringSystem = !!scout.scoringSystem ?
+  let selectedScoringSystem = $derived(!!scout.scoringSystem ?
       [
         {
           value: scout.scoringSystem.id?.toString(),
           label: scout.scoringSystem.name
         }
-      ] : []
+      ] : [])
 </script>
 
 <div class="flex flex-wrap gap-2">

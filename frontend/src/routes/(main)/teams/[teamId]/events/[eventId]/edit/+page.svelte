@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Event } from '$lib/services/events/events.service'
 </script>
 
@@ -12,16 +12,20 @@
 	import OptionMenu from '$lib/components/common/OptionMenu.svelte'
 	import type { PageData } from './$types'
 
-  export let data: PageData
+	interface Props {
+		data: PageData;
+	}
 
-	let event: Event
+	let { data }: Props = $props();
+
+	let event: Event = $state()
 
 	onMount(async () => {
 		let service = new EventsService({ fetch })
 		event = await service.show({ id: parseInt($page.params.eventId) })
 	})
 
-	let loading = false
+	let loading = $state(false)
 	function handleConfirmClick() {
 		loading = true
 
@@ -50,26 +54,28 @@
 
 {#if data.groupedPermissions.event.update}
 	<PageTitle title={event?.name || ''} prependVisible={true}>
-		<svelte:fragment slot="append">
-			<OptionMenu
-				options={[
-					{
-						name: 'save',
-						title: 'Salva',
-						icon: 'mdi-floppy'
-					},
-					{
-						name: 'delete',
-						title: 'Elimina',
-						icon: 'mdi-delete',
-						style: {
-							color: '#ad0000'
+		{#snippet append()}
+			
+				<OptionMenu
+					options={[
+						{
+							name: 'save',
+							title: 'Salva',
+							icon: 'mdi-floppy'
+						},
+						{
+							name: 'delete',
+							title: 'Elimina',
+							icon: 'mdi-delete',
+							style: {
+								color: '#ad0000'
+							}
 						}
-					}
-				]}
-				on:select={handleOptionClick}
-			/>
-		</svelte:fragment>
+					]}
+					on:select={handleOptionClick}
+				/>
+			
+			{/snippet}
 	</PageTitle>
 
 	{#if !!event}

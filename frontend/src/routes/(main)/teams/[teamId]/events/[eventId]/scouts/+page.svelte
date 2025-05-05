@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { stopPropagation } from 'svelte/legacy';
+
   import type { PageData } from './$types';
   import ScoutSimpleTable from '$lib/components/scouts/ScoutSimpleTable.svelte';
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
@@ -6,7 +8,11 @@
 	import { goto, invalidate } from '$app/navigation'
 	import ScoutsService from '@/lib/services/scouts/scouts.service'
   
-  export let data: PageData;
+  interface Props {
+    data: PageData;
+  }
+
+  let { data }: Props = $props();
 
   function handleRowClick(event: CustomEvent<any>) {
     goto(`/teams/${data.team.id}/events/${data.event.id}/scouts/${event.detail.item.id}/edit`) 
@@ -41,21 +47,23 @@
   scouts={data.event.scouts}
   on:rowClick={handleRowClick}
 >
-  <div class="px-2 flex gap-8" slot="rowActions" let:item>
-    <button
-      on:click|stopPropagation={() => handleStudioClick({ id: item.id })}
-    >
-      <Icon
-        name="mdi-atom-variant"
-      ></Icon>
-    </button>
-    <button
-      on:click|stopPropagation={() => handleDeleteClick({ id: item.id })}
-      class=" text-red-500"
-    >
-      <Icon
-        name="mdi-delete"
-      ></Icon>
-    </button>
-  </div>
+  {#snippet rowActions({ item })}
+    <div class="px-2 flex gap-8"  >
+      <button
+        onclick={stopPropagation(() => handleStudioClick({ id: item.id }))}
+      >
+        <Icon
+          name="mdi-atom-variant"
+        ></Icon>
+      </button>
+      <button
+        onclick={stopPropagation(() => handleDeleteClick({ id: item.id }))}
+        class=" text-red-500"
+      >
+        <Icon
+          name="mdi-delete"
+        ></Icon>
+      </button>
+    </div>
+  {/snippet}
 </ScoutSimpleTable>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import type { ScoringSystem } from "$lib/services/scoringSystems/scoringSystems.service"
 	import LabelAndTextfield from "../common/LabelAndTextfield.svelte"
 	import ScoutSportAutocomplete from "../scouts/ScoutSportAutocomplete.svelte"
@@ -6,38 +8,50 @@
 	import ButtonGroup from "../common/ButtonGroup.svelte"
 	import { Icon } from "@likable-hair/svelte"
 
-  export let scoringSystem: DeepPartial<ScoringSystem> = {},
-    formValid: boolean = false
+  interface Props {
+    scoringSystem?: DeepPartial<ScoringSystem>;
+    formValid?: boolean;
+  }
 
-  $: selectedSports = !!scoringSystem.sport ? 
+  let { scoringSystem = $bindable({}), formValid = $bindable(false) }: Props = $props();
+
+  let selectedSports = $derived(!!scoringSystem.sport ? 
     [
       { 
         value: scoringSystem.sport,
         label: scoringSystem.sport
       }
-    ] : []
+    ] : [])
 
-  $: if(!scoringSystem.config) scoringSystem.config = {}
-  $: if(!!scoringSystem.config && !scoringSystem.config.set) scoringSystem.config.set = {}
-  $: if(!!scoringSystem.config && !scoringSystem.config.points) scoringSystem.config.points = {}
+  run(() => {
+    if(!scoringSystem.config) scoringSystem.config = {}
+  });
+  run(() => {
+    if(!!scoringSystem.config && !scoringSystem.config.set) scoringSystem.config.set = {}
+  });
+  run(() => {
+    if(!!scoringSystem.config && !scoringSystem.config.points) scoringSystem.config.points = {}
+  });
 
-  $: formValid = !!scoringSystem.name
-      && !!scoringSystem.sport
-      && !!scoringSystem.config
-      && !!scoringSystem.config.set
-      && !!scoringSystem.config.set.mode
-      && (
-        (scoringSystem.config.set.mode == 'totalSet' && !!scoringSystem.config.set.totalSets)
-        || (scoringSystem.config.set.mode == 'winSet' && !!scoringSystem.config.set.winSets)
-      )
-      && !!scoringSystem.config.points
-      && (
-        (scoringSystem.config.points.mode == 'totalPoints' && !!scoringSystem.config.points.totalPoints)
-        || (
-          scoringSystem.config.points.mode == 'winPoints' 
-          && !!scoringSystem.config.points.winPoints
+  run(() => {
+    formValid = !!scoringSystem.name
+        && !!scoringSystem.sport
+        && !!scoringSystem.config
+        && !!scoringSystem.config.set
+        && !!scoringSystem.config.set.mode
+        && (
+          (scoringSystem.config.set.mode == 'totalSet' && !!scoringSystem.config.set.totalSets)
+          || (scoringSystem.config.set.mode == 'winSet' && !!scoringSystem.config.set.winSets)
         )
-      )
+        && !!scoringSystem.config.points
+        && (
+          (scoringSystem.config.points.mode == 'totalPoints' && !!scoringSystem.config.points.totalPoints)
+          || (
+            scoringSystem.config.points.mode == 'winPoints' 
+            && !!scoringSystem.config.points.winPoints
+          )
+        )
+  });
 </script>
 
 <div class="flex flex-col gap-2">
@@ -91,22 +105,24 @@
           },
         ]}
         bind:selectedButton={scoringSystem.config.set.mode}
-        let:button
+        
       >
-        <div class="flex gap-4 text-left items-center">
-          <div class="text-4xl">
-            <Icon name={button.icon}></Icon>
-          </div>
-          <div>
-            <div class="text-2xl">
-              {button.label}
+        {#snippet children({ button })}
+                <div class="flex gap-4 text-left items-center">
+            <div class="text-4xl">
+              <Icon name={button.icon}></Icon>
             </div>
-            <div class="mt-2 font-light">
-              {button.description}
+            <div>
+              <div class="text-2xl">
+                {button.label}
+              </div>
+              <div class="mt-2 font-light">
+                {button.description}
+              </div>
             </div>
           </div>
-        </div>
-      </ButtonGroup>
+                      {/snippet}
+            </ButtonGroup>
     </div>
 
     {#if scoringSystem.config?.set?.mode == 'totalSet'}
@@ -148,22 +164,24 @@
         },
       ]}
       bind:selectedButton={scoringSystem.config.points.mode}
-      let:button
+      
     >
-      <div class="flex gap-4 text-left items-center">
-        <div class="text-4xl">
-          <Icon name={button.icon}></Icon>
-        </div>
-        <div>
-          <div class="text-2xl">
-            {button.label}
+      {#snippet children({ button })}
+            <div class="flex gap-4 text-left items-center">
+          <div class="text-4xl">
+            <Icon name={button.icon}></Icon>
           </div>
-          <div class="mt-2 font-light">
-            {button.description}
+          <div>
+            <div class="text-2xl">
+              {button.label}
+            </div>
+            <div class="mt-2 font-light">
+              {button.description}
+            </div>
           </div>
         </div>
-      </div>
-    </ButtonGroup>
+                {/snippet}
+        </ButtonGroup>
 
     {#if scoringSystem.config?.points?.mode == 'totalPoints'}
       <div class="mt-4">
@@ -242,22 +260,24 @@
           },
         ]}
         bind:selectedButton={scoringSystem.config.tieBreak.mode}
-        let:button
+        
       >
-        <div class="flex gap-4 text-left items-center">
-          <div class="text-4xl">
-            <Icon name={button.icon}></Icon>
-          </div>
-          <div>
-            <div class="text-2xl">
-              {button.label}
+        {#snippet children({ button })}
+                <div class="flex gap-4 text-left items-center">
+            <div class="text-4xl">
+              <Icon name={button.icon}></Icon>
             </div>
-            <div class="mt-2 font-light">
-              {button.description}
+            <div>
+              <div class="text-2xl">
+                {button.label}
+              </div>
+              <div class="mt-2 font-light">
+                {button.description}
+              </div>
             </div>
           </div>
-        </div>
-      </ButtonGroup>
+                      {/snippet}
+            </ButtonGroup>
 
       {#if scoringSystem.config?.tieBreak?.mode == 'totalPoints'}
         <div class="mt-4">

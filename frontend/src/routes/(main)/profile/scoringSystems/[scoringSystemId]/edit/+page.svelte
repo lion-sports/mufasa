@@ -13,10 +13,14 @@
     return !!ss.id
   }
 
-  export let data: PageData;
+  interface Props {
+    data: PageData;
+  }
 
-  let formValid: boolean = false,
-      loadingSave: boolean = false
+  let { data = $bindable() }: Props = $props();
+
+  let formValid: boolean = $state(false),
+      loadingSave: boolean = $state(false)
 
   async function handleSubmit() {
     loadingSave = true

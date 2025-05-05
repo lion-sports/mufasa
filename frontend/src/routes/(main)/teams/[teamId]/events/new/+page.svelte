@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import type { Event } from '$lib/components/events/EventForm.svelte'
 	import { page } from '$app/stores'
 	import EventService from '$lib/services/events/events.service'
@@ -10,11 +12,15 @@
 	import { DateTime } from 'luxon'
 	import type { PageData } from './$types'
 
-	export let data: PageData
+	interface Props {
+		data: PageData;
+	}
 
-	let event: Event = {},
-		loading: boolean = false,
-		convocations: { [key: number]: boolean } = {}
+	let { data }: Props = $props();
+
+	let event: Event = $state({}),
+		loading: boolean = $state(false),
+		convocations: { [key: number]: boolean } = $state({})
 
 	onMount(async () => {
 		let startParams: string | null = $page.url.searchParams.get('start')
@@ -63,14 +69,14 @@
 		}
 	}
 
-	$: {
+	run(() => {
 		let startParams: string | null = $page.url.searchParams.get('start')
 		if (!!startParams && !event.start) {
 			event.start = DateTime.fromISO(startParams).toJSDate()
 		}
-	}
+	});
 
-	$: confirmDisabled = !event || !event.start || !event.end || !event.name
+	let confirmDisabled = $derived(!event || !event.start || !event.end || !event.name)
 
 	function handleCancel() {
 		window.history.back()

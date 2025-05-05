@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type Event = {
 		start?: Date
 		end?: Date
@@ -10,6 +10,7 @@
 </script>
 
 <script lang="ts">
+	import { run } from 'svelte/legacy';
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
 	import StandardDatepicker from '$lib/components/common/StandardDatepicker.svelte'
 	import StandardTimePicker from '$lib/components/common/StandardTimePicker.svelte'
@@ -19,22 +20,36 @@
 	import CollapsableSection from '$lib/components/common/CollapsableSection.svelte'
 	import type { Group } from '$lib/services/groups/groups.service'
 
-	export let event: Event = {},
-		convocations: {
+	interface Props {
+		event?: Event;
+		convocations?: {
 			[key: number]: boolean
-		} = {},
-		mode: 'create' | 'update' = 'create',
-		padding: string | undefined = undefined,
-		margin: string | undefined = undefined,
-		width: string | undefined = undefined,
-		height: string | undefined = undefined,
-		teammates: Teammate[] | undefined = undefined,
-		groups: Group[] = []
+		};
+		mode?: 'create' | 'update';
+		padding?: string | undefined;
+		margin?: string | undefined;
+		width?: string | undefined;
+		height?: string | undefined;
+		teammates?: Teammate[] | undefined;
+		groups?: Group[];
+	}
 
-	let startTime: string,
-		endTime: string
+	let {
+		event = $bindable({}),
+		convocations = $bindable({}),
+		mode = 'create',
+		padding = undefined,
+		margin = undefined,
+		width = undefined,
+		height = undefined,
+		teammates = $bindable(undefined),
+		groups = $bindable([])
+	}: Props = $props();
 
-	$: {
+	let startTime: string | undefined = $state(),
+		endTime: string | undefined = $state()
+
+	run(() => {
 		if (!event.start) {
 			event.start = new Date()
 		}
@@ -50,7 +65,7 @@
 		if (!!event.end) {
 			endTime = DateTime.fromJSDate(new Date(event.end)).toFormat('HH:mm')
 		}
-	}
+	});
 
 	function selectAll() {
 		if (!!teammates) {
@@ -136,10 +151,10 @@
 	{#if mode == 'create' && teammates}
 		<div style:margin-top="20px">
 			<CollapsableSection title="Convocazioni">
-				<button on:click={selectAll} class="text-[rgb(var(--global-color-primary-500))]"
+				<button onclick={selectAll} class="text-[rgb(var(--global-color-primary-500))]"
 					>Seleziona tutti</button
 				>
-        <button on:click={unselectAll} class="text-[rgb(var(--global-color-primary-500))] ml-2"
+        <button onclick={unselectAll} class="text-[rgb(var(--global-color-primary-500))] ml-2"
 					>Deseleziona tutti</button
 				>
 				<TeammatesChecklist

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy'
+
 	import { page } from '$app/stores'
 	import type { ComponentProps } from 'svelte'
 	import { goto } from '$app/navigation'
@@ -12,11 +14,16 @@
 	import type { LayoutData } from './$types'
 	import { slide } from 'svelte/transition'
 
-	export let data: LayoutData
+	interface Props {
+		data: LayoutData
+		children?: import('svelte').Snippet
+	}
 
-	let selectedTab: string = 'general',
-		options: ComponentProps<OptionMenu>['options'] = [],
-		tabs: ComponentProps<StandardTabSwitcher>['tabs'] = []
+	let { data, children }: Props = $props()
+
+	let selectedTab: string = $state('general'),
+		options: ComponentProps<typeof OptionMenu>['options'] = $state([]),
+		tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = $state([])
 
 	options = []
 
@@ -41,25 +48,25 @@
 		{
 			name: 'general',
 			label: 'Generale',
-      icon: 'mdi-text'
+			icon: 'mdi-text'
 		},
 		{
 			name: 'convocations',
 			label: 'Convocazioni',
-      icon: 'mdi-list-status'
+			icon: 'mdi-list-status'
 		}
 	]
 
-  if(data.groupedPermissions.scout.view) {
-    tabs = [
-      ...tabs,
-      {
-        name: 'scouts',
-        label: 'Scout',
-        icon: 'mdi-chart-timeline-variant'
-      }
-    ]
-  }
+	if (data.groupedPermissions.scout.view) {
+		tabs = [
+			...tabs,
+			{
+				name: 'scouts',
+				label: 'Scout',
+				icon: 'mdi-chart-timeline-variant'
+			}
+		]
+	}
 
 	function handleOptionClick(ev: any) {
 		if (ev.detail?.element?.name == 'update')
@@ -69,7 +76,7 @@
 		}
 	}
 
-	let confirmDialogOpen: boolean
+	let confirmDialogOpen: boolean = $state(false)
 	function confirmEventDeletion() {
 		confirmDialogOpen = false
 
@@ -89,23 +96,29 @@
 		if (selectedTab == 'general') {
 			goto(`/teams/${data.event.teamId}/events/${data.event.id}/general`, { replaceState: true })
 		} else if (selectedTab == 'convocations') {
-			goto(`/teams/${data.event.teamId}/events/${data.event.id}/convocations`, { replaceState: true })
-		} else if(selectedTab == 'scouts') {
-      goto(`/teams/${data.event.teamId}/events/${data.event.id}/scouts`, { replaceState: true })
-    }
+			goto(`/teams/${data.event.teamId}/events/${data.event.id}/convocations`, {
+				replaceState: true
+			})
+		} else if (selectedTab == 'scouts') {
+			goto(`/teams/${data.event.teamId}/events/${data.event.id}/scouts`, { replaceState: true })
+		}
 	}
 
-	$: if ($page.url.href.endsWith('general')) {
-		selectedTab = 'general'
-	} else if ($page.url.href.endsWith('convocations')) {
-		selectedTab = 'convocations'
-	} else if($page.url.href.endsWith('scouts')) {
-    selectedTab = 'scouts'
-  }
+	run(() => {
+		if ($page.url.href.endsWith('general')) {
+			selectedTab = 'general'
+		} else if ($page.url.href.endsWith('convocations')) {
+			selectedTab = 'convocations'
+		} else if ($page.url.href.endsWith('scouts')) {
+			selectedTab = 'scouts'
+		}
+	})
 
-	$: headerHidden = $page.url.pathname.endsWith('/edit') ||
-    $page.url.pathname.endsWith('/scouts/create') ||
-    /\/scouts\/\d+\/studio$/.test($page.url.pathname)
+	let headerHidden = $derived(
+		$page.url.pathname.endsWith('/edit') ||
+			$page.url.pathname.endsWith('/scouts/create') ||
+			/\/scouts\/\d+\/studio$/.test($page.url.pathname)
+	)
 </script>
 
 {#if !!$event}
@@ -114,13 +127,13 @@
 			<PageTitle
 				title={$event.name}
 				prependVisible={true}
-        prependRoute={`/teams/${data.team.id}/calendar`}
+				prependRoute={`/teams/${data.team.id}/calendar`}
 			>
-				<svelte:fragment slot="append">
+				{#snippet append()}
 					{#if !!options && options.length > 0}
-						<OptionMenu {options} on:select={handleOptionClick} />
+						<OptionMenu {options} onselect={handleOptionClick} />
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</PageTitle>
 
 			<StandardTabSwitcher
@@ -128,12 +141,12 @@
 				marginTop="10px"
 				marginBottom="10px"
 				bind:selected={selectedTab}
-				on:tab-click={handleTabClick}
+				ontabClick={handleTabClick}
 			/>
 		</div>
 	{/if}
 
-	<slot />
+	{@render children?.()}
 {:else}
 	<CircularLoader />
 {/if}

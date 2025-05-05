@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import ConfirmOrCancelButtons from "@/lib/components/common/ConfirmOrCancelButtons.svelte"
 	import StandardDialog from "@/lib/components/common/StandardDialog.svelte"
 	import StandardSelect from "@/lib/components/common/StandardSelect.svelte"
@@ -17,7 +19,8 @@
     'reload': undefined
   }>()
 
-  export let selectedSet: number[] = [],
+  interface Props {
+    selectedSet?: number[];
     widget: Widget<{
       totalSpikeForPosition: TotalSpikeForPositionResult
       totalSpikeForPlayer: TotalSpikeForPlayerResult
@@ -25,8 +28,11 @@
       previousTotalSpikeForPosition: TotalSpikeForPositionResult
       previousTotalSpikeForPlayer: TotalSpikeForPlayerResult
       previousTotalSpikeForPlayerAndPosition: TotalSpikeForPlayerAndPositionResult
-    }>,
-    loadingData: boolean = false
+    }>;
+    loadingData?: boolean;
+  }
+
+  let { selectedSet = [], widget, loadingData = false }: Props = $props();
   
   function getPositionStats(params: {
     position: number,
@@ -35,7 +41,7 @@
     return widget.data?.totalSpikeForPosition.find((e) => Number(e.position) === Number(params.position) && (!params.teamFilter || (params.teamFilter == 'friend' && !e.opponent) || (params.teamFilter == 'opponent' && e.opponent)))
   }
 
-  let selectedPosition: VolleyballScoutEventPosition | undefined = undefined
+  let selectedPosition: VolleyballScoutEventPosition | undefined = $state(undefined)
   function handlePositionClick(params: {
     position: number
   }) {
@@ -43,29 +49,31 @@
     selectedPosition = position
   }
 
-  $: totalSpike = widget.data?.totalSpikeForPlayer.reduce((p, c, i, a) => {
+  let totalSpike = $derived(widget.data?.totalSpikeForPlayer.reduce((p, c, i, a) => {
     return p + c.total
-  }, 0) || 0
-  $: totalPoints = widget.data?.totalSpikeForPlayer.reduce((p, c, i, a) => {
+  }, 0) || 0)
+  let totalPoints = $derived(widget.data?.totalSpikeForPlayer.reduce((p, c, i, a) => {
     return p + c.points
-  }, 0) || 0
-  $: totalErrors = widget.data?.totalSpikeForPlayer.reduce((p, c, i, a) => {
+  }, 0) || 0)
+  let totalErrors = $derived(widget.data?.totalSpikeForPlayer.reduce((p, c, i, a) => {
     return p + c.errors
-  }, 0) || 0
-  $: selectedPositionStats = !!selectedPosition ? widget.data?.totalSpikeForPlayerAndPosition.filter((el) => el.position === selectedPosition) : undefined
-  $: selectedPositionPoints = !!selectedPositionStats ? selectedPositionStats.reduce((p, c, i, a) => {
+  }, 0) || 0)
+  let selectedPositionStats = $derived(!!selectedPosition ? widget.data?.totalSpikeForPlayerAndPosition.filter((el) => el.position === selectedPosition) : undefined)
+  let selectedPositionPoints = $derived(!!selectedPositionStats ? selectedPositionStats.reduce((p, c, i, a) => {
     return p + c.points
-  }, 0) : undefined
-  $: selectedPositionErrors = !!selectedPositionStats ? selectedPositionStats.reduce((p, c, i, a) => {
+  }, 0) : undefined)
+  let selectedPositionErrors = $derived(!!selectedPositionStats ? selectedPositionStats.reduce((p, c, i, a) => {
     return p + c.errors
-  }, 0) : undefined
+  }, 0) : undefined)
 
 
-  let settingsOpened: boolean = false
-  let selectedTeamFilter: TeamFilter | undefined = undefined
-  $: selectedTeamFilter = widget.widgetSetting?.settings?.widget == 'VolleyballDistribution' ? widget.widgetSetting?.settings.team : undefined
+  let settingsOpened: boolean = $state(false)
+  let selectedTeamFilter: TeamFilter | undefined = $state(undefined)
+  run(() => {
+    selectedTeamFilter = widget.widgetSetting?.settings?.widget == 'VolleyballDistribution' ? widget.widgetSetting?.settings.team : undefined
+  });
   
-  let loadingSaveSetting: boolean = false
+  let loadingSaveSetting: boolean = $state(false)
 
   async function handleSaveSettings() {
     loadingSaveSetting = true
@@ -92,7 +100,7 @@
       Distribution
     </div>
     <div>
-      <button on:click={() => settingsOpened = true}>
+      <button onclick={() => settingsOpened = true}>
         <Icon name="mdi-cog"></Icon>
       </button>
     </div>
@@ -114,7 +122,7 @@
               <button 
                 class="flex flex-col justify-center items-center relative transition-all"
                 class:not-selected={selectedPosition !== undefined && selectedPosition !== position}
-                on:click={() => handlePositionClick({ position })}
+                onclick={() => handlePositionClick({ position })}
               >
                 {#if !widget.widgetSetting?.settings?.team || widget.widgetSetting?.settings?.team == "both"}
                   <div 
@@ -162,7 +170,7 @@
               <button 
                 class="flex flex-col justify-center items-center relative transition-all"
                 class:not-selected={selectedPosition !== undefined && selectedPosition !== position}
-                on:click={() => handlePositionClick({ position })}
+                onclick={() => handlePositionClick({ position })}
               >
                 {#if !widget.widgetSetting?.settings?.team || widget.widgetSetting?.settings?.team == "both"}
                   <div 
@@ -225,7 +233,7 @@
         {#if selectedPosition !== undefined}
           <div class="flex flex-col h-full w-full overflow-auto">
             <div>
-              <button on:click={() => { selectedPosition = undefined }} style:cursor="pointer" class="flex">
+              <button onclick={() => { selectedPosition = undefined }} style:cursor="pointer" class="flex">
                 <div class="back-icon">
                   <Icon name="mdi-arrow-left" />
                 </div>
@@ -423,7 +431,7 @@
               { value: 'both', text: 'Entrambi'}
             ]}
             value={selectedTeamFilter}
-            on:change={(e) => {
+            onchange={(e) => {
               // @ts-ignore
               let value = e.target.value
               selectedTeamFilter = value

@@ -1,29 +1,26 @@
 <script lang="ts">
-	import ConfirmOrCancelButtons from "@/lib/components/common/ConfirmOrCancelButtons.svelte"
-	import StandardDialog from "@/lib/components/common/StandardDialog.svelte"
-	import StandardSelect from "@/lib/components/common/StandardSelect.svelte"
 	import ValueChangeIndicator from "@/lib/components/common/ValueChangeIndicator.svelte"
-	import PlayerMarker from "@/lib/components/scouts/PlayerMarker.svelte"
 	import type { Widget } from "@/lib/services/dashboards/dashboard.service"
-	import type { TotalServeByPlayerResult, TotalServeResult, TotalSpikeForPlayerAndPositionResult, TotalSpikeForPlayerResult, TotalSpikeForPositionResult } from "@/lib/services/scouts/scoutAnalysis.service"
-	import TeammatesService from "@/lib/services/teammates/teammates.service"
-	import type { TeamFilter } from "@/lib/services/widgets/widgetSettings.service"
 	import WidgetSettingsService from "@/lib/services/widgets/widgetSettings.service"
-	import { GanymedeBarChart, HorizontalStackedProgress, Icon, Skeleton, theme } from "@likable-hair/svelte"
+	import { Icon, Skeleton } from "@likable-hair/svelte"
 	import type { VolleyballPoints } from "lionn-common"
-	import { createEventDispatcher, type ComponentProps } from "svelte"
+	import { createEventDispatcher } from "svelte"
 
   let dispatch = createEventDispatcher<{
     'reload': undefined
   }>()
 
-  export let selectedSet: number[] = [],
+  interface Props {
+    selectedSet?: number[];
     widget: Widget<{
       points: VolleyballPoints[]
-    }>,
-    loadingData: boolean = false
+    }>;
+    loadingData?: boolean;
+  }
 
-  let settingsOpened: boolean = false
+  let { selectedSet = [], widget, loadingData = false }: Props = $props();
+
+  let settingsOpened: boolean = $state(false)
   let loadingSaveSetting: boolean = false
 
   async function handleSaveSettings() {
@@ -48,7 +45,7 @@
       Points history
     </div>
     <div>
-      <button on:click={() => settingsOpened = true}>
+      <button onclick={() => settingsOpened = true}>
         <Icon name="mdi-cog"></Icon>
       </button>
     </div>

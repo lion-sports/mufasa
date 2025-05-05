@@ -1,8 +1,13 @@
 <script lang="ts" generics="Button extends { value: number | string }">
   import { createEventDispatcher } from "svelte";
 
-  export let buttons: Button[] = [],
-    selectedButton: string | number | undefined = undefined
+  interface Props {
+    buttons?: Button[];
+    selectedButton?: string | number | undefined;
+    children?: import('svelte').Snippet<[any]>;
+  }
+
+  let { buttons = [], selectedButton = $bindable(undefined), children }: Props = $props();
 
   let dispatch = createEventDispatcher<{
     'click': {
@@ -14,17 +19,14 @@
 <div class="flex gap-2 flex-col md:flex-row w-full">
   {#each buttons as button}
     <button
-      on:click={() => {
+      onclick={() => {
         selectedButton = button.value
         dispatch('click', { button })
       }}
       class="w-full md:max-w-[300px]"
       class:selected={selectedButton == button.value}
     >
-      <slot 
-        {button} 
-        selected={selectedButton == button.value}
-      ></slot>
+      {@render children?.({ button, selected: selectedButton == button.value, })}
     </button>
   {/each}
 </div>

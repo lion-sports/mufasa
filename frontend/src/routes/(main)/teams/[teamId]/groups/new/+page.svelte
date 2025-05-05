@@ -1,6 +1,6 @@
 <script lang="ts">
 	import GroupsService from '$lib/services/groups/groups.service'
-	import { page } from '$app/stores'
+	import { page } from '$app/state'
 	import { goto, invalidate } from '$app/navigation'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import ConfirmOrCancelButtons from '$lib/components/common/ConfirmOrCancelButtons.svelte'
@@ -13,10 +13,10 @@
 		convocable?: boolean
 		team: { id: number }
 	} = {
-		team: { id: parseInt($page.params.teamId) }
+		team: { id: parseInt(page.params.teamId) }
 	}
 
-	let loading = false
+	let loading = $state(false)
 
 	async function handleSubmit() {
 		let service = new GroupsService({ fetch })

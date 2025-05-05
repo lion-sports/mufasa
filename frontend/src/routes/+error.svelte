@@ -9,7 +9,7 @@
 		500: 'Something went wrong'
 	}
 
-	$: message = mapper[$page.status]
+	let message = $derived(mapper[$page.status])
 </script>
 
 <div

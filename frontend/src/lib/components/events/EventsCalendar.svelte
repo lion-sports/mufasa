@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import './EventsCalendar.css'
   import Calendar from '@event-calendar/core';
   import TimeGrid from '@event-calendar/time-grid';
@@ -12,23 +14,35 @@
 	import { goto } from '$app/navigation'
 	import qs from 'qs'
 
-  export let team: Team | undefined = undefined,
-		selectedDate: Date | undefined = new Date(),
-    events: Event[],
-		visibleMonth: number = DateTime.now().get('month') - 1,
-		visibleYear: number = DateTime.now().get('year'),
-    canCreate: boolean = false
-
-  let eventCalendar: Calendar,
-    plugins = [TimeGrid, DayGrid, Interaction],
-    selectedView: string = 'dayGridMonth'
-
-  $: if(!!visibleMonth && !!visibleYear && !!eventCalendar) {
-    eventCalendar.setOption('date', DateTime.fromObject({ month: visibleMonth + 1, year: visibleYear }).startOf('month').toJSDate())
+  interface Props {
+    team?: Team | undefined;
+    selectedDate?: Date | undefined;
+    events: Event[];
+    visibleMonth?: number;
+    visibleYear?: number;
+    canCreate?: boolean;
   }
 
-  let options: Calendar.Options
-  $: options = {
+  let {
+    team = undefined,
+    selectedDate = $bindable(new Date()),
+    events = $bindable(),
+    visibleMonth = DateTime.now().get('month') - 1,
+    visibleYear = DateTime.now().get('year'),
+    canCreate = false
+  }: Props = $props();
+
+  let eventCalendar: Calendar = $state(),
+    plugins = [TimeGrid, DayGrid, Interaction],
+    selectedView: string = $state('dayGridMonth')
+
+  run(() => {
+    if(!!visibleMonth && !!visibleYear && !!eventCalendar) {
+      eventCalendar.setOption('date', DateTime.fromObject({ month: visibleMonth + 1, year: visibleYear }).startOf('month').toJSDate())
+    }
+  });
+
+  let options: Calendar.Options = $derived({
     view: selectedView,
     events: [],
     datesSet: (info: Calendar.DatesSetInfo) => {
@@ -212,7 +226,8 @@
         goto(`/teams/${team.id}/events/new?${qs.stringify({ start: info.start, end: info.end })}`)
       }
     }
-  };
+  })
+  
 </script>
 
 <div class:ec-dark={$theme.dark}>

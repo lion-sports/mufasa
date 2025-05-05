@@ -1,9 +1,15 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import type { ScoutAnalysis } from '@/lib/services/scouts/scouts.service'
 	import StudioAnalysisErrorsMadeChart from './StudioAnalysisErrorsMadeChart.svelte'
 	import lodash from 'lodash'
 
-	export let analysis: ScoutAnalysis
+	interface Props {
+		analysis: ScoutAnalysis;
+	}
+
+	let { analysis }: Props = $props();
 
 	let dataGroupedByPlayer: Record<
       number,
@@ -11,26 +17,28 @@
         player: (typeof analysis.errorsMade)[number]['player']
         errorsMade: (typeof analysis.errorsMade)[number]['errorsMade']
       }
-    > = {},
-    groupBy: 'category' | 'none' = 'none'
+    > = $state({}),
+    groupBy: 'category' | 'none' = $state('none')
 
-	$: if (!!analysis.errorsMade) {
-		dataGroupedByPlayer = {}
-		for (let i = 0; i < analysis.errorsMade.length; i += 1) {
-			let row = analysis.errorsMade[i]
+	run(() => {
+		if (!!analysis.errorsMade) {
+			dataGroupedByPlayer = {}
+			for (let i = 0; i < analysis.errorsMade.length; i += 1) {
+				let row = analysis.errorsMade[i]
 
-			if (!dataGroupedByPlayer[row.player.id])
-				dataGroupedByPlayer[row.player.id] = lodash.cloneDeep(row)
-			else {
-				dataGroupedByPlayer[row.player.id].errorsMade =
-					dataGroupedByPlayer[row.player.id].errorsMade + row.errorsMade
+				if (!dataGroupedByPlayer[row.player.id])
+					dataGroupedByPlayer[row.player.id] = lodash.cloneDeep(row)
+				else {
+					dataGroupedByPlayer[row.player.id].errorsMade =
+						dataGroupedByPlayer[row.player.id].errorsMade + row.errorsMade
+				}
 			}
 		}
-	}
+	});
 
-	$: maxPoint = Object.keys(dataGroupedByPlayer).reduce((p, c: any, i, a) => {
+	let maxPoint = $derived(Object.keys(dataGroupedByPlayer).reduce((p, c: any, i, a) => {
 		return Math.max(p, dataGroupedByPlayer[c].errorsMade)
-	}, 0)
+	}, 0))
 </script>
 
 <div class="text-xl">Errori</div>
@@ -44,7 +52,7 @@
       class:hover:bg-gray-100={groupBy !== 'none'}
       class:dark:hover:bg-gray-800={groupBy !== 'none'}
       class:dark:hover:text-white={groupBy !== 'none'}
-      on:click={() => groupBy = 'none'}
+      onclick={() => groupBy = 'none'}
     >
       Totale
     </button>
@@ -58,7 +66,7 @@
       class:hover:bg-gray-100={groupBy !== 'category'}
       class:dark:hover:bg-gray-800={groupBy !== 'category'}
       class:dark:hover:text-white={groupBy !== 'category'}
-      on:click={() => groupBy = 'category'}
+      onclick={() => groupBy = 'category'}
 		>
       Per tipo
     </button>

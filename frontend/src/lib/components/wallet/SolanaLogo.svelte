@@ -1,8 +1,12 @@
 <script lang="ts">
 	import metamaskLogo from '$lib/assets/phantom-logo.svg';
 
-	export let width: string = '30',
-		height: string = '30';
+	interface Props {
+		width?: string;
+		height?: string;
+	}
+
+	let { width = '30', height = '30' }: Props = $props();
 </script>
 
 <img src={metamaskLogo} alt={''} class="button-icon" {width} {height} />

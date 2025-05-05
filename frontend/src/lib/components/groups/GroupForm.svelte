@@ -5,15 +5,25 @@
 	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
 	import { slide } from 'svelte/transition'
 
-	export let group: DeepPartial<Group> = {
-			name: undefined
-		},
-		padding: string | undefined = undefined,
-		margin: string | undefined = undefined,
-		width: string | undefined = undefined,
-		height: string | undefined = undefined
+	interface Props {
+		group?: DeepPartial<Group>;
+		padding?: string | undefined;
+		margin?: string | undefined;
+		width?: string | undefined;
+		height?: string | undefined;
+	}
 
-	let closureStatus: { [key: string]: boolean } = {}
+	let {
+		group = $bindable({
+			name: undefined
+		}),
+		padding = undefined,
+		margin = undefined,
+		width = undefined,
+		height = undefined
+	}: Props = $props();
+
+	let closureStatus: { [key: string]: boolean } = $state({})
 
 	function getActions(resource: Resource) {
 		return GroupsService.getActionsForResource(resource)
@@ -43,7 +53,7 @@
 					<button
 						class="resource-title-container"
 						type="button"
-						on:click={() => (closureStatus[resource] = !closureStatus[resource])}
+						onclick={() => (closureStatus[resource] = !closureStatus[resource])}
 					>
 						<div class="resource-title">{GroupsService.translateResource(resource)}</div>
 						<div class="expand-icon" class:reverse={closureStatus[resource]}>

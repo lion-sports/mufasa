@@ -1,21 +1,39 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type Item = {
 		value: string
 		label?: string
 		data?: any
-	};
+	}
 </script>
 
 <script lang="ts">
-	export let items: Item[],
-		width: string = '100%',
-		maxWidth: string = '100%',
-    height: string | undefined = "44px",
-		multiple: boolean = false,
-		placeholder: string | undefined = undefined,
-		values: Item[]
-
 	import { Autocomplete } from '@likable-hair/svelte'
+	import type { ComponentProps } from 'svelte'
+
+	interface Props extends ComponentProps<typeof Autocomplete> {
+		items: Item[]
+		width?: string
+		maxWidth?: string
+		height?: string | undefined
+		multiple?: boolean
+		placeholder?: string | undefined
+		values: Item[]
+		itemLabel?: import('svelte').Snippet<[any]>
+	}
+
+	let {
+		items,
+		width = '100%',
+		maxWidth = '100%',
+		height = '44px',
+		multiple = false,
+		placeholder = undefined,
+		values = $bindable(),
+		itemLabel,
+    ...rest
+	}: Props = $props()
+
+	const itemLabel_render = $derived(itemLabel)
 </script>
 
 <Autocomplete
@@ -25,15 +43,15 @@
 	{multiple}
 	{placeholder}
 	{items}
-  --autocomplete-min-height="44px"
-  {height}
-	on:change
+	--autocomplete-min-height="44px"
+	{height}
+	{...rest}
 >
-  <svelte:fragment slot="item-label" let:item>
-    <slot name="item-label" {item}>
-      <div class="label-container">
-        <div>{item.label || ''}</div>
-      </div>
-    </slot>
-  </svelte:fragment>
+	{#snippet itemLabelSnippet({ item })}
+		{#if itemLabel_render}{@render itemLabel_render({ item })}{:else}
+			<div class="label-container">
+				<div>{item.label || ''}</div>
+			</div>
+		{/if}
+	{/snippet}
 </Autocomplete>

@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Group } from '$lib/services/groups/groups.service'
 	import type { Team } from '$lib/services/teams/teams.service'
 </script>
@@ -16,11 +16,15 @@
 		destroy: undefined
 	}>()
 
-	export let groups: Group[] = [],
-		team: Team | undefined = undefined,
-		searchable: boolean = false
+	interface Props {
+		groups?: Group[];
+		team?: Team | undefined;
+		searchable?: boolean;
+	}
 
-	let headers: ComponentProps<SimpleTable>['headers'] = [
+	let { groups = [], team = undefined, searchable = false }: Props = $props();
+
+	let headers: ComponentProps<typeof SimpleTable>['headers'] = [
 		{
 			value: 'name',
 			label: 'Nome',
@@ -30,12 +34,12 @@
 		}
 	]
 
-	let searchText: string
-	$: filteredGroups = !!searchText
+	let searchText: string = $state('')
+	let filteredGroups = $derived(!!searchText
 		? groups.filter((group) => {
-				return group.name.toLowerCase().includes(searchText.toLowerCase())
+				return !searchText || group.name.toLowerCase().includes(searchText.toLowerCase())
       })
-		: groups
+		: groups)
 
 	function goToNewGroup(event: any) {
 		if (!!team) {
@@ -49,7 +53,7 @@
 		}
 	}
 
-	let confirmDialogOpen: boolean, deletingGroup: Group | undefined
+	let confirmDialogOpen: boolean = $state(false), deletingGroup: Group | undefined = $state()
 	function handleDeleteClick(group: any) {
 		deletingGroup = group
 		confirmDialogOpen = true
@@ -74,11 +78,12 @@
 {#if searchable}
 	<div style:max-width="100%" style:width="400px" style:margin-bottom="0px" style:display="flex">
 		<StandardTextfield bind:value={searchText} placeholder="Cerca gruppi ...">
-			<svelte:fragment slot="prepend-inner">
-				<div style:margin-right="10px">
-					<Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
-				</div>
-			</svelte:fragment>
+      {#snippet prependInner()}
+	        <div style:margin-right="10px">
+	          <Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
+	        </div>
+	      
+					{/snippet}
 		</StandardTextfield>
 		<div style:margin-left="10px">
 			<StandardButton on:click={goToNewGroup}>Nuovo</StandardButton>
@@ -87,17 +92,18 @@
 {/if}
 
 <SimpleTable {headers} items={filteredGroups}>
-	<div style:display="flex" style:justify-content="end" slot="rowActions" let:item>
-		<div style:margin-right="10px">
-			<Icon name="mdi-pencil" click on:click={() => goToEdit(item)} />
+	{#snippet rowActionsSnippet({ item })}
+		<div style:display="flex" style:justify-content="end"  >
+			<div style:margin-right="10px">
+				<Icon name="mdi-pencil" onclick={() => goToEdit(item)} />
+			</div>
+			<Icon
+				name="mdi-delete"
+				--icon-color="rgb(var(--global-color-error-500))"
+				onclick={() => handleDeleteClick(item)}
+			/>
 		</div>
-		<Icon
-			name="mdi-delete"
-			click
-			--icon-color="rgb(var(--global-color-error-500))"
-			on:click={() => handleDeleteClick(item)}
-		/>
-	</div>
+	{/snippet}
 </SimpleTable>
 
 <ConfirmDialog

@@ -9,9 +9,13 @@
     }
   }>()
 
-  export let points: VolleyballPoints | undefined = FIRST_POINT,
-    friendName: string = "Amici",
-    opponentName: string = "Avversari"
+  interface Props {
+    points?: VolleyballPoints | undefined;
+    friendName?: string;
+    opponentName?: string;
+  }
+
+  let { points = FIRST_POINT, friendName = "Amici", opponentName = "Avversari" }: Props = $props();
 </script>
 
 <div class="flex w-full gap-4">
@@ -19,7 +23,7 @@
     <div>
       <button 
         class="text-2xl hover:bg-[rgb(var(--global-color-background-200))] rounded-full h-[56px] w-[56px]"
-        on:click={() => dispatch('increment', { opponent: false })}
+        onclick={() => dispatch('increment', { opponent: false })}
       >
         <Icon name="mdi-plus"></Icon>
       </button>
@@ -42,7 +46,7 @@
     </div>
     <button 
       class="text-2xl hover:bg-[rgb(var(--global-color-background-200))] rounded-full h-[56px] w-[56px]"
-      on:click={() => dispatch('increment', { opponent: true })}
+      onclick={() => dispatch('increment', { opponent: true })}
     >
       <Icon name="mdi-plus"></Icon>
     </button>

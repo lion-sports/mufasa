@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { T, useLoader, useTask, useThrelte } from '@threlte/core'
 	import { OrbitControls, SoftShadows, interactivity } from '@threlte/extras'
 	import StudioField3DPlayerMarker from './StudioField3DPlayerMarker.svelte'
@@ -30,24 +32,32 @@
 		}
 	}>()
 
-  export let fieldDimension: number = 9,
-    lineWidth: number = 0.1,
-    netHeight: number = 3,
-    playerMarkerDimension: number = 0.5,
-    scout: Scout,
-		phase: VolleyballPhase = 'serve',
-    selectedPlayer: ScoutEventPlayer | undefined = undefined,
-    friendSides: 'right' | 'left' = 'left'
+  interface Props {
+    fieldDimension?: number;
+    lineWidth?: number;
+    netHeight?: number;
+    playerMarkerDimension?: number;
+    scout: Scout;
+    phase?: VolleyballPhase;
+    selectedPlayer?: ScoutEventPlayer | undefined;
+    friendSides?: 'right' | 'left';
+  }
+
+  let {
+    fieldDimension = 9,
+    lineWidth = 0.1,
+    netHeight = 3,
+    playerMarkerDimension = 0.5,
+    scout,
+    phase = 'serve',
+    selectedPlayer = undefined,
+    friendSides = 'left'
+  }: Props = $props();
 
   let outsideColor: string = '#60a5fa',
     insideColor: string = '#fb923c',
     lineColor: string = '#64748b'
   
-  $: totalFieldWidth = fieldDimension * 2
-  $: fieldHeight = fieldDimension
-  $: blueBackgroundDimension = fieldDimension * 5
-  $: spotlightDistance = fieldDimension * 4
-  $: spotlightIntensity = fieldDimension * 100
 
   let camera: PerspectiveCamera = new PerspectiveCamera(),
     cameraPositionX = spring(0),
@@ -60,61 +70,16 @@
 		defenseBreak: 'playersDefenseBreakPositions'
 	} as Record<typeof phase, keyof Scout['stash']>
 
-	$: friendsTotalPositions = scout.stash?.[positionPhaseKeyMapper[phase]] as
-		| VolleyballPlayersPosition
-		| undefined
-	$: friendsPosition = friendsTotalPositions?.friends
 
-	$: enemyTotalPositions =
-		phase == 'receive'
-			? scout.stash?.playersServePositions
-			: phase == 'defenseBreak'
-				? scout.stash?.playersDefenseSideOutPositions
-				: phase == 'defenseSideOut'
-					? scout.stash?.playersDefenseBreakPositions
-					: undefined
-	$: enemyPosition = enemyTotalPositions?.enemy
 
 	type ReceivePositions = {
 		player: ScoutEventPlayer
 		position: VolleyballScoutEventPosition
 		anchor?: VolleyballScoutEventAnchor
 	}[]
-	let enemyReceivePositions: ReceivePositions = []
-	$: if (!!scout.stash?.playersReceivePositions?.enemy) {
-		enemyReceivePositions = []
-		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.enemy)) {
-			let player = scout.players.find((p) => Number(p.id) === Number(playerId))
-			if (!player) continue
+	let enemyReceivePositions: ReceivePositions = $state([])
 
-			enemyReceivePositions = [
-				...enemyReceivePositions,
-				{
-					player: player as ScoutEventPlayer,
-					position: value.position,
-					anchor: value.anchor
-				}
-			]
-		}
-	} else enemyReceivePositions = []
-
-	let friendsReceivePositions: ReceivePositions = []
-	$: if (!!scout.stash?.playersReceivePositions?.friends) {
-		friendsReceivePositions = []
-		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.friends)) {
-			let player = scout.players.find((p) => Number(p.id) === Number(playerId))
-			if (!player) continue
-
-			friendsReceivePositions = [
-				...friendsReceivePositions,
-				{
-					player: player as ScoutEventPlayer,
-					position: value.position,
-					anchor: value.anchor
-				}
-			]
-		}
-	} else friendsReceivePositions = []
+	let friendsReceivePositions: ReceivePositions = $state([])
 
 	function handlePlayerClick(player: ScoutEventPlayer | undefined) {
 		if (!!player) {
@@ -131,134 +96,7 @@
       number, 
       number
     ]
-  }[] = []
-  $: if(!!friendsPosition || !!enemyPosition || !!friendsReceivePositions || !!enemyReceivePositions || !!phase) {
-    
-    if(phase === 'defenseBreak' || phase === 'defenseSideOut') {
-      if(!!friendsPosition) {
-        for(const [position, player] of Object.entries(friendsPosition)) {
-          let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
-          let coordinates = getPlayersPositionByZone({
-            zone: Number(position) as VolleyballScoutEventPosition,
-            isOpponent: player.player.isOpponent
-          })
-          if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
-          else {
-            playersCoordinates = [
-              ...playersCoordinates,
-              {
-                player: player.player,
-                coordinates
-              }
-            ]
-          }
-        }
-      }
-
-      if(!!enemyPosition) {
-        for(const [position, player] of Object.entries(enemyPosition)) {
-          let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
-          let coordinates = getPlayersPositionByZone({
-            zone: Number(position) as VolleyballScoutEventPosition,
-            isOpponent: player.player.isOpponent
-          })
-          if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
-          else {
-            playersCoordinates = [
-              ...playersCoordinates,
-              {
-                player: player.player,
-                coordinates
-              }
-            ]
-          }
-        }
-      }
-    } else if(phase == 'serve') {
-      if(!!friendsPosition) {
-        for(const [position, player] of Object.entries(friendsPosition)) {
-          let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
-          let coordinates = getPlayersPositionByZone({
-            zone: Number(position) as VolleyballScoutEventPosition,
-            isOpponent: player.player.isOpponent
-          })
-          if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
-          else {
-            playersCoordinates = [
-              ...playersCoordinates,
-              {
-                player: player.player,
-                coordinates
-              }
-            ]
-          }
-        }
-      }
-
-      if(!!enemyReceivePositions) {
-        for(const [position, player] of Object.entries(enemyReceivePositions)) {
-          let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
-          let coordinates = getPlayersPositionByZone({
-            zone: Number(position) as VolleyballScoutEventPosition,
-            anchor: player.anchor,
-            isOpponent: player.player.isOpponent
-          })
-          if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
-          else {
-            playersCoordinates = [
-              ...playersCoordinates,
-              {
-                player: player.player,
-                coordinates
-              }
-            ]
-          }
-        }
-      }
-    } else if(phase == 'receive') {
-      if(!!friendsReceivePositions) {
-        for(let k = 0; k < friendsReceivePositions.length; k += 1) {
-          let player = friendsReceivePositions[k]
-          let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
-          let coordinates = getPlayersPositionByZone({
-            zone: Number(player.position) as VolleyballScoutEventPosition,
-            anchor: player.anchor,
-            isOpponent: player.player.isOpponent
-          })
-          if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
-          else {
-            playersCoordinates = [
-              ...playersCoordinates,
-              {
-                player: player.player,
-                coordinates
-              }
-            ]
-          }
-        }
-      }
-
-      if(!!enemyPosition) {
-        for(const [position, player] of Object.entries(enemyPosition)) {
-          let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
-          let coordinates = getPlayersPositionByZone({
-            zone: Number(position) as VolleyballScoutEventPosition,
-            isOpponent: player.player.isOpponent
-          })
-          if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
-          else {
-            playersCoordinates = [
-              ...playersCoordinates,
-              {
-                player: player.player,
-                coordinates
-              }
-            ]
-          }
-        }
-      }
-    }
-  }
+  }[] = $state([])
 
   function getPlayersPositionByZone(params: {
     zone: VolleyballScoutEventPosition,
@@ -396,6 +234,189 @@
     return [x, y, z]
   }
 
+  let totalFieldWidth = $derived(fieldDimension * 2)
+  let fieldHeight = $derived(fieldDimension)
+  let blueBackgroundDimension = $derived(fieldDimension * 5)
+  let spotlightDistance = $derived(fieldDimension * 4)
+  let spotlightIntensity = $derived(fieldDimension * 100)
+	let friendsTotalPositions = $derived(scout.stash?.[positionPhaseKeyMapper[phase]] as
+		| VolleyballPlayersPosition
+		| undefined)
+	let friendsPosition = $derived(friendsTotalPositions?.friends)
+	let enemyTotalPositions =
+		$derived(phase == 'receive'
+			? scout.stash?.playersServePositions
+			: phase == 'defenseBreak'
+				? scout.stash?.playersDefenseSideOutPositions
+				: phase == 'defenseSideOut'
+					? scout.stash?.playersDefenseBreakPositions
+					: undefined)
+	let enemyPosition = $derived(enemyTotalPositions?.enemy)
+	run(() => {
+    if (!!scout.stash?.playersReceivePositions?.enemy) {
+  		enemyReceivePositions = []
+  		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.enemy)) {
+  			let player = scout.players.find((p) => Number(p.id) === Number(playerId))
+  			if (!player) continue
+
+  			enemyReceivePositions = [
+  				...enemyReceivePositions,
+  				{
+  					player: player as ScoutEventPlayer,
+  					position: value.position,
+  					anchor: value.anchor
+  				}
+  			]
+  		}
+  	} else enemyReceivePositions = []
+  });
+	run(() => {
+    if (!!scout.stash?.playersReceivePositions?.friends) {
+  		friendsReceivePositions = []
+  		for (const [playerId, value] of Object.entries(scout.stash?.playersReceivePositions?.friends)) {
+  			let player = scout.players.find((p) => Number(p.id) === Number(playerId))
+  			if (!player) continue
+
+  			friendsReceivePositions = [
+  				...friendsReceivePositions,
+  				{
+  					player: player as ScoutEventPlayer,
+  					position: value.position,
+  					anchor: value.anchor
+  				}
+  			]
+  		}
+  	} else friendsReceivePositions = []
+  });
+  run(() => {
+    if(!!friendsPosition || !!enemyPosition || !!friendsReceivePositions || !!enemyReceivePositions || !!phase) {
+      
+      if(phase === 'defenseBreak' || phase === 'defenseSideOut') {
+        if(!!friendsPosition) {
+          for(const [position, player] of Object.entries(friendsPosition)) {
+            let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
+            let coordinates = getPlayersPositionByZone({
+              zone: Number(position) as VolleyballScoutEventPosition,
+              isOpponent: player.player.isOpponent
+            })
+            if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
+            else {
+              playersCoordinates = [
+                ...playersCoordinates,
+                {
+                  player: player.player,
+                  coordinates
+                }
+              ]
+            }
+          }
+        }
+
+        if(!!enemyPosition) {
+          for(const [position, player] of Object.entries(enemyPosition)) {
+            let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
+            let coordinates = getPlayersPositionByZone({
+              zone: Number(position) as VolleyballScoutEventPosition,
+              isOpponent: player.player.isOpponent
+            })
+            if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
+            else {
+              playersCoordinates = [
+                ...playersCoordinates,
+                {
+                  player: player.player,
+                  coordinates
+                }
+              ]
+            }
+          }
+        }
+      } else if(phase == 'serve') {
+        if(!!friendsPosition) {
+          for(const [position, player] of Object.entries(friendsPosition)) {
+            let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
+            let coordinates = getPlayersPositionByZone({
+              zone: Number(position) as VolleyballScoutEventPosition,
+              isOpponent: player.player.isOpponent
+            })
+            if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
+            else {
+              playersCoordinates = [
+                ...playersCoordinates,
+                {
+                  player: player.player,
+                  coordinates
+                }
+              ]
+            }
+          }
+        }
+
+        if(!!enemyReceivePositions) {
+          for(const [position, player] of Object.entries(enemyReceivePositions)) {
+            let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
+            let coordinates = getPlayersPositionByZone({
+              zone: Number(position) as VolleyballScoutEventPosition,
+              anchor: player.anchor,
+              isOpponent: player.player.isOpponent
+            })
+            if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
+            else {
+              playersCoordinates = [
+                ...playersCoordinates,
+                {
+                  player: player.player,
+                  coordinates
+                }
+              ]
+            }
+          }
+        }
+      } else if(phase == 'receive') {
+        if(!!friendsReceivePositions) {
+          for(let k = 0; k < friendsReceivePositions.length; k += 1) {
+            let player = friendsReceivePositions[k]
+            let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
+            let coordinates = getPlayersPositionByZone({
+              zone: Number(player.position) as VolleyballScoutEventPosition,
+              anchor: player.anchor,
+              isOpponent: player.player.isOpponent
+            })
+            if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
+            else {
+              playersCoordinates = [
+                ...playersCoordinates,
+                {
+                  player: player.player,
+                  coordinates
+                }
+              ]
+            }
+          }
+        }
+
+        if(!!enemyPosition) {
+          for(const [position, player] of Object.entries(enemyPosition)) {
+            let exisitingPlayerIndex = playersCoordinates.findIndex(pp => pp.player.id == player.player.id)
+            let coordinates = getPlayersPositionByZone({
+              zone: Number(position) as VolleyballScoutEventPosition,
+              isOpponent: player.player.isOpponent
+            })
+            if(exisitingPlayerIndex !== -1) playersCoordinates[exisitingPlayerIndex].coordinates = coordinates
+            else {
+              playersCoordinates = [
+                ...playersCoordinates,
+                {
+                  player: player.player,
+                  coordinates
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  });
 </script>
 
 <T.SpotLight 

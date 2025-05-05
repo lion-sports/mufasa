@@ -7,7 +7,11 @@
 	import type { PageData } from './$types'
 	import { goto } from '$app/navigation'
 
-	export let data: PageData
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	let loading = false
 	function handleConfirmClick() {

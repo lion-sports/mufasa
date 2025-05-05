@@ -7,18 +7,36 @@
 	import type { Group } from '$lib/services/groups/groups.service'
 	import type { ComponentProps } from 'svelte'
 
-	export let teammates: Teammate[] = [],
-		team: { id: number } | undefined = undefined,
-		searchable: boolean = false,
-		onlyConvocables: boolean = false,
-		groupFilter: boolean = false,
-		selectableGroups: Group[] = [],
-		value: {
+	interface Props {
+		teammates?: Teammate[];
+		team?: { id: number } | undefined;
+		searchable?: boolean;
+		onlyConvocables?: boolean;
+		groupFilter?: boolean;
+		selectableGroups?: Group[];
+		value?: {
 			[key: number]: boolean
-		} = {}
+		};
+	}
 
-	let searchText: string
-	$: filteredTeammates = teammates.filter((teammate) => {
+	let {
+		teammates = $bindable([]),
+		team = undefined,
+		searchable = false,
+		onlyConvocables = false,
+		groupFilter = false,
+		selectableGroups = $bindable([]),
+		value = $bindable({})
+	}: Props = $props();
+
+	let searchText: string | undefined = $state()
+
+	function handleChange(teammate: Teammate, event: any) {
+		value[teammate.id] = event.target.checked
+	}
+
+	let selectedGroups: ComponentProps<typeof GroupMultipleSelectorChip>['value'] = $state([])
+	let filteredTeammates = $derived(teammates.filter((teammate) => {
 		return (
 			(!searchText ||
 				(!!searchText &&
@@ -32,23 +50,17 @@
 					teammate.groupId &&
 					selectedGroups.map((r) => r.value).includes(teammate.groupId?.toString())))
 		)
-	})
-
-	function handleChange(teammate: Teammate, event: any) {
-		value[teammate.id] = event.target.checked
-	}
-
-	let selectedGroups: ComponentProps<GroupMultipleSelectorChip>['value'] = []
+	}))
 </script>
 
 {#if searchable}
 	<div style:width="100%" style:margin-bottom="0px" style:display="flex">
 		<StandardTextfield bind:value={searchText} placeholder="Cerca partecipanti ...">
-			<svelte:fragment slot="prepend-inner">
-				<div style:margin-right="10px">
-					<Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
-				</div>
-			</svelte:fragment>
+      {#snippet prependInner()}
+        <div style:margin-right="10px">
+          <Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
+        </div>
+      {/snippet}
 		</StandardTextfield>
 	</div>
 {/if}
@@ -70,12 +82,14 @@
 				label=""
 				on:change={(event) => handleChange(teammate, event)}
 			>
-				<svelte:fragment slot="text">
-					<span>{teammate.alias || teammate.user.firstname + ' ' + teammate.user.lastname}</span>
-					<span class="font-thin text-xs ml-2"
-						>{teammate.group?.name || ''}</span
-					>
-				</svelte:fragment>
+				{#snippet text()}
+							
+						<span>{teammate.alias || teammate.user.firstname + ' ' + teammate.user.lastname}</span>
+						<span class="font-thin text-xs ml-2"
+							>{teammate.group?.name || ''}</span
+						>
+					
+							{/snippet}
 			</LabelAndCheckbox>
 		</div>
 	{/each}

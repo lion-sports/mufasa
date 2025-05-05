@@ -1,5 +1,4 @@
-<script lang="ts" context="module">
-	import type { Team } from '$lib/services/teams/teams.service'
+<script lang="ts" module>
 	import type { Invitation } from '$lib/services/invitations/invitations.service'
 </script>
 
@@ -14,7 +13,11 @@
 	import InvitationToAccept from '$lib/components/invitations/InvitationToAccept.svelte'
 	import type { PageData } from './$types'
 
-	export let data: PageData
+	interface Props {
+		data: PageData;
+	}
+
+	let { data = $bindable() }: Props = $props();
 
 	async function loadTeams() {
 		let service = new TeamsService({ fetch })
@@ -22,7 +25,7 @@
 		data.teams = paginationData.data
 	}
 
-	let invitationsToAccept: Invitation[]
+	let invitationsToAccept: Invitation[] = $state([])
 	async function loadInvitations() {
 		let service = new InvitationsService({ fetch })
 		invitationsToAccept = await service.invitationToAccept()
@@ -48,18 +51,18 @@
 </script>
 
 <PageTitle title="Teams">
-	<svelte:fragment slot="append">
-		<OptionMenu
-			options={[
-				{
-					name: 'new',
-					title: 'Nuovo',
-					icon: 'mdi-plus'
-				}
-			]}
-			on:select={handleOptionClick}
-		/>
-	</svelte:fragment>
+	{#snippet append()}
+    <OptionMenu
+      options={[
+        {
+          name: 'new',
+          title: 'Nuovo',
+          icon: 'mdi-plus'
+        }
+      ]}
+      onselect={handleOptionClick}
+    />
+	{/snippet}
 </PageTitle>
 
 <div>

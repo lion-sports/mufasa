@@ -5,9 +5,13 @@
 	import ScoutsService from '$lib/services/scouts/scouts.service'
   import type { PageData } from './$types';
   
-  export let data: PageData;
+  interface Props {
+    data: PageData;
+  }
 
-  let loading: boolean = false
+  let { data = $bindable() }: Props = $props();
+
+  let loading: boolean = $state(false)
 
   async function handleSubmit() {
     loading = true

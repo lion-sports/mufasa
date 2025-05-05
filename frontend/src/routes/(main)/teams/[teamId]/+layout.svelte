@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy'
+
 	import { page } from '$app/stores'
 	import type { ComponentProps } from 'svelte'
 	import { goto } from '$app/navigation'
@@ -12,12 +14,19 @@
 	import type { LayoutData } from './$types'
 	import { slide } from 'svelte/transition'
 
-	export let data: LayoutData
-	$: $team = data.team
+	interface Props {
+		data: LayoutData
+		children?: import('svelte').Snippet
+	}
 
-	let selectedTab: string = 'general',
-		options: ComponentProps<OptionMenu>['options'] = [],
-		tabs: ComponentProps<StandardTabSwitcher>['tabs'] = []
+	let { data, children }: Props = $props()
+	run(() => {
+		$team = data.team
+	})
+
+	let selectedTab: string = $state('general'),
+		options: ComponentProps<typeof OptionMenu>['options'] = $state([]),
+		tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = $state([])
 
 	options = []
 
@@ -66,12 +75,12 @@
 		{
 			name: 'general',
 			label: 'Generale',
-      icon: 'mdi-text'
+			icon: 'mdi-text'
 		},
 		{
 			name: 'teammates',
 			label: 'Partecipanti',
-      icon: 'mdi-account'
+			icon: 'mdi-account'
 		}
 	]
 
@@ -79,24 +88,24 @@
 		tabs.push({
 			name: 'groups',
 			label: 'Gruppi',
-      icon: 'mdi-account-multiple'
+			icon: 'mdi-account-multiple'
 		})
 
 	tabs.push({
 		name: 'calendar',
 		label: 'Calendario',
-    icon: 'mdi-calendar'
+		icon: 'mdi-calendar'
 	})
 
 	tabs.push({
 		name: 'weeks',
 		label: 'Settimane',
-    icon: 'mdi-clock'
+		icon: 'mdi-clock'
 	})
 
-	function handleOptionClick(
-		event: CustomEvent<{ element: NonNullable<ComponentProps<OptionMenu>['options']>[0] }>
-	) {
+	function handleOptionClick(event: {
+		detail: { element: NonNullable<ComponentProps<typeof OptionMenu>['options']>[0] }
+	}) {
 		if (event.detail?.element?.name == 'edit' && !!$team) {
 			goto('/teams/' + $team.id + '/edit')
 		} else if (event.detail?.element?.name == 'inviteUser' && !!$team) {
@@ -108,7 +117,7 @@
 		}
 	}
 
-	function handleTabClick(event: any) {
+	function handleTabClick() {
 		if (selectedTab == 'general') {
 			goto(`/teams/${$team?.id}/general`, { replaceState: true })
 		} else if (selectedTab == 'teammates') {
@@ -122,23 +131,25 @@
 		}
 	}
 
-	$: if ($page.url.href.endsWith('general')) {
-		selectedTab = 'general'
-	} else if (
-		$page.url.href.endsWith('teammates') ||
-		$page.url.href.endsWith('inviteUser') ||
-		$page.url.href.includes('teammates')
-	) {
-		selectedTab = 'teammates'
-	} else if ($page.url.href.endsWith('groups')) {
-		selectedTab = 'groups'
-	} else if ($page.url.href.endsWith('calendar')) {
-		selectedTab = 'calendar'
-	} else if ($page.url.href.endsWith('weeks')) {
-		selectedTab = 'weeks'
-	}
+	run(() => {
+		if ($page.url.href.endsWith('general')) {
+			selectedTab = 'general'
+		} else if (
+			$page.url.href.endsWith('teammates') ||
+			$page.url.href.endsWith('inviteUser') ||
+			$page.url.href.includes('teammates')
+		) {
+			selectedTab = 'teammates'
+		} else if ($page.url.href.endsWith('groups')) {
+			selectedTab = 'groups'
+		} else if ($page.url.href.endsWith('calendar')) {
+			selectedTab = 'calendar'
+		} else if ($page.url.href.endsWith('weeks')) {
+			selectedTab = 'weeks'
+		}
+	})
 
-	let exitTeamConfirmDialog: boolean = false
+	let exitTeamConfirmDialog: boolean = $state(false)
 
 	function confirmTeamExit() {
 		let service = new InvitationsService({ fetch })
@@ -153,24 +164,25 @@
 		}
 	}
 
-	$: headerHidden =
+	let headerHidden = $derived(
 		$page.url.pathname.endsWith('/groups/new') ||
-		/\/groups\/\d+\/edit$/.test($page.url.pathname) ||
-		$page.url.pathname.endsWith('/events/new') ||
-		/\/events\/\d+\//.test($page.url.pathname) ||
-    /\/teammates\/\d+\/edit$/.test($page.url.pathname) ||
-    /\/teammates\/\d+\/shirts.*$/.test($page.url.pathname)
+			/\/groups\/\d+\/edit$/.test($page.url.pathname) ||
+			$page.url.pathname.endsWith('/events/new') ||
+			/\/events\/\d+\//.test($page.url.pathname) ||
+			/\/teammates\/\d+\/edit$/.test($page.url.pathname) ||
+			/\/teammates\/\d+\/shirts.*$/.test($page.url.pathname)
+	)
 </script>
 
 {#if !!$team}
 	{#if !headerHidden}
 		<div transition:slide|local={{ duration: 200 }}>
 			<PageTitle title={$team.name} prependVisible={true}>
-				<svelte:fragment slot="append">
+				{#snippet append()}
 					{#if !!options && options.length > 0}
-						<OptionMenu {options} on:select={handleOptionClick} />
+						<OptionMenu {options} onselect={handleOptionClick} />
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</PageTitle>
 
 			<StandardTabSwitcher
@@ -178,12 +190,12 @@
 				marginTop="10px"
 				marginBottom="10px"
 				bind:selected={selectedTab}
-				on:tab-click={handleTabClick}
+				ontabClick={handleTabClick}
 			/>
 		</div>
 	{/if}
 
-	<slot />
+	{@render children?.()}
 {:else}
 	<CircularLoader />
 {/if}

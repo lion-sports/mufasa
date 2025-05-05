@@ -8,13 +8,17 @@
 	import ConfirmOrCancelButtons from '$lib/components/common/ConfirmOrCancelButtons.svelte'
 	import { invalidate } from '$app/navigation'
   
-  export let data: PageData;
+  interface Props {
+    data: PageData;
+  }
+
+  let { data }: Props = $props();
 
   let loading: boolean = false
 
-  let shirt: DeepPartial<Shirt> = {
+  let shirt: DeepPartial<Shirt> = $state({
     teammateId: data.teammate.id
-  }
+  })
 
   async function handleSubmit() {
     if(shirt.number === undefined || !shirt.teammateId) return

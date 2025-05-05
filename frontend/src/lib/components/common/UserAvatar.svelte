@@ -1,14 +1,28 @@
 <script lang="ts">
-	export let username: string,
-		description: string = '',
-    solanaPublicKey: string = '',
-		showTitleAndDescription: boolean = true,
-    direction: ComponentProps<DescriptiveAvatar>['direction'] = 'row',
-    reverse: ComponentProps<DescriptiveAvatar>['reverse'] | undefined = undefined,
-		src: string | undefined = undefined
 
 	import { Avatar, DescriptiveAvatar } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
+  interface Props {
+    username: string;
+    description?: string;
+    solanaPublicKey?: string;
+    showTitleAndDescription?: boolean;
+    direction?: ComponentProps<typeof DescriptiveAvatar>['direction'];
+    reverse?: ComponentProps<typeof DescriptiveAvatar>['reverse'] | undefined;
+    onclick?: ComponentProps<typeof DescriptiveAvatar>['onclick'] | undefined;
+    src?: string | undefined;
+  }
+
+  let {
+    username,
+    description = '',
+    solanaPublicKey = '',
+    showTitleAndDescription = true,
+    direction = 'row',
+    reverse = undefined,
+    src = undefined,
+    onclick = undefined
+  }: Props = $props();
 </script>
 
 {#if showTitleAndDescription}
@@ -18,7 +32,7 @@
     src={src || ''}
     {reverse}
     {direction}
-    on:click
+    {onclick}
     --avatar-min-width="40px"
   ></DescriptiveAvatar>
 

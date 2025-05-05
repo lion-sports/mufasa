@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { VolleyballScoutEventAnchor } from "@/lib/services/scouts/volleyball"
   
-  let clazz: string | undefined = undefined
-  export { clazz as class };
+  
 
   type PropertyMapper = {
     [Direction in typeof direction]?: {
@@ -10,8 +9,19 @@
     }
   }
 
-  export let direction: 'leftToRight' | 'rightToLeft' = 'leftToRight',
-    anchor: VolleyballScoutEventAnchor = 13
+  interface Props {
+    class?: string | undefined;
+    direction?: 'leftToRight' | 'rightToLeft';
+    anchor?: VolleyballScoutEventAnchor;
+    children?: import('svelte').Snippet;
+  }
+
+  let {
+    class: clazz = undefined,
+    direction = 'leftToRight',
+    anchor = 13,
+    children
+  }: Props = $props();
 
   const rightMapper: PropertyMapper = {
     'rightToLeft': {
@@ -133,7 +143,7 @@
     }
   }
 
-  let marker: HTMLElement | undefined = undefined
+  let marker: HTMLElement | undefined = $state(undefined)
 </script>
 
 <div class="w-full h-full relative">
@@ -161,6 +171,6 @@
     }
     bind:this={marker}
   >
-    <slot></slot>
+    {@render children?.()}
   </div>
 </div>

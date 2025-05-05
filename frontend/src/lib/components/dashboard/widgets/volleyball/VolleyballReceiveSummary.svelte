@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import ConfirmOrCancelButtons from "@/lib/components/common/ConfirmOrCancelButtons.svelte"
 	import StandardDialog from "@/lib/components/common/StandardDialog.svelte"
 	import StandardSelect from "@/lib/components/common/StandardSelect.svelte"
@@ -9,86 +11,94 @@
 	import TeammatesService from "@/lib/services/teammates/teammates.service"
 	import type { TeamFilter } from "@/lib/services/widgets/widgetSettings.service"
 	import WidgetSettingsService from "@/lib/services/widgets/widgetSettings.service"
-	import { GanymedeBarChart, HorizontalStackedProgress, Icon, Skeleton, theme } from "@likable-hair/svelte"
+	import { BarChart, HorizontalStackedProgress, Icon, Skeleton, theme } from "@likable-hair/svelte"
 	import { createEventDispatcher, type ComponentProps } from "svelte"
 
   let dispatch = createEventDispatcher<{
     'reload': undefined
   }>()
 
-  export let selectedSet: number[] = [],
+  interface Props {
+    selectedSet?: number[];
     widget: Widget<{
       totalReceive: TotalReceiveResult
       totalReceiveByPlayer: TotalReceiveByPlayerResult
       previousTotalReceiveByPlayer: TotalReceiveByPlayerResult
-    }>,
-    loadingData: boolean = false
+    }>;
+    loadingData?: boolean;
+  }
 
-  let data: ComponentProps<GanymedeBarChart>['data'] = {
+  let { selectedSet = [], widget, loadingData = false }: Props = $props();
+
+  let data: ComponentProps<typeof BarChart>['data'] = $state({
     labels: [],
     datasets: []
-  }
+  })
 
-  $: setting = widget.widgetSetting?.settings?.widget == 'VolleyballServeSummary' ? widget.widgetSetting?.settings : undefined
+  let setting = $derived(widget.widgetSetting?.settings?.widget == 'VolleyballServeSummary' ? widget.widgetSetting?.settings : undefined)
 
-  $: if(!!widget.data?.totalReceive) {
-    data = {
-      labels: ['++', '+', '-', '/', 'x'],
-      datasets: []
-    }
-
-    if(!setting || setting?.team == 'both' || setting?.team == 'friend') {
-      data.datasets = [
-        ...data.datasets,
-        {
-          label: 'Amici',
-          data: [],
-          backgroundColor: 'rgb(59, 130, 246, .6)',
-          borderColor: 'rgb(59, 130, 246, .6)',
-          tension: 0.3
-        }
-      ]
-    }
-
-    if(!setting || setting?.team == 'both' || setting?.team == 'opponent') {
-      data.datasets = [
-        ...data.datasets,
-        {
-          label: 'Avversari',
-          data: [],
-          backgroundColor: 'rgb(239, 68, 68, .6)',
-          borderColor: 'rgb(239, 68, 68, .6)',
-          tension: 0.3
-        }
-      ]
-    }
-
-    for(let i = 0; i < widget.data.totalReceive.length; i += 1) {
-      let totalReceiveRow = widget.data.totalReceive[i]
-
-      let datasetIndex = -1
-      if(totalReceiveRow.opponent) {
-        datasetIndex = data.datasets.findIndex((d) => d.label == 'Avversari')
-      } else {
-        datasetIndex = data.datasets.findIndex((d) => d.label == 'Amici')
+  run(() => {
+    if(!!widget.data?.totalReceive) {
+      data = {
+        labels: ['++', '+', '-', '/', 'x'],
+        datasets: []
       }
 
-      if(datasetIndex === -1) continue
-      data.datasets[datasetIndex].data = [ 
-        totalReceiveRow.perfect, 
-        totalReceiveRow.plus, 
-        totalReceiveRow.minus,
-        totalReceiveRow.slash,
-        totalReceiveRow.error
-      ]
-    }
-  }
+      if(!setting || setting?.team == 'both' || setting?.team == 'friend') {
+        data.datasets = [
+          ...data.datasets,
+          {
+            label: 'Amici',
+            data: [],
+            backgroundColor: 'rgb(59, 130, 246, .6)',
+            borderColor: 'rgb(59, 130, 246, .6)',
+            tension: 0.3
+          }
+        ]
+      }
 
-  let settingsOpened: boolean = false
-  let selectedTeamFilter: TeamFilter | undefined = undefined
-  $: selectedTeamFilter = widget.widgetSetting?.settings?.widget == 'VolleyballReceiveSummary' ? widget.widgetSetting?.settings.team : undefined
+      if(!setting || setting?.team == 'both' || setting?.team == 'opponent') {
+        data.datasets = [
+          ...data.datasets,
+          {
+            label: 'Avversari',
+            data: [],
+            backgroundColor: 'rgb(239, 68, 68, .6)',
+            borderColor: 'rgb(239, 68, 68, .6)',
+            tension: 0.3
+          }
+        ]
+      }
+
+      for(let i = 0; i < widget.data.totalReceive.length; i += 1) {
+        let totalReceiveRow = widget.data.totalReceive[i]
+
+        let datasetIndex = -1
+        if(totalReceiveRow.opponent) {
+          datasetIndex = data.datasets.findIndex((d) => d.label == 'Avversari')
+        } else {
+          datasetIndex = data.datasets.findIndex((d) => d.label == 'Amici')
+        }
+
+        if(datasetIndex === -1) continue
+        data.datasets[datasetIndex].data = [ 
+          totalReceiveRow.perfect, 
+          totalReceiveRow.plus, 
+          totalReceiveRow.minus,
+          totalReceiveRow.slash,
+          totalReceiveRow.error
+        ]
+      }
+    }
+  });
+
+  let settingsOpened: boolean = $state(false)
+  let selectedTeamFilter: TeamFilter | undefined = $state(undefined)
+  run(() => {
+    selectedTeamFilter = widget.widgetSetting?.settings?.widget == 'VolleyballReceiveSummary' ? widget.widgetSetting?.settings.team : undefined
+  });
   
-  let loadingSaveSetting: boolean = false
+  let loadingSaveSetting: boolean = $state(false)
 
   async function handleSaveSettings() {
     loadingSaveSetting = true
@@ -113,7 +123,7 @@
       Receive summary
     </div>
     <div>
-      <button on:click={() => settingsOpened = true}>
+      <button onclick={() => settingsOpened = true}>
         <Icon name="mdi-cog"></Icon>
       </button>
     </div>
@@ -126,7 +136,7 @@
           --skeleton-card-width="100%"
         ></Skeleton>
       {:else}
-        <GanymedeBarChart
+        <BarChart
           data={data}
           rgbTooltipBackgroundColor={$theme.colors?.[$theme.active]['dark']['background']['200']}
           rgbTooltipColor={$theme.colors?.[$theme.active]['dark']['contrast']['200']}
@@ -138,7 +148,7 @@
           xTickLabel={(value) => {
             return ['++', '+', '-', '/', 'x'][Number(value)]
           }}
-        ></GanymedeBarChart>
+        ></BarChart>
       {/if}
     </div>
     <div class="@md:col-span-6 p-2 @md:h-[350px]">
@@ -302,7 +312,7 @@
               { value: 'both', text: 'Entrambi'}
             ]}
             value={selectedTeamFilter}
-            on:change={(e) => {
+            onchange={(e) => {
               // @ts-ignore
               let value = e.target.value
               selectedTeamFilter = value

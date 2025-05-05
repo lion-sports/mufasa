@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Event } from '$lib/services/events/events.service'
 </script>
 
@@ -9,12 +9,25 @@
 	import { Icon } from '@likable-hair/svelte'
 	import type { Teammate } from '$lib/services/teams/teams.service'
 
-	export let events: Event[] = [],
-		team: { id: number } | undefined = undefined,
-		teammate: Teammate | undefined = undefined,
-		precompiledDate: DateTime | undefined = undefined,
-		showTeamName: boolean = false,
-    canCreate: boolean = false
+	interface Props {
+		events?: Event[];
+		team?: { id: number } | undefined;
+		teammate?: Teammate | undefined;
+		precompiledDate?: DateTime | undefined;
+		showTeamName?: boolean;
+		canCreate?: boolean;
+		noData?: import('svelte').Snippet;
+	}
+
+	let {
+		events = [],
+		team = undefined,
+		teammate = undefined,
+		precompiledDate = undefined,
+		showTeamName = false,
+		canCreate = false,
+		noData
+	}: Props = $props();
 
 	function formattedTime(event: Event) {
 		let fromTime: string = DateTime.fromJSDate(event.start)
@@ -48,18 +61,18 @@
 		return !!teammate && event.convocations.some((c) => !!teammate && c.teammateId == teammate.id)
 	}
 
-	$: sortedEvents = !!events
+	let sortedEvents = $derived(!!events
 		? events.sort((a, b) => {
 				return DateTime.fromJSDate(new Date(a.start)).diff(DateTime.fromJSDate(new Date(b.start)))
 					.milliseconds
 		})
-		: []
+		: [])
 </script>
 
 <div class="events-container">
 	{#if events.length > 0}
 		{#each sortedEvents as event}
-			<button class="event-post" on:click={() => handleEventClick(event)} class:clickable={true}>
+			<button class="event-post" onclick={() => handleEventClick(event)} class:clickable={true}>
         <div class="event-post-band"></div>
 				<div class="title">{event.name}</div>
 				<div class="time">
@@ -100,19 +113,19 @@
 		{/each}
 		{#if !!team && canCreate}
 			<div class="plus-container">
-				<Icon name="mdi-plus" click on:click={handlePlusClick} />
+				<Icon name="mdi-plus" onclick={handlePlusClick} />
 			</div>
 		{/if}
 	{:else}
-		<slot name="no-data">
+		{#if noData}{@render noData()}{:else}
 			<div class="no-data">
         Nessun evento, 
         <button 
-          on:click={handlePlusClick}
+          onclick={handlePlusClick}
           class="inline underline text-[rgb(var(--global-color-primary-500))]"
         >creane uno</button>
       </div>
-		</slot>
+		{/if}
 	{/if}
 </div>
 

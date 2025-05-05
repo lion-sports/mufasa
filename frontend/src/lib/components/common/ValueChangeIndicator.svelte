@@ -1,10 +1,19 @@
 <script lang="ts">
 	import { Icon } from "@likable-hair/svelte"
 
-  export let difference: number,
-    postfix: string | undefined = undefined,
-    invertPositivity: boolean = false,
-    showIcon: boolean = true
+  interface Props {
+    difference: number;
+    postfix?: string | undefined;
+    invertPositivity?: boolean;
+    showIcon?: boolean;
+  }
+
+  let {
+    difference,
+    postfix = undefined,
+    invertPositivity = false,
+    showIcon = true
+  }: Props = $props();
 </script>
 
 {#if difference !== 0}

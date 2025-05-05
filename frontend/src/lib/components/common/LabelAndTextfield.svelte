@@ -1,24 +1,42 @@
 <script lang="ts">
-	let clazz: {
+  import type { ComponentProps } from 'svelte';
+	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
+
+	interface Props {
+		class?: {
 		label?: string
 		input?: {
 			container?: string
 			row?: string
 			input?: string
 		}
-	} = {}
-	export { clazz as class }
+	};
+		value?: string | number | undefined;
+		label?: string | undefined;
+		placeholder?: string;
+		name: string;
+		type?: 'password' | 'text' | 'number';
+		readonly?: boolean;
+		error?: boolean;
+		disabled?: boolean;
+		appendInner?: import('svelte').Snippet;
+	}
 
-	export let value: string | number | undefined = undefined,
-		label: string | undefined = undefined,
-		placeholder: string = '',
-		name: string,
-		type: 'password' | 'text' | 'number' = 'text',
-		readonly: boolean = false,
-		error: boolean = false,
-		disabled: boolean = false
+	let {
+		class: clazz = {},
+		value = $bindable(undefined),
+		label = undefined,
+		placeholder = '',
+		name,
+		type = 'text',
+		readonly = false,
+		error = false,
+		disabled = false,
+		appendInner,
+    ...rest
+  }: Props & ComponentProps<typeof StandardTextfield> = $props();
 
-	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
+	const appendInner_render = $derived(appendInner);
 </script>
 
 <label style:font-weight="500" style:margin-left="3px" for={name} class={clazz.label}
@@ -32,12 +50,13 @@
 		{error}
 		{disabled}
 		{placeholder}
-		on:input
-		on:focus
+		{...rest}
 		class={clazz.input}
 	>
-		<svelte:fragment slot="append-inner">
-			<slot name="append-inner" />
-		</svelte:fragment>
+		{#snippet appendInner()}
+			
+				{@render appendInner_render?.()}
+			
+			{/snippet}
 	</StandardTextfield>
 </div>

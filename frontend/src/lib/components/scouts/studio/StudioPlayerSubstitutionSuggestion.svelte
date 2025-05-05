@@ -6,8 +6,12 @@
 	import TeammatesService from "@/lib/services/teammates/teammates.service"
 	import { Icon } from "@likable-hair/svelte"
 
-  export let player: ScoutEventPlayer,
-    scout: Scout
+  interface Props {
+    player: ScoutEventPlayer;
+    scout: Scout;
+  }
+
+  let { player, scout }: Props = $props();
 
   async function handleSubstitutionClick(playerIn: ScoutEventPlayer) {
     let confirmed = confirm('Vuoi davverso sotituire il giocatore?')
@@ -52,7 +56,7 @@
 {#if player.role == 'middleBlocker'}
   {#each scout.players.filter(fp => fp.role == 'libero' && fp.isOpponent == player.isOpponent) as libero}
     <button 
-      on:click={() => handleSubstitutionClick(libero)}
+      onclick={() => handleSubstitutionClick(libero)}
       style:--hover-background-color={player.isOpponent ? '#fca5a51f' : '#93c5fd1f'}
       class="flex text-left items-center gap-4 hover:bg-[var(--hover-background-color)] py-2 px-2 w-full rounded-sm"
     >
@@ -79,7 +83,7 @@
 {#if player.role !== 'libero'}
   {#each scout.players.filter(fp => fp.role == player.role && fp.isOpponent == player.isOpponent && fp.id !== player.id) as suggestedPlayer}
     <button 
-      on:click={() => handleSubstitutionClick(suggestedPlayer)}
+      onclick={() => handleSubstitutionClick(suggestedPlayer)}
       style:--hover-background-color={player.isOpponent ? '#fca5a51f' : '#93c5fd1f'}
       class="flex text-left items-center gap-4 hover:bg-[var(--hover-background-color)] py-2 px-2 w-full rounded-sm"
     >
@@ -106,6 +110,6 @@
   <button 
     style:--hover-background-color={player.isOpponent ? '#fca5a51f' : '#93c5fd1f'}
     class="text-left hover:bg-[var(--hover-background-color)] py-2 px-2 w-full rounded-sm"
-    on:click={handleExitLiberoClick}
+    onclick={handleExitLiberoClick}
   >Uscita libero</button>
 {/if}

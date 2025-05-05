@@ -1,15 +1,11 @@
 <script lang="ts">
-	import AuthService from '$lib/services/auth/auth.service'
-	import { goto } from '$app/navigation'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
-	import { Icon } from '@likable-hair/svelte'
-	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
 	import type { Reward } from '$lib/services/solana/solana.service'
 	import SolanaService from '$lib/services/solana/solana.service'
 
-	let solanaPublicKey: string = '',
-		loading: boolean = false
+	let solanaPublicKey: string = $state(''),
+		loading: boolean = $state(false)
 
 	function reward() {
 		loading = true
@@ -47,9 +43,6 @@
 					name="email"
 					class={{
 						label: 'box-border w-full',
-						input: {
-							container: '!box-border !w-full'
-						}
 					}}
 					bind:value={solanaPublicKey}
 				/>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import StudioPlayersList from '$lib/components/scouts/studio/StudioPlayersList.svelte'
   import type { PageData } from './$types';
   import * as Menubar from "$lib/components/ui/menubar";
@@ -21,20 +23,26 @@
 	import ScoutsService from '@/lib/services/scouts/scouts.service'
 	import StudioSettings from '@/lib/components/scouts/studio/StudioSettings.svelte'
 
-  export let data: PageData;
-  $: $studio = data.studio
+  interface Props {
+    data: PageData;
+  }
 
-  let playersOpened: boolean = false,
-    settingsOpened: boolean = false,
-    addPlayerDialog: boolean = false,
-    addPlayerSelectedTab: string | undefined = undefined,
-    newPlayer: Partial<Player> = {
+  let { data }: Props = $props();
+  run(() => {
+    $studio = data.studio
+  });
+
+  let playersOpened: boolean = $state(false),
+    settingsOpened: boolean = $state(false),
+    addPlayerDialog: boolean = $state(false),
+    addPlayerSelectedTab: string | undefined = $state(undefined),
+    newPlayer: Partial<Player> = $state({
       aliases: []
-    },
-    insertStartingSixDialog: boolean = false,
-    insertStartingSixSelectedTab: string | undefined = undefined,
-    reloadFirstSetStartingSix: boolean = false,
-    selectedSection: 'benches' | 'player' | 'analysis' = 'benches'
+    }),
+    insertStartingSixDialog: boolean = $state(false),
+    insertStartingSixSelectedTab: string | undefined = $state(undefined),
+    reloadFirstSetStartingSix: boolean = $state(false),
+    selectedSection: 'benches' | 'player' | 'analysis' = $state('benches')
 
   async function handleStartingSixSet(e: CustomEvent<{ position: VolleyballScoutEventPosition, player: ScoutEventPlayer | undefined }>) {
     if(!!e.detail.player)
@@ -68,10 +76,10 @@
     }
   }
 
-  let startingSixPositions: VolleyballPlayersPosition = {
+  let startingSixPositions: VolleyballPlayersPosition = $state({
     friends: {},
     enemy: {}
-  }
+  })
 </script>
 
 

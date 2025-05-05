@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { Checkbox } from '@likable-hair/svelte'
-	export let value: boolean = false,
-		disabled: boolean = false,
-		id: string
+	interface Props {
+		value?: boolean;
+		disabled?: boolean;
+		id: string;
+	}
+
+	let { value = $bindable(false), disabled = false, id }: Props = $props();
 </script>
 
 <Checkbox bind:value {id} {disabled} on:change />

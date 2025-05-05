@@ -8,8 +8,8 @@
 	let team: {
 		name?: string
 		notes?: string
-	} = {}
-	let loading = false
+	} = $state({})
+	let loading = $state(false)
 
 	function handleSubmit() {
 		let service = new TeamsService({ fetch })

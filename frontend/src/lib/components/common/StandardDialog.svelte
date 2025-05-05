@@ -1,18 +1,28 @@
 <script lang="ts">
-	export let open: boolean = false,
-		title: string | undefined = undefined,
-		_overlayOpacity: string | undefined = '60%'
 
 	import { Dialog } from '@likable-hair/svelte'
+	interface Props {
+		open: boolean;
+		title?: string | undefined;
+		_overlayOpacity?: string | undefined;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		open = $bindable(),
+		title = undefined,
+		_overlayOpacity = '60%',
+		children
+	}: Props = $props();
 </script>
 
 <Dialog bind:open {_overlayOpacity}>
-	<div class="card">
-		{#if !!title}
-			<div class="font-bold text-xl">{title}</div>
-		{/if}
-		<slot />
-	</div>
+  <div class="card">
+    {#if !!title}
+      <div class="font-bold text-xl">{title}</div>
+    {/if}
+    {@render children?.()}
+  </div>
 </Dialog>
 
 <style>

@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Chip } from '$lib/components/common/ChipMultipleSelection.svelte'
 	import type { Group } from '$lib/services/groups/groups.service'
 </script>
@@ -6,13 +6,15 @@
 <script lang="ts">
 	import ChipMultipleSelection from '$lib/components/common/ChipMultipleSelection.svelte'
 
-	export let value: Chip[],
-		onlyConvocable: boolean = false,
-		groups: Group[]
+	interface Props {
+		value: Chip[];
+		onlyConvocable?: boolean;
+		groups: Group[];
+	}
 
-	let filteredChips: Chip[]
+	let { value = $bindable(), onlyConvocable = false, groups = $bindable() }: Props = $props();
 
-	$: filteredChips = !!groups
+	let filteredChips: Chip[] = $derived(!!groups
 		? groups
 				.filter((group) => {
 					return !onlyConvocable || (onlyConvocable && group.convocable)
@@ -23,7 +25,9 @@
 						label: group.name
 					}
 				})
-		: []
+		: [])
+
+	
 </script>
 
 <ChipMultipleSelection bind:chips={filteredChips} bind:value />

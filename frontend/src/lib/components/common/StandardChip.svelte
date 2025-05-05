@@ -1,10 +1,21 @@
 <script lang="ts">
-	export let close: boolean = false,
-		closeIcon: string = 'mdi-close',
-		text: string | undefined = undefined,
-		fontWeight: number | undefined = undefined
 
 	import { Chip } from '@likable-hair/svelte'
+	interface Props {
+		close?: boolean;
+		closeIcon?: string;
+		text?: string | undefined;
+		fontWeight?: number | undefined;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		close = false,
+		closeIcon = 'mdi-close',
+		text = undefined,
+		fontWeight = undefined,
+		children
+	}: Props = $props();
 </script>
 
 <Chip label {close} {closeIcon} on:click on:close>
@@ -14,8 +25,8 @@
 		style:align-items="center"
 		style:font-weight={fontWeight}
 	>
-		<slot>
+		{#if children}{@render children()}{:else}
 			{text}
-		</slot>
+		{/if}
 	</div>
 </Chip>

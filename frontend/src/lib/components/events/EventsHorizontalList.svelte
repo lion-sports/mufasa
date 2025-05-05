@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Event } from '$lib/services/events/events.service'
 </script>
 
@@ -8,10 +8,21 @@
 	import qs from 'qs'
 	import { Icon } from '@likable-hair/svelte'
 
-	export let events: Event[] = [],
-		team: { id: number } | undefined = undefined,
-		precompiledDate: DateTime | undefined = undefined,
-    canCreate: boolean = false
+	interface Props {
+		events?: Event[];
+		team?: { id: number } | undefined;
+		precompiledDate?: DateTime | undefined;
+		canCreate?: boolean;
+		noData?: import('svelte').Snippet;
+	}
+
+	let {
+		events = [],
+		team = undefined,
+		precompiledDate = undefined,
+		canCreate = false,
+		noData
+	}: Props = $props();
 
 	function formattedTime(event: Event) {
 		let fromTime: string = DateTime.fromJSDate(event.start)
@@ -41,18 +52,18 @@
 		}
 	}
 
-	$: sortedEvents = !!events
+	let sortedEvents = $derived(!!events
 		? events.sort((a, b) => {
 				return DateTime.fromJSDate(new Date(a.start)).diff(DateTime.fromJSDate(new Date(b.start)))
 					.milliseconds
 		})
-		: []
+		: [])
 </script>
 
 <div class="events-container">
 	{#if events.length > 0}
 		{#each sortedEvents as event}
-			<button class="event-post" on:click={() => handleEventClick(event)} class:clickable={true}>
+			<button class="event-post" onclick={() => handleEventClick(event)} class:clickable={true}>
         <div class="event-post-band"></div>
 				<div class="title">{event.name}</div>
         <div class="team">{event.team.name}</div>
@@ -67,13 +78,13 @@
 		{/each}
 		{#if !!team && canCreate}
 			<div class="plus-container">
-				<Icon name="mdi-plus" click on:click={handlePlusClick} />
+				<Icon name="mdi-plus" onclick={handlePlusClick} />
 			</div>
 		{/if}
 	{:else}
-		<slot name="no-data">
+		{#if noData}{@render noData()}{:else}
 			<div class="no-data">Nessun evento</div>
-		</slot>
+		{/if}
 	{/if}
 </div>
 

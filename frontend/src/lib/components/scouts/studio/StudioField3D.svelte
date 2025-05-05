@@ -4,10 +4,19 @@
 	import type { Scout } from '@/lib/services/scouts/scouts.service'
 	import type { ScoutEventPlayer, VolleyballPhase } from 'lionn-common'
 
-  export let scout: Scout,
-		phase: VolleyballPhase = 'serve',
-    selectedPlayer: ScoutEventPlayer | undefined = undefined,
-    friendSides: 'right' | 'left' = 'left'
+  interface Props {
+    scout: Scout;
+    phase?: VolleyballPhase;
+    selectedPlayer?: ScoutEventPlayer | undefined;
+    friendSides?: 'right' | 'left';
+  }
+
+  let {
+    scout = $bindable(),
+    phase = $bindable('serve'),
+    selectedPlayer = $bindable(undefined),
+    friendSides = $bindable('left')
+  }: Props = $props();
 </script>
 
 <div class="overflow-auto h-full">

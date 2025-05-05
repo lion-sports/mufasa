@@ -7,10 +7,14 @@
 	import type { ScoutStudio } from "@/lib/services/scouts/scouts.service"
 	import { Icon } from "@likable-hair/svelte"
 
-  export let dashboards: Dashboard[] = [],
-    studio: ScoutStudio
+  interface Props {
+    dashboards?: Dashboard[];
+    studio: ScoutStudio;
+  }
 
-  let loadingActiveDashboard: boolean = false
+  let { dashboards = $bindable([]), studio }: Props = $props();
+
+  let loadingActiveDashboard: boolean = $state(false)
 	async function activeDashboard(dashboard: Dashboard) {
 		loadingActiveDashboard = true
 
@@ -24,9 +28,9 @@
 		loadingActiveDashboard = false
 	}
 
-	let confirmDeleteDashboardDialog: boolean = false,
-		deletingDashboard: Dashboard | undefined = undefined,
-		loadingDeleteDashboard: boolean = false
+	let confirmDeleteDashboardDialog: boolean = $state(false),
+		deletingDashboard: Dashboard | undefined = $state(undefined),
+		loadingDeleteDashboard: boolean = $state(false)
 	async function handleConfirmDashboardDelete() {
 		if (!deletingDashboard) return
 
@@ -83,7 +87,7 @@
         {#if !dashboard.active}
           <button
             class="text-[rgb(var(--global-color-primary-500))]"
-            on:click={() => activeDashboard(dashboard)}
+            onclick={() => activeDashboard(dashboard)}
             disabled={loadingActiveDashboard}
           >
             {#if loadingActiveDashboard}
@@ -98,7 +102,7 @@
               class="text-[rgb(var(--global-color-error-500))]"
               class:opacity-50={dashboard.active || loadingDeleteDashboard}
               disabled={dashboard.active || loadingDeleteDashboard}
-              on:click={() => {
+              onclick={() => {
                 deletingDashboard = dashboard
                 confirmDeleteDashboardDialog = true
               }}

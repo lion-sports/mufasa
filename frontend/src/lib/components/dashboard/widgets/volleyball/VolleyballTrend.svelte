@@ -1,119 +1,130 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
 	import ConfirmOrCancelButtons from "@/lib/components/common/ConfirmOrCancelButtons.svelte"
 	import StandardAutocomplete from "@/lib/components/common/StandardAutocomplete.svelte"
 	import StandardDialog from "@/lib/components/common/StandardDialog.svelte"
 	import StandardSelect from "@/lib/components/common/StandardSelect.svelte"
 	import StandardTextfield from "@/lib/components/common/StandardTextfield.svelte"
-	import ValueChangeIndicator from "@/lib/components/common/ValueChangeIndicator.svelte"
-	import PlayerMarker from "@/lib/components/scouts/PlayerMarker.svelte"
 	import type { Widget } from "@/lib/services/dashboards/dashboard.service"
-	import type { TotalServeByPlayerResult, TotalServeResult, TotalSpikeForPlayerAndPositionResult, TotalSpikeForPlayerResult, TotalSpikeForPositionResult, TrendResult } from "@/lib/services/scouts/scoutAnalysis.service"
-	import TeammatesService from "@/lib/services/teammates/teammates.service"
 	import type { TeamFilter } from "@/lib/services/widgets/widgetSettings.service"
 	import WidgetSettingsService from "@/lib/services/widgets/widgetSettings.service"
-	import { GanymedeLineChart, HorizontalStackedProgress, Icon, Skeleton, theme } from "@likable-hair/svelte"
+	import { LineChart, Icon, Skeleton } from "@likable-hair/svelte"
 	import { createEventDispatcher, type ComponentProps } from "svelte"
+	import type { TrendResult } from '@/lib/services/scouts/scoutAnalysis.service'
 
   let dispatch = createEventDispatcher<{
     'reload': undefined
   }>()
 
-  export let selectedSet: number[] = [],
+  interface Props {
+    selectedSet?: number[];
     widget: Widget<{
       totalTrend: TrendResult
       trendForType: {
         [Key in 'block' | 'serve' | 'spike' | 'receive']?: TrendResult
       }
-    }>,
-    loadingData: boolean = false
-
-  let data: ComponentProps<GanymedeLineChart>['data'] = {
-    labels: [],
-    datasets: []
+    }>;
+    loadingData?: boolean;
   }
 
-  $: if(!!widget.data?.totalTrend) {
-    data = {
-      labels: [],
-      datasets: []
-    }
+  let { selectedSet = [], widget, loadingData = false }: Props = $props();
 
-    data.datasets = [
-      ...data.datasets,
-      {
-        label: 'Totale',
-        data: [],
-        backgroundColor: 'rgb(239, 71, 110, .6)',
-        borderColor: 'rgb(239, 71, 110, .6)',
-        tension: 0.3,
-        spanGaps: true
+  let data: ComponentProps<typeof LineChart>['data'] = $state({
+    labels: [],
+    datasets: []
+  })
+
+  run(() => {
+    if(!!widget.data?.totalTrend) {
+      data = {
+        labels: [],
+        datasets: []
       }
-    ]
 
-    let typeToColors: Record<string, string> = {
-      'block': '#d81159',
-      'serve': '#ffbc42',
-      'spike': '#0496ff',
-      'receive': '#006ba6'
-    }
-
-    for(const [key, value] of Object.entries(widget.data.trendForType)) {
-      let type = key
       data.datasets = [
         ...data.datasets,
         {
-          label: type,
+          label: 'Totale',
           data: [],
-          backgroundColor: typeToColors[type],
-          borderColor: typeToColors[type],
+          backgroundColor: 'rgb(239, 71, 110, .6)',
+          borderColor: 'rgb(239, 71, 110, .6)',
           tension: 0.3,
           spanGaps: true
         }
       ]
-    }
 
-    for(let i = 0; i < widget.data.totalTrend.length; i += 1) {
-      let trendRow = widget.data.totalTrend[i]
-      data.labels = [...data.labels, '']
+      let typeToColors: Record<string, string> = {
+        'block': '#d81159',
+        'serve': '#ffbc42',
+        'spike': '#0496ff',
+        'receive': '#006ba6'
+      }
 
-      data.datasets[0].data = [
-        ...data.datasets[0].data,
-        trendRow.windowAverageRating
-      ]
+      for(const [key, value] of Object.entries(widget.data.trendForType)) {
+        let type = key
+        data.datasets = [
+          ...data.datasets,
+          {
+            label: type,
+            data: [],
+            backgroundColor: typeToColors[type],
+            borderColor: typeToColors[type],
+            tension: 0.3,
+            spanGaps: true
+          }
+        ]
+      }
 
-      let datasetIndex = data.datasets.findIndex((d) => d.label === trendRow.type)
-      if(datasetIndex === -1) continue
+      for(let i = 0; i < widget.data.totalTrend.length; i += 1) {
+        let trendRow = widget.data.totalTrend[i]
+        data.labels = [...data.labels, '']
 
-      let typeTrend = widget.data.trendForType[trendRow.type]
-      if(!!typeTrend) {
-        let rowIndex = typeTrend.findIndex((e) => e._id === trendRow._id)
-        if(rowIndex !== -1) {
-          data.datasets[datasetIndex].data = [
-            ...data.datasets[datasetIndex].data,
-            typeTrend[rowIndex].windowAverageRating
+        data.datasets[0].data = [
+          ...data.datasets[0].data,
+          trendRow.windowAverageRating
+        ]
+
+        let datasetIndex = data.datasets.findIndex((d) => d.label === trendRow.type)
+        if(datasetIndex === -1) continue
+
+        let typeTrend = widget.data.trendForType[trendRow.type]
+        if(!!typeTrend) {
+          let rowIndex = typeTrend.findIndex((e) => e._id === trendRow._id)
+          if(rowIndex !== -1) {
+            data.datasets[datasetIndex].data = [
+              ...data.datasets[datasetIndex].data,
+              typeTrend[rowIndex].windowAverageRating
+            ]
+          }
+        }
+
+        for(let k = 0; k < data.datasets.length; k += 1) {
+          if(data.datasets[k].label === trendRow.type) continue
+          data.datasets[k].data = [
+            ...data.datasets[k].data,
+            null
           ]
         }
       }
-
-      for(let k = 0; k < data.datasets.length; k += 1) {
-        if(data.datasets[k].label === trendRow.type) continue
-        data.datasets[k].data = [
-          ...data.datasets[k].data,
-          null
-        ]
-      }
     }
-  }
+  });
 
-  let settingsOpened: boolean = false
-  let selectedTeamFilter: TeamFilter | undefined = undefined
-  $: selectedTeamFilter = widget.widgetSetting?.settings?.widget == 'VolleyballTrend' ? widget.widgetSetting?.settings.team : undefined
-  let selectedType: ('block' | 'serve' | 'spike' | 'receive')[] | undefined = undefined
-  $: selectedType = widget.widgetSetting?.settings?.widget == 'VolleyballTrend' ? widget.widgetSetting?.settings.type : undefined
-  let selectedWindow: number | undefined = undefined
-  $: selectedWindow = widget.widgetSetting?.settings?.widget == 'VolleyballTrend' ? widget.widgetSetting?.settings.window : undefined
+  let settingsOpened: boolean = $state(false)
+  let selectedTeamFilter: TeamFilter | undefined = $state(undefined)
+  run(() => {
+    selectedTeamFilter = widget.widgetSetting?.settings?.widget == 'VolleyballTrend' ? widget.widgetSetting?.settings.team : undefined
+  });
+  let selectedType: ('block' | 'serve' | 'spike' | 'receive')[] | undefined = $state(undefined)
+  run(() => {
+    selectedType = widget.widgetSetting?.settings?.widget == 'VolleyballTrend' ? widget.widgetSetting?.settings.type : undefined
+  });
+  let selectedWindow: number | undefined = $state(undefined)
+  run(() => {
+    selectedWindow = widget.widgetSetting?.settings?.widget == 'VolleyballTrend' ? widget.widgetSetting?.settings.window : undefined
+  });
   
-  let loadingSaveSetting: boolean = false
+  let loadingSaveSetting: boolean = $state(false)
 
   async function handleSaveSettings() {
     loadingSaveSetting = true
@@ -143,7 +154,7 @@
       {/if}
     </div>
     <div>
-      <button on:click={() => settingsOpened = true}>
+      <button onclick={() => settingsOpened = true}>
         <Icon name="mdi-cog"></Icon>
       </button>
     </div>
@@ -156,7 +167,7 @@
           --skeleton-card-width="100%"
         ></Skeleton>
       {:else}
-        <GanymedeLineChart
+        <LineChart
           data={data}
           showXTicks={false}
           showYTicks={false}
@@ -171,7 +182,7 @@
           hitRadius={0}
           hoverRadius={0}
           tooltipsDisabled={false}
-        ></GanymedeLineChart>
+        ></LineChart>
       {/if}
     </div>
   </div>
@@ -194,7 +205,7 @@
               { value: 'both', text: 'Entrambi'}
             ]}
             value={selectedTeamFilter}
-            on:change={(e) => {
+            onchange={(e) => {
               // @ts-ignore
               let value = e.target.value
               selectedTeamFilter = value
@@ -213,7 +224,7 @@
               { value: 'receive', label: 'receive'},
             ]}
             values={selectedType?.map((e) => ({ value: e, label: e })) || []}
-            on:change={(e) => {
+            onchange={(e) => {
               // @ts-ignore
               selectedType = e.detail.selection.map((e) => e.value)
             }}
@@ -228,7 +239,7 @@
           <StandardTextfield
             value={selectedWindow}
             type="number"
-            on:input={(e) => {
+            oninput={(e) => {
               // @ts-ignore
               let value = e.target?.value
               selectedWindow = value === '' ? undefined : Number(value)

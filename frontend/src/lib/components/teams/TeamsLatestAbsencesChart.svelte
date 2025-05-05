@@ -1,8 +1,11 @@
 <script lang="ts">
-  import { GanymedeLineChart } from "@likable-hair/svelte";
+  import { run } from 'svelte/legacy';
+
+  import { LineChart } from "@likable-hair/svelte";
 	import type { ComponentProps } from "svelte"
 
-  export let absences: Record<number, {
+  interface Props {
+    absences?: Record<number, {
     team: {
       id: number,
       name: string
@@ -11,9 +14,15 @@
       eventId: number,
       absencesNumber: number
     }[]
-  }> = {}
+  }>;
+  }
 
-  let data: ComponentProps<GanymedeLineChart>['data']
+  let { absences = {} }: Props = $props();
+
+  let data: ComponentProps<typeof LineChart>['data'] = {
+    labels: [],
+    datasets: []
+  }
 
   let backgroundColors = [
     '#ED1C2480',
@@ -23,29 +32,29 @@
     '#C73E1D80'
   ]
 
-  $: if(!!absences) {
-    data = {
-      labels: Array.from({ length: 10 }, (_, index) => index + 1).map((v) => v.toString()),
-      datasets: []
-    }
-
-    for(const [teamId, teamValue] of Object.entries(absences)) {
-      let dataset: NonNullable<ComponentProps<GanymedeLineChart>['data']>['datasets'][0] = {
-        label: teamValue.team.name,
-        data: teamValue.absences.map((a) => a.absencesNumber),
-        backgroundColor: backgroundColors[data.datasets.length % backgroundColors.length],
-        borderColor: backgroundColors[data.datasets.length % backgroundColors.length],
-        tension: .2
+  run(() => {
+    if(!!absences) {
+      data = {
+        labels: Array.from({ length: 10 }, (_, index) => index + 1).map((v) => v.toString()),
+        datasets: []
       }
 
-      data.datasets.push(dataset)
-    }
+      for(const [teamId, teamValue] of Object.entries(absences)) {
+        let dataset: NonNullable<ComponentProps<typeof LineChart>['data']>['datasets'][0] = {
+          label: teamValue.team.name,
+          data: teamValue.absences.map((a) => a.absencesNumber),
+          backgroundColor: backgroundColors[data.datasets.length % backgroundColors.length],
+          borderColor: backgroundColors[data.datasets.length % backgroundColors.length],
+          tension: .2
+        }
 
-    data = {...data}
-  }
+        data.datasets.push(dataset)
+      }
+    }
+  });
 </script>
 
-<GanymedeLineChart
+<LineChart
   {data}
   showXTicks
-></GanymedeLineChart>
+></LineChart>

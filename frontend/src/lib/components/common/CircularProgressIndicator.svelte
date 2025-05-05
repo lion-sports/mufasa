@@ -1,8 +1,12 @@
 <script lang="ts">
-	export let progress: number = 0
+	interface Props {
+		progress?: number;
+	}
+
+	let { progress = 0 }: Props = $props();
 
   // x : 109.9 = progress : 100
-  $: dashoffset = 109.9 * (100 - progress) / 100
+  let dashoffset = $derived(109.9 * (100 - progress) / 100)
 </script>
 
 <svg

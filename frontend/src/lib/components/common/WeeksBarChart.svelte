@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Bar } from 'svelte-chartjs'
+  import BarChart from '$lib/components/common/BarChart.svelte'
 
-	let background: string | undefined = undefined
+	let background: string | undefined = $state(undefined)
 	onMount(() => {
 		let style = getComputedStyle(document.body)
 		background = style.getPropertyValue('--global-color-background-200')
@@ -12,7 +12,8 @@
 
 	ChartJS.register(...registerables)
 
-	export let data: {
+	interface Props {
+		data?: {
 			labels: string[]
 			datasets: {
 				label: string
@@ -22,24 +23,37 @@
 				hoverBackgroundColor?: string[]
 				tension?: number
 			}[]
-		} = {
+		};
+		horizontal?: boolean;
+		responsive?: boolean;
+		maintainAspectRatio?: boolean;
+		showLegend?: boolean;
+		showYTicks?: boolean;
+		showXTicks?: boolean;
+		displayYGrid?: boolean;
+		lineWidth?: number;
+	}
+
+	let {
+		data = $bindable({
 			labels: [],
 			datasets: []
-		},
-		horizontal: boolean = false,
-		responsive: boolean = true,
-		maintainAspectRatio: boolean = true,
-		showLegend: boolean = true,
-		showYTicks: boolean = true,
-		showXTicks: boolean = true,
-		displayYGrid: boolean = true,
-		lineWidth: number = 1
+		}),
+		horizontal = false,
+		responsive = true,
+		maintainAspectRatio = true,
+		showLegend = true,
+		showYTicks = true,
+		showXTicks = true,
+		displayYGrid = true,
+		lineWidth = 1
+	}: Props = $props();
 
-	$: gridColor = 'rgb(' + (background || '200, 200, 200') + ', .3)'
+	let gridColor = $derived('rgb(' + (background || '200, 200, 200') + ', .3)')
 </script>
 
-<Bar
-	bind:data
+<BarChart
+	data={$state.snapshot(data)}
 	options={{
 		indexAxis: horizontal ? 'y' : 'x',
 		responsive: responsive,
@@ -85,4 +99,4 @@
 			}
 		}
 	}}
-></Bar>
+></BarChart>

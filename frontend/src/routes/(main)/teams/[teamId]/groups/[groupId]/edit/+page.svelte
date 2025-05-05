@@ -5,9 +5,13 @@
 	import ConfirmOrCancelButtons from '$lib/components/common/ConfirmOrCancelButtons.svelte'
 	import type { PageData } from './$types'
 
-  export let data: PageData
+	interface Props {
+		data: PageData;
+	}
 
-	let loading = false
+	let { data }: Props = $props();
+
+	let loading = $state(false)
 	async function handleConfirmClick() {
 		loading = true
 
