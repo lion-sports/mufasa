@@ -131,7 +131,7 @@
 		convocationDetailDialogOpen = true
 	}
 
-	let selectedGroups: ComponentProps<GroupMultipleSelectorChip>['value'] = $state([])
+	let selectedGroups: ComponentProps<typeof GroupMultipleSelectorChip>['value'] = $state([])
 
 	run(() => {
 		if (!!editingConvocation) {
@@ -181,7 +181,7 @@
 </script>
 
 <MediaQuery >
-	{#snippet children({ lAndUp })}
+	{#snippet defaultSnippet({ lAndUp })}
 		<div>
 			<div class="summary">
 				<HorizontalStackedProgress
@@ -254,15 +254,14 @@
 											{#if canConfirm || convocation.teammate.userId == $user?.id}
 												<Icon
 													name="mdi-check"
-													click
-													on:click={() => confirmConvocation(convocation)}
+													onclick={() => confirmConvocation(convocation)}
 												/>
 											{/if}
 											{#if canDeny || convocation.teammate.userId == $user?.id}
-												<Icon name="mdi-close" click on:click={() => denyConvocation(convocation)} />
+												<Icon name="mdi-close" onclick={() => denyConvocation(convocation)} />
 											{/if}
 											{#if canConvocate}
-												<Icon name="mdi-delete" click on:click={() => unConvocate(convocation)} />
+												<Icon name="mdi-delete" onclick={() => unConvocate(convocation)} />
 											{/if}
 										{:else}
 											<CircularLoader />
