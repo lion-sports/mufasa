@@ -4,38 +4,34 @@
 	import type { ComponentProps } from 'svelte'
 
 	interface Props {
-		users?: User[];
-		rowActions?: import('svelte').Snippet<[any]>;
+		users?: User[]
+		rowActions?: import('svelte').Snippet<[any]>
 	}
 
-	let { users = [], rowActions }: Props = $props();
+	let { users = [], rowActions }: Props = $props()
 
-	let headers: ComponentProps<SimpleTable>['headers'] = [
+	let headers: ComponentProps<typeof SimpleTable>['headers'] = [
 		{
 			value: 'name',
 			label: 'Nome',
-			type: {
-				key: 'string'
-			}
+			type: { key: 'string' }
 		},
 		{
 			value: 'email',
 			label: 'Email',
-			type: {
-				key: 'string'
-			}
+			type: { key: 'string' }
 		}
 	]
 
-	const rowActions_render = $derived(rowActions);
+	const rowActions_render = $derived(rowActions)
 </script>
 
 <div style:max-width="100%" style:overflow="auto">
 	<SimpleTable {headers} items={users}>
-		{#snippet rowActions({ item })}
-				<div style:display="flex" style:justify-content="end"  >
-				{@render rowActions_render?.({ item, })}
+		{#snippet rowActionsSnippet({ item })}
+			<div style:display="flex" style:justify-content="end">
+				{@render rowActions_render?.({ item })}
 			</div>
-			{/snippet}
+		{/snippet}
 	</SimpleTable>
 </div>
