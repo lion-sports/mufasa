@@ -19,10 +19,10 @@
 
   let { presences = {} }: Props = $props();
 
-  let data: ComponentProps<typeof LineChart>['data'] = {
+  let data: ComponentProps<typeof LineChart>['data'] = $state({
     labels: [],
     datasets: []
-  }
+  })
 
   let backgroundColors = [
     '#297DB780',
@@ -57,6 +57,6 @@
 </script>
 
 <LineChart
-  {data}
+  data={$state.snapshot(data)}
   showXTicks
 ></LineChart>

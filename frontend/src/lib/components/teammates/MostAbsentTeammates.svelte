@@ -25,7 +25,7 @@
 
   let { data = [] }: Props = $props();
 
-  let chartData: ComponentProps<typeof WeeksBarChart>['data']
+  let chartData: ComponentProps<typeof WeeksBarChart>['data'] = $state()
 
   let backgroundColors = [
     '#ED1C2480',
@@ -76,6 +76,6 @@
 </script>
 
 <WeeksBarChart
-  bind:data={chartData}
+  data={$state.snapshot(chartData)}
   showXTicks
 ></WeeksBarChart>
