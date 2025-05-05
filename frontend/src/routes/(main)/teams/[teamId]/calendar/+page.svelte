@@ -5,12 +5,17 @@
 	import type { PageData } from './$types'
 
 	interface Props {
-		data: PageData;
+		data: PageData
 	}
 
-	let { data }: Props = $props();
+	let { data }: Props = $props()
 </script>
 
-{#if !!$team}
-	<TeamsCalendarWithSidebar team={$team} teammate={$teammate} events={data.events} canCreate={data.groupedPermissions.event.create} />
+{#if $team}
+	<TeamsCalendarWithSidebar
+		team={$team}
+		teammate={$teammate}
+		events={data.events}
+		canCreate={data.groupedPermissions.event.create}
+	/>
 {/if}
