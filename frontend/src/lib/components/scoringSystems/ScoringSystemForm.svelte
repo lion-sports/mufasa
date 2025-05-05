@@ -68,7 +68,7 @@
       <div class="mb-1">Sport</div>
       <ScoutSportAutocomplete
         bind:values={selectedSports}
-        on:change={(e) => {
+        onchange={(e) => {
           if(selectedSports.length > 0)
             scoringSystem.sport = selectedSports[0].value
           else 
@@ -229,7 +229,7 @@
       value={!!scoringSystem.config?.tieBreak}
       id="has-tie-break"
       label="Ha tie break"
-      on:change={(e) => {
+      onchange={(e) => {
         // @ts-ignore
         let checked = e.target.checked
         if(checked) {
