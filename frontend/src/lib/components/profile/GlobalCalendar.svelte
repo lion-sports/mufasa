@@ -47,5 +47,5 @@
 	bind:selectedDate
 	bind:visibleMonth
 	bind:visibleYear
-  bind:canCreate
+  {canCreate}
 />

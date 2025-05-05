@@ -71,7 +71,7 @@
 											: false}
 										label={translateAction(action)}
 										id={`${resource}-${action}`}
-										on:change={(event) => handleCheckChange(resource, action, event)}
+										onchange={(event) => handleCheckChange(resource, action, event)}
 									/>
 								</div>
 							{/each}
