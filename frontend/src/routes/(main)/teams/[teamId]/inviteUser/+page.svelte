@@ -43,7 +43,7 @@
 					user: { email: user.email },
 					group:
 						!!selectedGroups && !!selectedGroups.length
-							? { id: parseInt(selectedGroups[0].value) }
+							? { id: parseInt(selectedGroups[0].value.toString()) }
 							: undefined
 				})
 				.then((result) => {
