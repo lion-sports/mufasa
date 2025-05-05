@@ -121,7 +121,7 @@
         />
       </div>
       <div>
-        <StandardTimePicker value={startTime} name="startTime" on:input={handleStartTimeChange} />
+        <StandardTimePicker value={startTime} name="startTime" oninput={handleStartTimeChange} />
       </div>
     </div>
     <div>
@@ -133,7 +133,7 @@
         />
       </div>
       <div>
-        <StandardTimePicker value={endTime} name="endTime" on:input={handleEndTimeChange} />
+        <StandardTimePicker value={endTime} name="endTime" oninput={handleEndTimeChange} />
       </div>
     </div>
   </div>
