@@ -3,13 +3,13 @@
 	import type { ComponentProps } from 'svelte'
 
 	interface Props {
-		value?: boolean;
-		disabled?: boolean;
-		id: string;
-    onchange?: ComponentProps<typeof Checkbox>['onchange']
+		value?: boolean
+		disabled?: boolean
+		id: string
+		onchange?: ComponentProps<typeof Checkbox>['onchange']
 	}
 
-	let { value = $bindable(false), disabled = false, id, onchange }: Props = $props();
+	let { value = $bindable(), disabled = false, id, onchange }: Props = $props()
 </script>
 
 <Checkbox bind:value {id} {disabled} {onchange} />

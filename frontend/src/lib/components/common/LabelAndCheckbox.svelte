@@ -11,7 +11,7 @@
 		onchange?: ComponentProps<typeof StandardCheckbox>['onchange']
 	}
 
-	let { label, id, value = $bindable(false), disabled = false, text, onchange }: Props = $props()
+	let { label, id, value = $bindable(), disabled = false, text, onchange }: Props = $props()
 </script>
 
 <div class="standard-checkbox-container">
