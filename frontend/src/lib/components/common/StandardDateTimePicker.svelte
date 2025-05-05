@@ -44,7 +44,7 @@
 		<StandardDatepicker bind:value />
 	</div>
 	<div style:width="100%">
-		<StandardTimePicker name={name + '-time'} value={time} on:change={handleTimeChange} />
+		<StandardTimePicker name={name + '-time'} value={time} oninput={handleTimeChange} />
 	</div>
 </div>
 
