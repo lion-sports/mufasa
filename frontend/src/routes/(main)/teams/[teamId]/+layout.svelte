@@ -24,83 +24,88 @@
 		$team = data.team
 	})
 
-	let selectedTab: string = $state('general'),
-		options: ComponentProps<typeof OptionMenu>['options'] = $state([]),
-		tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = $state([])
+	let selectedTab: string = $state('general')
 
-	options = []
+	let options: ComponentProps<typeof OptionMenu>['options'] = $derived.by(() => {
+		let options: ComponentProps<typeof OptionMenu>['options'] = []
+		if (data.groupedPermissions.team.update)
+			options.push({
+				name: 'edit',
+				title: 'Modifica',
+				icon: 'mdi-pencil'
+			})
 
-	if (data.groupedPermissions.team.update)
-		options.push({
-			name: 'edit',
-			title: 'Modifica',
-			icon: 'mdi-pencil'
-		})
+		if (data.groupedPermissions.team.invite)
+			options.push({
+				name: 'inviteUser',
+				title: 'Invita utente',
+				icon: 'mdi-account-plus'
+			})
 
-	if (data.groupedPermissions.team.invite)
-		options.push({
-			name: 'inviteUser',
-			title: 'Invita utente',
-			icon: 'mdi-account-plus'
-		})
+		if (data.groupedPermissions.event.create)
+			options.push({
+				name: 'addEvent',
+				title: 'Aggiungi evento',
+				icon: 'mdi-calendar-plus'
+			})
 
-	if (data.groupedPermissions.event.create)
-		options.push({
-			name: 'addEvent',
-			title: 'Aggiungi evento',
-			icon: 'mdi-calendar-plus'
-		})
+		if (data.groupedPermissions.team.destroy)
+			options.push({
+				name: 'delete',
+				title: 'Elimina',
+				icon: 'mdi-delete',
+				style: {
+					color: 'rgb(var(--global-color-error-500))'
+				}
+			})
 
-	if (data.groupedPermissions.team.destroy)
-		options.push({
-			name: 'delete',
-			title: 'Elimina',
-			icon: 'mdi-delete',
-			style: {
-				color: 'rgb(var(--global-color-error-500))'
-			}
-		})
+		if (!data.isOwner)
+			options.push({
+				name: 'exit',
+				title: 'Esci dal team',
+				icon: 'mdi-delete',
+				style: {
+					color: 'rgb(var(--global-color-error-500))'
+				}
+			})
 
-	if (!data.isOwner)
-		options.push({
-			name: 'exit',
-			title: 'Esci dal team',
-			icon: 'mdi-delete',
-			style: {
-				color: 'rgb(var(--global-color-error-500))'
-			}
-		})
-
-	tabs = [
-		{
-			name: 'general',
-			label: 'Generale',
-			icon: 'mdi-text'
-		},
-		{
-			name: 'teammates',
-			label: 'Partecipanti',
-			icon: 'mdi-account'
-		}
-	]
-
-	if (data.groupedPermissions.group.update)
-		tabs.push({
-			name: 'groups',
-			label: 'Gruppi',
-			icon: 'mdi-account-multiple'
-		})
-
-	tabs.push({
-		name: 'calendar',
-		label: 'Calendario',
-		icon: 'mdi-calendar'
+		return options
 	})
 
-	tabs.push({
-		name: 'weeks',
-		label: 'Settimane',
-		icon: 'mdi-clock'
+	let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = $derived.by(() => {
+		let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = [
+			{
+				name: 'general',
+				label: 'Generale',
+				icon: 'mdi-text'
+			},
+			{
+				name: 'teammates',
+				label: 'Partecipanti',
+				icon: 'mdi-account'
+			}
+		]
+
+		if (data.groupedPermissions.group.update)
+			tabs.push({
+				name: 'groups',
+				label: 'Gruppi',
+				icon: 'mdi-account-multiple'
+			})
+
+		tabs.push({
+			name: 'calendar',
+			label: 'Calendario',
+			icon: 'mdi-calendar'
+		})
+
+		tabs.push({
+			name: 'weeks',
+			label: 'Settimane',
+			icon: 'mdi-clock'
+		})
+
+		return tabs
 	})
 
 	function handleOptionClick(event: {
