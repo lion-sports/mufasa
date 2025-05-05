@@ -70,7 +70,7 @@
 
 <StandardDialog bind:open title="Convoca">
 	<div style:margin-bottom="15px">
-		<TeammatesChecklist {teammates} bind:value={selectedTeammates} bind:team groupFilter={true} />
+		<TeammatesChecklist {teammates} bind:value={selectedTeammates} {team} groupFilter={true} />
 	</div>
 	<StandardButton on:click={convocate} {loading} disabled={cannotConvocate}>Convoca</StandardButton>
 </StandardDialog>
