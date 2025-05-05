@@ -26,17 +26,19 @@
     children
   }: Props = $props();
 
-  let activator: HTMLElement = $state()
+  let activator: HTMLElement | undefined = $state()
 </script>
 
-<ToolTip 
-  bind:activator
-  appearTimeout={400}
->
-  <div class="bg-[rgb(var(--global-color-background-200))] p-1 rounded-sm {clazz}">
-    {@render tooltip?.()}
-  </div>
-</ToolTip>
+{#if activator}
+  <ToolTip 
+    bind:activator
+    appearTimeout={400}
+  >
+    <div class="bg-[rgb(var(--global-color-background-200))] p-1 rounded-sm {clazz}">
+      {@render tooltip?.()}
+    </div>
+  </ToolTip>
+{/if}
 
 <button
   class="
