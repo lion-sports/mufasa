@@ -4,10 +4,11 @@
 	import StandardAutocomplete from "../common/StandardAutocomplete.svelte"
 
   interface Props {
-    values?: ComponentProps<StandardAutocomplete>['values'];
+    values?: ComponentProps<typeof StandardAutocomplete>['values'];
+    onchange?: ComponentProps<typeof StandardAutocomplete>['onchange'];
   }
 
-  let { values = $bindable([]) }: Props = $props();
+  let { values = $bindable([]), onchange }: Props = $props();
 
 </script>
 
@@ -19,5 +20,5 @@
     }
   })}
   bind:values={values}
-  on:change
+  {onchange}
 ></StandardAutocomplete>
