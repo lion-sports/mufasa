@@ -8,7 +8,7 @@
 	import { goto } from '$app/navigation'
 
   function isScoringSystemValid(
-    ss: NonNullable<ComponentProps<ScoringSystemForm>['scoringSystem']>
+    ss: NonNullable<ComponentProps<typeof ScoringSystemForm>['scoringSystem']>
   ): ss is Parameters<ScoringSystemsService['create']>[0] {
     return !!ss.name
       && !!ss.sport
@@ -35,7 +35,7 @@
 
   let { data }: Props = $props();
 
-  let scoringSystem: NonNullable<ComponentProps<ScoringSystemForm>['scoringSystem']> = $state({}),
+  let scoringSystem: NonNullable<ComponentProps<typeof ScoringSystemForm>['scoringSystem']> = $state({}),
       formValid: boolean = $state(false),
       loadingSave: boolean = $state(false)
 
