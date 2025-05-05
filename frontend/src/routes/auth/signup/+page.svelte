@@ -169,10 +169,6 @@
 		background-color: rgb(var(--global-color-background-100));
 	}
 
-	h2 {
-		font-weight: 500;
-	}
-
 	@media (min-width: 425px) {
 		.card {
 			max-width: 90vw;

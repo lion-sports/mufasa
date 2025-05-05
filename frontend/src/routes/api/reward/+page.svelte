@@ -14,7 +14,7 @@
 
 		let params: Reward = {
 			solanaPublicKey: solanaPublicKey,
-			amount: 10e6,
+			amount: 10e6
 		}
 
 		service
@@ -42,7 +42,7 @@
 					placeholder="wallet address"
 					name="email"
 					class={{
-						label: 'box-border w-full',
+						label: 'box-border w-full'
 					}}
 					bind:value={solanaPublicKey}
 				/>
@@ -90,11 +90,5 @@
 			border-radius: 0px;
 			overflow: auto;
 		}
-	}
-
-	.forgot-password {
-		text-align: center;
-		display: block;
-		color: rgb(var(--global-color-primary-400));
 	}
 </style>

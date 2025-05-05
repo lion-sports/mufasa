@@ -6,12 +6,14 @@
 	import type { PageData } from './$types'
 
 	interface Props {
-		data: PageData;
+		data: PageData
 	}
 
-	let { data }: Props = $props();
+	let { data }: Props = $props()
 
-	let visibleWeek: number = $state(), visibleYear: number = $state(), reloadEvents: boolean = $state()
+	let visibleWeek: number | undefined = $state()
+	let visibleYear: number | undefined = $state()
+	let reloadEvents: boolean = $state(true)
 
 	onMount(() => {
 		let visibleYearCached = localStorage.getItem('teams:weeks:visibleYear')
@@ -22,12 +24,12 @@
 		if (visibleWeekCached !== undefined && visibleWeekCached !== null)
 			visibleWeek = parseInt(visibleWeekCached)
 
-    reloadEvents = true
+		reloadEvents = true
 	})
 
 	function handleWeekChange(e: CustomEvent<{ visibleYear: number; visibleWeek: number }>) {
-		localStorage.setItem('teams:weeks:visibleYear', visibleYear.toString())
-		localStorage.setItem('teams:weeks:visibleWeek', visibleWeek.toString())
+		if (visibleYear) localStorage.setItem('teams:weeks:visibleYear', visibleYear.toString())
+		if (visibleWeek) localStorage.setItem('teams:weeks:visibleWeek', visibleWeek.toString())
 	}
 </script>
 
@@ -38,10 +40,10 @@
 		events={data.events}
 		bind:visibleWeek
 		bind:visibleYear
-    bind:reloadEvents
-    canCreate={data.groupedPermissions.event.create}
-    canUpdate={data.groupedPermissions.event.update}
-    canDestroy={data.groupedPermissions.event.destroy}
+		bind:reloadEvents
+		canCreate={data.groupedPermissions.event.create}
+		canUpdate={data.groupedPermissions.event.update}
+		canDestroy={data.groupedPermissions.event.destroy}
 		on:nextWeek={handleWeekChange}
 		on:previousWeek={handleWeekChange}
 		on:focusToday={handleWeekChange}
