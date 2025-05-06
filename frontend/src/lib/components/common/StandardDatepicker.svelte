@@ -15,7 +15,7 @@
 </script>
 
 <DatePickerTextField
-	selectedDate={value}
+	bind:selectedDate={value}
 	{placeholder}
 	--simple-text-field-width="fit-content"
 	{...rest}

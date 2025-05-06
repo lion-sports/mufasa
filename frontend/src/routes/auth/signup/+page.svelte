@@ -8,7 +8,9 @@
 	import { slide } from 'svelte/transition'
 	import { Icon } from '@likable-hair/svelte'
 	import StandardDatepicker from '@/lib/components/common/StandardDatepicker.svelte'
+	import type { Sport } from '@/lib/services/scouts/scouts.service'
 
+	// User Data
 	let email: string = $state('')
 	let password: string = $state('')
 	let passwordConfirmation: string = $state('')
@@ -16,6 +18,11 @@
 	let lastname: string = $state('')
 	let birthday: Date | undefined = $state()
 	let acceptPrivacy: boolean = $state(false)
+
+	// Team Data
+	let sports: Sport | undefined = $state(undefined)
+	let name: string = $state('')
+	let notes: string = $state('')
 
 	let loading: boolean = false
 	let error: boolean = $state(false)
