@@ -13,7 +13,7 @@ components:
     PaginationMeta:
       type: object
       properties:
-        total: 
+        total:
           type: integer
         perPage:
           type: number
@@ -22,28 +22,50 @@ components:
     User:
       type: object
       properties:
-        id: 
+        id:
           type: integer
         email:
           type: string
+          nullable: true
+        firstname:
+          type: string
+          nullable: true
+        lastname:
+          type: string
+          nullable: true
         name:
           type: string
+          nullable: true
+        birthday:
+          type: string
+          format: date
+          nullable: true
         color:
           type: string
           nullable: true
         textColor:
           type: string
           nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
+        solanaPublicKey:
+          type: string
+          nullable: true
+        solanaPrivateKey:
+          type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
+
     Team:
       type: object
       properties:
-        id: 
+        id:
           type: integer
         uid:
           type: string
@@ -58,13 +80,13 @@ components:
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
     Invitation:
       type: object
       properties:
-        id: 
+        id:
           type: integer
         invitedByUserId:
           type: integer
@@ -73,28 +95,28 @@ components:
           nullable: true
         invitedBy:
           nullable: true
-          $ref: "#/components/schemas/User"
+          $ref: '#/components/schemas/User'
         invitedEmail:
           type: string
         teamId:
           type: integer
         team:
           nullable: true
-          $ref: "#/components/schemas/Team"
+          $ref: '#/components/schemas/Team'
         groupId:
           type: integer
           nullable: true
         status:
           type: string
           enum:
-            - pending 
+            - pending
             - rejected
             - accepted
             - discarded
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
     Event:
@@ -118,7 +140,7 @@ components:
           nullable: true
         team:
           nullable: true
-          $ref: "#/components/schemas/Team"
+          $ref: '#/components/schemas/Team'
         frequencyId:
           type: integer
           nullable: true
@@ -130,7 +152,7 @@ components:
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
     EventSession:
@@ -145,7 +167,7 @@ components:
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
     Group:
@@ -162,13 +184,13 @@ components:
           type: object
         team:
           nullable: true
-          $ref: "#/components/schemas/Team"
+          $ref: '#/components/schemas/Team'
         teamId:
           type: integer
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
     Convocation:
@@ -190,7 +212,7 @@ components:
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
     Teammate:
@@ -205,7 +227,7 @@ components:
         uid:
           type: string
           nullable: true
-        userId: 
+        userId:
           type: integer
         alias:
           type: string
@@ -213,7 +235,7 @@ components:
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
     Shirt:
@@ -237,7 +259,7 @@ components:
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
     Scout:
@@ -264,11 +286,11 @@ components:
             general:
               type: object
               properties:
-                opponent: 
+                opponent:
                   type: object
                   nullable: true
                   properties:
-                    name: 
+                    name:
                       type: string
                       nullable: true
                 friendsFieldSide:
@@ -280,7 +302,7 @@ components:
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
     ScoringSystem:
@@ -308,7 +330,7 @@ components:
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
     Player:
@@ -351,7 +373,7 @@ components:
         createdAt:
           type: string
           format: date-time
-        updatedAt: 
+        updatedAt:
           type: string
           format: date-time
 
@@ -428,7 +450,7 @@ paths:
             application/json:
               schema:
                 type: object
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/User'
     parameters:
       - name: email
         in: query
@@ -469,15 +491,15 @@ paths:
           description: A JSON array of user names
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   meta:
-                    $ref: "#/components/schemas/PaginationMeta"
+                    $ref: '#/components/schemas/PaginationMeta'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/User"
+                      $ref: '#/components/schemas/User'
     post:
       summary: Create a user.
       responses:
@@ -485,8 +507,8 @@ paths:
           description: The new user.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/User"
+              schema:
+                $ref: '#/components/schemas/User'
   /users/{userId}:
     get:
       summary: Returns a certain user.
@@ -495,8 +517,8 @@ paths:
           description: The user got.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/User"
+              schema:
+                $ref: '#/components/schemas/User'
     put:
       summary: Update a certain user.
       responses:
@@ -504,8 +526,8 @@ paths:
           description: The user got.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/User"
+              schema:
+                $ref: '#/components/schemas/User'
   /teams:
     post:
       summary: Create a new team.
@@ -515,7 +537,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Team"
+                $ref: '#/components/schemas/Team'
     get:
       summary: Returns a list of teams associated to the current user.
       responses:
@@ -523,15 +545,15 @@ paths:
           description: The teams associated to my user.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   meta:
-                    $ref: "#/components/schemas/PaginationMeta"
+                    $ref: '#/components/schemas/PaginationMeta'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Team"
+                      $ref: '#/components/schemas/Team'
   /teams/{teamId}:
     get:
       summary: Returns a certain team.
@@ -541,7 +563,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Team"
+                $ref: '#/components/schemas/Team'
     put:
       summary: Update a certain team.
       responses:
@@ -549,8 +571,8 @@ paths:
           description: The team updated.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/Team"
+              schema:
+                $ref: '#/components/schemas/Team'
   /teams/{teamId}/removeUser:
     post:
       summary: Remove the logged in user from a team.
@@ -571,8 +593,8 @@ paths:
           description: The team updated.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/Team"
+              schema:
+                $ref: '#/components/schemas/Team'
   /teams/absencesInLatestEvents:
     get:
       summary: Returns a the absences for the latest events in all participating teams.
@@ -581,9 +603,9 @@ paths:
           description: The teams associated to my user.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
-                additionalProperties: 
+                additionalProperties:
                   type: object
                   properties:
                     team:
@@ -600,7 +622,7 @@ paths:
                           type: number
                         absencesNumber:
                           type: number
-                        
+
   /teammates/{teammateId}:
     put:
       summary: Update a certain teammate.
@@ -609,8 +631,8 @@ paths:
           description: The teammate updated.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/Teammate"
+              schema:
+                $ref: '#/components/schemas/Teammate'
   /invitations/inviteUser:
     post:
       summary: Invite a user to a team.
@@ -620,7 +642,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Invitation"
+                $ref: '#/components/schemas/Invitation'
     parameters:
       - name: user
         in: query
@@ -660,7 +682,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Invitation"
+                  $ref: '#/components/schemas/Invitation'
   /invitations/accept:
     post:
       summary: Accept an invitation
@@ -670,7 +692,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Invitation"
+                $ref: '#/components/schemas/Invitation'
     parameters:
       - name: invitation
         in: query
@@ -690,7 +712,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Invitation"
+                $ref: '#/components/schemas/Invitation'
     parameters:
       - name: invitation
         in: query
@@ -710,7 +732,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Invitation"
+                $ref: '#/components/schemas/Invitation'
     parameters:
       - name: invitation
         in: query
@@ -730,14 +752,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Event"
+                $ref: '#/components/schemas/Event'
       parameters:
         - name: event
           in: query
           description: The event to create
           required: true
           schema:
-            $ref: "#/components/schemas/Event"
+            $ref: '#/components/schemas/Event'
     get:
       summary: Get a list of events.
       responses:
@@ -748,7 +770,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Event"
+                  $ref: '#/components/schemas/Event'
       parameters:
         - name: filters
           in: query
@@ -757,16 +779,16 @@ paths:
           schema:
             type: object
             properties:
-              from: 
+              from:
                 type: string
                 format: date-time
-              to: 
+              to:
                 type: string
                 format: date-time
               team:
                 type: object
                 properties:
-                  id: 
+                  id:
                     type: integer
   /events/{eventId}:
     get:
@@ -777,7 +799,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Event"
+                $ref: '#/components/schemas/Event'
       parameters:
         - name: eventId
           in: path
@@ -793,7 +815,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Event"
+                $ref: '#/components/schemas/Event'
       parameters:
         - name: eventId
           in: path
@@ -806,7 +828,7 @@ paths:
           description: The data used to update the event
           required: true
           schema:
-            $ref: "#/components/schemas/Event"
+            $ref: '#/components/schemas/Event'
     delete:
       summary: Destroy a new event.
       responses:
@@ -830,7 +852,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Convocation"
+                  $ref: '#/components/schemas/Convocation'
       parameters:
         - name: eventId
           in: path
@@ -847,7 +869,7 @@ paths:
             items:
               type: object
               properties:
-                id: 
+                id:
                   type: integer
   /events/{eventId}/unConvocate:
     post:
@@ -860,7 +882,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Convocation"
+                  $ref: '#/components/schemas/Convocation'
       parameters:
         - name: eventId
           in: path
@@ -877,7 +899,7 @@ paths:
             items:
               type: object
               properties:
-                id: 
+                id:
                   type: integer
   /events/createWithFrequency:
     post:
@@ -890,7 +912,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Event"
+                  $ref: '#/components/schemas/Event'
     parameters:
       - name: event
         in: query
@@ -956,7 +978,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Event"
+                  $ref: '#/components/schemas/Event'
     parameters:
       - name: fromWeekNumber
         in: query
@@ -1000,7 +1022,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EventSession"
+                $ref: '#/components/schemas/EventSession'
     get:
       summary: Returns a list of event sessions associated to the current user.
       responses:
@@ -1008,15 +1030,15 @@ paths:
           description: The event sessions associated to my user.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   meta:
-                    $ref: "#/components/schemas/PaginationMeta"
+                    $ref: '#/components/schemas/PaginationMeta'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/EventSession"
+                      $ref: '#/components/schemas/EventSession'
   /eventSessions/{eventSessionId}:
     get:
       summary: Returns a certain event session.
@@ -1026,7 +1048,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EventSession"
+                $ref: '#/components/schemas/EventSession'
     put:
       summary: Update an event session.
       responses:
@@ -1034,8 +1056,8 @@ paths:
           description: The team updated.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/Team"
+              schema:
+                $ref: '#/components/schemas/Team'
     delete:
       summary: delete a event session.
       responses:
@@ -1050,7 +1072,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Shirt"
+                $ref: '#/components/schemas/Shirt'
     get:
       summary: Returns a list of shirts associated to the teammates that the user can view.
       responses:
@@ -1058,15 +1080,15 @@ paths:
           description: The shirts visible to my user.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   meta:
-                    $ref: "#/components/schemas/PaginationMeta"
+                    $ref: '#/components/schemas/PaginationMeta'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Shirt"
+                      $ref: '#/components/schemas/Shirt'
   /shirts/{shirtId}:
     get:
       summary: Returns a certain shirt.
@@ -1076,7 +1098,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Shirt"
+                $ref: '#/components/schemas/Shirt'
     put:
       summary: Update a shirt.
       responses:
@@ -1084,8 +1106,8 @@ paths:
           description: The shirt updated.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/Shirt"
+              schema:
+                $ref: '#/components/schemas/Shirt'
     delete:
       summary: delete a shirt.
       responses:
@@ -1100,7 +1122,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Player"
+                $ref: '#/components/schemas/Player'
     get:
       summary: Returns a list of players associated to the scouts that the user can view.
       responses:
@@ -1108,15 +1130,15 @@ paths:
           description: The players visible to my user.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   meta:
-                    $ref: "#/components/schemas/PaginationMeta"
+                    $ref: '#/components/schemas/PaginationMeta'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Player"
+                      $ref: '#/components/schemas/Player'
   /players/{playerId}:
     get:
       summary: Returns a certain player.
@@ -1126,7 +1148,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Player"
+                $ref: '#/components/schemas/Player'
     put:
       summary: Update a player.
       responses:
@@ -1134,8 +1156,8 @@ paths:
           description: The player updated.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/Player"
+              schema:
+                $ref: '#/components/schemas/Player'
     delete:
       summary: delete a player.
       responses:
@@ -1150,7 +1172,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Scout"
+                $ref: '#/components/schemas/Scout'
     get:
       summary: Returns a list of scouts associated to the events that the user can view.
       responses:
@@ -1158,15 +1180,15 @@ paths:
           description: The scouts visible to my user.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   meta:
-                    $ref: "#/components/schemas/PaginationMeta"
+                    $ref: '#/components/schemas/PaginationMeta'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Scout"
+                      $ref: '#/components/schemas/Scout'
   /scouts/{scoutId}:
     get:
       summary: Returns a certain scout.
@@ -1176,7 +1198,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Scout"
+                $ref: '#/components/schemas/Scout'
     put:
       summary: Update a scout.
       responses:
@@ -1184,8 +1206,8 @@ paths:
           description: The scout updated.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/Scout"
+              schema:
+                $ref: '#/components/schemas/Scout'
     delete:
       summary: delete a scout.
       responses:
@@ -1213,7 +1235,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ScoringSystem"
+                $ref: '#/components/schemas/ScoringSystem'
     get:
       summary: Returns a list of scoring systems that the user can view.
       responses:
@@ -1221,15 +1243,15 @@ paths:
           description: The scoring systems visible to my user.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   meta:
-                    $ref: "#/components/schemas/PaginationMeta"
+                    $ref: '#/components/schemas/PaginationMeta'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/ScoringSystem"
+                      $ref: '#/components/schemas/ScoringSystem'
   /scoringSystems/{scoringSystemId}:
     get:
       summary: Returns a certain scoring system.
@@ -1239,7 +1261,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ScoringSystem"
+                $ref: '#/components/schemas/ScoringSystem'
     put:
       summary: Update a scoring system.
       responses:
@@ -1247,8 +1269,8 @@ paths:
           description: The scoring system updated.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/ScoringSystem"
+              schema:
+                $ref: '#/components/schemas/ScoringSystem'
     delete:
       summary: delete a scoring system.
       responses:
@@ -1263,7 +1285,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Group"
+                $ref: '#/components/schemas/Group'
   /teams/{teamId}/groups:
     get:
       summary: Returns a list of groups associated to the team.
@@ -1272,15 +1294,15 @@ paths:
           description: The groups associated to the teams.
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   meta:
-                    $ref: "#/components/schemas/PaginationMeta"
+                    $ref: '#/components/schemas/PaginationMeta'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Group"
+                      $ref: '#/components/schemas/Group'
   /groups/{teamId}:
     get:
       summary: Returns a certain group.
@@ -1290,7 +1312,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Group"
+                $ref: '#/components/schemas/Group'
     put:
       summary: Update a certain group.
       responses:
@@ -1298,8 +1320,8 @@ paths:
           description: The updated group.
           content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/Group"
+              schema:
+                $ref: '#/components/schemas/Group'
   /convocations/{convocationId}/confirm:
     post:
       summary: Confirm a convocation.
@@ -1309,7 +1331,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Convocation"
+                $ref: '#/components/schemas/Convocation'
   /convocations/{convocationId}/deny:
     post:
       summary: Deny a convocation.
@@ -1319,4 +1341,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Convocation"
+                $ref: '#/components/schemas/Convocation'

@@ -1,15 +1,15 @@
-import { CamelCaseBaseModel } from './CamelCaseBaseModel.js';
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import encryption from '@adonisjs/core/services/encryption'
 import { column, beforeSave, manyToMany, hasMany } from '@adonisjs/lucid/orm'
-import Team from '#app/Models/Team';
-import Dashboard from './Dashboard.js';
-import { type ManyToMany } from "@adonisjs/lucid/types/relations";
-import { type HasMany } from "@adonisjs/lucid/types/relations";
+import Team from '#app/Models/Team'
+import Dashboard from './Dashboard.js'
+import { type ManyToMany } from '@adonisjs/lucid/types/relations'
+import { type HasMany } from '@adonisjs/lucid/types/relations'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider, AccessToken } from '@adonisjs/auth/access_tokens'
-import { compose } from '@adonisjs/core/helpers';
+import { compose } from '@adonisjs/core/helpers'
 
 const AuthFinder = withAuthFinder(() => hash.use('argon'), {
   uids: ['email'],
@@ -28,6 +28,9 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
 
   @column()
   public name?: string
+
+  @column.dateTime()
+  public birthday?: DateTime
 
   @column()
   public firstname?: string
@@ -51,7 +54,7 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
     tokenSecretLength: 64,
     prefix: 'oat_',
     table: 'auth_access_tokens',
-    type: 'api'
+    type: 'api',
   })
 
   static resetPasswordTokens = DbAccessTokensProvider.forModel(User, {
@@ -59,7 +62,7 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
     tokenSecretLength: 64,
     prefix: 'rpt_',
     table: 'auth_access_tokens',
-    type: 'resetPassword'
+    type: 'resetPassword',
   })
 
   static rememberMeTokens = DbAccessTokensProvider.forModel(User, {
@@ -67,7 +70,7 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
     tokenSecretLength: 64,
     prefix: 'rem_',
     table: 'auth_access_tokens',
-    type: 'rememberMe'
+    type: 'rememberMe',
   })
 
   @column()

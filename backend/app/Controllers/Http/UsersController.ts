@@ -8,8 +8,8 @@ export default class UsersController {
       data: {
         page: request.input('page'),
         perPage: request.input('perPage'),
-        filters: request.input('filters')
-      }
+        filters: request.input('filters'),
+      },
     })
   }
 
@@ -18,11 +18,12 @@ export default class UsersController {
     return await manager.create({
       data: {
         email: request.input('email'),
+        birthday: request.input('birthday'),
         password: request.input('password'),
         firstname: request.input('firstname'),
         lastname: request.input('lastname'),
-        solanaPublicKey: request.input('solanaPublicKey')
-      }
+        solanaPublicKey: request.input('solanaPublicKey'),
+      },
     })
   }
 
@@ -30,8 +31,8 @@ export default class UsersController {
     const manager = new UsersManager()
     return await manager.get({
       data: {
-        id: params.id
-      }
+        id: params.id,
+      },
     })
   }
 
@@ -41,12 +42,13 @@ export default class UsersController {
       data: {
         id: params.id,
         email: request.input('email'),
+        birthday: request.input('birthday'),
         password: request.input('password'),
         firstname: request.input('firstname'),
-        lastname: request.input('lastname')
-      }
+        lastname: request.input('lastname'),
+      },
     })
   }
 
-  public async destroy({ }: HttpContext) { }
+  public async destroy({}: HttpContext) {}
 }

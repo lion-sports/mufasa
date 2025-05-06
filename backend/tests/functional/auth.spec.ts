@@ -4,16 +4,14 @@ import { UserFactory } from '#database/factories/index'
 
 test.group('Auth', () => {
   test('return a token for a user', async ({ client }) => {
-    const user = await UserFactory
-      .merge({
-        email: 'test@example.com',
-        password: 'passwordtest'
-      })
-      .create()
+    const user = await UserFactory.merge({
+      email: 'test@example.com',
+      password: 'passwordtest',
+    }).create()
 
     const response = await client.post('/auth/login').json({
       email: 'test@example.com',
-      password: 'passwordtest'
+      password: 'passwordtest',
     })
 
     response.assertAgainstApiSpec()
@@ -26,7 +24,8 @@ test.group('Auth', () => {
       email: 'test2@example.com',
       password: 'passwordtest',
       firstname: 'some new name',
-      lastname: 'some other new name'
+      birthday: '1984-06-07',
+      lastname: 'some other new name',
     })
 
     assert.equal(response.status(), 200)
@@ -36,13 +35,10 @@ test.group('Auth', () => {
   })
 
   test('revoke a token for a user', async ({ client }) => {
-    const user = await UserFactory
-      .merge({
-        email: 'test@example.com',
-        password: 'passwordtest'
-      })
-      .create()
-
+    const user = await UserFactory.merge({
+      email: 'test@example.com',
+      password: 'passwordtest',
+    }).create()
 
     const response = await client.post('/auth/logout').loginAs(user)
 
@@ -52,30 +48,28 @@ test.group('Auth', () => {
   })
 
   test('login with refresh token', async ({ client, assert }) => {
-    const user = await UserFactory
-      .merge({
-        email: 'test2@example.com',
-        password: 'passwordtest'
-      })
-      .create()
+    const user = await UserFactory.merge({
+      email: 'test2@example.com',
+      password: 'passwordtest',
+    }).create()
 
     let response = await client.post('/auth/login').json({
       email: 'test2@example.com',
       password: 'passwordtest',
-      generateRefresh: true
+      generateRefresh: true,
     })
 
     let data = response.body()
     let refreshToken = data.refreshToken
 
     response = await client.post('/auth/refreshToken').headers({
-      'Authorization': 'Bearer ' + refreshToken
+      Authorization: 'Bearer ' + refreshToken,
     })
 
     response.assertAgainstApiSpec()
     data = response.body()
 
-    assert.isNotEmpty(data.token, "should generate the api token")
+    assert.isNotEmpty(data.token, 'should generate the api token')
     await user.delete()
   })
 })

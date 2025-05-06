@@ -3,8 +3,9 @@ import { validator } from '@adonisjs/validator'
 import User from '#app/Models/User'
 import { Context, withTransaction, withUser } from './base.manager.js'
 import SolanaManager from './solana.manager.js'
-import { ModelObject } from "@adonisjs/lucid/types/model";
+import { ModelObject } from '@adonisjs/lucid/types/model'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import { DateTime } from 'luxon'
 
 export type CreateParams = {
   data: {
@@ -12,6 +13,7 @@ export type CreateParams = {
     password: string
     firstname: string
     lastname: string
+    birthday: DateTime
     solanaPublicKey?: string
   }
   context?: Context
@@ -23,6 +25,7 @@ export type UpdateParams = {
     email?: string
     password?: string
     firstname?: string
+    birthday?: DateTime
     lastname?: string
   }
   context?: Context
@@ -41,7 +44,7 @@ export type ListParams = {
 
 export type GetParams = {
   data: {
-    id: number,
+    id: number
     username?: string
   }
   context?: Context
@@ -55,7 +58,6 @@ class UsersManager {
   @withUser
   public async list(params: ListParams): Promise<{ data: ModelObject[]; meta: any }> {
     const trx = params.context?.trx as TransactionClientContract
-    const user = params.context?.user as User
 
     if (!params.data.page) params.data.page = 1
     if (!params.data.perPage) params.data.perPage = 100
@@ -72,7 +74,7 @@ class UsersManager {
 
   // TODO review signup logics
   @withTransaction
-public async create(params: CreateParams): Promise<User> {
+  public async create(params: CreateParams): Promise<User> {
     const trx = params.context?.trx as TransactionClientContract
 
     await validator.validate({
@@ -102,11 +104,12 @@ public async create(params: CreateParams): Promise<User> {
 
   public async get(params: GetParams): Promise<User | null> {
     const trx = params.context?.trx as TransactionClientContract
-    let user = params.context?.user as User
-    
+
     let userByUsername: User
-    if(!!params.data.username) {
-      userByUsername = await User.query({client: trx}).where('username', params.data.username).firstOrFail()
+    if (!!params.data.username) {
+      userByUsername = await User.query({ client: trx })
+        .where('username', params.data.username)
+        .firstOrFail()
       return userByUsername
     }
 
@@ -117,7 +120,6 @@ public async create(params: CreateParams): Promise<User> {
   @withUser
   public async update(params: UpdateParams): Promise<User> {
     const trx = params.context?.trx as TransactionClientContract
-    const user = params.context?.user as User
 
     const id = params.data.id
     delete params.data.id
