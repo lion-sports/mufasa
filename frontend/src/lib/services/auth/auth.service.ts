@@ -50,7 +50,7 @@ export type SignupParams = {
 		password: string
 		firstname: string
 		lastname: string
-		birthday: Date
+		birthday?: Date
 		solanaPublicKey?: string
 	}
 	context?: {}
@@ -120,7 +120,7 @@ export default class AuthService extends FetchBasedService {
 				}
 			})
 			.then((r) => {
-        r.expiresAt = new Date(r.expiresAt)
+				r.expiresAt = new Date(r.expiresAt)
 				r.refreshTokenExpiration = new Date(r.refreshTokenExpiration)
 				return r
 			})

@@ -133,7 +133,7 @@
 			{/if}
 		{:else}
 			<p>
-				Oops!!! Phantom is not available. Go get it <a href="https://phantom.app/"
+				Oops!!! Phantom is not available. Go get it <a class="underline" href="https://phantom.app/"
 					>https://phantom.app/</a
 				>.
 			</p>
@@ -147,10 +147,11 @@
 				<div
 					style="border-radius: 999px; width: 100%; background-color: rgb(var(--global-color-contract-900));"
 				>
-					<div class="w-full px-4 py-1.5 flex items-center justify-between gap-2">
+					<div class="w-full px-1.5 py-1.5 flex items-center justify-between gap-2">
 						<div class="rounded-full overflow-hidden">
-							<SolanaLogo width="35px" height="auto" />
+							<SolanaLogo width="34px" height="auto" />
 						</div>
+
 						<StandardButton
 							on:click={handleConnectPhantom}
 							--button-background-color="rgb(var(--global-color-grey-950))"
