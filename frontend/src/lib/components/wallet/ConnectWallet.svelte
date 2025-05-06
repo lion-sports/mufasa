@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
+	import { run } from 'svelte/legacy'
 	import { onMount } from 'svelte'
 	import { writable } from 'svelte/store'
-	import { PublicKey} from '@solana/web3.js'
+	import { PublicKey } from '@solana/web3.js'
 	import StandardDialog from '../common/StandardDialog.svelte'
 	import SolanaLogo from './SolanaLogo.svelte'
 	import { goto } from '$app/navigation'
@@ -12,20 +11,18 @@
 	import StandardButton from '../common/StandardButton.svelte'
 
 	interface Props {
-		connectWalletDialog?: boolean;
+		connectWalletDialog?: boolean
 	}
 
-	let { connectWalletDialog = $bindable(false) }: Props = $props();
-
-	let 
-		error: boolean = $state(false),
+	let { connectWalletDialog = $bindable(false) }: Props = $props()
+	let error: boolean = $state(false),
 		errorMessage: string | undefined = $state(undefined),
 		generateRefreshToken: boolean = false
 
 	const walletAvail = writable(false)
 
 	const connected = writable(false)
-	let currentPublicKey : string = $state('')
+	let currentPublicKey: string = $state('')
 
 	onMount(() => {
 		currentPublicKey = ''
@@ -47,7 +44,7 @@
 				currentPublicKey = ''
 			})
 		}
-	});
+	})
 
 	async function handleConnectPhantom() {
 		const authService = new AuthService({ fetch })
@@ -126,8 +123,9 @@
 </script>
 
 <StandardDialog bind:open={connectWalletDialog}>
-	<div class="px-4 pt-2 gap-2" style="overflow:hidden">
+	<div class="w-full px-4 pt-2 gap-2" style="overflow:hidden">
 		<div class="font-bold text-2xl">Connetti un Wallet</div>
+
 		{#if $walletAvail}
 			{#if $connected}
 				<p>Your public key is</p>
@@ -141,19 +139,24 @@
 			</p>
 		{/if}
 
-		<div class="w-full mt-10" style={"display: flex; justify-content: space-between;"}>
+		<div class="w-full mt-10 flex justify-between">
 			{#if $connected}
 				<button disabled={!$connected} onclick={handleDisconnectPhantom}>Disconnect</button>
 				<StandardButton disabled={!$connected} on:click={loginOrSignup}>Log In</StandardButton>
-
 			{:else}
-				<div>
-					<div class="flex items-center justify-between gap-2">
-						<SolanaLogo></SolanaLogo>
+				<div
+					style="border-radius: 999px; width: 100%; background-color: rgb(var(--global-color-contract-900));"
+				>
+					<div class="w-full px-4 py-1.5 flex items-center justify-between gap-2">
+						<div class="rounded-full overflow-hidden">
+							<SolanaLogo width="35px" height="auto" />
+						</div>
 						<StandardButton
 							on:click={handleConnectPhantom}
-							--button-background-color="rgb(var(--global-color-grey-950))">Phantom</StandardButton
-						>
+							--button-background-color="rgb(var(--global-color-grey-950))"
+							--button-height="35px"
+							>Phantom
+						</StandardButton>
 					</div>
 					<!-- <div class="flex items-center justify-between gap-2">
 						<MetamaskLogo></MetamaskLogo>

@@ -1,19 +1,17 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 
 	import { Button } from '@likable-hair/svelte'
 	import { createEventDispatcher } from 'svelte'
 	import { CircularLoader } from '@likable-hair/svelte'
 
-	
-
 	interface Props {
-		class?: string;
-		loading?: boolean;
-		disabled?: boolean;
-		style?: 'primary' | 'secondary' | 'danger';
-		href?: string | undefined;
-		children?: import('svelte').Snippet;
+		class?: string
+		loading?: boolean
+		disabled?: boolean
+		style?: 'primary' | 'secondary' | 'danger'
+		href?: string | undefined
+		children?: import('svelte').Snippet
 	}
 
 	let {
@@ -23,7 +21,7 @@
 		style = 'primary',
 		href = undefined,
 		children
-	}: Props = $props();
+	}: Props = $props()
 
 	let dispatch = createEventDispatcher<{
 		click: {
@@ -31,7 +29,7 @@
 		}
 	}>()
 
-	function handleClick(event: { detail: { nativeEvent: MouseEvent }}) {
+	function handleClick(event: { detail: { nativeEvent: MouseEvent } }) {
 		if (!disabled && !loading)
 			dispatch('click', {
 				nativeEvent: event.detail.nativeEvent
@@ -43,21 +41,21 @@
 		if (style == 'primary') backgroundColor = 'rgb(var(--global-color-primary-500))'
 		else if (style == 'secondary') backgroundColor = 'rgb(var(--global-color-background-600), .4)'
 		else if (style == 'danger') backgroundColor = 'rgb(var(--global-color-error-500))'
-	});
+	})
 
 	let color: string = $state('')
 	run(() => {
 		if (style == 'primary') color = 'rgb(var(--global-color-grey-50))'
 		else if (style == 'secondary') color = 'rgb(var(--global-color-contrast-900))'
 		else if (style == 'danger') color = 'rgb(var(--global-color-grey-50))'
-	});
+	})
 
 	let activeColor: string = $state('')
 	run(() => {
 		if (style == 'primary') activeColor = 'rgb(var(--global-color-primary-500), .7)'
 		else if (style == 'secondary') activeColor = 'rgb(var(--global-color-primary-500))'
 		else if (style == 'danger') activeColor = 'rgb(var(--global-color-error-500), .7)'
-	});
+	})
 </script>
 
 {#if !!href}

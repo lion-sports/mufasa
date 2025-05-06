@@ -5,9 +5,13 @@
 	type Props = {
 		value?: Date | undefined
 		placeholder?: string | undefined
-  } & ComponentProps<typeof DatePickerTextField>
+	} & ComponentProps<typeof DatePickerTextField>
 
-	let { value = $bindable(undefined), placeholder = $bindable(undefined), ...rest }: Props = $props();
+	let {
+		value = $bindable(undefined),
+		placeholder = $bindable(undefined),
+		...rest
+	}: Props = $props()
 </script>
 
 <DatePickerTextField
