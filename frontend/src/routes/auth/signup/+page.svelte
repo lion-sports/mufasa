@@ -2,13 +2,10 @@
 	import AuthService from '$lib/services/auth/auth.service'
 	import { goto } from '$app/navigation'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
-	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
-	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
-	import StandardTextfield from '@/lib/components/common/StandardTextfield.svelte'
-	import { slide } from 'svelte/transition'
-	import { Icon } from '@likable-hair/svelte'
-	import StandardDatepicker from '@/lib/components/common/StandardDatepicker.svelte'
 	import type { Sport } from '@/lib/services/scouts/scouts.service'
+	import UserCredentialsForm from '@/lib/components/auth/UserCredentialsForm.svelte'
+	import { Icon } from '@likable-hair/svelte'
+	import NewTeamForm from '@/lib/components/auth/NewTeamForm.svelte'
 
 	// User Data
 	let email: string = $state('')
@@ -20,15 +17,13 @@
 	let acceptPrivacy: boolean = $state(false)
 
 	// Team Data
-	let sports: Sport | undefined = $state(undefined)
+	let sport: Sport | undefined = $state(undefined)
 	let name: string = $state('')
 	let notes: string = $state('')
 
 	let loading: boolean = false
 	let error: boolean = $state(false)
 	let errorMessage: string = $state('')
-	let showPassword: boolean = $state(false)
-	let showPasswordConfirmation: boolean = $state(false)
 
 	function signup() {
 		if (password != passwordConfirmation) {
@@ -59,6 +54,19 @@
 	let disabled = $derived(
 		!passValid || !lastname || !firstname || !email || !acceptPrivacy || !birthday
 	)
+
+	type Step = 'userCredentials' | 'team' | 'review'
+	let step: Step = $state('team')
+
+	function nextStep() {
+		if (step == 'userCredentials') step = 'team'
+		else step = 'review'
+	}
+
+	function prevStep() {
+		if (step == 'review') step = 'team'
+		else step = 'userCredentials'
+	}
 </script>
 
 <div
@@ -86,123 +94,80 @@
 						</div>
 					</div>
 
-					<!-- Credentials Box -->
+					<!-- Input Box -->
 					<div class="w-full flex-grow flex justify-center items-center">
 						<div class="w-full flex flex-col items-center justify-center">
 							<div class="text-2xl">Sign Up</div>
 
-							<div class="w-full flex flex-col gap-1 mt-5">
-								<div class="w-full flex gap-1.5">
-									<div class="w-full">
-										<LabelAndTextfield
-											error={error && !firstname}
-											placeholder="Firstname"
-											name="firstname"
-											bind:value={firstname}
-											--simple-textfield-width="100%"
-										/>
-									</div>
-									<div class="w-full">
-										<LabelAndTextfield
-											error={error && !lastname}
-											placeholder="Lastname"
-											name="lastname"
-											bind:value={lastname}
-											--simple-textfield-width="100%"
-										/>
-									</div>
-								</div>
-
-								<div
-									class="h-fit mb-1 m-0 p-0 rounded-full"
-									style:border={error ? '1px solid rgb(var(--global-color-error-500))' : ''}
-								>
-									<StandardDatepicker
-										class={{
-											textfield: {
-												row: '!mb-0 !pb-0',
-												field: 'flex items-center'
-											}
-										}}
-										bind:value={birthday}
-										placeholder="Birthday"
-										--simple-textfield-height="40px"
-										--simple-textfield-default-width="100%"
-										--simple-textfield-max-width="100%"
-										--simple-text-field-width="100%"
-									/>
-								</div>
-
-								<StandardTextfield
-									error={error && !email}
-									type="text"
-									bind:value={email}
-									placeholder="Email"
-									--simple-textfield-width="100%"
+							{#if step == 'userCredentials'}
+								<UserCredentialsForm
+									{disabled}
+									{errorMessage}
+									bind:firstname
+									bind:lastname
+									bind:birthday
+									bind:email
+									bind:error
+									bind:password
+									bind:passwordConfirmation
+									bind:acceptPrivacy
 								/>
+							{:else if step == 'team'}
+								<NewTeamForm bind:sport bind:name bind:notes bind:error />
+							{:else if step == 'review'}
+								<div class="h-full w-full">
+									Review Data
 
-								<StandardTextfield
-									error={error && (!password || password !== passwordConfirmation)}
-									type={showPassword ? 'text' : 'password'}
-									bind:value={password}
-									placeholder="Password"
-									--simple-textfield-width="100%"
-								>
-									{#snippet appendInner()}
-										<button
-											onclick={() => (showPassword = !showPassword)}
-											class="flex items-center"
-										>
-											<Icon name={showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'} />
-										</button>
-									{/snippet}
-								</StandardTextfield>
+									<div>
+										User
+										<div>firstname :{firstname}</div>
+										<div>lastname :{lastname}</div>
+										<div>birthday :{birthday?.toISOString()}</div>
+										<div>email :{email}</div>
+									</div>
 
-								<StandardTextfield
-									error={error && (!passwordConfirmation || password !== passwordConfirmation)}
-									type={showPasswordConfirmation ? 'text' : 'password'}
-									bind:value={passwordConfirmation}
-									placeholder="Confirm Password"
-									--simple-textfield-width="100%"
-								>
-									{#snippet appendInner()}
-										<button
-											onclick={() => (showPasswordConfirmation = !showPasswordConfirmation)}
-											class="flex items-center"
-										>
-											<Icon
-												name={showPasswordConfirmation ? 'mdi-eye-off-outline' : 'mdi-eye-outline'}
-											/>
-										</button>
-									{/snippet}
-								</StandardTextfield>
-							</div>
+									<div>
+										Team {name}
+										<div>sport : {sport}</div>
+										<div>notes :{notes}</div>
+									</div>
+								</div>
+							{:else}
+								LOL?
+							{/if}
+						</div>
+					</div>
 
-							<div class="mb-2 flex items-center w-full text-xs">
-								{#if error && errorMessage}
-									<span
-										transition:slide={{ axis: 'y' }}
-										class="text-[rgb(var(--global-color-error-500))]">{errorMessage}</span
+					<!-- Action Button -->
+					<div class="mb-6 w-full text-sm">
+						<div class="flex items-center justify-between gap-10">
+							{#if step == 'review'}
+								<div class="w-full">
+									<StandardButton
+										on:click={signup}
+										--button-border-radius="999px"
+										--button-width="100%"
+										class="!p-1.5">Signup</StandardButton
 									>
-								{/if}
-							</div>
 
-							<div class="w-full mt-1 text-xs">
-								<LabelAndCheckbox
-									bind:value={acceptPrivacy}
-									id="accept-privacy"
-									label="I accept all privacy terms and conditions"
-								/>
-							</div>
-
-							<!-- Next Button -->
-							<div class="w-full mt-5">
-								<StandardButton
-									on:click={signup}
-									--button-border-radius="999px"
-									--button-width="100%">Signup</StandardButton
-								>
-							</div>
+									<div class="w-full mt-1">
+										or <button onclick={prevStep}> go back</button>
+									</div>
+								</div>
+							{:else}
+								<button onclick={prevStep} class="py-1.5">
+									<div class="mx-auto w-fit flex items-center gap-1">
+										<Icon name="mdi-arrow-left" />
+										<span class="underline underline-offset-2">Back</span>
+									</div>
+								</button>
+								<button onclick={nextStep} class="!p-1.5">
+									<div class="flex items-center gap-1">
+										<span class="underline underline-offset-2">Next</span>
+										<Icon name="mdi-arrow-right" />
+									</div>
+								</button>
+							{/if}
 						</div>
 					</div>
 

@@ -5,12 +5,14 @@
 		label?: string
 		placeholder?: string
 		value?: string
+		width?: string
 	}
 
-	let { label = '', placeholder = '', value = $bindable() }: Props = $props()
+	let { width = '90%', label = '', placeholder = '', value = $bindable() }: Props = $props()
 </script>
 
 <Textarea
+	{width}
 	{label}
 	{placeholder}
 	bind:value
@@ -20,7 +22,6 @@
 	paddingRight="10px"
 	paddingLeft="10px"
 	fontSize="1rem"
-	width="90%"
 	height="130px"
 	textColor="rgb(var(--global-color-contrast-900))"
 	focusedBoxShadow="rgb(149 157 165 / 20%) 2px 2px 10px"
