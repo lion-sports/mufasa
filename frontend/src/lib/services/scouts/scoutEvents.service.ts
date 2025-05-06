@@ -68,11 +68,16 @@ export default class ScoutEventsService extends FetchBasedService {
       if(!!idb) {
         const transaction = idb.transaction(IDB_SCOUT_EVENTS_STORE_NAME, 'readwrite')
         const objectStore = transaction.objectStore(IDB_SCOUT_EVENTS_STORE_NAME);
-        objectStore.add({
+        console.log({
           event: params.event,
           clientIdentifier,
           status: 'pending'
         })
+        objectStore.add(JSON.parse(JSON.stringify({
+          event: params.event,
+          clientIdentifier,
+          status: 'pending'
+        })))
       }
     } catch (e) { 
       console.error(e)

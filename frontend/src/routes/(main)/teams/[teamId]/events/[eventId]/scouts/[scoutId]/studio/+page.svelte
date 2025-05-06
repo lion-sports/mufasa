@@ -98,13 +98,13 @@
       <Menubar.Menu>
         <Menubar.Trigger>Scout</Menubar.Trigger>
         <Menubar.Content>
-          <Menubar.Item on:click={() => { undo() }}>
+          <Menubar.Item onclick={() => { undo() }}>
             <Icon name="mdi-undo"></Icon>
             <span class="ml-2">
               Undo
             </span>
           </Menubar.Item>
-          <Menubar.Item on:click={() => {
+          <Menubar.Item onclick={() => {
             let confirmed = confirm('Sei sicuro di voler ripartire con lo scout?')
             if(confirmed) {
               restart()
@@ -116,7 +116,7 @@
             </span>
           </Menubar.Item>
           <Menubar.Separator />
-          <Menubar.Item on:click={() => {
+          <Menubar.Item onclick={() => {
             settingsOpened = !settingsOpened
           }}>
             <Icon name="mdi-cog"></Icon>
@@ -125,7 +125,7 @@
             </span>
           </Menubar.Item>
           <Menubar.Separator />
-          <Menubar.Item on:click={() => {
+          <Menubar.Item onclick={() => {
             if(!$studio) return
             let service = new ScoutsService({ fetch })
             service.exportXlsx({ id: $studio.scout.id })
@@ -140,13 +140,13 @@
       <Menubar.Menu>
         <Menubar.Trigger>Layout</Menubar.Trigger>
         <Menubar.Content>
-          <Menubar.Item on:click={() => { changeSides() }}>
+          <Menubar.Item onclick={() => { changeSides() }}>
             <Icon name="mdi-swap-horizontal"></Icon>
             <span class="ml-2">
               Cambia lato
             </span>
           </Menubar.Item>
-          <Menubar.Item on:click={() => { changeFieldRenderMode() }}>
+          <Menubar.Item onclick={() => { changeFieldRenderMode() }}>
             {#if $studio.scout.scoutInfo.general?.fieldRenderEngine == '3d'}
               <Icon name="mdi-cube-off-outline"></Icon>
               <span class="ml-2">
@@ -164,15 +164,15 @@
       <Menubar.Menu>
         <Menubar.Trigger>Giocatori</Menubar.Trigger>
         <Menubar.Content>
-          <Menubar.Item on:click={() => { playersOpened = true}}>Visualizza</Menubar.Item>
+          <Menubar.Item onclick={() => { playersOpened = true}}>Visualizza</Menubar.Item>
           <Menubar.Sub>
             <Menubar.SubTrigger>Nuovo</Menubar.SubTrigger>
             <Menubar.SubContent>
-              <Menubar.Item on:click={() => {
+              <Menubar.Item onclick={() => {
                 addPlayerSelectedTab = 'importConvocation'
                 addPlayerDialog = true
               }}>Da convocazione</Menubar.Item>
-              <Menubar.Item on:click={() => {
+              <Menubar.Item onclick={() => {
                 addPlayerSelectedTab = 'create'
                 addPlayerDialog = true
               }}>In aggiunta</Menubar.Item>
@@ -181,10 +181,10 @@
           <Menubar.Sub>
             <Menubar.SubTrigger>Formazione</Menubar.SubTrigger>
             <Menubar.SubContent>
-              <Menubar.Item on:click={() => {
+              <Menubar.Item onclick={() => {
                 openStartingSixDialog('friends')
               }}>Amici</Menubar.Item>
-              <Menubar.Item on:click={() => {
+              <Menubar.Item onclick={() => {
                 openStartingSixDialog('opponents')
               }}>Avversari</Menubar.Item>
             </Menubar.SubContent>
@@ -192,7 +192,7 @@
           <Menubar.Sub>
             <Menubar.SubTrigger>Rotazione</Menubar.SubTrigger>
             <Menubar.SubContent>
-              <Menubar.Item on:click={() => {
+              <Menubar.Item onclick={() => {
                   teamRotation({
                     opponent: false,
                     rotationType: 'forward'
@@ -203,7 +203,7 @@
                   Amici avanti
                 </span>
               </Menubar.Item>
-              <Menubar.Item on:click={() => {
+              <Menubar.Item onclick={() => {
                 teamRotation({
                   opponent: false,
                   rotationType: 'backward'
@@ -215,7 +215,7 @@
                 </span>
               </Menubar.Item>
               <Menubar.Separator />
-              <Menubar.Item on:click={() => {
+              <Menubar.Item onclick={() => {
                 teamRotation({
                   opponent: true,
                   rotationType: 'forward'
@@ -226,7 +226,7 @@
                   Avversari avanti
                 </span>
               </Menubar.Item>
-              <Menubar.Item on:click={() => {
+              <Menubar.Item onclick={() => {
                 teamRotation({
                   opponent: true,
                   rotationType: 'backward'

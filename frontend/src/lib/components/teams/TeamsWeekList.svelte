@@ -8,7 +8,7 @@
 
 	import { DateTime } from 'luxon'
 	import EventsService from '$lib/services/events/events.service'
-	import { createEventDispatcher } from 'svelte'
+	import { createEventDispatcher, onMount } from 'svelte'
 	import EventsWeekList from '../events/EventsWeekList.svelte'
 	import { Icon } from '@likable-hair/svelte'
 	import TeamImportWeekDialog from '$lib/components/teams/TeamImportWeekDialog.svelte'
@@ -39,8 +39,8 @@
 		teammate = $bindable(undefined),
 		selectedDate = $bindable(new Date()),
 		selectedEvents = $bindable([]),
-		visibleYear = $bindable(DateTime.now().get('year')),
-		visibleWeek = $bindable(DateTime.now().get('weekNumber')),
+		visibleYear = $bindable(),
+		visibleWeek = $bindable(),
 		events = $bindable([]),
 		reloadEvents = $bindable(false),
 		canUpdate = $bindable(false),
@@ -48,10 +48,15 @@
 		canCreate = $bindable(false)
 	}: Props = $props()
 
+  let mounted = $state(false)
+  onMount(() => {
+    mounted = true
+  })
+
 	let importFromYear = $state(visibleYear),
 		importFromWeek = $state(visibleWeek)
 
-	async function loadEvents(vw: number, vy: number) {
+	async function loadEvents(vw: number | undefined, vy: number | undefined) {
 		let from: Date = DateTime.fromObject({
 				weekday: 1,
 				weekNumber: vw,
@@ -108,7 +113,7 @@
 	}
 
 	run(() => {
-		if (reloadEvents) {
+		if (reloadEvents && mounted) {
 			loadEvents(visibleWeek, visibleYear)
 			reloadEvents = false
 		}
@@ -141,13 +146,15 @@
 		{/snippet}
 	</EventsWeekList>
 
-	<TeamImportWeekDialog
-		bind:open={openImportWeekDialog}
-		{team}
-		bind:selectedYear={importFromYear}
-		bind:selectedWeek={importFromWeek}
-		bind:toYear={visibleYear}
-		bind:toWeek={visibleWeek}
-		on:import={() => loadEvents(visibleWeek, visibleYear)}
-	/>
+  {#if visibleYear !== undefined && visibleWeek !== undefined && importFromWeek !== undefined}
+    <TeamImportWeekDialog
+      bind:open={openImportWeekDialog}
+      {team}
+      bind:selectedYear={importFromYear}
+      bind:selectedWeek={importFromWeek}
+      bind:toYear={visibleYear}
+      bind:toWeek={visibleWeek}
+      on:import={() => loadEvents(visibleWeek, visibleYear)}
+    />
+  {/if}
 {/if}

@@ -33,8 +33,8 @@
 		selectedDate = $bindable(new Date()),
 		selectedEvents = $bindable([]),
 		events = $bindable(),
-		visibleYear = $bindable(DateTime.now().get('year')),
-		visibleWeek = $bindable(DateTime.now().get('weekNumber')),
+		visibleYear = $bindable(),
+		visibleWeek = $bindable(),
 		canUpdate = false,
 		canDestroy = false,
 		canCreate = false,
@@ -128,6 +128,8 @@
 	});
 
 	function nextWeek() {
+    if(visibleYear === undefined || visibleWeek === undefined) return
+
 		let currentVisibleWeek = DateTime.fromObject({
 			weekday: 1,
 			weekNumber: visibleWeek,
@@ -152,6 +154,8 @@
 	}
 
 	function previousWeek() {
+    if(visibleYear === undefined || visibleWeek === undefined) return
+
 		let currentVisibleWeek = DateTime.fromObject({
 			weekday: 1,
 			weekNumber: visibleWeek,
