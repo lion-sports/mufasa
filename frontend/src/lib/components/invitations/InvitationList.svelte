@@ -14,10 +14,10 @@
 	}>()
 
 	interface Props {
-		invitations?: Invitation[];
+		invitations?: Invitation[]
 	}
 
-	let { invitations = [] }: Props = $props();
+	let { invitations = [] }: Props = $props()
 
 	let headers: ComponentProps<typeof SimpleTable>['headers'] = [
 		{
@@ -50,7 +50,8 @@
 		}
 	]
 
-	let confirmDialogOpen: boolean = $state(false), discardingInvitation: Invitation | undefined = $state()
+	let confirmDialogOpen: boolean = $state(false),
+		discardingInvitation: Invitation | undefined = $state()
 	function handleDeleteClick(teammate: any) {
 		discardingInvitation = teammate
 		confirmDialogOpen = true
@@ -70,28 +71,27 @@
 <div style:max-width="100%" style:overflow="auto">
 	<SimpleTable {headers} items={invitations}>
 		{#snippet customSnippet({ item, header })}
-				{#if header.value == 'status'}
-					{item.status}
-				{:else if header.value == 'invitedBy'}
-					{item.invitedBy.email}
-				{:else if header.value == 'group'}
-					{#if !!item.group?.name}
-						{item.group?.name}
-					{:else}
-						Nessuno
-					{/if}
+			{#if header.value == 'status'}
+				{item.status}
+			{:else if header.value == 'invitedBy'}
+				{item.invitedBy.email}
+			{:else if header.value == 'group'}
+				{#if !!item.group?.name}
+					{item.group?.name}
+				{:else}
+					Nessuno
 				{/if}
-			
-			{/snippet}
+			{/if}
+		{/snippet}
 		{#snippet rowActionsSnippet({ item })}
-				<div style:display="flex" style:justify-content="end"  >
+			<div style:display="flex" style:justify-content="end">
 				<Icon
 					name="mdi-delete"
 					--icon-color="rgb(var(--global-color-error-500))"
 					onclick={() => handleDeleteClick(item)}
 				/>
 			</div>
-			{/snippet}
+		{/snippet}
 	</SimpleTable>
 </div>
 

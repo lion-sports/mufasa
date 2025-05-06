@@ -17,10 +17,10 @@
 	}>()
 
 	interface Props {
-		invitations?: Invitation[];
+		invitations?: Invitation[]
 	}
 
-	let { invitations = [] }: Props = $props();
+	let { invitations = [] }: Props = $props()
 
 	function handleReject(invitation: Invitation) {
 		let service = new InvitationsService({ fetch })

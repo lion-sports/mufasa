@@ -10,12 +10,12 @@
 	import LabelAndTextarea from '$lib/components/common/LabelAndTextarea.svelte'
 
 	interface Props {
-		team?: Team;
-		mode?: 'create' | 'update';
-		padding?: string | undefined;
-		margin?: string | undefined;
-		width?: string | undefined;
-		height?: string | undefined;
+		team?: Team
+		mode?: 'create' | 'update'
+		padding?: string | undefined
+		margin?: string | undefined
+		width?: string | undefined
+		height?: string | undefined
 	}
 
 	let {
@@ -28,7 +28,7 @@
 		margin = undefined,
 		width = undefined,
 		height = undefined
-	}: Props = $props();
+	}: Props = $props()
 </script>
 
 <form style:padding style:margin style:width style:height>

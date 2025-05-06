@@ -1,5 +1,5 @@
 <script lang="ts">
-  import BarChart from '$lib/components/common/BarChart.svelte'
+	import BarChart from '$lib/components/common/BarChart.svelte'
 
 	let background: string | undefined = $state(undefined)
 	onMount(() => {
@@ -23,15 +23,15 @@
 				hoverBackgroundColor?: string[]
 				tension?: number
 			}[]
-		};
-		horizontal?: boolean;
-		responsive?: boolean;
-		maintainAspectRatio?: boolean;
-		showLegend?: boolean;
-		showYTicks?: boolean;
-		showXTicks?: boolean;
-		displayYGrid?: boolean;
-		lineWidth?: number;
+		}
+		horizontal?: boolean
+		responsive?: boolean
+		maintainAspectRatio?: boolean
+		showLegend?: boolean
+		showYTicks?: boolean
+		showXTicks?: boolean
+		displayYGrid?: boolean
+		lineWidth?: number
 	}
 
 	let {
@@ -47,7 +47,7 @@
 		showXTicks = true,
 		displayYGrid = true,
 		lineWidth = 1
-	}: Props = $props();
+	}: Props = $props()
 
 	let gridColor = $derived('rgb(' + (background || '200, 200, 200') + ', .3)')
 </script>
@@ -61,7 +61,7 @@
 		plugins: {
 			legend: {
 				display: showLegend
-			},
+			}
 		},
 		interaction: {
 			intersect: false

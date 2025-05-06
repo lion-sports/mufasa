@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 
-	import DashboardService, {
-		type Widget
-	} from '$lib/services/dashboards/dashboard.service'
+	import DashboardService, { type Widget } from '$lib/services/dashboards/dashboard.service'
 	import DashboardShaper from './DashboardShaper.svelte'
 	import { createId } from '@paralleldrive/cuid2'
 	import { Icon } from '@likable-hair/svelte'
@@ -18,14 +16,14 @@
 	let componentMap: Record<string, Component<any, any, any>> = { ...WidgetComponents }
 
 	interface Props {
-		widgets?: (Omit<Widget, 'id'> & { id: string | number })[];
-		someRowSlotEmpty?: boolean;
-		preview?: boolean;
-		canDelete?: boolean;
-		canAdd?: boolean;
-		widgetLoading?: Record<number | string, boolean>;
-		selectedSet?: number[];
-		scoutId?: number | undefined;
+		widgets?: (Omit<Widget, 'id'> & { id: string | number })[]
+		someRowSlotEmpty?: boolean
+		preview?: boolean
+		canDelete?: boolean
+		canAdd?: boolean
+		widgetLoading?: Record<number | string, boolean>
+		selectedSet?: number[]
+		scoutId?: number | undefined
 	}
 
 	let {
@@ -37,49 +35,47 @@
 		widgetLoading = $bindable({}),
 		selectedSet = [],
 		scoutId = undefined
-	}: Props = $props();
+	}: Props = $props()
 
 	let localWidgets: NonNullable<ComponentProps<DashboardShaper>['widgets']> = $state([]),
-    mounted: boolean = $state(false)
+		mounted: boolean = $state(false)
 
-  onMount(() => {
-    mounted = true
-  })
+	onMount(() => {
+		mounted = true
+	})
 
-
-
-  async function loadWidgetData() {
-    for(let i = 0; i < widgets.length; i += 1) {
-      let widget = widgets[i]
-      let widgetSpec = DashboardService.availableWidget.find(
+	async function loadWidgetData() {
+		for (let i = 0; i < widgets.length; i += 1) {
+			let widget = widgets[i]
+			let widgetSpec = DashboardService.availableWidget.find(
 				(aw) => aw.name === widget.componentName
 			)
 
-      if(!!widgetSpec?.fetchData) {
-        widgetLoading[Number(widget.id)] = true
-      }
-    }
-    
-    for(let i = 0; i < widgets.length; i += 1) {
-      let widget = widgets[i]
-      let widgetSpec = DashboardService.availableWidget.find(
+			if (!!widgetSpec?.fetchData) {
+				widgetLoading[Number(widget.id)] = true
+			}
+		}
+
+		for (let i = 0; i < widgets.length; i += 1) {
+			let widget = widgets[i]
+			let widgetSpec = DashboardService.availableWidget.find(
 				(aw) => aw.name === widget.componentName
 			)
 
-      if(!!widgetSpec?.fetchData) {
-        widgets[i].data = await widgetSpec.fetchData(
-          {
-            fetch,
-            widget: widgets[i],
-            scoutId,
-            sets: selectedSet
-          },
-          i
-        )
-        widgetLoading[Number(widget.id)] = false
-      }
-    }
-  }
+			if (!!widgetSpec?.fetchData) {
+				widgets[i].data = await widgetSpec.fetchData(
+					{
+						fetch,
+						widget: widgets[i],
+						scoutId,
+						sets: selectedSet
+					},
+					i
+				)
+				widgetLoading[Number(widget.id)] = false
+			}
+		}
+	}
 
 	async function handleAddWidget(
 		event: CustomEvent<{
@@ -107,8 +103,8 @@
 						{
 							fetch,
 							widget: widgets[widgetIndex],
-              scoutId,
-              sets: selectedSet
+							scoutId,
+							sets: selectedSet
 						},
 						widgetIndex
 					)
@@ -129,7 +125,7 @@
 				left: lw.widget.data.left,
 				top: lw.widget.data.top,
 				data: lw.widget.data.data,
-        widgetSetting: lw.widget.data.widgetSetting,
+				widgetSetting: lw.widget.data.widgetSetting,
 				options: lw.widget.data.options
 			}
 		})
@@ -149,7 +145,7 @@
 						top: w.top,
 						data: w.data,
 						options: w.options,
-            widgetSetting: w.widgetSetting,
+						widgetSetting: w.widgetSetting
 					}
 				},
 				columnSpanFrom: w.left,
@@ -173,41 +169,41 @@
 	let allWidgetsAvailable = DashboardService.availableWidget,
 		filteredWidgets = allWidgetsAvailable
 
-  async function handleReloadWidget(params: { widget: Widget }) {
-    let widgetSpec = DashboardService.availableWidget.find(
-      (aw) => aw.name === params.widget.componentName
-    )
-    let widgetIndex = widgets.findIndex((w) => w.id === params.widget.id)
-    if(widgetIndex === -1) return
+	async function handleReloadWidget(params: { widget: Widget }) {
+		let widgetSpec = DashboardService.availableWidget.find(
+			(aw) => aw.name === params.widget.componentName
+		)
+		let widgetIndex = widgets.findIndex((w) => w.id === params.widget.id)
+		if (widgetIndex === -1) return
 
-    let widgetService = new WidgetsService({ fetch })
-    let fetchedWidget = await widgetService.get({
-      id: params.widget.id
-    })
-    widgets[widgetIndex] = fetchedWidget
+		let widgetService = new WidgetsService({ fetch })
+		let fetchedWidget = await widgetService.get({
+			id: params.widget.id
+		})
+		widgets[widgetIndex] = fetchedWidget
 
-    if(!!widgetSpec?.fetchData) {
-      widgetLoading[Number(params.widget.id)] = true
-      widgets[widgetIndex].data = await widgetSpec.fetchData(
-        {
-          fetch,
-          widget: widgets[widgetIndex],
-          scoutId,
-          sets: selectedSet
-        },
-        widgetIndex
-      )
-      widgetLoading[Number(params.widget.id)] = false
-    }
-  }
-  run(() => {
-		if(mounted && selectedSet) loadWidgetData()
-	});
+		if (!!widgetSpec?.fetchData) {
+			widgetLoading[Number(params.widget.id)] = true
+			widgets[widgetIndex].data = await widgetSpec.fetchData(
+				{
+					fetch,
+					widget: widgets[widgetIndex],
+					scoutId,
+					sets: selectedSet
+				},
+				widgetIndex
+			)
+			widgetLoading[Number(params.widget.id)] = false
+		}
+	}
+	run(() => {
+		if (mounted && selectedSet) loadWidgetData()
+	})
 	run(() => {
 		if (!!widgets) {
-	    calculateLocalWidgetsFromWidgets()
-	  }
-	});
+			calculateLocalWidgetsFromWidgets()
+		}
+	})
 </script>
 
 <DashboardShaper
@@ -227,10 +223,10 @@
 						<div class="p-2.5 rounded-md flex flex-col relative basis-1/2">
 							<SvelteComponent>
 								{#snippet label()}
-															<div  class="text-xl font-bold">
+									<div class="text-xl font-bold">
 										{widgetSpec.label}
 									</div>
-														{/snippet}
+								{/snippet}
 							</SvelteComponent>
 							<div class="flex gap-2 flex-wrap mt-2">
 								{#each availableSizes( { availableHeight: addWidgetInfo.availableHeight, availableWidth: addWidgetInfo.availableWidth, availableSizes: widgetSpec.availableSizes } ) as sizes}
@@ -266,23 +262,20 @@
 		</div>
 	{/snippet}
 	{#snippet widgetSnippet({ widget, removeWidget })}
-		<div
-			class="w-full h-full overflow-auto"
-			class:relative={canDelete}
-			
-			
-		>
+		<div class="w-full h-full overflow-auto" class:relative={canDelete}>
 			{#if !!componentMap[widget.widget?.data.componentName]}
 				{@const SvelteComponent_1 = componentMap[widget.widget?.data.componentName]}
-			<div class="w-full h-full p-2">
-	        <div class="w-full h-[calc(100%)] overflow-auto border-[rgb(var(--global-color-contrast-200),.1)] rounded border py-2 px-2">
-	          <SvelteComponent_1
-	            widget={widget.widget?.data}
-	            loadingData={widgetLoading[widget.widget?.name || '']}
-	            {selectedSet}
-	            on:reload={() => handleReloadWidget({ widget: widget.widget?.data })}
-	          />
-	        </div>
+				<div class="w-full h-full p-2">
+					<div
+						class="w-full h-[calc(100%)] overflow-auto border-[rgb(var(--global-color-contrast-200),.1)] rounded border py-2 px-2"
+					>
+						<SvelteComponent_1
+							widget={widget.widget?.data}
+							loadingData={widgetLoading[widget.widget?.name || '']}
+							{selectedSet}
+							on:reload={() => handleReloadWidget({ widget: widget.widget?.data })}
+						/>
+					</div>
 				</div>
 			{:else}
 				<div class="w-full flex items-center justify-center text-sm font-light h-full">
@@ -308,7 +301,7 @@
 
 <style>
 	.black-glass {
-		background-color: rgb(var(--global-color-background-100),.5);
+		background-color: rgb(var(--global-color-background-100), 0.5);
 		backdrop-filter: blur(1px);
 	}
 

@@ -1,22 +1,21 @@
 <script lang="ts">
-
 	import { Icon } from '@likable-hair/svelte'
 	import { slide } from 'svelte/transition'
 	interface Props {
-		collapsed?: boolean;
-		title?: string | undefined;
-		children?: import('svelte').Snippet;
+		collapsed?: boolean
+		title?: string | undefined
+		children?: import('svelte').Snippet
 	}
 
-	let { collapsed = $bindable(false), title = undefined, children }: Props = $props();
+	let { collapsed = $bindable(false), title = undefined, children }: Props = $props()
 </script>
 
 <div class="panel">
 	<button class="title-container" onclick={() => (collapsed = !collapsed)}>
-    <div class="title">{title}</div>
-    <div class="expand-icon" class:reverse={!collapsed}>
-      <Icon name="mdi-menu-down" />
-    </div>
+		<div class="title">{title}</div>
+		<div class="expand-icon" class:reverse={!collapsed}>
+			<Icon name="mdi-menu-down" />
+		</div>
 	</button>
 	{#if !collapsed}
 		<div transition:slide|local={{ duration: 200 }}>

@@ -8,27 +8,27 @@ export const load = (async ({ fetch, parent }) => {
 	const parentData = await parent()
 
 	const service = new EventsService({ fetch, token: parentData.token })
-  let nextEvents = await service.list({
-    filters: {
-      from: DateTime.now().toJSDate(),
-      to: DateTime.now().plus({ days: 1 }).endOf('day').toJSDate()
-    }
-  })
+	let nextEvents = await service.list({
+		filters: {
+			from: DateTime.now().toJSDate(),
+			to: DateTime.now().plus({ days: 1 }).endOf('day').toJSDate()
+		}
+	})
 
-  let teamService = new TeamsService({ fetch, token: parentData.token })
-  let absencesInLatestEvents = await teamService.absencesInLatestEvents({
-    forLastEvents: 10
-  })
+	let teamService = new TeamsService({ fetch, token: parentData.token })
+	let absencesInLatestEvents = await teamService.absencesInLatestEvents({
+		forLastEvents: 10
+	})
 
-  let paginatedTeams = await teamService.list()
+	let paginatedTeams = await teamService.list()
 
-  let teammateService = new TeammatesService({ fetch, token: parentData.token })
-  let mostAbsenceForTeammate = await teammateService.mostAbsenceForTeammates()
+	let teammateService = new TeammatesService({ fetch, token: parentData.token })
+	let mostAbsenceForTeammate = await teammateService.mostAbsenceForTeammates()
 
 	return {
-    nextEvents,
-    absencesInLatestEvents,
-    mostAbsenceForTeammate,
-    teams: paginatedTeams.data
+		nextEvents,
+		absencesInLatestEvents,
+		mostAbsenceForTeammate,
+		teams: paginatedTeams.data
 	}
 }) satisfies PageLoad

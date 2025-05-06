@@ -14,9 +14,9 @@ export type Teammate = {
 	userId: number
 	user: User
 	alias?: string
-  shirts: Shirt[]
-  defaultRole: Role
-  availableRoles: Role[]
+	shirts: Shirt[]
+	defaultRole: Role
+	availableRoles: Role[]
 	createdAt: Date
 	updatedAt: Date
 }
@@ -85,29 +85,32 @@ export default class TeamsService extends FetchBasedService {
 		return response
 	}
 
-  public async absencesInLatestEvents(params: {
-    forLastEvents: number
-  }): Promise<Record<number, {
-    team: {
-      id: number,
-      name: string
-    }
-    absences: {
-      eventId: number,
-      absencesNumber: number
-    }[]
-    presences: {
-      eventId: number,
-      presencesNumber: number
-    }[]
-  }>> {
-    let response = await this.client.get({
-      url: '/teams/absencesInLatestEvents',
-      params: {
-        forLastEvents: params.forLastEvents
-      }
-    })
+	public async absencesInLatestEvents(params: { forLastEvents: number }): Promise<
+		Record<
+			number,
+			{
+				team: {
+					id: number
+					name: string
+				}
+				absences: {
+					eventId: number
+					absencesNumber: number
+				}[]
+				presences: {
+					eventId: number
+					presencesNumber: number
+				}[]
+			}
+		>
+	> {
+		let response = await this.client.get({
+			url: '/teams/absencesInLatestEvents',
+			params: {
+				forLastEvents: params.forLastEvents
+			}
+		})
 
-    return response
-  }
+		return response
+	}
 }

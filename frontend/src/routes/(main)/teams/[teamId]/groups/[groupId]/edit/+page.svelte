@@ -6,10 +6,10 @@
 	import type { PageData } from './$types'
 
 	interface Props {
-		data: PageData;
+		data: PageData
 	}
 
-	let { data }: Props = $props();
+	let { data }: Props = $props()
 
 	let loading = $state(false)
 	async function handleConfirmClick() {
@@ -26,14 +26,13 @@
 	}
 </script>
 
-
 <PageTitle title={data.group.name || ''} prependVisible={true} />
 
 <div class="mt-4">
-  <GroupForm group={data.group} />
-  <ConfirmOrCancelButtons
-    on:confirm-click={handleConfirmClick}
-    on:cancel-click={handleCancelClick}
-    {loading}
-  />
+	<GroupForm group={data.group} />
+	<ConfirmOrCancelButtons
+		on:confirm-click={handleConfirmClick}
+		on:cancel-click={handleCancelClick}
+		{loading}
+	/>
 </div>

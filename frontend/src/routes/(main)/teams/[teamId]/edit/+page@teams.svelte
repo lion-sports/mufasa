@@ -8,10 +8,10 @@
 	import { goto } from '$app/navigation'
 
 	interface Props {
-		data: PageData;
+		data: PageData
 	}
 
-	let { data }: Props = $props();
+	let { data }: Props = $props()
 
 	let loading = false
 	function handleConfirmClick() {

@@ -1,24 +1,24 @@
 <script lang="ts">
-	import { SimpleTextField, Icon } from '@likable-hair/svelte'	
+	import { SimpleTextField, Icon } from '@likable-hair/svelte'
 	import { type ComponentProps } from 'svelte'
 
 	interface Props {
 		class?: {
-		container?: string
-		row?: string
-		input?: string
-	};
-		placeholder?: string;
-		value?: string | number | undefined;
-		type?: 'text' | 'number' | 'password' | 'time';
-		error?: boolean;
-		disabled?: boolean;
-		readonly?: boolean;
-		valueRequired?: boolean;
-		appendIcon?: string | undefined;
-		appendInnerIcon?: string | undefined;
-		prependInner?: import('svelte').Snippet;
-		appendInner?: import('svelte').Snippet;
+			container?: string
+			row?: string
+			input?: string
+		}
+		placeholder?: string
+		value?: string | number | undefined
+		type?: 'text' | 'number' | 'password' | 'time'
+		error?: boolean
+		disabled?: boolean
+		readonly?: boolean
+		valueRequired?: boolean
+		appendIcon?: string | undefined
+		appendInnerIcon?: string | undefined
+		prependInner?: import('svelte').Snippet
+		appendInner?: import('svelte').Snippet
 	}
 
 	let {
@@ -34,13 +34,13 @@
 		appendInnerIcon = undefined,
 		prependInner,
 		appendInner,
-    ...rest
-	}: Props & ComponentProps<typeof SimpleTextField> = $props();
+		...rest
+	}: Props & ComponentProps<typeof SimpleTextField> = $props()
 
 	let localError = $derived((valueRequired && value?.toString().length == 0) || error)
 
-	const prependInner_render = $derived(prependInner);
-	const appendInner_render = $derived(appendInner);
+	const prependInner_render = $derived(prependInner)
+	const appendInner_render = $derived(appendInner)
 </script>
 
 <SimpleTextField
@@ -51,7 +51,7 @@
 	{readonly}
 	{appendIcon}
 	{appendInnerIcon}
-  {...rest}
+	{...rest}
 	class={clazz}
 	--simple-textfield-height="40px"
 	--simple-textfield-border={localError
@@ -62,10 +62,8 @@
 		{@render prependInner_render?.()}
 	{/snippet}
 	{#snippet appendInnerSnippet()}
-		{#if appendInner_render}{@render appendInner_render()}{:else}
-			{#if !!appendInnerIcon}
-				<Icon name={appendInnerIcon} />
-			{/if}
+		{#if appendInner_render}{@render appendInner_render()}{:else if !!appendInnerIcon}
+			<Icon name={appendInnerIcon} />
 		{/if}
 	{/snippet}
 </SimpleTextField>

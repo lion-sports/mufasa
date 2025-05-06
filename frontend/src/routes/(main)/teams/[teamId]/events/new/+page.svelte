@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 
 	import type { Event } from '$lib/components/events/EventForm.svelte'
 	import { page } from '$app/stores'
@@ -13,10 +13,10 @@
 	import type { PageData } from './$types'
 
 	interface Props {
-		data: PageData;
+		data: PageData
 	}
 
-	let { data }: Props = $props();
+	let { data }: Props = $props()
 
 	let event: Event = $state({}),
 		loading: boolean = $state(false),
@@ -25,14 +25,14 @@
 	onMount(async () => {
 		let startParams: string | null = $page.url.searchParams.get('start')
 		if (!!startParams) {
-      if(!event) event = {}
-      event.start = DateTime.fromISO(startParams).toJSDate()
+			if (!event) event = {}
+			event.start = DateTime.fromISO(startParams).toJSDate()
 		}
 
-    let endParams: string | null = $page.url.searchParams.get('end')
-    if (!!endParams) {
-      if(!event) event = {}
-      event.end = DateTime.fromISO(endParams).toJSDate()
+		let endParams: string | null = $page.url.searchParams.get('end')
+		if (!!endParams) {
+			if (!event) event = {}
+			event.end = DateTime.fromISO(endParams).toJSDate()
 		}
 	})
 
@@ -74,7 +74,7 @@
 		if (!!startParams && !event.start) {
 			event.start = DateTime.fromISO(startParams).toJSDate()
 		}
-	});
+	})
 
 	let confirmDisabled = $derived(!event || !event.start || !event.end || !event.name)
 
@@ -83,15 +83,14 @@
 	}
 </script>
 
-
 <PageTitle title="Nuovo evento" prependVisible={true} />
 
 <div style:margin-top="20px">
-  <EventForm bind:event teammates={$team?.teammates} bind:convocations groups={$team?.groups} />
-  <ConfirmOrCancelButtons
-    confirmDisable={confirmDisabled}
-    {loading}
-    on:confirm-click={handleSubmit}
-    on:cancel-click={handleCancel}
-  />
+	<EventForm bind:event teammates={$team?.teammates} bind:convocations groups={$team?.groups} />
+	<ConfirmOrCancelButtons
+		confirmDisable={confirmDisabled}
+		{loading}
+		on:confirm-click={handleSubmit}
+		on:cancel-click={handleCancel}
+	/>
 </div>

@@ -3,17 +3,16 @@
 </script>
 
 <script lang="ts">
-import type { ComponentProps } from 'svelte'
-
+	import type { ComponentProps } from 'svelte'
 
 	import StandardSelect from './StandardSelect.svelte'
 	interface Props {
-		value?: string | number | undefined;
-		label: string;
-		name: string;
-		options: Option[];
-		disabled?: boolean;
-    onchange?: ComponentProps<typeof StandardSelect>['onchange']
+		value?: string | number | undefined
+		label: string
+		name: string
+		options: Option[]
+		disabled?: boolean
+		onchange?: ComponentProps<typeof StandardSelect>['onchange']
 	}
 
 	let {
@@ -22,8 +21,8 @@ import type { ComponentProps } from 'svelte'
 		name,
 		options,
 		disabled = false,
-    onchange
-	}: Props = $props();
+		onchange
+	}: Props = $props()
 </script>
 
 <label style:font-weight="500" style:margin-left="3px" for={name}>{label}</label>

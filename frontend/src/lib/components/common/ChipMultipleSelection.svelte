@@ -7,11 +7,11 @@
 
 <script lang="ts">
 	interface Props {
-		chips?: Chip[];
-		value?: Chip[];
+		chips?: Chip[]
+		value?: Chip[]
 	}
 
-	let { chips = $bindable([]), value = $bindable([]) }: Props = $props();
+	let { chips = $bindable([]), value = $bindable([]) }: Props = $props()
 
 	function toggleSelection(chip: Chip) {
 		if (!value) value = []

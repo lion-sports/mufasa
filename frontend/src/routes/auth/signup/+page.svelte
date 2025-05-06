@@ -85,21 +85,25 @@
 							<div class="text-2xl">Sign Up</div>
 
 							<div class="w-full flex flex-col gap-1 mt-5">
-								<div class="flex">
-									<LabelAndTextfield
-										error={error && !firstname}
-										placeholder="Firstname"
-										name="firstname"
-										bind:value={firstname}
-										--simple-textfield-width="100%"
-									/>
-									<LabelAndTextfield
-										error={error && !lastname}
-										placeholder="Lastname"
-										name="lastname"
-										bind:value={lastname}
-										--simple-textfield-width="100%"
-									/>
+								<div class="w-full flex gap-1.5">
+									<div class="w-full">
+										<LabelAndTextfield
+											error={error && !firstname}
+											placeholder="Firstname"
+											name="firstname"
+											bind:value={firstname}
+											--simple-textfield-width="100%"
+										/>
+									</div>
+									<div class="w-full">
+										<LabelAndTextfield
+											error={error && !lastname}
+											placeholder="Lastname"
+											name="lastname"
+											bind:value={lastname}
+											--simple-textfield-width="100%"
+										/>
+									</div>
 								</div>
 
 								<div
@@ -107,9 +111,15 @@
 									style:border={error ? '1px solid rgb(var(--global-color-error-500))' : ''}
 								>
 									<StandardDatepicker
-										class={{ textfield: { row: '!mb-0 !pb-0' } }}
+										class={{
+											textfield: {
+												row: '!mb-0 !pb-0',
+												field: 'flex items-center'
+											}
+										}}
 										bind:value={birthday}
 										placeholder="Birthday"
+										--simple-textfield-height="40px"
 										--simple-textfield-default-width="100%"
 										--simple-textfield-max-width="100%"
 										--simple-text-field-width="100%"

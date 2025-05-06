@@ -8,11 +8,11 @@
 	import { invalidate } from '$app/navigation'
 
 	interface Props {
-		data: PageData;
+		data: PageData
 	}
 
-	let { data = $bindable() }: Props = $props();
-  let teammate = $state(data.teammate)
+	let { data = $bindable() }: Props = $props()
+	let teammate = $state(data.teammate)
 
 	team.subscribe((value) => {
 		if (!!value) {
@@ -29,37 +29,36 @@
 
 		let service = new TeammateService({ fetch })
 		await service.update({
-      id: teammate.id,
-      alias: teammate.alias,
-      groupId: teammate.group?.id,
-      defaultRole: teammate.defaultRole,
-      availableRoles: teammate.availableRoles
-    })
-				
+			id: teammate.id,
+			alias: teammate.alias,
+			groupId: teammate.group?.id,
+			defaultRole: teammate.defaultRole,
+			availableRoles: teammate.availableRoles
+		})
+
 		loading = false
 
-    await invalidate('teams:[teamId]')
-    window.history.back()
+		await invalidate('teams:[teamId]')
+		window.history.back()
 	}
 
 	function handleCancelClick() {
 		window.history.back()
 	}
-
 </script>
 
 <div class="mt-4">
-  <TeammateForm
-    bind:alias={teammate.alias} 
-    bind:group={teammate.group} 
-    teamGroups={data.team.groups} 
-    bind:defaultRole={teammate.defaultRole}
-    bind:availableRoles={teammate.availableRoles}
-  />
+	<TeammateForm
+		bind:alias={teammate.alias}
+		bind:group={teammate.group}
+		teamGroups={data.team.groups}
+		bind:defaultRole={teammate.defaultRole}
+		bind:availableRoles={teammate.availableRoles}
+	/>
 </div>
 
 <ConfirmOrCancelButtons
-  on:confirm-click={handleConfirmClick}
-  on:cancel-click={handleCancelClick}
-  {loading}
+	on:confirm-click={handleConfirmClick}
+	on:cancel-click={handleCancelClick}
+	{loading}
 />

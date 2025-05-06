@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 
 	import DashboardAddButton from './DashboardAddButton.svelte'
 	import StandardDialog from '../common/StandardDialog.svelte'
@@ -18,14 +18,14 @@
 			rowSpanTo: number
 			availableHeight?: number
 			availableWidth?: number
-		}[];
-		layoutWidth?: number;
-		layoutHeight?: number | undefined;
-		someRowSlotEmpty?: boolean;
-		preview?: boolean;
-		canAdd?: boolean;
-		widgetSnippet?: import('svelte').Snippet<[any]>;
-		addWidgetSnippet?: import('svelte').Snippet<[any]>;
+		}[]
+		layoutWidth?: number
+		layoutHeight?: number | undefined
+		someRowSlotEmpty?: boolean
+		preview?: boolean
+		canAdd?: boolean
+		widgetSnippet?: import('svelte').Snippet<[any]>
+		addWidgetSnippet?: import('svelte').Snippet<[any]>
 	}
 
 	let {
@@ -37,7 +37,7 @@
 		canAdd = $bindable(true),
 		widgetSnippet,
 		addWidgetSnippet
-	}: Props = $props();
+	}: Props = $props()
 
 	let dispatch = createEventDispatcher<{
 		addWidget: {
@@ -47,7 +47,6 @@
 			widget: (typeof widgets)[number]
 		}
 	}>()
-
 
 	let normalizedWidgetGrid: ((typeof widgets)[number] | undefined)[][] = $state([])
 
@@ -74,8 +73,6 @@
 		}
 	}
 
-
-
 	let filledWidgetGrid: (Omit<(typeof widgets)[number], 'widget'> & {
 		widget?: (typeof widgets)[number]['widget'] | undefined
 	})[] = $state([])
@@ -90,7 +87,7 @@
 					let availableHeight: number = layoutHeight === undefined ? Infinity : 1
 					while (
 						normalizedWidgetGrid[r + availableHeight]?.[c] === undefined &&
-            layoutHeight !== undefined &&
+						layoutHeight !== undefined &&
 						r + availableHeight < layoutHeight
 					)
 						availableHeight += 1
@@ -177,7 +174,7 @@
 	}
 	run(() => {
 		if (!!widgets) calculateNormalizedWidgetGrid()
-	});
+	})
 	run(() => {
 		someRowSlotEmpty = normalizedWidgetGrid.some((row) => {
 			for (let i = 0; i < layoutWidth; i += 1) {
@@ -185,10 +182,10 @@
 			}
 			return false
 		})
-	});
+	})
 	run(() => {
 		if (!!normalizedWidgetGrid) calculateFilledWidgetGrid()
-	});
+	})
 </script>
 
 <div
@@ -204,10 +201,8 @@
 			>
 				{#if preview}
 					<div class="widget-preview"></div>
-				{:else}
-					{#if widgetSnippet}{@render widgetSnippet({ widget, removeWidget, })}{:else}
-						{widget.widget.name}
-					{/if}
+				{:else if widgetSnippet}{@render widgetSnippet({ widget, removeWidget })}{:else}
+					{widget.widget.name}
 				{/if}
 			</div>
 		{:else if !preview && canAdd}
@@ -215,7 +210,7 @@
 				style:grid-column={`${widget.columnSpanFrom} / ${widget.columnSpanTo}`}
 				style:grid-row={`${widget.rowSpanFrom} / ${widget.rowSpanTo}`}
 			>
-        <DashboardAddButton on:click={() => handleAddClick({ slot: widget })} />
+				<DashboardAddButton on:click={() => handleAddClick({ slot: widget })} />
 			</div>
 		{/if}
 	{/each}
@@ -229,7 +224,8 @@
 							columnSpanTo: layoutWidth + 1,
 							rowSpanFrom: normalizedWidgetGrid.length + 1,
 							rowSpanTo: normalizedWidgetGrid.length + 2,
-							availableHeight: layoutHeight === undefined ? Infinity : layoutHeight - normalizedWidgetGrid.length,
+							availableHeight:
+								layoutHeight === undefined ? Infinity : layoutHeight - normalizedWidgetGrid.length,
 							availableWidth: layoutWidth
 						}
 					})}
@@ -241,12 +237,16 @@
 <StandardDialog title="Add widget" bind:open={addWidgetDialog}>
 	<div>
 		{#if !!addWidgetInfo}
-			{@render addWidgetSnippet?.({ addWidgetInfo: {
+			{@render addWidgetSnippet?.({
+				addWidgetInfo: {
 					availableHeight: addWidgetInfo.availableHeight,
 					availableWidth: addWidgetInfo.availableWidth,
 					fromRow: addWidgetInfo.fromRow,
 					fromColumn: addWidgetInfo.fromColumn
-				}, addWidget, closeAddWidgetDialog, })}
+				},
+				addWidget,
+				closeAddWidgetDialog
+			})}
 		{/if}
 	</div>
 </StandardDialog>

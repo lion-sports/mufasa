@@ -10,13 +10,13 @@
 	import type { Teammate } from '$lib/services/teams/teams.service'
 
 	interface Props {
-		events?: Event[];
-		team?: { id: number } | undefined;
-		teammate?: Teammate | undefined;
-		precompiledDate?: DateTime | undefined;
-		showTeamName?: boolean;
-		canCreate?: boolean;
-		noData?: import('svelte').Snippet;
+		events?: Event[]
+		team?: { id: number } | undefined
+		teammate?: Teammate | undefined
+		precompiledDate?: DateTime | undefined
+		showTeamName?: boolean
+		canCreate?: boolean
+		noData?: import('svelte').Snippet
 	}
 
 	let {
@@ -27,7 +27,7 @@
 		showTeamName = false,
 		canCreate = false,
 		noData
-	}: Props = $props();
+	}: Props = $props()
 
 	function formattedTime(event: Event) {
 		let fromTime: string = DateTime.fromJSDate(event.start)
@@ -42,7 +42,9 @@
 	function handlePlusClick() {
 		if (!!team) {
 			if (!!precompiledDate) {
-				goto(`/teams/${team.id}/events/new?${qs.stringify({ start: precompiledDate.toJSDate(), end: precompiledDate.toJSDate() })}`)
+				goto(
+					`/teams/${team.id}/events/new?${qs.stringify({ start: precompiledDate.toJSDate(), end: precompiledDate.toJSDate() })}`
+				)
 			} else {
 				goto('/teams/' + team.id + '/events/new')
 			}
@@ -61,19 +63,21 @@
 		return !!teammate && event.convocations.some((c) => !!teammate && c.teammateId == teammate.id)
 	}
 
-	let sortedEvents = $derived(!!events
-		? events.sort((a, b) => {
-				return DateTime.fromJSDate(new Date(a.start)).diff(DateTime.fromJSDate(new Date(b.start)))
-					.milliseconds
-		})
-		: [])
+	let sortedEvents = $derived(
+		!!events
+			? events.sort((a, b) => {
+					return DateTime.fromJSDate(new Date(a.start)).diff(DateTime.fromJSDate(new Date(b.start)))
+						.milliseconds
+				})
+			: []
+	)
 </script>
 
 <div class="events-container">
 	{#if events.length > 0}
 		{#each sortedEvents as event}
 			<button class="event-post" onclick={() => handleEventClick(event)} class:clickable={true}>
-        <div class="event-post-band"></div>
+				<div class="event-post-band"></div>
 				<div class="title">{event.name}</div>
 				<div class="time">
 					{formattedTime(event)}
@@ -109,23 +113,21 @@
 						</span>
 					</div>
 				{/if}
-      </button>
+			</button>
 		{/each}
 		{#if !!team && canCreate}
 			<div class="plus-container">
 				<Icon name="mdi-plus" onclick={handlePlusClick} />
 			</div>
 		{/if}
-	{:else}
-		{#if noData}{@render noData()}{:else}
-			<div class="no-data">
-        Nessun evento, 
-        <button 
-          onclick={handlePlusClick}
-          class="inline underline text-[rgb(var(--global-color-primary-500))]"
-        >creane uno</button>
-      </div>
-		{/if}
+	{:else if noData}{@render noData()}{:else}
+		<div class="no-data">
+			Nessun evento,
+			<button
+				onclick={handlePlusClick}
+				class="inline underline text-[rgb(var(--global-color-primary-500))]">creane uno</button
+			>
+		</div>
 	{/if}
 </div>
 
@@ -145,19 +147,19 @@
 		padding-bottom: 5px;
 		margin-left: 10px;
 		margin-right: 10px;
-    text-align: left;
-    position: relative;
+		text-align: left;
+		position: relative;
 	}
 
-  .event-post-band {
-    position: absolute;
-    top: 0px;
-    bottom: 0px;
-    width: 10px;
-    left: 0px;
-    border-radius: 5px 0px 0px 5px;
-    background-color: rgb(var(--global-color-primary-500));
-  }
+	.event-post-band {
+		position: absolute;
+		top: 0px;
+		bottom: 0px;
+		width: 10px;
+		left: 0px;
+		border-radius: 5px 0px 0px 5px;
+		background-color: rgb(var(--global-color-primary-500));
+	}
 
 	.clickable {
 		cursor: pointer;

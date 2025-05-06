@@ -7,27 +7,27 @@
 	import ChipMultipleSelection from '$lib/components/common/ChipMultipleSelection.svelte'
 
 	interface Props {
-		value: Chip[];
-		onlyConvocable?: boolean;
-		groups: Group[];
+		value: Chip[]
+		onlyConvocable?: boolean
+		groups: Group[]
 	}
 
-	let { value = $bindable(), onlyConvocable = false, groups = $bindable() }: Props = $props();
+	let { value = $bindable(), onlyConvocable = false, groups = $bindable() }: Props = $props()
 
-	let filteredChips: Chip[] = $derived(!!groups
-		? groups
-				.filter((group) => {
-					return !onlyConvocable || (onlyConvocable && group.convocable)
-				})
-				.map((group): Chip => {
-					return {
-						value: group.id.toString(),
-						label: group.name
-					}
-				})
-		: [])
-
-	
+	let filteredChips: Chip[] = $derived(
+		!!groups
+			? groups
+					.filter((group) => {
+						return !onlyConvocable || (onlyConvocable && group.convocable)
+					})
+					.map((group): Chip => {
+						return {
+							value: group.id.toString(),
+							label: group.name
+						}
+					})
+			: []
+	)
 </script>
 
 <ChipMultipleSelection bind:chips={filteredChips} bind:value />

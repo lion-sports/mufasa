@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { createBubbler } from 'svelte/legacy';
+	import { createBubbler } from 'svelte/legacy'
 
-	const bubble = createBubbler();
+	const bubble = createBubbler()
 	import { Icon } from '@likable-hair/svelte'
 </script>
 

@@ -1,8 +1,8 @@
 <script lang="ts" generics="Data">
 	import { Autocomplete } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
-  
-  type AutocompleteProps = ComponentProps<typeof Autocomplete<Data>>
+
+	type AutocompleteProps = ComponentProps<typeof Autocomplete<Data>>
 
 	type Props = {
 		width?: string
@@ -22,7 +22,7 @@
 		placeholder = undefined,
 		values = $bindable(),
 		itemLabel,
-    ...rest
+		...rest
 	}: Props = $props()
 
 	const itemLabel_render = $derived(itemLabel)

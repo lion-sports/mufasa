@@ -7,9 +7,9 @@ interface ImportMeta {
 	readonly env: ImportMetaEnv
 }
 
-interface Window { 
-  ethereum: Ether;
-	solana: PhantomProvider	
+interface Window {
+	ethereum: Ether
+	solana: PhantomProvider
 }
 
 interface PaginationData {
@@ -24,9 +24,8 @@ interface PaginationData {
 	total: number
 }
 
-
 type DeepPartial<T> = T extends object
-  ? {
-    [P in keyof T]?: DeepPartial<T[P]>
-  }
-  : T
+	? {
+			[P in keyof T]?: DeepPartial<T[P]>
+		}
+	: T

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 
 	import type { Team, Teammate } from '$lib/services/teams/teams.service'
 	import type { Event } from '$lib/services/events/events.service'
@@ -14,17 +14,17 @@
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte'
 
 	interface Props {
-		team: Team;
-		teammate?: Teammate | undefined;
-		selectedDate?: Date;
-		selectedEvents?: Event[];
-		events: Event[];
-		visibleYear?: number;
-		visibleWeek?: number;
-		canUpdate?: boolean;
-		canDestroy?: boolean;
-		canCreate?: boolean;
-		weekListOptions?: import('svelte').Snippet;
+		team: Team
+		teammate?: Teammate | undefined
+		selectedDate?: Date
+		selectedEvents?: Event[]
+		events: Event[]
+		visibleYear?: number
+		visibleWeek?: number
+		canUpdate?: boolean
+		canDestroy?: boolean
+		canCreate?: boolean
+		weekListOptions?: import('svelte').Snippet
 	}
 
 	let {
@@ -39,7 +39,7 @@
 		canDestroy = false,
 		canCreate = false,
 		weekListOptions
-	}: Props = $props();
+	}: Props = $props()
 
 	let dispatch = createEventDispatcher<{
 		nextWeek: {
@@ -125,10 +125,10 @@
 			})
 
 		weekName = `${firstDayOfWeek} - ${lastDayOfWeek} ${visibleYear}`
-	});
+	})
 
 	function nextWeek() {
-    if(visibleYear === undefined || visibleWeek === undefined) return
+		if (visibleYear === undefined || visibleWeek === undefined) return
 
 		let currentVisibleWeek = DateTime.fromObject({
 			weekday: 1,
@@ -154,7 +154,7 @@
 	}
 
 	function previousWeek() {
-    if(visibleYear === undefined || visibleWeek === undefined) return
+		if (visibleYear === undefined || visibleWeek === undefined) return
 
 		let currentVisibleWeek = DateTime.fromObject({
 			weekday: 1,
@@ -211,7 +211,7 @@
 
 	run(() => {
 		if (!!events) groupEventByDate()
-	});
+	})
 	run(() => {
 		if (!!selectedDate) {
 			let key = DateTime.now()
@@ -224,7 +224,7 @@
 
 			selectedEvents = dayGroupedEvents[key] || []
 		}
-	});
+	})
 
 	function handleEventTitleClick(event: Event) {
 		goto(`/teams/${team.id}/events/${event.id}/general`)
@@ -233,9 +233,12 @@
 	let confirmDeletionDialogOpen: boolean = $state(false),
 		deletingEvent: Event | undefined = $state(),
 		loadingDelete: boolean = false
-	function handleEventOptionClick(e: {
-    detail: { element: (typeof options)[0] }
-  }, event: Event) {
+	function handleEventOptionClick(
+		e: {
+			detail: { element: (typeof options)[0] }
+		},
+		event: Event
+	) {
 		if (e.detail.element.name == 'edit' && !!team) {
 			goto(`/teams/${team.id}/events/${event.id}/edit`)
 		} else if (e.detail.element.name == 'view' && !!team) {
@@ -271,7 +274,7 @@
 		return !!teammate && event.convocations.some((c) => !!teammate && c.teammateId == teammate.id)
 	}
 
-  let weekdays: WeekdayNumbers[] = [1, 2, 3, 4, 5, 6, 7]
+	let weekdays: WeekdayNumbers[] = [1, 2, 3, 4, 5, 6, 7]
 </script>
 
 <MediaQuery>
@@ -317,7 +320,10 @@
 													>{event.name}</button
 												>
 												<div style:margin-left="10px">
-													<OptionMenu {options} onselect={(e) => handleEventOptionClick(e, event)} />
+													<OptionMenu
+														{options}
+														onselect={(e) => handleEventOptionClick(e, event)}
+													/>
 												</div>
 											</div>
 											<div class="event-subtitle">

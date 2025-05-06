@@ -1,10 +1,10 @@
 <script lang="ts">
 	interface Props {
-		subtitle?: string;
-		marginBottom?: string;
-		marginTop?: string;
-		paddingTop?: string;
-		children?: import('svelte').Snippet;
+		subtitle?: string
+		marginBottom?: string
+		marginTop?: string
+		paddingTop?: string
+		children?: import('svelte').Snippet
 	}
 
 	let {
@@ -13,7 +13,7 @@
 		marginTop = '',
 		paddingTop = '',
 		children
-	}: Props = $props();
+	}: Props = $props()
 </script>
 
 <div

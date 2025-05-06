@@ -3,11 +3,11 @@
 	import StandardDialog from './StandardDialog.svelte'
 
 	interface Props {
-		open: boolean;
-		title?: string;
-		description?: string;
-		confirmText?: string;
-		cancelText?: string;
+		open: boolean
+		title?: string
+		description?: string
+		confirmText?: string
+		cancelText?: string
 	}
 
 	let {
@@ -16,7 +16,7 @@
 		description = "Sicuro di confermare l'operazione?",
 		confirmText = 'Conferma',
 		cancelText = 'Annulla'
-	}: Props = $props();
+	}: Props = $props()
 </script>
 
 <StandardDialog bind:open {title}>

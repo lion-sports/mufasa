@@ -24,7 +24,7 @@
 		await service.create(role)
 
 		loading = false
-    await invalidate('teams:[teamId]')
+		await invalidate('teams:[teamId]')
 		goto(`/teams/${role.team.id}/groups`)
 	}
 
@@ -36,10 +36,10 @@
 <PageTitle title="Nuovo gruppo" prependVisible={true} />
 
 <div style:margin-top="20px">
-  <RoleForm group={role} />
-  <ConfirmOrCancelButtons
-    on:cancel-click={handleCancel}
-    on:confirm-click={handleSubmit}
-    {loading}
-  />
+	<RoleForm group={role} />
+	<ConfirmOrCancelButtons
+		on:cancel-click={handleCancel}
+		on:confirm-click={handleSubmit}
+		{loading}
+	/>
 </div>

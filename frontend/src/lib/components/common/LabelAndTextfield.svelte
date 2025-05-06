@@ -1,25 +1,25 @@
 <script lang="ts">
-  import type { ComponentProps } from 'svelte';
+	import type { ComponentProps } from 'svelte'
 	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
 
 	interface Props {
 		class?: {
-		label?: string
-		input?: {
-			container?: string
-			row?: string
-			input?: string
+			label?: string
+			input?: {
+				container?: string
+				row?: string
+				input?: string
+			}
 		}
-	};
-		value?: string | number | undefined;
-		label?: string | undefined;
-		placeholder?: string;
-		name: string;
-		type?: 'password' | 'text' | 'number';
-		readonly?: boolean;
-		error?: boolean;
-		disabled?: boolean;
-		appendInner?: import('svelte').Snippet;
+		value?: string | number | undefined
+		label?: string | undefined
+		placeholder?: string
+		name: string
+		type?: 'password' | 'text' | 'number'
+		readonly?: boolean
+		error?: boolean
+		disabled?: boolean
+		appendInner?: import('svelte').Snippet
 	}
 
 	let {
@@ -33,15 +33,18 @@
 		error = false,
 		disabled = false,
 		appendInner,
-    ...rest
-  }: Props & ComponentProps<typeof StandardTextfield> = $props();
+		...rest
+	}: Props & ComponentProps<typeof StandardTextfield> = $props()
 
-	const appendInner_render = $derived(appendInner);
+	const appendInner_render = $derived(appendInner)
 </script>
 
-<label style:font-weight="500" style:margin-left="3px" for={name} class={clazz.label}
-	>{label || ''}</label
->
+{#if label}
+	<label style:font-weight="500" style:margin-left="3px" for={name} class={clazz.label}
+		>{label || ''}</label
+	>
+{/if}
+
 <div style:margin-top="5px">
 	<StandardTextfield
 		bind:value
@@ -54,9 +57,7 @@
 		class={clazz.input}
 	>
 		{#snippet appendInner()}
-			
-				{@render appendInner_render?.()}
-			
-			{/snippet}
+			{@render appendInner_render?.()}
+		{/snippet}
 	</StandardTextfield>
 </div>

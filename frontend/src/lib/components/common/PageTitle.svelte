@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
-  import { Icon } from '@likable-hair/svelte'
+	import { Icon } from '@likable-hair/svelte'
 
 	interface Props {
-		title: string;
-		subtitle?: string;
-		marginTop?: string;
-		paddingTop?: string;
-		prependVisible?: boolean;
-		prependRoute?: string | undefined;
-		prepend?: import('svelte').Snippet;
-		titleSnippet?: import('svelte').Snippet;
-		append?: import('svelte').Snippet;
+		title: string
+		subtitle?: string
+		marginTop?: string
+		paddingTop?: string
+		prependVisible?: boolean
+		prependRoute?: string | undefined
+		prepend?: import('svelte').Snippet
+		titleSnippet?: import('svelte').Snippet
+		append?: import('svelte').Snippet
 	}
 
 	let {
@@ -24,7 +24,7 @@
 		prepend,
 		titleSnippet,
 		append
-	}: Props = $props();
+	}: Props = $props()
 
 	function handleBackClick() {
 		if (!prependRoute) window.history.back()
@@ -56,7 +56,7 @@
 				</div>
 			{/if}
 		</div>
-		<div style:flex-grow="1" ></div>
+		<div style:flex-grow="1"></div>
 		<div>
 			{@render append?.()}
 		</div>

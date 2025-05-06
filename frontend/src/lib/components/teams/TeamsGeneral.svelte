@@ -6,10 +6,10 @@
 	import { DateTime } from 'luxon'
 
 	interface Props {
-		team: Team;
+		team: Team
 	}
 
-	let { team }: Props = $props();
+	let { team }: Props = $props()
 </script>
 
 <table>

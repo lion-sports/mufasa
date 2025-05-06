@@ -1,16 +1,20 @@
 <script lang="ts">
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
-	import GroupsService, { RESOURCES, type Group, type Resource } from '$lib/services/groups/groups.service'
+	import GroupsService, {
+		RESOURCES,
+		type Group,
+		type Resource
+	} from '$lib/services/groups/groups.service'
 	import { Icon } from '@likable-hair/svelte'
 	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
 	import { slide } from 'svelte/transition'
 
 	interface Props {
-		group?: DeepPartial<Group>;
-		padding?: string | undefined;
-		margin?: string | undefined;
-		width?: string | undefined;
-		height?: string | undefined;
+		group?: DeepPartial<Group>
+		padding?: string | undefined
+		margin?: string | undefined
+		width?: string | undefined
+		height?: string | undefined
 	}
 
 	let {
@@ -21,7 +25,7 @@
 		margin = undefined,
 		width = undefined,
 		height = undefined
-	}: Props = $props();
+	}: Props = $props()
 
 	let closureStatus: { [key: string]: boolean } = $state({})
 
@@ -66,8 +70,8 @@
 								<div style:margin-top="10px">
 									<LabelAndCheckbox
 										value={!!group.cans && !!group.cans[resource]
-                      // @ts-ignore
-											? group.cans[resource][action]
+											? // @ts-ignore
+												group.cans[resource][action]
 											: false}
 										label={translateAction(action)}
 										id={`${resource}-${action}`}

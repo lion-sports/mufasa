@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 
 	import { DateTime } from 'luxon'
 	import StandardDatepicker from './StandardDatepicker.svelte'
 	import StandardTimePicker from './StandardTimePicker.svelte'
 
 	interface Props {
-		value?: Date;
-		name: string;
+		value?: Date
+		name: string
 	}
 
-	let { value = $bindable(new Date()), name }: Props = $props();
+	let { value = $bindable(new Date()), name }: Props = $props()
 
 	let time: string | undefined = $state()
 
 	run(() => {
 		if (!!value) time = DateTime.fromJSDate(value).toLocaleString(DateTime.TIME_SIMPLE)
-	});
+	})
 
 	function handleTimeChange(e: any) {
 		if (!value) value = new Date()

@@ -5,44 +5,40 @@
 	import ShirtsForm from '$lib/components/shirts/ShirtsForm.svelte'
 	import ShirtService from '$lib/services/shirts/shirts.service'
 	import TeammatesService from '$lib/services/teammates/teammates.service'
-  import type { PageData } from './$types';
-  
-  interface Props {
-    data: PageData;
-  }
+	import type { PageData } from './$types'
 
-  let { data = $bindable() }: Props = $props();
+	interface Props {
+		data: PageData
+	}
 
-  let loading: boolean = false
+	let { data = $bindable() }: Props = $props()
 
-  async function handleSubmit() {
-    loading = true
-    let shirtService = new ShirtService({ fetch })
-    await shirtService.update({
-      id: data.shirt.id,
-      number: data.shirt.number,
-      name: data.shirt.name,
-      teammateId: data.shirt.teammateId,
-      primaryColor: data.shirt.primaryColor,
-      secondaryColor: data.shirt.secondaryColor
-    })
+	let loading: boolean = false
 
-    await invalidate('shirts:list')
-    loading = false
-    window.history.back()
-  }
+	async function handleSubmit() {
+		loading = true
+		let shirtService = new ShirtService({ fetch })
+		await shirtService.update({
+			id: data.shirt.id,
+			number: data.shirt.number,
+			name: data.shirt.name,
+			teammateId: data.shirt.teammateId,
+			primaryColor: data.shirt.primaryColor,
+			secondaryColor: data.shirt.secondaryColor
+		})
+
+		await invalidate('shirts:list')
+		loading = false
+		window.history.back()
+	}
 </script>
 
 <PageTitle
-  title={data.shirt.number.toString() || data.shirt.name || "Nuova maglia"}
-  prependVisible
-  subtitle={TeammatesService.getTeammateName({ teammate: data.teammate })}
+	title={data.shirt.number.toString() || data.shirt.name || 'Nuova maglia'}
+	prependVisible
+	subtitle={TeammatesService.getTeammateName({ teammate: data.teammate })}
 ></PageTitle>
 
-<ShirtsForm
-  bind:shirt={data.shirt}
-></ShirtsForm>
+<ShirtsForm bind:shirt={data.shirt}></ShirtsForm>
 
-<ConfirmOrCancelButtons
-  on:confirm-click={handleSubmit}
-></ConfirmOrCancelButtons>
+<ConfirmOrCancelButtons on:confirm-click={handleSubmit}></ConfirmOrCancelButtons>

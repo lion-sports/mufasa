@@ -1,8 +1,8 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { User } from '../auth/auth.service'
 
-export type Reward ={
-  solanaPublicKey: string,
+export type Reward = {
+	solanaPublicKey: string
 	amount: number
 }
 export default class SolanaService extends FetchBasedService {

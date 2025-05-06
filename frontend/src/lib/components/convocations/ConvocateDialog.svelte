@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 
 	import type { Teammate } from '$lib/services/teams/teams.service'
 	import type { Convocation } from '$lib/services/convocations/convocations.service'
@@ -11,10 +11,10 @@
 	import type { Event } from '$lib/services/events/events.service'
 
 	interface Props {
-		open?: boolean;
-		teammates?: Teammate[];
-		team?: { id: number } | undefined;
-		event: Pick<Event, 'id'>;
+		open?: boolean
+		teammates?: Teammate[]
+		team?: { id: number } | undefined
+		event: Pick<Event, 'id'>
 	}
 
 	let {
@@ -22,7 +22,7 @@
 		teammates = [],
 		team = $bindable(undefined),
 		event
-	}: Props = $props();
+	}: Props = $props()
 
 	let dispatch = createEventDispatcher<{
 		convocate: {
@@ -64,7 +64,7 @@
 				})
 			}
 		}
-	});
+	})
 	let cannotConvocate = $derived(teammatesObjects.length == 0)
 </script>
 

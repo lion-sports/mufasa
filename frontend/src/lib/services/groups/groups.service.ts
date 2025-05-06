@@ -15,101 +15,101 @@ export type PaginatedGroups = {
 }
 
 export type GroupedPermissions<Type = boolean> = {
-  team: {
-    update: Type,
-    destroy: Type,
-    view: Type,
-    invite: Type,
-    removeUser: Type,
-  },
-  teammate: {
-    update: Type,
-  },
-  invitation: {
-    accept: Type,
-    reject: Type,
-    discard: Type,
-  },
-  group: {
-    create: Type,
-    update: Type,
-    destroy: Type,
-    view: Type,
-  },
-  event: {
-    create: Type,
-    update: Type,
-    convocate: Type,
-    destroy: Type,
-  },
-  shirt: {
-    create: Type,
-    update: Type,
-    view: Type,
-    destroy: Type,
-  },
-  scout: {
-    manage: Type,
-    view: Type,
-  },
-  scoringSystem: {
-    view: Type,
-    manage: Type,
-    create: Type,
-  },
-  convocation: {
-    confirm: Type,
-    deny: Type,
-  }
+	team: {
+		update: Type
+		destroy: Type
+		view: Type
+		invite: Type
+		removeUser: Type
+	}
+	teammate: {
+		update: Type
+	}
+	invitation: {
+		accept: Type
+		reject: Type
+		discard: Type
+	}
+	group: {
+		create: Type
+		update: Type
+		destroy: Type
+		view: Type
+	}
+	event: {
+		create: Type
+		update: Type
+		convocate: Type
+		destroy: Type
+	}
+	shirt: {
+		create: Type
+		update: Type
+		view: Type
+		destroy: Type
+	}
+	scout: {
+		manage: Type
+		view: Type
+	}
+	scoringSystem: {
+		view: Type
+		manage: Type
+		create: Type
+	}
+	convocation: {
+		confirm: Type
+		deny: Type
+	}
 }
 
 const EMPTY_GROUPED_PERMISSIONS: GroupedPermissions = {
-  team: {
-    update: false,
-    destroy: false,
-    view: false,
-    invite: false,
-    removeUser: false,
-  },
-  teammate: {
-    update: false,
-  },
-  invitation: {
-    accept: false,
-    reject: false,
-    discard: false,
-  },
-  group: {
-    create: false,
-    update: false,
-    destroy: false,
-    view: false,
-  },
-  event: {
-    create: false,
-    update: false,
-    convocate: false,
-    destroy: false,
-  },
-  shirt: {
-    create: false,
-    update: false,
-    view: false,
-    destroy: false,
-  },
-  scout: {
-    manage: false,
-    view: false,
-  },
-  scoringSystem: {
-    view: false,
-    manage: false,
-    create: false,
-  },
-  convocation: {
-    confirm: false,
-    deny: false,
-  }
+	team: {
+		update: false,
+		destroy: false,
+		view: false,
+		invite: false,
+		removeUser: false
+	},
+	teammate: {
+		update: false
+	},
+	invitation: {
+		accept: false,
+		reject: false,
+		discard: false
+	},
+	group: {
+		create: false,
+		update: false,
+		destroy: false,
+		view: false
+	},
+	event: {
+		create: false,
+		update: false,
+		convocate: false,
+		destroy: false
+	},
+	shirt: {
+		create: false,
+		update: false,
+		view: false,
+		destroy: false
+	},
+	scout: {
+		manage: false,
+		view: false
+	},
+	scoringSystem: {
+		view: false,
+		manage: false,
+		create: false
+	},
+	convocation: {
+		confirm: false,
+		deny: false
+	}
 }
 
 export type Resource = keyof GroupedPermissions
@@ -165,7 +165,7 @@ export default class GroupsService extends FetchBasedService {
 		id: number
 		name?: string
 		convocable?: boolean
-    cans?: DeepPartial<GroupedPermissions>
+		cans?: DeepPartial<GroupedPermissions>
 	}): Promise<Group> {
 		let response = await this.client.put({
 			url: '/groups/' + params.id,
@@ -194,10 +194,10 @@ export default class GroupsService extends FetchBasedService {
 			event: 'Eventi',
 			convocation: 'Convocazioni',
 			group: 'Gruppi',
-      teammate: 'Membro',
-      scout: 'Scout',
-      scoringSystem: 'Sistemi di punteggio',
-      shirt: 'Maglie'
+			teammate: 'Membro',
+			scout: 'Scout',
+			scoringSystem: 'Sistemi di punteggio',
+			shirt: 'Maglie'
 		}
 		return translationMapping[resource]
 	}
@@ -218,28 +218,29 @@ export default class GroupsService extends FetchBasedService {
 			confirm: 'Confermare',
 			deny: 'Non confermare',
 			convocate: 'Convocare',
-      manage: 'Gestire'
+			manage: 'Gestire'
 		}
 		return translationMapping[action]
 	}
 
-  public static getGroupedPermissions(params: { 
-    owner: boolean,
-    group?: {
-      cans?: DeepPartial<GroupedPermissions>
-    }
-  }): GroupedPermissions {
-    let basePermissions = {
-      ...EMPTY_GROUPED_PERMISSIONS
-    }
+	public static getGroupedPermissions(params: {
+		owner: boolean
+		group?: {
+			cans?: DeepPartial<GroupedPermissions>
+		}
+	}): GroupedPermissions {
+		let basePermissions = {
+			...EMPTY_GROUPED_PERMISSIONS
+		}
 
-    for(const resource of Object.keys(basePermissions) as Resource[]) {
-      for(const action of Object.keys(basePermissions[resource]) as (Action<typeof resource>)[]) {
-        // @ts-ignore
-        basePermissions[resource][action] = !!params.owner || !!params.group?.cans?.[resource]?.[action]
-      }
-    }
+		for (const resource of Object.keys(basePermissions) as Resource[]) {
+			for (const action of Object.keys(basePermissions[resource]) as Action<typeof resource>[]) {
+				// @ts-ignore
+				basePermissions[resource][action] =
+					!!params.owner || !!params.group?.cans?.[resource]?.[action]
+			}
+		}
 
-    return basePermissions
-  }
+		return basePermissions
+	}
 }

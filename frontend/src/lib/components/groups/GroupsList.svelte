@@ -17,12 +17,12 @@
 	}>()
 
 	interface Props {
-		groups?: Group[];
-		team?: Team | undefined;
-		searchable?: boolean;
+		groups?: Group[]
+		team?: Team | undefined
+		searchable?: boolean
 	}
 
-	let { groups = [], team = undefined, searchable = false }: Props = $props();
+	let { groups = [], team = undefined, searchable = false }: Props = $props()
 
 	let headers: ComponentProps<typeof SimpleTable>['headers'] = [
 		{
@@ -35,11 +35,13 @@
 	]
 
 	let searchText: string = $state('')
-	let filteredGroups = $derived(!!searchText
-		? groups.filter((group) => {
-				return !searchText || group.name.toLowerCase().includes(searchText.toLowerCase())
-      })
-		: groups)
+	let filteredGroups = $derived(
+		!!searchText
+			? groups.filter((group) => {
+					return !searchText || group.name.toLowerCase().includes(searchText.toLowerCase())
+				})
+			: groups
+	)
 
 	function goToNewGroup(event: any) {
 		if (!!team) {
@@ -53,7 +55,8 @@
 		}
 	}
 
-	let confirmDialogOpen: boolean = $state(false), deletingGroup: Group | undefined = $state()
+	let confirmDialogOpen: boolean = $state(false),
+		deletingGroup: Group | undefined = $state()
 	function handleDeleteClick(group: any) {
 		deletingGroup = group
 		confirmDialogOpen = true
@@ -78,12 +81,11 @@
 {#if searchable}
 	<div style:max-width="100%" style:width="400px" style:margin-bottom="0px" style:display="flex">
 		<StandardTextfield bind:value={searchText} placeholder="Cerca gruppi ...">
-      {#snippet prependInner()}
-	        <div style:margin-right="10px">
-	          <Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
-	        </div>
-	      
-					{/snippet}
+			{#snippet prependInner()}
+				<div style:margin-right="10px">
+					<Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
+				</div>
+			{/snippet}
 		</StandardTextfield>
 		<div style:margin-left="10px">
 			<StandardButton on:click={goToNewGroup}>Nuovo</StandardButton>
@@ -93,7 +95,7 @@
 
 <SimpleTable {headers} items={filteredGroups}>
 	{#snippet rowActionsSnippet({ item })}
-		<div style:display="flex" style:justify-content="end"  >
+		<div style:display="flex" style:justify-content="end">
 			<div style:margin-right="10px">
 				<Icon name="mdi-pencil" onclick={() => goToEdit(item)} />
 			</div>

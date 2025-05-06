@@ -2,7 +2,7 @@
 	import { AsyncAutocomplete } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
 
-  type AutocompleteProps = ComponentProps<typeof AsyncAutocomplete<Data>>
+	type AutocompleteProps = ComponentProps<typeof AsyncAutocomplete<Data>>
 
 	interface Props {
 		values?: AutocompleteProps['values']

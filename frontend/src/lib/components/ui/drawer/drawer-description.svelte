@@ -1,23 +1,27 @@
 <script lang="ts">
-	import { Drawer as DrawerPrimitive } from "vaul-svelte";
-	import { cn } from "$lib/utils.js";
+	import { Drawer as DrawerPrimitive } from 'vaul-svelte'
+	import { cn } from '$lib/utils.js'
 
-	type $$Props = DrawerPrimitive.DescriptionProps;
+	type $$Props = DrawerPrimitive.DescriptionProps
 
 	interface Props {
-		el?: $$Props["el"];
-		class?: $$Props["class"];
-		children?: import('svelte').Snippet;
+		el?: $$Props['el']
+		class?: $$Props['class']
+		children?: import('svelte').Snippet
 		[key: string]: any
 	}
 
-	let { el = $bindable(undefined), class: className = undefined, children, ...rest }: Props = $props();
-	
+	let {
+		el = $bindable(undefined),
+		class: className = undefined,
+		children,
+		...rest
+	}: Props = $props()
 </script>
 
 <DrawerPrimitive.Description
 	bind:el
-	class={cn("text-sm text-muted-foreground", className)}
+	class={cn('text-sm text-muted-foreground', className)}
 	{...rest}
 >
 	{@render children?.()}

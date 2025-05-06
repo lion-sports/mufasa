@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 	import { goto } from '$app/navigation'
 	import { page } from '$app/stores'
 	import { UnstableDividedSideBarLayout, GlobalSearchTextField } from '@likable-hair/svelte'
@@ -10,12 +10,12 @@
 	import ApplicationLogo from '$lib/components/common/ApplicationLogo.svelte'
 	import type { LayoutData } from './$types'
 
-  interface Props {
-    data: LayoutData;
-    children?: import('svelte').Snippet;
-  }
+	interface Props {
+		data: LayoutData
+		children?: import('svelte').Snippet
+	}
 
-  let { data, children: childernino }: Props = $props();
+	let { data, children: childernino }: Props = $props()
 
 	function handleProfileClick() {
 		goto('/profile')
@@ -32,9 +32,9 @@
 		fetch('/api/setTheme?dark=' + $theme.dark)
 	}
 
-	function handleMenuClick(event: {detail: { option: { name: string } }}) {
+	function handleMenuClick(event: { detail: { option: { name: string } } }) {
 		if (event.detail.option.name == 'teams') goto('/teams')
-    else if (event.detail.option.name == 'calendar') goto('/calendar')
+		else if (event.detail.option.name == 'calendar') goto('/calendar')
 		else if (event.detail.option.name == 'home') goto('/')
 	}
 
@@ -53,105 +53,98 @@
 			name: 'calendar',
 			label: 'Calendario',
 			icon: 'mdi-calendar'
-		},
+		}
 	])
 
 	let selectedIndex: number | undefined = $state(undefined)
 
 	run(() => {
-    if ($page.url.pathname.startsWith('/teams'))
-  		selectedIndex = options.findIndex((o) => o.name == 'teams')
-    else if ($page.url.pathname.startsWith('/calendar'))
-      selectedIndex = options.findIndex((o) => o.name == 'calendar')
-  	else selectedIndex = options.findIndex((o) => o.name == 'home')
-  });
+		if ($page.url.pathname.startsWith('/teams'))
+			selectedIndex = options.findIndex((o) => o.name == 'teams')
+		else if ($page.url.pathname.startsWith('/calendar'))
+			selectedIndex = options.findIndex((o) => o.name == 'calendar')
+		else selectedIndex = options.findIndex((o) => o.name == 'home')
+	})
 
 	let drawerOpened: boolean = $state(false)
 
-  let sidebarVisible: boolean = $state(true)
-  run(() => {
-    sidebarVisible = !/\/teams\/\d+\/events\/\d+\/scouts\/\d+\/studio$/.test($page.url.pathname)
-  });
+	let sidebarVisible: boolean = $state(true)
+	run(() => {
+		sidebarVisible = !/\/teams\/\d+\/events\/\d+\/scouts\/\d+\/studio$/.test($page.url.pathname)
+	})
 </script>
 
 <main>
-  {#if sidebarVisible}
-    <UnstableDividedSideBarLayout
-      {options}
-      onmenuSelect={handleMenuClick}
-      bind:drawerOpened
-      bind:selectedIndex
-      expandOn="hover"
-    >
-       {#snippet innerMenuSnippet({ hamburgerVisible })}
-        {#if !!hamburgerVisible}
-          <ApplicationLogo
-            class="ml-4 mt-2 !h-[45px]"
-            collapsed={true}
-          />
-        {:else}
-          <div class="w-full flex justify-center">
-            <GlobalSearchTextField
-              --global-search-text-field-width="200px"
-              --global-search-text-field-border-radius="5px"
-              --global-search-text-field-ring-color="transparent"
-              --global-search-text-field-hover-ring-color="transparent"
-              --global-search-text-field-background-color="rgb(var(--global-color-background-200))"
-            />
-          </div>
-        {/if}
-      {/snippet}
-      {#snippet logoSnippet({ sidebarExpanded, hamburgerVisible })}
-          
-          <ApplicationLogo
-            class="mt-4 {sidebarExpanded || hamburgerVisible ? 'ml-4' : 'ml-1'}"
-            collapsed={!sidebarExpanded && !hamburgerVisible}
-          />
-        
-          {/snippet}
-      {#snippet userSnippet({ sidebarExpanded, hamburgerVisible })}
-          
-          <div style:display="flex" style:flex-direction="column" style:height="100%">
-            <div style:flex-grow="1"></div>
-            <div class="profile-container" class:collapsed={!sidebarExpanded && !hamburgerVisible}>
-              <div style:margin-bottom="20px">
-                <UserAvatar
-                  username={$user?.firstname + ' ' + $user?.lastname}
-                  description={$user?.email}
-                  src={$user?.avatarUrl}
-                  showTitleAndDescription={sidebarExpanded || hamburgerVisible}
-                  onclick={handleProfileClick}
-                />
-              </div>
-              {#if sidebarExpanded || hamburgerVisible}
-                <div class="mt-3 flex flex-col gap-3 pl-1">
-                  <button
-                    class="cursor-pointer opacity-60 text-left"
-                    onclick={handleLogoutClick}
-                    onkeydown={handleLogoutClick}
-                  >
-                    Logout
-                  </button>
-                  <button
-                    class="cursor-pointer opacity-60 text-left"
-                    onclick={handleDarkThemeClick}
-                    onkeydown={handleDarkThemeClick}
-                  >
-                    {$theme.dark ? 'Tema chiaro' : 'Tema scuro'}
-                  </button>
-                </div>
-              {/if}
-            </div>
-          </div>
-        
-          {/snippet}
-      {#snippet children()}
-        {@render childernino?.()}
-      {/snippet}
-    </UnstableDividedSideBarLayout>
-  {:else}
-    {@render childernino?.()}
-  {/if}
+	{#if sidebarVisible}
+		<UnstableDividedSideBarLayout
+			{options}
+			onmenuSelect={handleMenuClick}
+			bind:drawerOpened
+			bind:selectedIndex
+			expandOn="hover"
+		>
+			{#snippet innerMenuSnippet({ hamburgerVisible })}
+				{#if !!hamburgerVisible}
+					<ApplicationLogo class="ml-4 mt-2 !h-[45px]" collapsed={true} />
+				{:else}
+					<div class="w-full flex justify-center">
+						<GlobalSearchTextField
+							--global-search-text-field-width="200px"
+							--global-search-text-field-border-radius="5px"
+							--global-search-text-field-ring-color="transparent"
+							--global-search-text-field-hover-ring-color="transparent"
+							--global-search-text-field-background-color="rgb(var(--global-color-background-200))"
+						/>
+					</div>
+				{/if}
+			{/snippet}
+			{#snippet logoSnippet({ sidebarExpanded, hamburgerVisible })}
+				<ApplicationLogo
+					class="mt-4 {sidebarExpanded || hamburgerVisible ? 'ml-4' : 'ml-1'}"
+					collapsed={!sidebarExpanded && !hamburgerVisible}
+				/>
+			{/snippet}
+			{#snippet userSnippet({ sidebarExpanded, hamburgerVisible })}
+				<div style:display="flex" style:flex-direction="column" style:height="100%">
+					<div style:flex-grow="1"></div>
+					<div class="profile-container" class:collapsed={!sidebarExpanded && !hamburgerVisible}>
+						<div style:margin-bottom="20px">
+							<UserAvatar
+								username={$user?.firstname + ' ' + $user?.lastname}
+								description={$user?.email}
+								src={$user?.avatarUrl}
+								showTitleAndDescription={sidebarExpanded || hamburgerVisible}
+								onclick={handleProfileClick}
+							/>
+						</div>
+						{#if sidebarExpanded || hamburgerVisible}
+							<div class="mt-3 flex flex-col gap-3 pl-1">
+								<button
+									class="cursor-pointer opacity-60 text-left"
+									onclick={handleLogoutClick}
+									onkeydown={handleLogoutClick}
+								>
+									Logout
+								</button>
+								<button
+									class="cursor-pointer opacity-60 text-left"
+									onclick={handleDarkThemeClick}
+									onkeydown={handleDarkThemeClick}
+								>
+									{$theme.dark ? 'Tema chiaro' : 'Tema scuro'}
+								</button>
+							</div>
+						{/if}
+					</div>
+				</div>
+			{/snippet}
+			{#snippet children()}
+				{@render childernino?.()}
+			{/snippet}
+		</UnstableDividedSideBarLayout>
+	{:else}
+		{@render childernino?.()}
+	{/if}
 </main>
 
 <style>

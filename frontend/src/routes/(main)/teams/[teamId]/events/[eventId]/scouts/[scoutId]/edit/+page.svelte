@@ -1,44 +1,38 @@
 <script lang="ts">
 	import ConfirmOrCancelButtons from '$lib/components/common/ConfirmOrCancelButtons.svelte'
-  import PageTitle from '$lib/components/common/PageTitle.svelte'
+	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import ScoutForm from '$lib/components/scouts/ScoutForm.svelte'
 	import ScoutsService from '$lib/services/scouts/scouts.service'
-  import type { PageData } from './$types';
-  
-  interface Props {
-    data: PageData;
-  }
+	import type { PageData } from './$types'
 
-  let { data = $bindable() }: Props = $props();
+	interface Props {
+		data: PageData
+	}
 
-  let loading: boolean = $state(false)
+	let { data = $bindable() }: Props = $props()
 
-  async function handleSubmit() {
-    loading = true
+	let loading: boolean = $state(false)
 
-    let service = new ScoutsService({ fetch })
-    await service.update({
-      ...data.scout,
-      id: data.scout.id
-    })
+	async function handleSubmit() {
+		loading = true
 
-    window.history.back()
-    loading = false
-  }
+		let service = new ScoutsService({ fetch })
+		await service.update({
+			...data.scout,
+			id: data.scout.id
+		})
+
+		window.history.back()
+		loading = false
+	}
 </script>
 
-<PageTitle 
-  title={data.scout.name}
-  prependVisible
-  subtitle={data.event.name}
-></PageTitle>
+<PageTitle title={data.scout.name} prependVisible subtitle={data.event.name}></PageTitle>
 
-<ScoutForm
-  bind:scout={data.scout}
-></ScoutForm>
+<ScoutForm bind:scout={data.scout}></ScoutForm>
 
 <ConfirmOrCancelButtons
-  {loading}
-  on:confirm-click={handleSubmit}
-  on:cancel-click={() => window.history.back()}
+	{loading}
+	on:confirm-click={handleSubmit}
+	on:cancel-click={() => window.history.back()}
 ></ConfirmOrCancelButtons>

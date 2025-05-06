@@ -10,9 +10,9 @@ declare global {
 		// interface Platform {}
 	}
 
-  namespace Threlte {
-    interface UserProps extends InteractivityProps { }
-  }
+	namespace Threlte {
+		interface UserProps extends InteractivityProps {}
+	}
 }
 
 export {}

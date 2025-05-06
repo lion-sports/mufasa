@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { Menubar as MenubarPrimitive } from "bits-ui";
-	import { cn, flyAndScale } from "$lib/utils.js";
+	import { Menubar as MenubarPrimitive } from 'bits-ui'
+	import { cn, flyAndScale } from '$lib/utils.js'
 
-	type $$Props = MenubarPrimitive.SubContentProps;
-	type $$Events = MenubarPrimitive.SubContentEvents;
+	type $$Props = MenubarPrimitive.SubContentProps
+	type $$Events = MenubarPrimitive.SubContentEvents
 
 	interface Props {
-		class?: $$Props["class"];
-		transition?: $$Props["transition"];
-		transitionConfig?: $$Props["transitionConfig"];
-		children?: import('svelte').Snippet;
+		class?: $$Props['class']
+		transition?: $$Props['transition']
+		transitionConfig?: $$Props['transitionConfig']
+		children?: import('svelte').Snippet
 		[key: string]: any
 	}
 
@@ -19,15 +19,14 @@
 		transitionConfig = { x: -10, y: 0 },
 		children,
 		...rest
-	}: Props = $props();
-	
+	}: Props = $props()
 </script>
 
 <MenubarPrimitive.SubContent
 	{transition}
 	{transitionConfig}
 	class={cn(
-		"z-50 min-w-max rounded-md border bg-popover p-1 text-popover-foreground focus:outline-none",
+		'z-50 min-w-max rounded-md border bg-popover p-1 text-popover-foreground focus:outline-none',
 		className
 	)}
 	{...rest}

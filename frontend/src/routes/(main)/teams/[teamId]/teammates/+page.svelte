@@ -1,14 +1,14 @@
 <script lang="ts">
 	import team from '$lib/stores/teams/teamsShow'
 	import TeamsService from '$lib/services/teams/teams.service'
-  import TeammatesList from '$lib/components/teammates/TeammatesList.svelte'
+	import TeammatesList from '$lib/components/teammates/TeammatesList.svelte'
 	import type { PageData } from './$types'
 
 	interface Props {
-		data: PageData;
+		data: PageData
 	}
 
-	let { data }: Props = $props();
+	let { data }: Props = $props()
 
 	async function handleTeammatesDestroy() {
 		let service = new TeamsService({ fetch })
@@ -25,9 +25,9 @@
 			teammates={$team.teammates}
 			team={$team}
 			on:destroy={handleTeammatesDestroy}
-      canInvite={data.groupedPermissions.team.invite}
-      canRemoveTeammate={data.groupedPermissions.team.removeUser}
-      canUpdateTeam={data.groupedPermissions.team.update}
+			canInvite={data.groupedPermissions.team.invite}
+			canRemoveTeammate={data.groupedPermissions.team.removeUser}
+			canUpdateTeam={data.groupedPermissions.team.update}
 		/>
 	{/if}
 </div>

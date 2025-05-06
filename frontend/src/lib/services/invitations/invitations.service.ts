@@ -9,7 +9,7 @@ export type Invitation = {
 	invitedBy: User
 	invitedUser?: User
 	invitedEmail: string
-  status: 'pending' | 'rejected' | 'accepted' | 'discarded'
+	status: 'pending' | 'rejected' | 'accepted' | 'discarded'
 	team: Team
 	group?: Group
 }

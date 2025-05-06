@@ -4,10 +4,10 @@
 
 	interface Props {
 		options?: ComponentProps<typeof MenuOrDrawerOptions>['elements']
-    onselect: ComponentProps<typeof MenuOrDrawerOptions>['onselect']
+		onselect: ComponentProps<typeof MenuOrDrawerOptions>['onselect']
 	}
 
-	let { options = [], onselect }: Props = $props();
+	let { options = [], onselect }: Props = $props()
 
 	let activator: HTMLElement | undefined = $state(),
 		open: boolean = $state(false)

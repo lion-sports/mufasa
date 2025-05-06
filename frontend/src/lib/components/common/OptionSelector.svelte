@@ -10,14 +10,13 @@
 <script lang="ts">
 	import { Icon } from '@likable-hair/svelte'
 
-
 	import { createEventDispatcher } from 'svelte'
 	interface Props {
-		options?: Option[];
-		padding?: string;
-		optionPadding?: string;
-		optionHeight?: string;
-		optionAppend?: import('svelte').Snippet<[any]>;
+		options?: Option[]
+		padding?: string
+		optionPadding?: string
+		optionHeight?: string
+		optionAppend?: import('svelte').Snippet<[any]>
 	}
 
 	let {
@@ -26,7 +25,7 @@
 		optionPadding = '0px 20px 0px 10px',
 		optionHeight = '35px',
 		optionAppend
-	}: Props = $props();
+	}: Props = $props()
 	const dispatch = createEventDispatcher<{
 		'option-click': {
 			nativeEvent: MouseEvent
@@ -67,7 +66,7 @@
 			<div style:color={option.color}>{option.label}</div>
 			<div class="spacer"></div>
 			<div>
-				{@render optionAppend?.({ option, })}
+				{@render optionAppend?.({ option })}
 			</div>
 		</button>
 	{/each}

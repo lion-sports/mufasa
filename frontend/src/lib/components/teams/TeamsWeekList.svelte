@@ -48,10 +48,10 @@
 		canCreate = $bindable(false)
 	}: Props = $props()
 
-  let mounted = $state(false)
-  onMount(() => {
-    mounted = true
-  })
+	let mounted = $state(false)
+	onMount(() => {
+		mounted = true
+	})
 
 	let importFromYear = $state(visibleYear),
 		importFromWeek = $state(visibleWeek)
@@ -146,15 +146,15 @@
 		{/snippet}
 	</EventsWeekList>
 
-  {#if visibleYear !== undefined && visibleWeek !== undefined && importFromWeek !== undefined}
-    <TeamImportWeekDialog
-      bind:open={openImportWeekDialog}
-      {team}
-      bind:selectedYear={importFromYear}
-      bind:selectedWeek={importFromWeek}
-      bind:toYear={visibleYear}
-      bind:toWeek={visibleWeek}
-      on:import={() => loadEvents(visibleWeek, visibleYear)}
-    />
-  {/if}
+	{#if visibleYear !== undefined && visibleWeek !== undefined && importFromWeek !== undefined}
+		<TeamImportWeekDialog
+			bind:open={openImportWeekDialog}
+			{team}
+			bind:selectedYear={importFromYear}
+			bind:selectedWeek={importFromWeek}
+			bind:toYear={visibleYear}
+			bind:toWeek={visibleWeek}
+			on:import={() => loadEvents(visibleWeek, visibleYear)}
+		/>
+	{/if}
 {/if}

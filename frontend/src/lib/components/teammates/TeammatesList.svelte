@@ -16,12 +16,12 @@
 	}>()
 
 	interface Props {
-		teammates?: Teammate[];
-		team: Pick<Team, 'id' | 'ownerId'>;
-		searchable?: boolean;
-		canInvite?: boolean;
-		canUpdateTeam?: boolean;
-		canRemoveTeammate?: boolean;
+		teammates?: Teammate[]
+		team: Pick<Team, 'id' | 'ownerId'>
+		searchable?: boolean
+		canInvite?: boolean
+		canUpdateTeam?: boolean
+		canRemoveTeammate?: boolean
 	}
 
 	let {
@@ -31,7 +31,7 @@
 		canInvite = false,
 		canUpdateTeam = false,
 		canRemoveTeammate = false
-	}: Props = $props();
+	}: Props = $props()
 
 	let headers: ComponentProps<typeof SimpleTable>['headers'] = [
 		{
@@ -58,21 +58,26 @@
 	]
 
 	let searchText: string = $state('')
-	let filteredTeammates = $derived(!!searchText
-		? teammates.filter((teammate) => {
-				return !searchText || (
-					teammate.user.firstname.toLowerCase() + teammate.user.lastname.toLowerCase()
-				).includes(searchText.toLowerCase()) || (
-          !!teammate.alias && teammate.alias.toLowerCase().includes(searchText.toLowerCase())
-        )
-      })
-		: teammates)
+	let filteredTeammates = $derived(
+		!!searchText
+			? teammates.filter((teammate) => {
+					return (
+						!searchText ||
+						(teammate.user.firstname.toLowerCase() + teammate.user.lastname.toLowerCase()).includes(
+							searchText.toLowerCase()
+						) ||
+						(!!teammate.alias && teammate.alias.toLowerCase().includes(searchText.toLowerCase()))
+					)
+				})
+			: teammates
+	)
 
 	function inviteUser(event: any) {
 		goto('/teams/' + team.id + '/inviteUser')
 	}
 
-	let confirmDialogOpen: boolean = $state(false), deletingTeammate: Teammate | undefined = $state()
+	let confirmDialogOpen: boolean = $state(false),
+		deletingTeammate: Teammate | undefined = $state()
 	function handleDeleteClick(teammate: any) {
 		deletingTeammate = teammate
 		confirmDialogOpen = true
@@ -104,13 +109,11 @@
 {#if searchable}
 	<div style:width="100%" style:margin-bottom="0px" style:display="flex">
 		<StandardTextfield bind:value={searchText} placeholder="Cerca partecipanti ...">
-	    {#snippet prependInner()}
-					
-					<div style:margin-right="10px">
-						<Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
-					</div>
-				
-					{/snippet}
+			{#snippet prependInner()}
+				<div style:margin-right="10px">
+					<Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
+				</div>
+			{/snippet}
 		</StandardTextfield>
 		<div style:flex-grow="1"></div>
 		{#if canInvite}
@@ -124,24 +127,22 @@
 <div class="overflow-auto w-full mt-4">
 	<SimpleTable {headers} items={filteredTeammates}>
 		{#snippet customSnippet({ item, header })}
-			
-				{#if header.value == 'group'}
-					{#if !!item.group?.name}
-						{item.group?.name}
-					{:else if !!team.ownerId && item.user.id == team.ownerId}
-						Proprietario
-					{:else}
-						Nessuno
-					{/if}
-				{:else if header.value == 'name'}
-					{item.alias || `${item.user.firstname} ${item.user.lastname}`}
-				{:else if header.value == 'email'}
-					{item.user.email}
+			{#if header.value == 'group'}
+				{#if !!item.group?.name}
+					{item.group?.name}
+				{:else if !!team.ownerId && item.user.id == team.ownerId}
+					Proprietario
+				{:else}
+					Nessuno
 				{/if}
-			
-			{/snippet}
+			{:else if header.value == 'name'}
+				{item.alias || `${item.user.firstname} ${item.user.lastname}`}
+			{:else if header.value == 'email'}
+				{item.user.email}
+			{/if}
+		{/snippet}
 		{#snippet rowActionsSnippet({ item })}
-				<div style:display="flex" style:justify-content="end"  >
+			<div style:display="flex" style:justify-content="end">
 				{#if canUpdateTeam}
 					<span style:margin-right="10px">
 						<Icon name="mdi-pencil" onclick={() => handleEditClick(item)} />
@@ -155,7 +156,7 @@
 					/>
 				{/if}
 			</div>
-			{/snippet}
+		{/snippet}
 	</SimpleTable>
 </div>
 

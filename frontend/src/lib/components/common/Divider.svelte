@@ -1,12 +1,12 @@
 <script lang="ts">
 	interface Props {
-		color?: string;
-		weight?: string;
-		radius?: string;
-		marginTop?: string | undefined;
-		marginBottom?: string | undefined;
-		marginLeft?: string | undefined;
-		marginRight?: string | undefined;
+		color?: string
+		weight?: string
+		radius?: string
+		marginTop?: string | undefined
+		marginBottom?: string | undefined
+		marginLeft?: string | undefined
+		marginRight?: string | undefined
 	}
 
 	let {
@@ -17,7 +17,7 @@
 		marginBottom = '10px',
 		marginLeft = '5px',
 		marginRight = '5px'
-	}: Props = $props();
+	}: Props = $props()
 </script>
 
 <div

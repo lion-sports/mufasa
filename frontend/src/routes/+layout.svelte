@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { run } from 'svelte/legacy'
 
 	import type { LayoutData } from './$types'
 	import user from '$lib/stores/auth/user'
 	import '../app.css'
 	import NProgress from 'nprogress'
 	import { navigating } from '$app/stores'
-  import { Toaster } from "$lib/components/ui/sonner";
+	import { Toaster } from '$lib/components/ui/sonner'
 
 	/************************************
 	 ***** NProgress for page loader *****
@@ -28,19 +28,17 @@
 		if (!$navigating) {
 			NProgress.done()
 		}
-	});
-
-	
+	})
 
 	interface Props {
 		/*************************************
-	 ***** Loading current user store *****
-	 **************************************/
-		data: LayoutData;
-		children?: import('svelte').Snippet;
+		 ***** Loading current user store *****
+		 **************************************/
+		data: LayoutData
+		children?: import('svelte').Snippet
 	}
 
-	let { data, children }: Props = $props();
+	let { data, children }: Props = $props()
 	user.set(data.user)
 </script>
 

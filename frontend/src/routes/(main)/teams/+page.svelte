@@ -14,10 +14,10 @@
 	import type { PageData } from './$types'
 
 	interface Props {
-		data: PageData;
+		data: PageData
 	}
 
-	let { data = $bindable() }: Props = $props();
+	let { data = $bindable() }: Props = $props()
 
 	async function loadTeams() {
 		let service = new TeamsService({ fetch })
@@ -52,16 +52,16 @@
 
 <PageTitle title="Teams">
 	{#snippet append()}
-    <OptionMenu
-      options={[
-        {
-          name: 'new',
-          title: 'Nuovo',
-          icon: 'mdi-plus'
-        }
-      ]}
-      onselect={handleOptionClick}
-    />
+		<OptionMenu
+			options={[
+				{
+					name: 'new',
+					title: 'Nuovo',
+					icon: 'mdi-plus'
+				}
+			]}
+			onselect={handleOptionClick}
+		/>
 	{/snippet}
 </PageTitle>
 

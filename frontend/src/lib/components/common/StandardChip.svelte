@@ -3,13 +3,13 @@
 	import type { ComponentProps } from 'svelte'
 
 	interface Props {
-		close?: boolean;
-		closeIcon?: string;
-		text?: string | undefined;
-		fontWeight?: number | undefined;
-		children?: import('svelte').Snippet;
-    onclick?: ComponentProps<typeof Chip>['onclick']
-    onclose?: ComponentProps<typeof Chip>['onclose']
+		close?: boolean
+		closeIcon?: string
+		text?: string | undefined
+		fontWeight?: number | undefined
+		children?: import('svelte').Snippet
+		onclick?: ComponentProps<typeof Chip>['onclick']
+		onclose?: ComponentProps<typeof Chip>['onclose']
 	}
 
 	let {
@@ -18,9 +18,9 @@
 		text = undefined,
 		fontWeight = undefined,
 		children,
-    onclick,
-    onclose
-	}: Props = $props();
+		onclick,
+		onclose
+	}: Props = $props()
 </script>
 
 <Chip label {close} {closeIcon} {onclick} {onclose}>

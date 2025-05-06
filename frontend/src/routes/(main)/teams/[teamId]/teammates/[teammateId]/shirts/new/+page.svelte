@@ -1,54 +1,50 @@
 <script lang="ts">
-  import PageTitle from '$lib/components/common/PageTitle.svelte'
-  import type { PageData } from './$types';
-  import TeammatesService from '$lib/services/teammates/teammates.service';
-  import ShirtService from '$lib/services/shirts/shirts.service';
+	import PageTitle from '$lib/components/common/PageTitle.svelte'
+	import type { PageData } from './$types'
+	import TeammatesService from '$lib/services/teammates/teammates.service'
+	import ShirtService from '$lib/services/shirts/shirts.service'
 	import ShirtsForm from '$lib/components/shirts/ShirtsForm.svelte'
 	import type { Shirt } from '$lib/services/shirts/shirts.service'
 	import ConfirmOrCancelButtons from '$lib/components/common/ConfirmOrCancelButtons.svelte'
 	import { invalidate } from '$app/navigation'
-  
-  interface Props {
-    data: PageData;
-  }
 
-  let { data }: Props = $props();
+	interface Props {
+		data: PageData
+	}
 
-  let loading: boolean = false
+	let { data }: Props = $props()
 
-  let shirt: DeepPartial<Shirt> = $state({
-    teammateId: data.teammate.id
-  })
+	let loading: boolean = false
 
-  async function handleSubmit() {
-    if(shirt.number === undefined || !shirt.teammateId) return
+	let shirt: DeepPartial<Shirt> = $state({
+		teammateId: data.teammate.id
+	})
 
-    loading = true
-    let shirtService = new ShirtService({ fetch })
-    await shirtService.create({
-      number: shirt.number,
-      name: shirt.name,
-      teammateId: shirt.teammateId,
-      primaryColor: shirt.primaryColor,
-      secondaryColor: shirt.secondaryColor
-    })
+	async function handleSubmit() {
+		if (shirt.number === undefined || !shirt.teammateId) return
 
-    await invalidate('shirts:list')
-    loading = false
-    window.history.back()
-  }
+		loading = true
+		let shirtService = new ShirtService({ fetch })
+		await shirtService.create({
+			number: shirt.number,
+			name: shirt.name,
+			teammateId: shirt.teammateId,
+			primaryColor: shirt.primaryColor,
+			secondaryColor: shirt.secondaryColor
+		})
+
+		await invalidate('shirts:list')
+		loading = false
+		window.history.back()
+	}
 </script>
 
 <PageTitle
-  title="Nuova maglia"
-  prependVisible
-  subtitle={TeammatesService.getTeammateName({ teammate: data.teammate })}
+	title="Nuova maglia"
+	prependVisible
+	subtitle={TeammatesService.getTeammateName({ teammate: data.teammate })}
 ></PageTitle>
 
-<ShirtsForm
-  bind:shirt={shirt}
-></ShirtsForm>
+<ShirtsForm bind:shirt></ShirtsForm>
 
-<ConfirmOrCancelButtons
-  on:confirm-click={handleSubmit}
-></ConfirmOrCancelButtons>
+<ConfirmOrCancelButtons on:confirm-click={handleSubmit}></ConfirmOrCancelButtons>

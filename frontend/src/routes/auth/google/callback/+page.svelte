@@ -6,10 +6,10 @@
 	import user from '$lib/stores/auth/user'
 
 	interface Props {
-		data: PageData;
+		data: PageData
 	}
 
-	let { data }: Props = $props();
+	let { data }: Props = $props()
 
 	onMount(async () => {
 		// if (!!data.token && !!data.expiresAt) {

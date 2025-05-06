@@ -1,14 +1,14 @@
 <script lang="ts">
 	import StandardTextfield from './StandardTextfield.svelte'
-  import type { ComponentProps } from 'svelte';
+	import type { ComponentProps } from 'svelte'
 
 	interface Props {
-		value?: string;
-		name?: string;
-    oninput?: ComponentProps<typeof StandardTextfield>['oninput']
+		value?: string
+		name?: string
+		oninput?: ComponentProps<typeof StandardTextfield>['oninput']
 	}
 
-	let { value = $bindable(''), name, oninput }: Props = $props();
+	let { value = $bindable(''), name, oninput }: Props = $props()
 </script>
 
 <StandardTextfield
@@ -16,6 +16,6 @@
 	appendInnerIcon="mdi-clock"
 	type="time"
 	--simple-textfield-width="fit-content"
-  {name}
+	{name}
 	{oninput}
 />
