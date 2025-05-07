@@ -6,6 +6,7 @@
 	import UserCredentialsForm from '@/lib/components/auth/UserCredentialsForm.svelte'
 	import { Icon } from '@likable-hair/svelte'
 	import NewTeamForm from '@/lib/components/auth/NewTeamForm.svelte'
+	import ConfirmForm from '@/lib/components/auth/ConfirmForm.svelte'
 
 	// User Data
 	let email: string = $state('')
@@ -17,7 +18,7 @@
 	let acceptPrivacy: boolean = $state(false)
 
 	// Team Data
-	let sport: Sport | undefined = $state(undefined)
+	let sport: Sport | undefined = $state()
 	let name: string = $state('')
 	let notes: string = $state('')
 
@@ -56,16 +57,17 @@
 	)
 
 	type Step = 'userCredentials' | 'team' | 'review'
-	let step: Step = $state('team')
+	let currStep: Step = $state('team')
+	const formSteps = ['userCredentials', 'team']
 
 	function nextStep() {
-		if (step == 'userCredentials') step = 'team'
-		else step = 'review'
+		if (currStep == 'userCredentials') currStep = 'team'
+		else currStep = 'review'
 	}
 
 	function prevStep() {
-		if (step == 'review') step = 'team'
-		else step = 'userCredentials'
+		if (currStep == 'review') currStep = 'team'
+		else currStep = 'userCredentials'
 	}
 </script>
 
@@ -95,53 +97,57 @@
 					</div>
 
 					<!-- Input Box -->
-					<div class="w-full flex-grow flex justify-center items-center">
-						<div class="w-full flex flex-col items-center justify-center">
-							<div class="text-2xl">Sign Up</div>
-
-							{#if step == 'userCredentials'}
-								<UserCredentialsForm
-									{disabled}
-									{errorMessage}
-									bind:firstname
-									bind:lastname
-									bind:birthday
-									bind:email
-									bind:error
-									bind:password
-									bind:passwordConfirmation
-									bind:acceptPrivacy
-								/>
-							{:else if step == 'team'}
-								<NewTeamForm bind:sport bind:name bind:notes bind:error />
-							{:else if step == 'review'}
-								<div class="h-full w-full">
-									Review Data
-
-									<div>
-										User
-										<div>firstname :{firstname}</div>
-										<div>lastname :{lastname}</div>
-										<div>birthday :{birthday?.toISOString()}</div>
-										<div>email :{email}</div>
+					<div class="w-full flex-grow flex justify-center items-center pt-8">
+						<div class="h-full w-full flex flex-col items-center justify-start">
+							<div class="w-full flex items-center justify-center relative">
+								{#if currStep == 'review'}
+									<div class="w-full mt-1 absolute left-0 top-0">
+										<button onclick={prevStep}>
+											<Icon name="mdi-arrow-left" />
+											Back
+										</button>
 									</div>
+								{/if}
+								<div class="text-2xl">Sign Up</div>
+							</div>
 
-									<div>
-										Team {name}
-										<div>sport : {sport}</div>
-										<div>notes :{notes}</div>
-									</div>
-								</div>
-							{:else}
-								LOL?
-							{/if}
+							<div class="flex-grow w-full flex flex-col justify-start items-center">
+								{#if currStep == 'userCredentials'}
+									<UserCredentialsForm
+										{disabled}
+										{errorMessage}
+										bind:firstname
+										bind:lastname
+										bind:birthday
+										bind:email
+										bind:error
+										bind:password
+										bind:passwordConfirmation
+										bind:acceptPrivacy
+									/>
+								{:else if currStep == 'team'}
+									<NewTeamForm bind:sport bind:name bind:notes bind:error />
+								{:else if currStep == 'review'}
+									<ConfirmForm
+										{firstname}
+										{lastname}
+										{birthday}
+										{email}
+										{notes}
+										teamName={name}
+										{sport}
+									/>
+								{:else}
+									LOL?
+								{/if}
+							</div>
 						</div>
 					</div>
 
 					<!-- Action Button -->
 					<div class="mb-6 w-full text-sm">
 						<div class="flex items-center justify-between gap-10">
-							{#if step == 'review'}
+							{#if currStep == 'review'}
 								<div class="w-full">
 									<StandardButton
 										on:click={signup}
@@ -149,18 +155,28 @@
 										--button-width="100%"
 										class="!p-1.5">Signup</StandardButton
 									>
-
-									<div class="w-full mt-1">
-										or <button onclick={prevStep}> go back</button>
-									</div>
 								</div>
 							{:else}
-								<button onclick={prevStep} class="py-1.5">
+								<button
+									onclick={prevStep}
+									class="py-1.5 {currStep == 'userCredentials' ? 'opacity-0' : ''}"
+								>
 									<div class="mx-auto w-fit flex items-center gap-1">
 										<Icon name="mdi-arrow-left" />
 										<span class="underline underline-offset-2">Back</span>
 									</div>
 								</button>
+
+								<div class="flex justify-center items-center gap-1">
+									{#each formSteps as step}
+										<div
+											class="rounded-full {step == currStep
+												? 'bg-[rgb(var(--global-color-primary-500))]'
+												: 'bg-[rgb(var(--global-color-contrast-500))]'} h-[7px] w-[7px]"
+										></div>
+									{/each}
+								</div>
+
 								<button onclick={nextStep} class="!p-1.5">
 									<div class="flex items-center gap-1">
 										<span class="underline underline-offset-2">Next</span>

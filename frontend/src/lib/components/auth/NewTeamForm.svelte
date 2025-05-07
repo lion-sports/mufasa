@@ -1,7 +1,7 @@
 <script lang="ts">
 	import StandardTextfield from '../common/StandardTextfield.svelte'
 	import { SPORTS, type Sport } from '@/lib/services/scouts/scouts.service'
-	import StandardSelect, { type Option } from '../common/StandardSelect.svelte'
+	import type { Option } from '../common/StandardSelect.svelte'
 
 	interface Props {
 		sport: Sport | undefined
@@ -11,7 +11,7 @@
 	}
 
 	let {
-		sport = $bindable(undefined),
+		sport = $bindable(),
 		name = $bindable(''),
 		notes = $bindable(''),
 		error = $bindable(false)
@@ -23,31 +23,37 @@
 	}))
 </script>
 
-<div class="w-full flex flex-col gap-2 mt-5">
+<div class="text-sm text-[rgb(var(--global-color-contrast-300))] mt-2">
+	Si prega di fornire i dettagli per creare la tua squadra.
+</div>
+<div class="w-full flex flex-col gap-2 mt-1">
+	<div class="mt-1">
+		<StandardTextfield
+			class={{ row: '!m-0 !p-0' }}
+			error={error && !name}
+			type="text"
+			bind:value={name}
+			placeholder="Nome"
+			--simple-textfield-width="100%"
+		/>
+	</div>
+
 	<select
 		bind:value={sport}
-		class="w-full p-2.5 px-3 text-[rgb(var(--global-color-contrast-900))] capitalize hover:cursor-pointer"
+		class="w-full p-2.5 px-3 text-[rgb(var(--global-color-contrast-900))] hover:cursor-pointer {!sport
+			? 'text-[rgb(var(--global-color-contrast-300))]'
+			: ''}"
 		style:border-radius="999px"
 		style:background="rgb(var(--global-color-background-200))"
 		style:font-family="inherit"
 		style:font-size="inherit"
+		placeholder="Sport"
 	>
 		{#each sportOptions as option}
-			<option value={option.value}>
-				{option.text}
-			</option>
+			<option selected={false} value={option.value}>{option.text}</option>
 		{/each}
+		<option value="" disabled selected hidden>Sport</option>
 	</select>
-
-	<div class="mt-1">
-		<StandardTextfield
-			error={error && !name}
-			type="text"
-			bind:value={name}
-			placeholder="Name"
-			--simple-textfield-width="100%"
-		/>
-	</div>
 
 	<div
 		style:background="rgb(var(--global-color-background-200))"
@@ -57,8 +63,8 @@
 			name="notes"
 			id="notes"
 			bind:value={notes}
-			placeholder="Notes..."
-			class="h-32 w-full resize-none bg-transparent p-1.5 px-3"
+			placeholder="Note..."
+			class="h-32 rounded-2xl w-full resize-none bg-transparent p-1.5 px-[16px]"
 		></textarea>
 	</div>
 </div>

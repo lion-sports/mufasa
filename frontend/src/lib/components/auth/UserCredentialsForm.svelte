@@ -35,7 +35,10 @@
 	let showPasswordConfirmation: boolean = $state(false)
 </script>
 
-<div class="w-full flex flex-col gap-1 mt-5">
+<div class="text-sm text-[rgb(var(--global-color-contrast-300))] mt-2">
+	Per favore, inserisci i tuoi dati per creare un account.
+</div>
+<div class="w-full flex flex-col gap-1 mt-1">
 	<div class="w-full flex gap-1.5">
 		<div class="w-full">
 			<LabelAndTextfield
