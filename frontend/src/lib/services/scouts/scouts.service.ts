@@ -2,21 +2,8 @@ import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { Event } from '../events/events.service'
 import type { ScoringSystem } from '../scoringSystems/scoringSystems.service'
 import type { Player } from '../players/players.service'
-import type {
-	ReceiveScoutEventResult,
-	VolleyballPlayersPosition,
-	VolleyballPoints,
-	VolleyballScoutEventJson
-} from './volleyball'
-import type {
-	ScoutEventPlayer,
-	ScoutInfoGeneral,
-	ScoutInfoSettings,
-	VolleyballScoutStash
-} from 'lionn-common'
-
-export const SPORTS = ['volleyball', 'basketball'] as const
-export type Sport = (typeof SPORTS)[number]
+import type { ReceiveScoutEventResult, VolleyballPlayersPosition, VolleyballPoints, VolleyballScoutEventJson } from './volleyball'
+import type { ScoutEventPlayer, ScoutInfoGeneral, ScoutInfoSettings, Sport, VolleyballScoutStash } from "lionn-common";
 
 export const VOLLEYBALL_ROLES = [
 	'setter',

@@ -1,7 +1,6 @@
 import { schema } from '@adonisjs/validator'
 import type { HttpContext } from '@adonisjs/core/http'
-import { SPORTS } from '#app/Models/Scout'
-import { FIELD_RENDER_ENGINES, FRIENDS_FIELD_SIDES, POSSIBLE_AUTO_PAHSE_EVENTS, POSSIBLE_AUTO_POINT_ENEMY_EVENTS, POSSIBLE_AUTO_POINT_FRIENDS_EVENTS } from 'lionn-common'
+import { FIELD_RENDER_ENGINES, FRIENDS_FIELD_SIDES, POSSIBLE_AUTO_PAHSE_EVENTS, POSSIBLE_AUTO_POINT_ENEMY_EVENTS, POSSIBLE_AUTO_POINT_FRIENDS_EVENTS, SPORTS } from 'lionn-common'
 import { CustomMessages } from "@adonisjs/validator/types";
 
 export default class CreateScoutValidator {

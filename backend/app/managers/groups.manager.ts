@@ -1,67 +1,26 @@
-import { CreateGroupValidator, UpdateGroupValidator } from '#app/Validators/groups/index'
-import { validator } from "@adonisjs/validator"
+import { createGroupValidator } from '#validators/groups/CreateGroupValidator';
+import { updateGroupValidator } from '#validators/groups/UpdateGroupValidator';
 import Group from '#app/Models/Group'
 import User from '#app/Models/User';
-import AuthorizationManager, { Action } from './authorization.manager.js';
+import AuthorizationManager from './authorization.manager.js';
 import type { GroupCans } from '#app/Models/Group';
 import { withTransaction, type Context, withUser } from './base.manager.js';
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { ModelObject } from "@adonisjs/lucid/types/model";
 
-export type CreateParams = {
-  data: {
-    name: string,
-    convocable?: boolean,
-    team: {
-      id: number
-    },
-    cans: GroupCans
-  },
-  context?: Context
-}
-
-export type UpdateParams = {
-  data: {
-    id: number,
-    name?: string,
-    convocable?: boolean,
-    cans?: GroupCans
-  },
-  context?: Context
-}
-
-export type ListParams = {
-  data: {
-    page?: number,
-    perPage?: number,
-    team: {
-      id: number
-    }
-  },
-  context?: Context
-}
-
-export type GetParams = {
-  data: {
-    id: number
-  },
-  context?: Context
-}
-
-export type DestroyParams = {
-  data: {
-    id: number
-  },
-  context?: Context
-}
-
 export default class GroupsManager {
-  constructor() {
-  }
-
   @withTransaction
   @withUser
-  public async list(params: ListParams): Promise<{ data: ModelObject[], meta: any }> {
+  public async list(params: {
+    data: {
+      page?: number,
+      perPage?: number,
+      team: {
+        id: number
+      }
+    },
+    context?: Context
+  }): Promise<{ data: ModelObject[], meta: any }> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -92,16 +51,24 @@ export default class GroupsManager {
 
   @withTransaction
   @withUser
-  public async create(params: CreateParams): Promise<Group> {
+  public async create(params: {
+    data: {
+      name: string,
+      convocable?: boolean,
+      team?: {
+        id: number
+      },
+      club?: {
+        id: number
+      },
+      cans: GroupCans
+    },
+    context?: Context
+  }): Promise<Group> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
-    await validator.validate({
-      schema: new CreateGroupValidator().schema,
-      data: {
-        ...params.data,
-      }
-    })
+    let validatedData = await createGroupValidator.validate(params.data)
 
     await AuthorizationManager.canOrFail({
       data: {
@@ -117,13 +84,10 @@ export default class GroupsManager {
       }
     })
 
-    return await Group.updateOrCreate({
-      name: params.data.name,
-      teamId: params.data.team.id
-    }, {
-      cans: params.data.cans,
-      convocable: params.data.convocable,
-      teamId: params.data.team.id
+    return await Group.create({
+      ...validatedData,
+      teamId: validatedData.team?.id,
+      clubId: validatedData.club?.id
     }, {
       client: trx
     })
@@ -131,7 +95,12 @@ export default class GroupsManager {
 
   @withTransaction
   @withUser
-  public async get(params: GetParams): Promise<Group> {
+  public async get(params: {
+    data: {
+      id: number
+    },
+    context?: Context
+  }): Promise<Group> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -160,14 +129,19 @@ export default class GroupsManager {
 
   @withTransaction
   @withUser
-  public async update(params: UpdateParams): Promise<Group> {
+  public async update(params: {
+    data: {
+      id: number,
+      name?: string,
+      convocable?: boolean,
+      cans?: GroupCans
+    },
+    context?: Context
+  }): Promise<Group> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
-    await validator.validate({
-      schema: new UpdateGroupValidator().schema,
-      data: params.data
-    })
+    await updateGroupValidator.validate(params.data)
 
     await AuthorizationManager.canOrFail({
       data: {
@@ -183,8 +157,8 @@ export default class GroupsManager {
       context: {
         trx
       }
-    })
 
+    })
     const group = await Group.findOrFail(params.data.id, {
       client: trx
     })
@@ -211,7 +185,12 @@ export default class GroupsManager {
 
   @withTransaction
   @withUser
-  public async destroy(params: DestroyParams): Promise<void> {
+  public async destroy(params: {
+    data: {
+      id: number
+    },
+    context?: Context
+  }): Promise<void> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 

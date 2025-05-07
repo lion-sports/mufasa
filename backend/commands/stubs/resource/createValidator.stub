@@ -1,0 +1,15 @@
+{{#var entity = generators.createEntity(name)}}
+{{#var modelName = generators.modelName(entity.name)}}
+{{#var pluralReference = string(string.pluralize(name)).camelCase().toString()}}
+{{{
+  exports({
+    to: app.makePath('app/Validators', pluralReference, `Create${modelName}Validator.ts`)
+  })
+}}}
+import vine from '@vinejs/vine'
+
+export const create{{{modelName}}}Validator = vine.compile(
+  vine.object({
+    name: vine.string().maxLength(255),
+  })
+)

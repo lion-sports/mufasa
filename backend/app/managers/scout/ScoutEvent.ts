@@ -2,8 +2,7 @@ import Mongo from "#app/Services/Mongo"
 import { Document, ObjectId, WithId } from "mongodb"
 import { Context } from "../base.manager.js"
 import Scout from "#app/Models/Scout"
-
-export type Sport = 'none' | 'volleyball' | 'basketball'
+import { Sport } from "lionn-common"
 
 export type ScoutEventJson<Type = string, S extends Sport = Sport> = {
   _id?: ObjectId

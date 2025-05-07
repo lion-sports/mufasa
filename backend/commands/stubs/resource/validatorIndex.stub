@@ -1,0 +1,10 @@
+{{#var entity = generators.createEntity(name)}}
+{{#var modelName = generators.modelName(entity.name)}}
+{{#var pluralReference = string(string.pluralize(name)).camelCase().toString()}}
+{{{
+  exports({
+    to: app.makePath('app/Validators', pluralReference, `index.ts`)
+  })
+}}}
+export { create{{{modelName}}}Validator } from './Create{{{modelName}}}Validator.js'
+export { update{{{modelName}}}Validator } from './Update{{{modelName}}}Validator.js'

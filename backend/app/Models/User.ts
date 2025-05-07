@@ -10,6 +10,7 @@ import { type HasMany } from '@adonisjs/lucid/types/relations'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider, AccessToken } from '@adonisjs/auth/access_tokens'
 import { compose } from '@adonisjs/core/helpers'
+import Club from './Club.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('argon'), {
   uids: ['email'],
@@ -100,11 +101,26 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
   })
   public teams: ManyToMany<typeof Team>
 
+  @manyToMany(() => Club, {
+    pivotTable: 'members',
+    localKey: 'id',
+    pivotForeignKey: 'userId',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'clubId',
+  })
+  public clubs: ManyToMany<typeof Club>
+
   @hasMany(() => Team, {
     localKey: 'id',
     foreignKey: 'ownerId',
   })
   public ownedTeams: HasMany<typeof Team>
+
+  @hasMany(() => Club, {
+    localKey: 'id',
+    foreignKey: 'ownerId',
+  })
+  public ownedClubs: HasMany<typeof Club>
 
   @hasMany(() => Dashboard, {
     localKey: 'id',

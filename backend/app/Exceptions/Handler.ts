@@ -1,5 +1,6 @@
 import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 import app from '@adonisjs/core/services/app'
+import env from '#start/env';
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   protected debug: boolean = !app.inProduction;
@@ -20,10 +21,12 @@ export default class HttpExceptionHandler extends ExceptionHandler {
         case 'E_VALIDATION_FAILURE':
           return ctx.response.badRequest(error.messages)
         default:
+          if (env.get('LOG_INTERNAL_SERVER_ERRORS')) {
+            console.log(error)
+          }
           return ctx.response.internalServerError({ code: error.code, message: error.message })
       }
     }
-
     return super.handle(error, ctx)
   }
 

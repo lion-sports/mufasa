@@ -1,16 +1,3 @@
-/*
-|--------------------------------------------------------------------------
-| Validating Environment Variables
-|--------------------------------------------------------------------------
-|
-| In this file we define the rules for validating environment variables.
-| By performing validation we ensure that your application is running in
-| a stable environment with correct configuration values.
-|
-| This file is read automatically by the framework during the boot lifecycle
-| and hence do not rename or move this file to a different location.
-|
-*/
 import { Env } from "@adonisjs/core/env"
 
 export default await Env.create(new URL("../", import.meta.url), {
@@ -38,16 +25,11 @@ export default await Env.create(new URL("../", import.meta.url), {
   REDIS_HOST: Env.schema.string({ format: 'host' }),
   REDIS_PORT: Env.schema.number(),
   REDIS_PASSWORD: Env.schema.string.optional(),
-
-  /*
-  |----------------------------------------------------------
-  | Variables for configuring session package
-  |----------------------------------------------------------
-  */
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory'] as const),
   AWS_ACCESS_KEY_ID: Env.schema.string.optional(),
   AWS_SECRET_ACCESS_KEY: Env.schema.string.optional(),
   AWS_REGION: Env.schema.string.optional(),
-  S3_BUCKET: Env.schema.string.optional()
+  S3_BUCKET: Env.schema.string.optional(),
+  LOG_INTERNAL_SERVER_ERRORS: Env.schema.boolean.optional()
 })
 

@@ -9,9 +9,7 @@ import type { VolleyballScoutStash } from 'lionn-common'
 import { type BelongsTo } from "@adonisjs/lucid/types/relations";
 import { type HasMany } from "@adonisjs/lucid/types/relations";
 import { type HasOne } from "@adonisjs/lucid/types/relations";
-
-export const SPORTS = ['volleyball', 'basketball'] as const
-export type Sport = typeof SPORTS[number]
+import { type Sport } from '#app/managers/scout/ScoutEvent'
 
 export default class Scout extends CamelCaseBaseModel {
   @column({ isPrimary: true })

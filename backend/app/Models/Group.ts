@@ -6,6 +6,7 @@ import type { Action, Resource } from '#app/managers/authorization.manager';
 import Teammate from './Teammate.js';
 import { type BelongsTo } from "@adonisjs/lucid/types/relations";
 import { type HasMany } from "@adonisjs/lucid/types/relations";
+import Club from './Club.js';
 
 export type GroupCans = {
   [resource in Resource]?: {
@@ -33,6 +34,14 @@ export default class Group extends CamelCaseBaseModel {
     foreignKey: 'teamId'
   })
   public team: BelongsTo<typeof Team>
+
+  @column()
+  public clubId: number
+
+  @belongsTo(() => Club, {
+    foreignKey: 'clubId'
+  })
+  public club: BelongsTo<typeof Club>
 
   @hasMany(() => Teammate, {
     foreignKey: 'groupId'

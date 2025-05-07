@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { SPORTS } from '$lib/services/scouts/scouts.service'
-	import type { ComponentProps } from 'svelte'
-	import StandardAutocomplete from '../common/StandardAutocomplete.svelte'
+	import type { ComponentProps } from "svelte"
+	import StandardAutocomplete from "../common/StandardAutocomplete.svelte"
+  import { SPORTS } from 'lionn-common'
 
 	interface Props {
 		values?: ComponentProps<typeof StandardAutocomplete>['values']

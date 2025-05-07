@@ -95,14 +95,14 @@ components:
           nullable: true
         invitedBy:
           nullable: true
-          $ref: '#/components/schemas/User'
+          $ref: "#/components/schemas/User"
         invitedEmail:
           type: string
         teamId:
           type: integer
         team:
           nullable: true
-          $ref: '#/components/schemas/Team'
+          $ref: "#/components/schemas/Team"
         groupId:
           type: integer
           nullable: true
@@ -140,7 +140,7 @@ components:
           nullable: true
         team:
           nullable: true
-          $ref: '#/components/schemas/Team'
+          $ref: "#/components/schemas/Team"
         frequencyId:
           type: integer
           nullable: true
@@ -184,7 +184,7 @@ components:
           type: object
         team:
           nullable: true
-          $ref: '#/components/schemas/Team'
+          $ref: "#/components/schemas/Team"
         teamId:
           type: integer
         createdAt:
@@ -376,13 +376,47 @@ components:
         updatedAt:
           type: string
           format: date-time
+    Club:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        completeName:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        sport:
+          type: string
+        logoMediaId:
+          type: integer
+          nullable: true
+        ownerId:
+          type: integer
+          nullable: true
+        owner:
+          nullable: true
+          $ref: "#/components/schemas/User"
+        groups:
+          type: array
+          items:
+          $ref: "#/components/schemas/Group"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
 paths:
   /auth/login:
     post:
       summary: Return a token to put in the authorization header.
       responses:
-        '200':
+        "200":
           description: Auth token.
           content:
             application/json:
@@ -424,7 +458,7 @@ paths:
     post:
       summary: Return a brand new token to put in the authorization header with the refresh token as a parameter.
       responses:
-        '200':
+        "200":
           description: Auth token.
           content:
             application/json:
@@ -444,13 +478,13 @@ paths:
     post:
       summary: Signup and create a new user.
       responses:
-        '200':
+        "200":
           description: New User.
           content:
             application/json:
               schema:
                 type: object
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
     parameters:
       - name: email
         in: query
@@ -474,7 +508,7 @@ paths:
     post:
       summary: Revoke a token for a user.
       responses:
-        '200':
+        "200":
           description: Status.
           content:
             application/json:
@@ -487,7 +521,7 @@ paths:
     get:
       summary: Returns a list of users.
       responses:
-        '200':
+        "200":
           description: A JSON array of user names
           content:
             application/json:
@@ -495,53 +529,53 @@ paths:
                 type: object
                 properties:
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/User'
+                      $ref: "#/components/schemas/User"
     post:
       summary: Create a user.
       responses:
-        '200':
+        "200":
           description: The new user.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
   /users/{userId}:
     get:
       summary: Returns a certain user.
       responses:
-        '200':
+        "200":
           description: The user got.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
     put:
       summary: Update a certain user.
       responses:
-        '200':
+        "200":
           description: The user got.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
   /teams:
     post:
       summary: Create a new team.
       responses:
-        '200':
+        "200":
           description: The new team.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Team'
+                $ref: "#/components/schemas/Team"
     get:
       summary: Returns a list of teams associated to the current user.
       responses:
-        '200':
+        "200":
           description: The teams associated to my user.
           content:
             application/json:
@@ -549,57 +583,57 @@ paths:
                 type: object
                 properties:
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Team'
+                      $ref: "#/components/schemas/Team"
   /teams/{teamId}:
     get:
       summary: Returns a certain team.
       responses:
-        '200':
+        "200":
           description: The team.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Team'
+                $ref: "#/components/schemas/Team"
     put:
       summary: Update a certain team.
       responses:
-        '200':
+        "200":
           description: The team updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Team'
+                $ref: "#/components/schemas/Team"
   /teams/{teamId}/removeUser:
     post:
       summary: Remove the logged in user from a team.
       responses:
-        '200':
+        "200":
           description: No response.
   /teams/{teamId}/exit:
     post:
       summary: Remove a user from a team.
       responses:
-        '200':
+        "200":
           description: No response.
   /teams/{teamId}/updatePreference:
     post:
       summary: Update a preference for a team.
       responses:
-        '200':
+        "200":
           description: The team updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Team'
+                $ref: "#/components/schemas/Team"
   /teams/absencesInLatestEvents:
     get:
       summary: Returns a the absences for the latest events in all participating teams.
       responses:
-        '200':
+        "200":
           description: The teams associated to my user.
           content:
             application/json:
@@ -627,22 +661,22 @@ paths:
     put:
       summary: Update a certain teammate.
       responses:
-        '200':
+        "200":
           description: The teammate updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Teammate'
+                $ref: "#/components/schemas/Teammate"
   /invitations/inviteUser:
     post:
       summary: Invite a user to a team.
       responses:
-        '200':
+        "200":
           description: The invitation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invitation'
+                $ref: "#/components/schemas/Invitation"
     parameters:
       - name: user
         in: query
@@ -675,24 +709,24 @@ paths:
     get:
       summary: Get my invitations
       responses:
-        '200':
+        "200":
           description: The invitation.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Invitation'
+                  $ref: "#/components/schemas/Invitation"
   /invitations/accept:
     post:
       summary: Accept an invitation
       responses:
-        '200':
+        "200":
           description: The accepted invitation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invitation'
+                $ref: "#/components/schemas/Invitation"
     parameters:
       - name: invitation
         in: query
@@ -707,12 +741,12 @@ paths:
     post:
       summary: Reject an invitation
       responses:
-        '200':
+        "200":
           description: The rejected invitation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invitation'
+                $ref: "#/components/schemas/Invitation"
     parameters:
       - name: invitation
         in: query
@@ -727,12 +761,12 @@ paths:
     post:
       summary: Discard an invitation
       responses:
-        '200':
+        "200":
           description: The discarded invitation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Invitation'
+                $ref: "#/components/schemas/Invitation"
     parameters:
       - name: invitation
         in: query
@@ -747,30 +781,30 @@ paths:
     post:
       summary: Create a new event.
       responses:
-        '200':
+        "200":
           description: The new event.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
+                $ref: "#/components/schemas/Event"
       parameters:
         - name: event
           in: query
           description: The event to create
           required: true
           schema:
-            $ref: '#/components/schemas/Event'
+            $ref: "#/components/schemas/Event"
     get:
       summary: Get a list of events.
       responses:
-        '200':
+        "200":
           description: The events.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Event'
+                  $ref: "#/components/schemas/Event"
       parameters:
         - name: filters
           in: query
@@ -794,12 +828,12 @@ paths:
     get:
       summary: Get an event.
       responses:
-        '200':
+        "200":
           description: The event.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
+                $ref: "#/components/schemas/Event"
       parameters:
         - name: eventId
           in: path
@@ -810,12 +844,12 @@ paths:
     put:
       summary: Update an event.
       responses:
-        '200':
+        "200":
           description: The updated event.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
+                $ref: "#/components/schemas/Event"
       parameters:
         - name: eventId
           in: path
@@ -828,11 +862,11 @@ paths:
           description: The data used to update the event
           required: true
           schema:
-            $ref: '#/components/schemas/Event'
+            $ref: "#/components/schemas/Event"
     delete:
       summary: Destroy a new event.
       responses:
-        '200':
+        "200":
           description: No response.
       parameters:
         - name: eventId
@@ -845,14 +879,14 @@ paths:
     post:
       summary: Convocate a teammate in an event.
       responses:
-        '200':
+        "200":
           description: The created convocations.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Convocation'
+                  $ref: "#/components/schemas/Convocation"
       parameters:
         - name: eventId
           in: path
@@ -875,14 +909,14 @@ paths:
     post:
       summary: Delete convocation of a teammate in an event.
       responses:
-        '200':
+        "200":
           description: The created convocations.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Convocation'
+                  $ref: "#/components/schemas/Convocation"
       parameters:
         - name: eventId
           in: path
@@ -905,14 +939,14 @@ paths:
     post:
       summary: Create a new event repeating over time.
       responses:
-        '200':
+        "200":
           description: The new events.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Event'
+                  $ref: "#/components/schemas/Event"
     parameters:
       - name: event
         in: query
@@ -971,14 +1005,14 @@ paths:
     post:
       summary: Copy the events of a week to another.
       responses:
-        '200':
+        "200":
           description: The new events.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Event'
+                  $ref: "#/components/schemas/Event"
     parameters:
       - name: fromWeekNumber
         in: query
@@ -1017,16 +1051,16 @@ paths:
     post:
       summary: Create a new event session.
       responses:
-        '200':
+        "200":
           description: The new event session.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventSession'
+                $ref: "#/components/schemas/EventSession"
     get:
       summary: Returns a list of event sessions associated to the current user.
       responses:
-        '200':
+        "200":
           description: The event sessions associated to my user.
           content:
             application/json:
@@ -1034,49 +1068,49 @@ paths:
                 type: object
                 properties:
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/EventSession'
+                      $ref: "#/components/schemas/EventSession"
   /eventSessions/{eventSessionId}:
     get:
       summary: Returns a certain event session.
       responses:
-        '200':
+        "200":
           description: The event session.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventSession'
+                $ref: "#/components/schemas/EventSession"
     put:
       summary: Update an event session.
       responses:
-        '200':
+        "200":
           description: The team updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Team'
+                $ref: "#/components/schemas/Team"
     delete:
       summary: delete a event session.
       responses:
-        '200':
+        "200":
           description: No response.
   /shirts:
     post:
       summary: Create a new shirt.
       responses:
-        '200':
+        "200":
           description: The new shirt.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Shirt'
+                $ref: "#/components/schemas/Shirt"
     get:
       summary: Returns a list of shirts associated to the teammates that the user can view.
       responses:
-        '200':
+        "200":
           description: The shirts visible to my user.
           content:
             application/json:
@@ -1084,49 +1118,99 @@ paths:
                 type: object
                 properties:
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Shirt'
+                      $ref: "#/components/schemas/Shirt"
   /shirts/{shirtId}:
     get:
       summary: Returns a certain shirt.
       responses:
-        '200':
+        "200":
           description: The shirt.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Shirt'
+                $ref: "#/components/schemas/Shirt"
     put:
       summary: Update a shirt.
       responses:
-        '200':
+        "200":
           description: The shirt updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Shirt'
+                $ref: "#/components/schemas/Shirt"
     delete:
       summary: delete a shirt.
       responses:
-        '200':
+        "200":
+          description: No response.
+  /clubs:
+    post:
+      summary: Create a new club.
+      responses:
+        "200":
+          description: The new club.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Club"
+    get:
+      summary: Returns a list of clubs associated to the user.
+      responses:
+        "200":
+          description: The clubs visible to my user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Club"
+  /clubs/{clubId}:
+    get:
+      summary: Returns a certain club.
+      responses:
+        "200":
+          description: The club.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Club"
+    put:
+      summary: Update a club.
+      responses:
+        "200":
+          description: The club updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Club"
+    delete:
+      summary: Delete a club.
+      responses:
+        "200":
           description: No response.
   /players:
     post:
       summary: Create a new player.
       responses:
-        '200':
+        "200":
           description: The new player.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Player'
+                $ref: "#/components/schemas/Player"
     get:
       summary: Returns a list of players associated to the scouts that the user can view.
       responses:
-        '200':
+        "200":
           description: The players visible to my user.
           content:
             application/json:
@@ -1134,49 +1218,49 @@ paths:
                 type: object
                 properties:
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Player'
+                      $ref: "#/components/schemas/Player"
   /players/{playerId}:
     get:
       summary: Returns a certain player.
       responses:
-        '200':
+        "200":
           description: The player.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Player'
+                $ref: "#/components/schemas/Player"
     put:
       summary: Update a player.
       responses:
-        '200':
+        "200":
           description: The player updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Player'
+                $ref: "#/components/schemas/Player"
     delete:
       summary: delete a player.
       responses:
-        '200':
+        "200":
           description: No response.
   /scouts:
     post:
       summary: Create a new scout.
       responses:
-        '200':
+        "200":
           description: The new scout.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scout'
+                $ref: "#/components/schemas/Scout"
     get:
       summary: Returns a list of scouts associated to the events that the user can view.
       responses:
-        '200':
+        "200":
           description: The scouts visible to my user.
           content:
             application/json:
@@ -1184,40 +1268,40 @@ paths:
                 type: object
                 properties:
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Scout'
+                      $ref: "#/components/schemas/Scout"
   /scouts/{scoutId}:
     get:
       summary: Returns a certain scout.
       responses:
-        '200':
+        "200":
           description: The scout.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scout'
+                $ref: "#/components/schemas/Scout"
     put:
       summary: Update a scout.
       responses:
-        '200':
+        "200":
           description: The scout updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scout'
+                $ref: "#/components/schemas/Scout"
     delete:
       summary: delete a scout.
       responses:
-        '200':
+        "200":
           description: No response.
   /scouts/{scoutId}/importTeammates:
     post:
       summary: Import teammates from event convocations into scout players.
       responses:
-        '200':
+        "200":
           description: The scout.
           content:
             application/json:
@@ -1230,16 +1314,16 @@ paths:
     post:
       summary: Create a new scoring system.
       responses:
-        '200':
+        "200":
           description: The new scoring system.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScoringSystem'
+                $ref: "#/components/schemas/ScoringSystem"
     get:
       summary: Returns a list of scoring systems that the user can view.
       responses:
-        '200':
+        "200":
           description: The scoring systems visible to my user.
           content:
             application/json:
@@ -1247,50 +1331,50 @@ paths:
                 type: object
                 properties:
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/ScoringSystem'
+                      $ref: "#/components/schemas/ScoringSystem"
   /scoringSystems/{scoringSystemId}:
     get:
       summary: Returns a certain scoring system.
       responses:
-        '200':
+        "200":
           description: The scoring system.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScoringSystem'
+                $ref: "#/components/schemas/ScoringSystem"
     put:
       summary: Update a scoring system.
       responses:
-        '200':
+        "200":
           description: The scoring system updated.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScoringSystem'
+                $ref: "#/components/schemas/ScoringSystem"
     delete:
       summary: delete a scoring system.
       responses:
-        '200':
+        "200":
           description: No response.
   /groups:
     post:
       summary: Create a new group.
       responses:
-        '200':
+        "200":
           description: The new group.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Group'
+                $ref: "#/components/schemas/Group"
   /teams/{teamId}/groups:
     get:
       summary: Returns a list of groups associated to the team.
       responses:
-        '200':
+        "200":
           description: The groups associated to the teams.
           content:
             application/json:
@@ -1298,47 +1382,47 @@ paths:
                 type: object
                 properties:
                   meta:
-                    $ref: '#/components/schemas/PaginationMeta'
+                    $ref: "#/components/schemas/PaginationMeta"
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Group'
+                      $ref: "#/components/schemas/Group"
   /groups/{teamId}:
     get:
       summary: Returns a certain group.
       responses:
-        '200':
+        "200":
           description: The group.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Group'
+                $ref: "#/components/schemas/Group"
     put:
       summary: Update a certain group.
       responses:
-        '200':
+        "200":
           description: The updated group.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Group'
+                $ref: "#/components/schemas/Group"
   /convocations/{convocationId}/confirm:
     post:
       summary: Confirm a convocation.
       responses:
-        '200':
+        "200":
           description: The new convocation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Convocation'
+                $ref: "#/components/schemas/Convocation"
   /convocations/{convocationId}/deny:
     post:
       summary: Deny a convocation.
       responses:
-        '200':
+        "200":
           description: The new convocation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Convocation'
+                $ref: "#/components/schemas/Convocation"
