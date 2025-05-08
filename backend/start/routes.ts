@@ -42,6 +42,7 @@ const SolanaController = () => import('#controllers/Http/SolanaController')
 const TeammatesController = () => import('#controllers/Http/TeammatesController')
 const MediaController = () => import('#controllers/Http/MediaController')
 const ClubsController = () => import('#controllers/Http/ClubsController')
+const UserSettingsController = () => import('#controllers/Http/UserSettingsController')
 
 router.post('/auth/login', [AuthController, 'login'])
 router.post('/auth/refreshToken', [AuthController, 'refreshToken'])
@@ -255,6 +256,15 @@ router.group(() => {
     guards: ['api']
   }))
   .prefix('/widgetSettings')
+
+router.group(() => {
+  router.post('/set', [UserSettingsController, 'set'])
+  router.get('/get', [UserSettingsController, 'get'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/userSettings')
 
 router.group(() => {
   router.post('/:id/confirm', [ConvocationsController, 'confirm'])

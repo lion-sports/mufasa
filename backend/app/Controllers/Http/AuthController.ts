@@ -50,7 +50,13 @@ export default class AuthController {
 
   public async me({ auth }: HttpContext) {
     await auth.use('api')
-    return auth.user
+    if (!auth.user) return
+
+    let user = await User.query().where('id', auth.user.id)
+      .preload('userSettings')
+      .firstOrFail()
+
+    return user
   }
 
   public async signup({ request }: HttpContext) {
