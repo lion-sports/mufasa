@@ -1,7 +1,7 @@
 import { schema, rules } from '@adonisjs/validator'
 import type { HttpContext } from '@adonisjs/core/http'
-import { SPORTS } from '#app/Models/Scout'
 import { CustomMessages } from "@adonisjs/validator/types";
+import { SPORTS } from 'lionn-common';
 
 export default class CreateScoringSystemValidator {
   constructor(protected ctx?: HttpContext) { }

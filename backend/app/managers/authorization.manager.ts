@@ -12,6 +12,7 @@ import ScoringSystem from '#app/Models/ScoringSystem'
 import { Context } from './base.manager.js'
 import WidgetSetting from '#app/Models/WidgetSetting'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import Club from '#models/Club'
 
 export type GroupedPermissions<Type = boolean> = {
   team: {
@@ -20,6 +21,11 @@ export type GroupedPermissions<Type = boolean> = {
     view: Type,
     invite: Type,
     removeUser: Type,
+  },
+  club: {
+    update: Type
+    destroy: Type
+    view: Type
   },
   teammate: {
     update: Type,
@@ -82,6 +88,7 @@ export type Entities = {
   scout?: Pick<Scout, 'id'>,
   scoringSystem?: Pick<ScoringSystem, 'id'>
   widget?: Pick<WidgetSetting, 'id'>
+  club?: Pick<Club, 'id'>
 }
 
 type CanFunction = (params: {
@@ -108,15 +115,20 @@ export default class AuthorizationManager {
     teammate: {
       update: AuthorizationManager._canUpdateTeammate
     },
+    club: {
+      update: AuthorizationManager._canUpdateClub,
+      destroy: AuthorizationManager._canDestroyClub,
+      view: AuthorizationManager._canViewClub
+    },
     invitation: {
       accept: AuthorizationManager._canAcceptInvitation,
       reject: AuthorizationManager._canRejectInvitation,
       discard: AuthorizationManager._canDiscardInvitation,
     },
     group: {
-      create: AuthorizationManager._canUpdateTeam,
+      create: AuthorizationManager._canCreateGroup,
       update: AuthorizationManager._canUpdateGroup,
-      destroy: AuthorizationManager._canUpdateGroup,
+      destroy: AuthorizationManager._canDestroyGroup,
       view: AuthorizationManager._canViewGroup,
     },
     event: {
@@ -340,24 +352,6 @@ export default class AuthorizationManager {
     return invitationBelogs.length != 0
   }
 
-  private static async _canViewGroup(
-    params: { actor: User, entities: Entities },
-    context?: { trx?: TransactionClientContract }
-  ): Promise<boolean> {
-    if (!params.entities.group?.id) throw new Error('group must be defined')
-    let groupId: number = params.entities.group.id
-
-    const userBelongs = await User.query({
-      client: context?.trx
-    }).whereHas('teams', (builder) => {
-      builder.whereHas('groups', groupsBuilder => {
-        groupsBuilder.where('groups.id', groupId)
-      })
-    }).where('users.id', params.actor.id)
-
-    return userBelongs.length != 0
-  }
-
   private static async _canUpdateGroup(
     params: { actor: User, entities: Entities },
     context?: { trx?: TransactionClientContract }
@@ -365,21 +359,122 @@ export default class AuthorizationManager {
     if (!params.entities.group?.id) throw new Error('group must be defined')
     let groupId: number = params.entities.group.id
 
-    const userBelongs = await User.query({
-      client: context?.trx
-    }).whereHas('teams', (builder) => {
-      builder
-        .whereIn('teams.id', Group.query().select('teamId').where('groups.id', groupId))
-        .where(teamsBuilder => {
-          teamsBuilder
-            .whereHas('groups', groupsBuilder => {
-              groupsBuilder.whereRaw("cast(groups.cans->'event'->>'create' as BOOLEAN) = true")
-            })
-            .orWhere('ownerId', params.actor.id)
-        })
-    }).where('users.id', params.actor.id)
+    let group = await Group.query({ client: context?.trx }).where('id', groupId).firstOrFail()
 
-    return userBelongs.length != 0
+    if(!!group.teamId) {
+      return await AuthorizationHelpers.userCanInTeam({
+        data: {
+          user: params.actor,
+          team: { id: group.teamId },
+          action: 'update',
+          resource: 'group'
+        },
+        context
+      })
+    } else if(!!group.clubId) {
+      return await AuthorizationHelpers.userCanInClub({
+        data: {
+          user: params.actor,
+          club: { id: group.clubId },
+          action: 'update',
+          resource: 'group'
+        },
+        context
+      })
+    } else throw new Error('group not belonging to either a team or a club')
+  }
+
+  private static async _canDestroyGroup(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.group?.id) throw new Error('group must be defined')
+    let groupId: number = params.entities.group.id
+
+    let group = await Group.query({ client: context?.trx }).where('id', groupId).firstOrFail()
+
+    if (!!group.teamId) {
+      return await AuthorizationHelpers.userCanInTeam({
+        data: {
+          user: params.actor,
+          team: { id: group.teamId },
+          action: 'destroy',
+          resource: 'group'
+        },
+        context
+      })
+    } else if (!!group.clubId) {
+      return await AuthorizationHelpers.userCanInClub({
+        data: {
+          user: params.actor,
+          club: { id: group.clubId },
+          action: 'destroy',
+          resource: 'group'
+        },
+        context
+      })
+    } else throw new Error('group not belonging to either a team or a club')
+  }
+
+  private static async _canCreateGroup(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!!params.entities.team?.id) {
+      let teamId: number = params.entities.team.id
+      return await AuthorizationHelpers.userCanInTeam({
+        data: {
+          user: params.actor,
+          team: { id: teamId },
+          resource: 'group',
+          action: 'create'
+        },
+        context
+      })
+    } else if(!!params.entities.club?.id) {
+      let clubId: number = params.entities.club.id
+      return await AuthorizationHelpers.userCanInClub({
+        data: {
+          user: params.actor,
+          club: { id: clubId },
+          resource: 'group',
+          action: 'create'
+        },
+        context
+      })
+    } else throw new Error("team or club must be defined")
+  }
+
+  private static async _canViewGroup(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.group?.id) throw new Error('group must be defined')
+    let groupId: number = params.entities.group.id
+
+    let group = await Group.query({ client: context?.trx }).where('id', groupId).firstOrFail()
+
+    if (!!group.teamId) {
+      return await AuthorizationHelpers.userCanInTeam({
+        data: {
+          user: params.actor,
+          team: { id: group.teamId },
+          action: 'view',
+          resource: 'group'
+        },
+        context
+      })
+    } else if (!!group.clubId) {
+      return await AuthorizationHelpers.userCanInClub({
+        data: {
+          user: params.actor,
+          club: { id: group.clubId },
+          action: 'view',
+          resource: 'group'
+        },
+        context
+      })
+    } else throw new Error('group not belonging to either a team or a club')
   }
 
   private static async _canCreateEvent(
@@ -826,6 +921,57 @@ export default class AuthorizationManager {
 
     return usersFromWidget.some((ufw) => ufw.id == params.actor.id)
   }
+
+  private static async _canUpdateClub(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.club?.id) throw new Error('club id must be defined')
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: params.actor,
+        club: { id: params.entities.club.id },
+        action: 'update',
+        resource: 'club'
+      },
+      context
+    })
+  }
+
+  private static async _canDestroyClub(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.club?.id) throw new Error('club id must be defined')
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: params.actor,
+        club: { id: params.entities.club.id },
+        action: 'destroy',
+        resource: 'club'
+      },
+      context
+    })
+  }
+
+  private static async _canViewClub(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.club?.id) throw new Error('club id must be defined')
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: params.actor,
+        club: { id: params.entities.club.id },
+        action: 'view',
+        resource: 'club'
+      },
+      context
+    })
+  }
 }
 
 
@@ -848,6 +994,37 @@ export class AuthorizationHelpers {
         .where('teams.id', params.data.team.id)
         .where(teamsBuilder => {
           teamsBuilder
+            .whereHas('groups', groupsBuilder => {
+              groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
+                resource: params.data.resource,
+                action: params.data.action.toString()
+              })
+            })
+            .orWhere('ownerId', params.data.user.id)
+        })
+    }).where('users.id', params.data.user.id)
+
+    return userHasGroup.length != 0
+  }
+
+  public static async userCanInClub<R extends Resource>(
+    params: {
+      data: {
+        user: User
+        club: { id: number }
+        resource: R
+        action: Action<R>
+      },
+      context?: Context
+    },
+  ): Promise<boolean> {
+    const userHasGroup = await User.query({
+      client: params.context?.trx
+    }).whereHas('clubs', (builder) => {
+      builder
+        .where('clubs.id', params.data.club.id)
+        .where(builder => {
+          builder
             .whereHas('groups', groupsBuilder => {
               groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
                 resource: params.data.resource,

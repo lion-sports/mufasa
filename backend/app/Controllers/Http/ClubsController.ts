@@ -1,60 +1,63 @@
-import GroupsManager from '#app/managers/groups.manager'
 import type { HttpContext } from '@adonisjs/core/http'
+import ClubsManager from '#app/managers/clubs.manager'
 
-export default class GroupsController {
-  public async index({ params, request }: HttpContext) {
-    const manager = new GroupsManager()
+export default class ClubsController {
+  public async index({ request }: HttpContext) {
+    const manager = new ClubsManager()
+
     return await manager.list({
       data: {
         page: request.input('page'),
         perPage: request.input('perPage'),
-        team: {
-          id: params.teamId
-        }
-      }
+        filtersBuilder: request.input('filtersBuilder'),
+      },
     })
   }
 
   public async store({ request }: HttpContext) {
-    const manager = new GroupsManager()
+    const manager = new ClubsManager()
+
     return await manager.create({
       data: {
         name: request.input('name'),
-        team: request.input('team'),
-        club: request.input('club'),
-        cans: request.input('cans'),
-        convocable: request.input('convocable')
-      }
+        completeName: request.input('completeName'),
+        bio: request.input('bio'),
+        sport: request.input('sport')
+      },
     })
   }
 
   public async show({ params }: HttpContext) {
-    const manager = new GroupsManager()
+    const manager = new ClubsManager()
+
     return await manager.get({
       data: {
-        id: params.id
-      }
+        id: params.id,
+      },
     })
   }
 
   public async update({ request, params }: HttpContext) {
-    const manager = new GroupsManager()
+    const manager = new ClubsManager()
+
     return await manager.update({
       data: {
         id: params.id,
         name: request.input('name'),
-        cans: request.input('cans'),
-        convocable: request.input('convocable') 
-      }
+        completeName: request.input('completeName'),
+        bio: request.input('bio'),
+        sport: request.input('sport')
+      },
     })
   }
 
   public async destroy({ params }: HttpContext) {
-    const manager = new GroupsManager()
+    const manager = new ClubsManager()
+
     return await manager.destroy({
       data: {
         id: params.id,
-      }
+      },
     })
   }
 }

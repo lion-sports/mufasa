@@ -1,0 +1,26 @@
+{{#var entity = generators.createEntity(name)}}
+{{#var modelName = generators.modelName(entity.name)}}
+{{#var modelReference = string.camelCase(modelName)}}
+{{#var modelFileName = string(modelName).pascalCase().ext('.ts').toString()}}
+{{{
+  exports({
+    to: app.makePath('app/Models', modelFileName)
+  })
+}}}
+import { DateTime } from 'luxon'
+import { column } from '@adonisjs/lucid/orm'
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
+
+export default class {{{modelName}}} extends CamelCaseBaseModel {
+  @column({ isPrimary: true })
+  public id: number
+
+  @column()
+  public name: string
+
+  @column.dateTime({ autoCreate: true })
+  public createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public updatedAt: DateTime
+}

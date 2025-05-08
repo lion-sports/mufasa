@@ -5,10 +5,11 @@ import { DateTime } from 'luxon'
 import { CamelCaseBaseModel } from './CamelCaseBaseModel.js';
 import { belongsTo, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
 import Teammate from './Teammate.js'
-import { Sport } from './Scout.js';
 import { type BelongsTo } from "@adonisjs/lucid/types/relations";
 import { type HasMany } from "@adonisjs/lucid/types/relations";
 import { type ManyToMany } from "@adonisjs/lucid/types/relations";
+import Club from './Club.js';
+import { Sport } from 'lionn-common';
 
 export default class Team extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -48,6 +49,14 @@ export default class Team extends CamelCaseBaseModel {
     foreignKey: 'ownerId'
   })
   public owner: BelongsTo<typeof User>
+
+  @column()
+  public clubId: number
+
+  @belongsTo(() => Club, {
+    foreignKey: 'clubId'
+  })
+  public club: BelongsTo<typeof Club>
 
   @manyToMany(() => User, {
     localKey: 'id',

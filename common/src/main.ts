@@ -2,7 +2,8 @@ export { incrementScore } from "./scouts/points";
 export {
   BASKETBALL_ROLES,
   ROLES,
-  VOLLEYBALL_ROLES
+  VOLLEYBALL_ROLES,
+  SPORTS
 } from "./scouts/common"
 export { FIRST_POINT } from "./scouts/volleyball/volleyball"
 export { 
@@ -33,7 +34,8 @@ export type {
   BasketballRole,
   Role,
   ScoringSystemConfigPoints,
-  VolleyballRole
+  VolleyballRole,
+  Sport
 } from "./scouts/common";
 export type { 
   VolleyballPoints, 

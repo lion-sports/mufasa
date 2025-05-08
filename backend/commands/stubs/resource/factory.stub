@@ -1,0 +1,20 @@
+{{#var entity = generators.createEntity(name)}}
+{{#var modelName = generators.modelName(entity.name)}}
+{{#var modelReference = string.camelCase(modelName)}}
+{{#var pluralReference = string(string.pluralize(name)).camelCase().toString()}}
+{{#var singularReference = string(string.singular(name)).camelCase().toString()}}
+{{#var factoryFilename = string(singularReference).pascalCase().suffix('Factory.ts').toString()}}
+{{{
+  exports({
+    to: app.makePath('database', 'factories', factoryFilename)
+  })
+}}}
+import {{{modelName}}} from '#models/{{{modelName}}}'
+import Factory from '@adonisjs/lucid/factories'
+
+export default Factory.define({{{modelName}}}, ({ faker }) => {
+  return {
+    name: faker.animal.dog(),
+  }
+})
+  .build()

@@ -1,0 +1,202 @@
+{{#var entity = generators.createEntity(name)}}
+{{#var modelName = generators.modelName(entity.name)}}
+{{#var modelReference = string.camelCase(modelName)}}
+{{#var pluralReference = string(string.pluralize(name)).camelCase().toString()}}
+{{#var singularReference = string(string.singular(name)).camelCase().toString()}}
+{{#var controllerFileName = string(pluralReference).suffix('Controller').pascalCase().ext('.ts').toString()}}
+{{#var managerReference = string(pluralReference).suffix('Manager').pascalCase().toString()}}
+{{#var managerFilename = string(pluralReference).camelCase().suffix('.manager').toString()}}
+{{#var managerFilenameWithExt = string(pluralReference).camelCase().suffix('.manager.ts').toString()}}
+{{#var controllerReference = string(pluralReference).suffix('Controller').pascalCase().toString()}}
+{{{
+  exports({
+    to: app.makePath('app/managers', managerFilenameWithExt)
+  })
+}}}
+import {{{modelName}}} from '#models/{{{modelName}}}'
+import FilterModifierApplier, { type Modifier } from '#app/Services/FilterModifierApplier'
+import { create{{{modelName}}}Validator, update{{{modelName}}}Validator } from '#validators/{{{pluralReference}}}/index'
+import AuthorizationManager from './authorization.manager.js'
+import { Context, withTransaction, withUser } from './base.manager.js'
+import User from '#models/User'
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import { ModelObject } from '@adonisjs/lucid/types/model'
+
+export default class {{{managerReference}}} {
+  constructor() { }
+
+  @withTransaction
+  @withUser
+  public async list(params: {
+    data: {
+      page: number
+      perPage: number
+      filtersBuilder?: {
+        modifiers: Modifier[]
+      }
+    }
+    context?: Context
+  }): Promise<{ data: ModelObject[]; meta: any }> {
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'view',
+        resource: '{{{singularReference}}}',
+        entities: {},
+      },
+      context: {
+        trx: trx,
+      },
+    })
+
+    let query = {{{modelName}}}.query({ client: trx })
+
+    if (!!params.data.filtersBuilder?.modifiers) {
+      let filtersApplier = new FilterModifierApplier()
+      filtersApplier.applyModifiers(query, params.data.filtersBuilder?.modifiers)
+    }
+
+    if (!params.data.page) params.data.page = 1
+    if (!params.data.perPage) params.data.perPage = 100
+
+    let results = await query.paginate(params.data.page, params.data.perPage)
+
+    return results.toJSON()
+  }
+
+  @withTransaction
+  @withUser
+  public async create(params: {
+    data: {
+      name: string
+    }
+    context?: Context
+  }): Promise<{{{modelName}}}> {
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'manage',
+        resource: '{{{singularReference}}}',
+        entities: {},
+      },
+      context: {
+        trx: trx,
+      },
+    })
+
+    await create{{{modelName}}}Validator.validate(params.data)
+
+    const created{{{modelName}}} = await {{{modelName}}}.create(
+      {
+        name: params.data.name,
+      },
+      {
+        client: trx,
+      }
+    )
+
+    return created{{{modelName}}}
+  }
+
+  @withTransaction
+  @withUser
+  public async update(params: {
+    data: {
+      id: number
+      name?: string
+    }
+    context?: Context
+  }): Promise<{{{modelName}}}> {
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'manage',
+        resource: '{{{singularReference}}}',
+        entities: {},
+      },
+      context: {
+        trx: trx,
+      },
+    })
+
+    await update{{{modelName}}}Validator.validate(params.data)
+
+    let {{{singularReference}}} = await {{{modelName}}}.query({
+        client: trx,
+      })
+      .where('id', params.data.id)
+      .firstOrFail()
+
+    if (!!params.data.name) {{{singularReference}}}.name = params.data.name
+
+    let results = await {{{singularReference}}}.save()
+    return results
+  }
+
+  @withTransaction
+  @withUser
+  public async destroy(params: {
+    data: {
+      id: number
+    }
+    context?: Context
+  }): Promise<void> {
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'manage',
+        resource: '{{{singularReference}}}',
+        entities: {},
+      },
+      context: {
+        trx: trx,
+      },
+    })
+
+    let {{{singularReference}}} = await {{{modelName}}}.query({ client: trx }).where('id', params.data.id).firstOrFail()
+
+    await {{{singularReference}}}.delete()
+  }
+
+  @withTransaction
+  @withUser
+  public async get(params: {
+    data: {
+      id: number
+    }
+    context?: Context
+  }): Promise<{{{modelName}}}> {
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'view',
+        resource: '{{{singularReference}}}',
+        entities: {},
+      },
+      context: {
+        trx: trx,
+      },
+    })
+
+    let {{{singularReference}}} = await {{{modelName}}}.query({ client: trx })
+      .where('id', params.data.id)
+      .firstOrFail()
+
+    return {{{singularReference}}}
+  }
+}

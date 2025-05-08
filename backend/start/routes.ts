@@ -40,6 +40,8 @@ const WidgetSettingsController = () => import('#controllers/Http/WidgetSettingsC
 const ConvocationsController = () => import('#controllers/Http/ConvocationsController')
 const SolanaController = () => import('#controllers/Http/SolanaController')
 const TeammatesController = () => import('#controllers/Http/TeammatesController')
+const MediaController = () => import('#controllers/Http/MediaController')
+const ClubsController = () => import('#controllers/Http/ClubsController')
 
 router.post('/auth/login', [AuthController, 'login'])
 router.post('/auth/refreshToken', [AuthController, 'refreshToken'])
@@ -212,6 +214,25 @@ router.resource('dashboards', DashboardController)
       guards: ['api']
     })
   )
+
+router.resource('clubs', ClubsController)
+  .only(['index', 'store', 'update', 'show', 'destroy'])
+  .middleware(
+    '*', middleware.auth({
+      guards: ['api']
+    })
+  )
+
+router.group(() => {
+  router.get('/:id/downloadThumbnail', [MediaController, 'downloadThumbnail'])
+  router.get('/:id/download', [MediaController, 'download'])
+  router.get('/:id/show', [MediaController, 'show'])
+  router.get('/:id/:filename', [MediaController, 'downloadWithFilename'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/media')
 
 router.group(() => {
   router.get('/loadDistribution', [WidgetsController, 'loadDistribution'])

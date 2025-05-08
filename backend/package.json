@@ -76,8 +76,10 @@
     "mongodb": "^6.5.0",
     "node-telegram-bot-api": "^0.60.0",
     "pg": "^8.7.3",
+    "prettier-edgejs": "^0.2.36",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
+    "sharp": "^0.34.1",
     "socket.io": "^4.7.5",
     "x-ray": "^2.3.4"
   },
