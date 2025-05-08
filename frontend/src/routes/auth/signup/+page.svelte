@@ -56,17 +56,19 @@
 		!passValid || !lastname || !firstname || !email || !acceptPrivacy || !birthday
 	)
 
-	type Step = 'userCredentials' | 'team' | 'review'
+	type Step = 'userCredentials' | 'team' | 'review' | 'collaborators'
 	let currStep: Step = $state('team')
 	const formSteps = ['userCredentials', 'team']
 
 	function nextStep() {
-		if (currStep == 'userCredentials') currStep = 'team'
+		if (currStep == 'userCredentials') currStep = 'collaborators'
+		else if (currStep == 'team') currStep = 'collaborators'
 		else currStep = 'review'
 	}
 
 	function prevStep() {
-		if (currStep == 'review') currStep = 'team'
+		if (currStep == 'review') currStep = 'collaborators'
+		else if (currStep == 'collaborators') currStep = 'team'
 		else currStep = 'userCredentials'
 	}
 </script>
@@ -126,6 +128,8 @@
 										bind:acceptPrivacy
 									/>
 								{:else if currStep == 'team'}
+									<NewTeamForm bind:sport bind:name bind:notes bind:error />
+								{:else if currStep == 'collaborators'}
 									<NewTeamForm bind:sport bind:name bind:notes bind:error />
 								{:else if currStep == 'review'}
 									<ConfirmForm
