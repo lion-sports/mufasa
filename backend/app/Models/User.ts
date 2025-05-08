@@ -2,15 +2,17 @@ import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import encryption from '@adonisjs/core/services/encryption'
-import { column, beforeSave, manyToMany, hasMany } from '@adonisjs/lucid/orm'
+import { column, beforeSave, manyToMany, hasMany, hasOne } from '@adonisjs/lucid/orm'
 import Team from '#app/Models/Team'
 import Dashboard from './Dashboard.js'
 import { type ManyToMany } from '@adonisjs/lucid/types/relations'
 import { type HasMany } from '@adonisjs/lucid/types/relations'
+import { type HasOne } from '@adonisjs/lucid/types/relations'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider, AccessToken } from '@adonisjs/auth/access_tokens'
 import { compose } from '@adonisjs/core/helpers'
 import Club from './Club.js'
+import UserSetting from './UserSetting.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('argon'), {
   uids: ['email'],
@@ -121,6 +123,12 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
     foreignKey: 'ownerId',
   })
   public ownedClubs: HasMany<typeof Club>
+
+  @hasOne(() => UserSetting, {
+    localKey: 'id',
+    foreignKey: 'userId',
+  })
+  public userSettings: HasOne<typeof UserSetting>
 
   @hasMany(() => Dashboard, {
     localKey: 'id',

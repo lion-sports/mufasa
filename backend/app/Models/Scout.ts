@@ -5,11 +5,10 @@ import Event from '#app/Models/Event'
 import Player from './Player.js'
 import ScoringSystem from './ScoringSystem.js'
 import ScoutInfo from './ScoutInfo.js'
-import type { VolleyballScoutStash } from 'lionn-common'
+import type { Sport, VolleyballScoutStash } from 'lionn-common'
 import { type BelongsTo } from "@adonisjs/lucid/types/relations";
 import { type HasMany } from "@adonisjs/lucid/types/relations";
 import { type HasOne } from "@adonisjs/lucid/types/relations";
-import { type Sport } from '#app/managers/scout/ScoutEvent'
 
 export default class Scout extends CamelCaseBaseModel {
   @column({ isPrimary: true })

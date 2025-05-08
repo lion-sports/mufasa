@@ -138,6 +138,7 @@
 							<div class="w-full mt-5">
 								<StandardButton
 									on:click={login}
+                  {loading}
 									--button-border-radius="999px"
 									--button-width="100%">Login</StandardButton
 								>

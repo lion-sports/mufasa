@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy'
 	import { goto } from '$app/navigation'
-	import { page } from '$app/stores'
-	import { UnstableDividedSideBarLayout, GlobalSearchTextField } from '@likable-hair/svelte'
+	import { page } from '$app/state'
+	import { UnstableDividedSideBarLayout, GlobalSearchTextField, HierarchyMenu } from '@likable-hair/svelte'
 	import UserAvatar from '$lib/components/common/UserAvatar.svelte'
 	import user from '$lib/stores/auth/user'
 	import AuthService from '$lib/services/auth/auth.service'
@@ -15,7 +14,7 @@
 		children?: import('svelte').Snippet
 	}
 
-	let { data, children: childernino }: Props = $props()
+	let { children: childernino }: Props = $props()
 
 	function handleProfileClick() {
 		goto('/profile')
@@ -35,7 +34,10 @@
 	function handleMenuClick(event: { detail: { option: { name: string } } }) {
 		if (event.detail.option.name == 'teams') goto('/teams')
 		else if (event.detail.option.name == 'calendar') goto('/calendar')
+    else if (event.detail.option.name == 'clubs') goto('/clubs')
 		else if (event.detail.option.name == 'home') goto('/')
+
+    drawerOpened = false
 	}
 
 	let options = $derived([
@@ -49,6 +51,11 @@
 			label: 'Teams',
 			icon: 'mdi-account-multiple'
 		},
+    {
+			name: 'clubs',
+			label: 'Clubs',
+			icon: 'mdi-domain'
+		},
 		{
 			name: 'calendar',
 			label: 'Calendario',
@@ -56,31 +63,30 @@
 		}
 	])
 
-	let selectedIndex: number | undefined = $state(undefined)
-
-	run(() => {
-		if ($page.url.pathname.startsWith('/teams'))
-			selectedIndex = options.findIndex((o) => o.name == 'teams')
-		else if ($page.url.pathname.startsWith('/calendar'))
-			selectedIndex = options.findIndex((o) => o.name == 'calendar')
-		else selectedIndex = options.findIndex((o) => o.name == 'home')
-	})
+  let selectedMenu = $derived.by(() => {
+    let selectedMenu: string
+    if (page.url.pathname.startsWith('/teams'))
+			selectedMenu = 'teams'
+		else if (page.url.pathname.startsWith('/calendar'))
+      selectedMenu = 'calendar'
+    else if (page.url.pathname.startsWith('/clubs'))
+      selectedMenu = 'clubs'
+		else selectedMenu = 'home'
+    return selectedMenu
+  })
 
 	let drawerOpened: boolean = $state(false)
 
-	let sidebarVisible: boolean = $state(true)
-	run(() => {
-		sidebarVisible = !/\/teams\/\d+\/events\/\d+\/scouts\/\d+\/studio$/.test($page.url.pathname)
-	})
+	let sidebarVisible: boolean = $derived.by(() => {
+    return !/\/teams\/\d+\/events\/\d+\/scouts\/\d+\/studio$/.test(page.url.pathname)
+  })
 </script>
 
 <main>
 	{#if sidebarVisible}
 		<UnstableDividedSideBarLayout
 			{options}
-			onmenuSelect={handleMenuClick}
 			bind:drawerOpened
-			bind:selectedIndex
 			expandOn="hover"
 		>
 			{#snippet innerMenuSnippet({ hamburgerVisible })}
@@ -104,6 +110,19 @@
 					collapsed={!sidebarExpanded && !hamburgerVisible}
 				/>
 			{/snippet}
+      {#snippet menuSnippet({ sidebarExpanded, hamburgerVisible })}
+        <div class="ml-4 mt-4 mr-2">
+          <HierarchyMenu
+            {options}
+            iconsOnly={!sidebarExpanded && !hamburgerVisible}
+            selected={selectedMenu}
+            --icon-size="20px"
+            --hierarchy-menu-element-selected-background-color="rgb(var(--global-color-primary-500))"
+            --hierarchy-menu-element-selected-color="white"
+            onoptionClick={handleMenuClick}
+          />
+        </div>
+      {/snippet}
 			{#snippet userSnippet({ sidebarExpanded, hamburgerVisible })}
 				<div style:display="flex" style:flex-direction="column" style:height="100%">
 					<div style:flex-grow="1"></div>

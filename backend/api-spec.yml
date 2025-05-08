@@ -410,6 +410,23 @@ components:
         updatedAt:
           type: string
           format: date-time
+    UserSetting:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        setting:
+          type: object
+          additionalProperties:
+            type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
 paths:
   /auth/login:
@@ -1426,3 +1443,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Convocation"
+  /userSettings/set:
+    post:
+      summary: Set a user setting.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  enum:
+                    - clubsSectionVisible
+                value:
+                  type: boolean
+                  nullable: true
+      responses:
+        "200":
+          description: The updated user setting.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSetting"
+  /userSettings/get:
+    get:
+      summary: Get a user setting.
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            type: string
+            enum:
+              - clubsSectionVisible
+      responses:
+        "200":
+          description: The requested user setting value.
