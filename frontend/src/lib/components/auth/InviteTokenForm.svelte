@@ -6,11 +6,10 @@
 	import { Icon } from '@likable-hair/svelte'
 
 	interface Props {
-		error: boolean
 		token: string
 	}
 
-	let { error = $bindable(false), token }: Props = $props()
+	let { token }: Props = $props()
 
 	function handleTokenCopied() {
 		navigator.clipboard.writeText(token)

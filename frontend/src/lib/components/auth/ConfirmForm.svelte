@@ -80,7 +80,7 @@
 				<div>{sport || '-'}</div>
 			</div>
 			<div class="w-full flex items-center">
-				<div class="w-full flex-grow font-medium mr-1">Notes:</div>
+				<div class="w-full flex-grow font-medium mr-1 text-left">Notes:</div>
 				<span class="line-clamp-1">{notes || '-'}</span>
 			</div>
 		{/snippet}

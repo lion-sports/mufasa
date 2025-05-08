@@ -6,11 +6,10 @@
 	import { Icon } from '@likable-hair/svelte'
 
 	interface Props {
-		error: boolean
 		collaborators: string[]
 	}
 
-	let { error = $bindable(false), collaborators = $bindable([]) }: Props = $props()
+	let { collaborators = $bindable([]) }: Props = $props()
 
 	let currentEmail: string = $state('')
 
@@ -41,7 +40,6 @@
 		<div class="w-full">
 			<StandardTextfield
 				class={{ row: '!m-0 !p-0' }}
-				error={error && !currentEmail}
 				type="text"
 				bind:value={currentEmail}
 				placeholder="example@mail.com"

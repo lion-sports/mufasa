@@ -16,7 +16,7 @@
 	let passwordConfirmation: string = $state('')
 	let firstname: string = $state('')
 	let lastname: string = $state('')
-	let birthday: Date | undefined = $state()
+	let birthday: Date | undefined = $state(undefined)
 	let acceptPrivacy: boolean = $state(false)
 
 	// Collaborators Data
@@ -62,14 +62,30 @@
 		!passValid || !lastname || !firstname || !email || !acceptPrivacy || !birthday
 	)
 
+	let teamDisabled = $derived(!name || !sport)
+
 	let currStep: RegistrationStep = $state('credentials')
 	const formSteps = ['credentials', 'team', 'invite-email', 'invite-token']
 
 	function nextStep() {
-		if (currStep == 'credentials') currStep = 'team'
-		else if (currStep == 'team') currStep = 'invite-email'
-		else if (currStep == 'invite-email') currStep = 'invite-token'
-		else currStep = 'review'
+		switch (currStep) {
+			case 'credentials':
+				if (disabled) error = true
+				else currStep = 'team'
+				break
+			case 'team':
+				if (teamDisabled) error = true
+				else currStep = 'invite-email'
+				break
+			case 'invite-email':
+				currStep = 'invite-token'
+				break
+			default: {
+				currStep = 'review'
+			}
+		}
+
+		if (!error && !teamDisabled) error = false
 	}
 
 	function prevStep() {
@@ -128,9 +144,9 @@
 								{:else if currStep == 'team'}
 									<NewTeamForm bind:sport bind:name bind:notes bind:error />
 								{:else if currStep == 'invite-email'}
-									<InviteEmailForm bind:collaborators bind:error />
+									<InviteEmailForm bind:collaborators />
 								{:else if currStep == 'invite-token'}
-									<InviteTokenForm {token} bind:error />
+									<InviteTokenForm {token} />
 								{:else if currStep == 'review'}
 									<ConfirmForm
 										bind:step={currStep}
@@ -159,7 +175,7 @@
 										on:click={signup}
 										--button-border-radius="999px"
 										--button-width="100%"
-										class="!p-1.5">Signup</StandardButton
+										class="!p-2">Signup</StandardButton
 									>
 								</div>
 							{:else}
@@ -242,7 +258,7 @@
 		.login-box-container {
 			max-width: 65vw;
 			width: 65vw;
-			height: 70vh;
+			height: 75vh;
 		}
 	}
 

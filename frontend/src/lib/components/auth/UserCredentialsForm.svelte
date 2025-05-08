@@ -60,22 +60,20 @@
 		</div>
 	</div>
 
-	{#key birthday}
-		<div
-			class="h-fit mb-1 m-0 p-0 rounded-full"
-			style:border={error && !birthday ? '1px solid rgb(var(--global-color-error-500))' : ''}
-		>
-			<StandardDatepicker
-				class={{ textfield: { row: '!mb-0 !pb-0', field: 'flex items-center' } }}
-				bind:value={birthday}
-				placeholder="Birthday"
-				--simple-textfield-height="40px"
-				--simple-textfield-default-width="100%"
-				--simple-textfield-max-width="100%"
-				--simple-text-field-width="100%"
-			/>
-		</div>
-	{/key}
+	<div
+		class="h-fit mb-1 m-0 p-0 rounded-full"
+		style:border={error && !birthday ? '1px solid rgb(var(--global-color-error-500))' : ''}
+	>
+		<StandardDatepicker
+			class={{ textfield: { row: '!mb-0 !pb-0', field: 'flex items-center' } }}
+			bind:value={birthday}
+			placeholder="Birthday"
+			--simple-textfield-height="40px"
+			--simple-textfield-default-width="100%"
+			--simple-textfield-max-width="100%"
+			--simple-text-field-width="100%"
+		/>
+	</div>
 
 	<StandardTextfield
 		error={error && !email}

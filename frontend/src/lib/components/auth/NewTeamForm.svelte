@@ -64,7 +64,7 @@
 			id="notes"
 			bind:value={notes}
 			placeholder="Note..."
-			class="h-32 rounded-2xl w-full resize-none bg-transparent p-1.5 px-[16px]"
+			class="h-full rounded-2xl w-full resize-none bg-transparent p-1.5 px-[16px]"
 		></textarea>
 	</div>
 </div>
