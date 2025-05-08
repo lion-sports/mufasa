@@ -7,6 +7,8 @@ import { DateTime, Duration } from 'luxon'
 import { get, writable } from 'svelte/store'
 import phantom from '$lib/stores/provider/phantom'
 
+export type RegistrationStep = 'credentials' | 'team' | 'review' | 'invite-email' | 'invite-token'
+
 export type User = {
 	id: number
 	firstname: string

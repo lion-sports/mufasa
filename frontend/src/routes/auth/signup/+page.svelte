@@ -1,12 +1,14 @@
 <script lang="ts">
-	import AuthService from '$lib/services/auth/auth.service'
-	import { goto } from '$app/navigation'
+	import AuthService, { type RegistrationStep } from '$lib/services/auth/auth.service'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
-	import type { Sport } from '@/lib/services/scouts/scouts.service'
+	import type { Sport } from 'lionn-common'
 	import UserCredentialsForm from '@/lib/components/auth/UserCredentialsForm.svelte'
 	import { Icon } from '@likable-hair/svelte'
 	import NewTeamForm from '@/lib/components/auth/NewTeamForm.svelte'
 	import ConfirmForm from '@/lib/components/auth/ConfirmForm.svelte'
+	import { goto } from '$app/navigation'
+	import InviteEmailForm from '@/lib/components/auth/InviteEmailForm.svelte'
+	import InviteTokenForm from '@/lib/components/auth/InviteTokenForm.svelte'
 
 	// User Data
 	let email: string = $state('')
@@ -16,6 +18,10 @@
 	let lastname: string = $state('')
 	let birthday: Date | undefined = $state()
 	let acceptPrivacy: boolean = $state(false)
+
+	// Collaborators Data
+	let collaborators: string[] = $state([])
+	let token: string = '#AABBCC' // Add a token generator
 
 	// Team Data
 	let sport: Sport | undefined = $state()
@@ -56,20 +62,20 @@
 		!passValid || !lastname || !firstname || !email || !acceptPrivacy || !birthday
 	)
 
-	type Step = 'userCredentials' | 'team' | 'review' | 'collaborators'
-	let currStep: Step = $state('team')
-	const formSteps = ['userCredentials', 'team']
+	let currStep: RegistrationStep = $state('credentials')
+	const formSteps = ['credentials', 'team', 'invite-email', 'invite-token']
 
 	function nextStep() {
-		if (currStep == 'userCredentials') currStep = 'collaborators'
-		else if (currStep == 'team') currStep = 'collaborators'
+		if (currStep == 'credentials') currStep = 'team'
+		else if (currStep == 'team') currStep = 'invite-email'
+		else if (currStep == 'invite-email') currStep = 'invite-token'
 		else currStep = 'review'
 	}
 
 	function prevStep() {
-		if (currStep == 'review') currStep = 'collaborators'
-		else if (currStep == 'collaborators') currStep = 'team'
-		else currStep = 'userCredentials'
+		if (currStep == 'invite-token') currStep = 'invite-email'
+		else if (currStep == 'invite-email') currStep = 'team'
+		else currStep = 'credentials'
 	}
 </script>
 
@@ -84,7 +90,7 @@
 	>
 		<div class="login-box-container flex">
 			<!-- Login Box -->
-			<div class="flex-grow sm:basis-1/2 h-full px-8 py-[20px]">
+			<div class="flex-grow basis-3/5 xl:basis-1/2 h-full px-8 py-[20px]">
 				<div class="h-full flex flex-col">
 					<div class="flex justify-between">
 						<div>LioNN</div>
@@ -102,19 +108,11 @@
 					<div class="w-full flex-grow flex justify-center items-center pt-8">
 						<div class="h-full w-full flex flex-col items-center justify-start">
 							<div class="w-full flex items-center justify-center relative">
-								{#if currStep == 'review'}
-									<div class="w-full mt-1 absolute left-0 top-0">
-										<button onclick={prevStep}>
-											<Icon name="mdi-arrow-left" />
-											Back
-										</button>
-									</div>
-								{/if}
 								<div class="text-2xl">Sign Up</div>
 							</div>
 
 							<div class="flex-grow w-full flex flex-col justify-start items-center">
-								{#if currStep == 'userCredentials'}
+								{#if currStep == 'credentials'}
 									<UserCredentialsForm
 										{disabled}
 										{errorMessage}
@@ -129,17 +127,21 @@
 									/>
 								{:else if currStep == 'team'}
 									<NewTeamForm bind:sport bind:name bind:notes bind:error />
-								{:else if currStep == 'collaborators'}
-									<NewTeamForm bind:sport bind:name bind:notes bind:error />
+								{:else if currStep == 'invite-email'}
+									<InviteEmailForm bind:collaborators bind:error />
+								{:else if currStep == 'invite-token'}
+									<InviteTokenForm {token} bind:error />
 								{:else if currStep == 'review'}
 									<ConfirmForm
+										bind:step={currStep}
+										teamName={name}
 										{firstname}
 										{lastname}
 										{birthday}
 										{email}
 										{notes}
-										teamName={name}
 										{sport}
+										{token}
 									/>
 								{:else}
 									LOL?
@@ -163,7 +165,7 @@
 							{:else}
 								<button
 									onclick={prevStep}
-									class="py-1.5 {currStep == 'userCredentials' ? 'opacity-0' : ''}"
+									class="py-1.5 {currStep == 'credentials' ? 'opacity-0' : ''}"
 								>
 									<div class="mx-auto w-fit flex items-center gap-1">
 										<Icon name="mdi-arrow-left" />
@@ -201,7 +203,7 @@
 			</div>
 
 			<!-- Gradient Box -->
-			<div class="gradient-box basis-0 sm:basis-1/2 hidden sm:block">
+			<div class="gradient-box basis-2/5 xl:basis-1/2 hidden lg:block">
 				<div
 					class="h-full px-8 py-[20px] flex flex-col items-end text-[rgb(var(--global-color-primary-foreground))]"
 				>

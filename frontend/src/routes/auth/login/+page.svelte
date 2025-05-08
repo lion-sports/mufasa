@@ -78,7 +78,7 @@
 	>
 		<div class="login-box-container flex">
 			<!-- Login Box -->
-			<div class="flex-grow sm:basis-1/2 h-full px-8 py-[20px]">
+			<div class="flex-grow basis-3/5 xl:basis-1/2 h-full px-8 py-[20px]">
 				<div class="h-full flex flex-col">
 					<div class="flex justify-between">
 						<div>LioNN</div>
@@ -180,7 +180,7 @@
 			</div>
 
 			<!-- Gradient Box -->
-			<div class="gradient-box basis-0 sm:basis-1/2 hidden sm:block">
+			<div class="gradient-box basis-2/5 xl:basis-1/2 hidden lg:block">
 				<div
 					class="h-full px-8 py-[20px] flex flex-col items-end text-[rgb(var(--global-color-primary-foreground))]"
 				>

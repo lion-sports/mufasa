@@ -35,7 +35,7 @@
 	let showPasswordConfirmation: boolean = $state(false)
 </script>
 
-<div class="text-sm text-[rgb(var(--global-color-contrast-300))] mt-2">
+<div class="w-full text-sm text-[rgb(var(--global-color-contrast-300))] mt-2 text-left">
 	Per favore, inserisci i tuoi dati per creare un account.
 </div>
 <div class="w-full flex flex-col gap-1 mt-1">

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import StandardTextfield from '../common/StandardTextfield.svelte'
-	import { SPORTS, type Sport } from '@/lib/services/scouts/scouts.service'
+	import { SPORTS, type Sport } from 'lionn-common'
 	import type { Option } from '../common/StandardSelect.svelte'
 
 	interface Props {
@@ -23,10 +23,10 @@
 	}))
 </script>
 
-<div class="text-sm text-[rgb(var(--global-color-contrast-300))] mt-2">
+<div class="w-full text-sm text-[rgb(var(--global-color-contrast-300))] mt-2 text-left">
 	Si prega di fornire i dettagli per creare la tua squadra.
 </div>
-<div class="w-full flex flex-col gap-2 mt-1">
+<div class="h-full w-full flex flex-col gap-2 mt-1">
 	<div class="mt-1">
 		<StandardTextfield
 			class={{ row: '!m-0 !p-0' }}
@@ -57,7 +57,7 @@
 
 	<div
 		style:background="rgb(var(--global-color-background-200))"
-		class="rounded-2xl overflow-hidden w-full flex justify-center"
+		class="flex-grow h-full rounded-2xl overflow-hidden w-full flex justify-center mb-5"
 	>
 		<textarea
 			name="notes"
