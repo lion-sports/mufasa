@@ -1,17 +1,23 @@
-import type { LiberoSubstitutionScoutExtraProperties, VolleyballPoints } from "lionn-common";
-import ScoutEvent, { ScoutEventConstructorsParameters } from "../../ScoutEvent.js";
-import scoutsSocket from "../../scouts.socket.js";
-import Scout from "#app/Models/Scout";
-import { Context } from "#app/managers/base.manager";
+import type { LiberoSubstitutionScoutExtraProperties, VolleyballPoints } from 'lionn-common'
+import ScoutEvent, { ScoutEventConstructorsParameters } from '../../ScoutEvent.js'
+import scoutsSocket from '../../scouts.socket.js'
+import Scout from '#app/Models/Scout'
+import { Context } from '#app/managers/base.manager'
 
 export default class LiberoSubstitutionScoutEvent extends ScoutEvent<
-  LiberoSubstitutionScoutExtraProperties, 
-  'liberoSubstitution', 
+  LiberoSubstitutionScoutExtraProperties,
+  'liberoSubstitution',
   VolleyballPoints
 > {
   public type = 'liberoSubstitution' as const
 
-  constructor(params: ScoutEventConstructorsParameters<'liberoSubstitution', VolleyballPoints, LiberoSubstitutionScoutExtraProperties>) {
+  constructor(
+    params: ScoutEventConstructorsParameters<
+      'liberoSubstitution',
+      VolleyballPoints,
+      LiberoSubstitutionScoutExtraProperties
+    >
+  ) {
     if (!params.playerId) params.playerId = params.player.id
     if (!params.playerId) throw new Error('playerId must be defined')
 
@@ -21,9 +27,8 @@ export default class LiberoSubstitutionScoutEvent extends ScoutEvent<
     if (params.opponent === undefined) params.opponent = params.player.isOpponent
     if (params.opponent === undefined) throw new Error('opponent must be defined')
 
-
     super({
-      ...params
+      ...params,
     })
     this.type = params.type
   }
@@ -36,7 +41,7 @@ export default class LiberoSubstitutionScoutEvent extends ScoutEvent<
       inOrOut: this.event.inOrOut,
       liberoId: this.event.liberoId,
       libero: this.event.libero,
-      position: this.event.position
+      position: this.event.position,
     }
   }
 
@@ -50,10 +55,10 @@ export default class LiberoSubstitutionScoutEvent extends ScoutEvent<
       data: {
         event: 'scout:lastEventReload',
         data: {
-          scoutId: params.data.scout.id
-        }
+          scoutId: params.data.scout.id,
+        },
       },
-      context: params.context
+      context: params.context,
     })
   }
 }

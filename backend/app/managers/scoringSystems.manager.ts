@@ -1,12 +1,16 @@
-import ScoringSystem, { ScoringSystemConfig } from "#app/Models/ScoringSystem";
-import { Context, withTransaction, withUser } from "./base.manager.js";
-import { validator } from "@adonisjs/validator"
-import User from "#app/Models/User";
-import AuthorizationManager from "./authorization.manager.js";
-import FilterModifierApplier, { Modifier } from "#app/Services/FilterModifierApplier";
-import { Sport } from "#app/Models/Scout";
-import { CreateScoringSystemValidator, UpdateScoringSystemValidator } from "#app/Validators/scoringSystems/index";
-import { ModelObject } from "@adonisjs/lucid/types/model";
+import { Context, withTransaction, withUser } from './base.manager.js'
+import { validator } from '@adonisjs/validator'
+import AuthorizationManager from './authorization.manager.js'
+import FilterModifierApplier, { Modifier } from '#app/Services/FilterModifierApplier'
+import {
+  CreateScoringSystemValidator,
+  UpdateScoringSystemValidator,
+} from '#app/Validators/scoringSystems/index'
+import { ModelObject } from '@adonisjs/lucid/types/model'
+
+import ScoringSystem, { ScoringSystemConfig } from '#app/Models/ScoringSystem'
+import User from '#app/Models/User'
+import Sport from '#app/Models/Scout'
 
 export default class ScoringSystemsManager {
   @withTransaction
@@ -31,19 +35,19 @@ export default class ScoringSystemsManager {
 
     // TODO view the scoring system only to the user that has view scout
     let query = ScoringSystem.query({
-        client: trx,
-      })
+      client: trx,
+    })
       .preload('createdByUser')
       .preload('createdForTeam')
       .select('scoring_systems.*')
       .leftJoin('teams', 'scoring_systems.createdForTeamId', 'teams.id')
-      .whereIn('teams.id', b => {
+      .whereIn('teams.id', (b) => {
         b.select('teams2.id')
           .from('teams as teams2')
           .join('teammates as teammates2', 'teammates2.teamId', 'teams2.id')
           .where('teammates2.userId', user.id)
-      }).orWhere('scoring_systems.createdByUserId', user.id)
-    
+      })
+      .orWhere('scoring_systems.createdByUserId', user.id)
 
     if (!!params.data.filtersBuilder) {
       let filtersApplier = new FilterModifierApplier()
@@ -55,7 +59,6 @@ export default class ScoringSystemsManager {
     }
 
     const results = await query.paginate(params.data.page, params.data.perPage)
-
 
     return results.toJSON()
   }
@@ -69,7 +72,7 @@ export default class ScoringSystemsManager {
       sport: Sport
       config: ScoringSystemConfig
       createdForTeamId?: number
-    },
+    }
     context?: Context
   }): Promise<ScoringSystem> {
     let trx = params.context?.trx
@@ -77,10 +80,10 @@ export default class ScoringSystemsManager {
 
     await validator.validate({
       schema: new CreateScoringSystemValidator().schema,
-      data: params.data
+      data: params.data,
     })
 
-    if(!!params.data.createdForTeamId) {
+    if (!!params.data.createdForTeamId) {
       await AuthorizationManager.canOrFail({
         data: {
           actor: user,
@@ -88,23 +91,26 @@ export default class ScoringSystemsManager {
           resource: 'scoringSystem',
           entities: {
             team: {
-              id: params.data.createdForTeamId
-            }
-          }
+              id: params.data.createdForTeamId,
+            },
+          },
         },
         context: {
-          trx
-        }
+          trx,
+        },
       })
     }
 
-    let scout = await ScoringSystem.create({
-      ...params.data,
-      createdByUserId: user.id
-    }, { client: trx })
+    let scout = await ScoringSystem.create(
+      {
+        ...params.data,
+        createdByUserId: user.id,
+      },
+      { client: trx }
+    )
 
     await scout.load('createdByUser')
-    if(!!scout.createdForTeamId) await scout.load('createdForTeam')
+    if (!!scout.createdForTeamId) await scout.load('createdForTeam')
     return scout
   }
 
@@ -126,17 +132,16 @@ export default class ScoringSystemsManager {
         resource: 'scoringSystem',
         entities: {
           scoringSystem: {
-            id: params.data.id
-          }
-        }
+            id: params.data.id,
+          },
+        },
       },
       context: {
-        trx
-      }
+        trx,
+      },
     })
 
-    let scoringSystem = await ScoringSystem
-      .query({ client: trx })
+    let scoringSystem = await ScoringSystem.query({ client: trx })
       .where('id', params.data.id)
       .preload('createdByUser')
       .preload('createdForTeam')
@@ -154,7 +159,7 @@ export default class ScoringSystemsManager {
       name?: string
       sport?: Sport
       config?: ScoringSystemConfig
-    },
+    }
     context?: Context
   }): Promise<ScoringSystem> {
     let trx = params.context?.trx
@@ -167,22 +172,21 @@ export default class ScoringSystemsManager {
         resource: 'scoringSystem',
         entities: {
           scoringSystem: {
-            id: params.data.id
-          }
-        }
+            id: params.data.id,
+          },
+        },
       },
       context: {
-        trx
-      }
+        trx,
+      },
     })
 
     await validator.validate({
       schema: new UpdateScoringSystemValidator().schema,
-      data: params.data
+      data: params.data,
     })
 
-    let scoringSystem = await ScoringSystem
-      .findOrFail(params.data.id, { client: trx })
+    let scoringSystem = await ScoringSystem.findOrFail(params.data.id, { client: trx })
 
     scoringSystem.merge(params.data)
     await scoringSystem.save()
@@ -209,17 +213,15 @@ export default class ScoringSystemsManager {
         resource: 'scoringSystem',
         entities: {
           scoringSystem: {
-            id: params.data.id
-          }
-        }
+            id: params.data.id,
+          },
+        },
       },
       context: {
-        trx
-      }
+        trx,
+      },
     })
 
-    await ScoringSystem.query({ client: trx })
-      .where('id', params.data.id)
-      .del()
+    await ScoringSystem.query({ client: trx }).where('id', params.data.id).del()
   }
 }

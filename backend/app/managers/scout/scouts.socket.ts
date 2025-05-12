@@ -1,62 +1,66 @@
-import User from "#app/Models/User"
-import Scout from "#app/Models/Scout"
-import { AuthorizationHelpers } from "../authorization.manager.js"
-import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT } from "./events/volleyball/VolleyballScoutEvent.js"
-import ScoutsManager from "./scouts.manager.js"
-import Ws from "#app/Services/Ws"
-import { Context, withTransaction, withUser } from "../base.manager.js"
-import PlayersManager from "../players.manager.js"
-import { FIRST_POINT, getNextAutomatedEvents, type VolleyballScoutEventParameters } from 'lionn-common'
+import User from '#app/Models/User'
+import Scout from '#app/Models/Scout'
+import { AuthorizationHelpers } from '../authorization.manager.js'
+import { TYPE_TO_VOLLEYBALL_SCOUT_EVENT } from './events/volleyball/VolleyballScoutEvent.js'
+import ScoutsManager from './scouts.manager.js'
+import Ws from '#app/Services/Ws'
+import { Context, withTransaction, withUser } from '../base.manager.js'
+import PlayersManager from '../players.manager.js'
+import {
+  FIRST_POINT,
+  getNextAutomatedEvents,
+  type VolleyballScoutEventParameters,
+} from 'lionn-common'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export type ScoutSocketEventMapping = {
-  'scout:add': VolleyballScoutEventParameters,
+  'scout:add': VolleyballScoutEventParameters
   'scout:stashReload': {
     scout: Scout
-  },
+  }
   'scout:lastEventReload': {
     scoutId: number
-  },
+  }
   'scout:analysisReload': {
     scoutId: number
-  },
+  }
   'scout:undo': {
     scoutId: number
-  },
+  }
   'scout:restart': {
     scoutId: number
   }
 }
 
 class ScoutSocket {
-  constructor() { }
+  constructor() {}
 
   public async emit<
     EventName extends keyof ScoutSocketEventMapping,
-    EventData extends ScoutSocketEventMapping[EventName]
+    EventData extends ScoutSocketEventMapping[EventName],
   >(params: {
     data: {
-      event: EventName,
+      event: EventName
       data: EventData
-    },
+    }
     context?: Context
   }) {
     if (params.data.event == 'scout:stashReload') {
       let data = params.data.data as ScoutSocketEventMapping['scout:stashReload']
 
       let scout = await Scout.query({ client: params.context?.trx })
-        .preload('event', b => b.preload('team'))
+        .preload('event', (b) => b.preload('team'))
         .where('id', data.scout.id)
         .firstOrFail()
 
       let roomName = Ws.roomName({
         team: scout.event.team,
-        namespace: 'scout'
+        namespace: 'scout',
       })
 
       let eventName = Ws.roomName({
         team: scout.event.team,
-        namespace: 'scout:stashReload'
+        namespace: 'scout:stashReload',
       })
 
       Ws.io.to(roomName).emit(eventName, data)
@@ -71,29 +75,29 @@ class ScoutSocket {
 
       let roomName = Ws.roomName({
         team: {
-          id: scout.event.teamId
+          id: scout.event.teamId,
         },
-        namespace: 'scout'
+        namespace: 'scout',
       })
 
       let eventName = Ws.roomName({
         team: {
-          id: scout.event.teamId
+          id: scout.event.teamId,
         },
-        namespace: 'scout:lastEventReload'
+        namespace: 'scout:lastEventReload',
       })
 
       let playersManager = new PlayersManager()
       let lastEventsForPlayers = await playersManager.lastScoutEventsForMany({
         data: {
           players: scout.players,
-          scout: scout
+          scout: scout,
         },
-        context: params.context
+        context: params.context,
       })
 
       Ws.io.to(roomName).emit(eventName, {
-        lastEventsForPlayers
+        lastEventsForPlayers,
       })
     } else if (params.data.event == 'scout:analysisReload') {
       let data = params.data.data as ScoutSocketEventMapping['scout:analysisReload']
@@ -106,28 +110,28 @@ class ScoutSocket {
 
       let roomName = Ws.roomName({
         team: {
-          id: scout.event.teamId
+          id: scout.event.teamId,
         },
-        namespace: 'scout'
+        namespace: 'scout',
       })
 
       let eventName = Ws.roomName({
         team: {
-          id: scout.event.teamId
+          id: scout.event.teamId,
         },
-        namespace: 'scout:analysisReload'
+        namespace: 'scout:analysisReload',
       })
 
       let scoutManager = new ScoutsManager()
       let analysis = await scoutManager.analysis({
         data: {
-          id: scout.id
+          id: scout.id,
         },
-        context: params.context
+        context: params.context,
       })
 
       Ws.io.to(roomName).emit(eventName, {
-        analysis
+        analysis,
       })
     }
   }
@@ -136,19 +140,23 @@ class ScoutSocket {
   @withTransaction
   public async handleEvent<
     Event extends keyof ScoutSocketEventMapping,
-    EventData extends ScoutSocketEventMapping[Event]
+    EventData extends ScoutSocketEventMapping[Event],
   >(params: {
     data: {
-      event: Event,
-      data: EventData,
+      event: Event
+      data: EventData
       clientIdentifier?: string
-    },
+    }
     context?: Context
   }) {
     let user = params.context?.user as User
     let trx = params.context?.trx as TransactionClientContract
 
-    if (params.data.event == 'scout:add' || params.data.event == 'scout:undo' || params.data.event == 'scout:restart') {
+    if (
+      params.data.event == 'scout:add' ||
+      params.data.event == 'scout:undo' ||
+      params.data.event == 'scout:restart'
+    ) {
       let data = params.data.data as ScoutSocketEventMapping['scout:add']
 
       // check if user can manage the scout
@@ -164,11 +172,12 @@ class ScoutSocket {
           user: user,
           team: { id: scout.event.teamId },
           action: 'manage',
-          resource: 'scout'
+          resource: 'scout',
         },
         context: {
-          user, trx
-        }
+          user,
+          trx,
+        },
       })
 
       if (!canManageScout) {
@@ -176,7 +185,10 @@ class ScoutSocket {
       }
 
       if (params.data.event == 'scout:add') {
-        await this.handleAdd({ data: { scoutEvent: data, scout, clientIdentifier: params.data.clientIdentifier }, context: { user, trx } })
+        await this.handleAdd({
+          data: { scoutEvent: data, scout, clientIdentifier: params.data.clientIdentifier },
+          context: { user, trx },
+        })
       } else if (params.data.event == 'scout:undo') {
         await this.handleUndo({ user, scout })
       } else if (params.data.event == 'scout:restart') {
@@ -194,33 +206,34 @@ class ScoutSocket {
       avoidRecalculateStash?: boolean
       avoidAutomations?: boolean
       clientIdentifier?: string
-    },
+    }
     context?: Context
   }) {
     let user = params.context?.user as User
     let trx = params.context?.trx as TransactionClientContract
 
-    if (!params.data.scoutEvent.points) params.data.scoutEvent.points = params.data.scout.stash?.points
+    if (!params.data.scoutEvent.points)
+      params.data.scoutEvent.points = params.data.scout.stash?.points
     if (!params.data.scoutEvent.points) params.data.scoutEvent.points = FIRST_POINT
 
     let Cl = TYPE_TO_VOLLEYBALL_SCOUT_EVENT[params.data.scoutEvent.type]
     let event = new Cl({
       ...params.data.scoutEvent,
       createdByUserId: user.id,
-      clientIdentifier: params.data.clientIdentifier
+      clientIdentifier: params.data.clientIdentifier,
     })
     await event.preReceived({
       data: {
-        scout: params.data.scout
+        scout: params.data.scout,
       },
-      context: { user, trx }
+      context: { user, trx },
     })
     await event.save()
     await event.postReceived({
       data: {
-        scout: params.data.scout
+        scout: params.data.scout,
       },
-      context: { user, trx }
+      context: { user, trx },
     })
 
     if (!params.data.avoidAutomations) {
@@ -229,58 +242,52 @@ class ScoutSocket {
         context: {
           scoutInfo: params.data.scout.scoutInfo,
           scoringSystem: params.data.scout.scoringSystem.config,
-          stash: params.data.scout.stash
-        }
+          stash: params.data.scout.stash,
+        },
       })
-  
-      if(!!automatedEvents && automatedEvents.length > 0) {
-        for(let i = 0; i < automatedEvents.length; i += 1) {
+
+      if (!!automatedEvents && automatedEvents.length > 0) {
+        for (let i = 0; i < automatedEvents.length; i += 1) {
           let automatedEvent = automatedEvents[i]
           await this.handleAdd({
             data: {
               scoutEvent: automatedEvent,
               scout: params.data.scout,
               avoidRecalculateStash: true,
-              avoidAutomations: true
+              avoidAutomations: true,
             },
-            context: { user, trx }
+            context: { user, trx },
           })
         }
       }
     }
 
-    if(!params.data.avoidRecalculateStash) {
+    if (!params.data.avoidRecalculateStash) {
       let scoutManager = new ScoutsManager()
       await scoutManager.recalculateStash({
         data: { id: params.data.scout.id },
-        context: { user, trx }
+        context: { user, trx },
       })
     }
   }
 
-  private async handleUndo(params: {
-    scout: Scout
-    user: User
-  }) {
+  private async handleUndo(params: { scout: Scout; user: User }) {
     let scoutManager = new ScoutsManager()
     await scoutManager.undo({
       data: { id: params.scout.id },
       context: {
-        user: params.user
-      }
+        user: params.user,
+      },
     })
   }
 
-  private async handleRestart(params: {
-    scout: Scout
-    user: User
-  }) {
+  private async handleRestart(params: { scout: Scout; user: User }) {
     let scoutManager = new ScoutsManager()
     await scoutManager.restart({
       data: { id: params.scout.id },
       context: {
-        user: params.user
-      }
+        user: params.user,
+      },
     })
   }
 }
