@@ -207,7 +207,9 @@
 
 								<button onclick={nextStep} class="!p-1.5">
 									<div class="flex items-center gap-1">
-										<span class="underline underline-offset-2">Next</span>
+										<span class="underline underline-offset-2"
+											>{currStep.includes('invite') ? 'Next / Skip' : 'Next'}</span
+										>
 										<Icon name="mdi-arrow-right" />
 									</div>
 								</button>
