@@ -144,8 +144,10 @@
 								{:else if currStep == 'team'}
 									<NewTeamForm bind:sport bind:name bind:notes bind:error />
 								{:else if currStep == 'invite-email'}
+									<!-- Optional -->
 									<InviteEmailForm bind:collaborators />
 								{:else if currStep == 'invite-token'}
+									<!-- Optional -->
 									<InviteTokenForm {token} />
 								{:else if currStep == 'review'}
 									<ConfirmForm
@@ -160,7 +162,9 @@
 										{token}
 									/>
 								{:else}
-									LOL?
+									<div class="w-full text-center text-small my-5">
+										Something went wrong! Please reload the page.
+									</div>
 								{/if}
 							</div>
 						</div>

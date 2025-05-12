@@ -3,8 +3,8 @@ import type { Cookies } from '@sveltejs/kit'
 import { browser } from '$app/environment'
 import JsCookies from 'js-cookie'
 import user from '$lib/stores/auth/user'
-import { DateTime, Duration } from 'luxon'
-import { get, writable } from 'svelte/store'
+import { DateTime } from 'luxon'
+import { get } from 'svelte/store'
 import phantom from '$lib/stores/provider/phantom'
 import type { UserSetting } from '../userSettings/usersSettings.service'
 
@@ -14,11 +14,11 @@ export type User = {
 	id: number
 	firstname: string
 	lastname: string
-  fullname: string
+	fullname: string
 	email: string
 	system: boolean
 	solanaPublicKey: string
-  userSetting: UserSetting
+	userSetting: UserSetting
 	avatarUrl?: string
 	createdAt: Date
 	updatedAt: Date
@@ -231,10 +231,10 @@ export default class AuthService extends FetchBasedService {
 			email: response.email,
 			firstname: response.firstname,
 			lastname: response.lastname,
-      fullname: response.fullname,
+			fullname: response.fullname,
 			solanaPublicKey: response.solanaPublicKey,
 			system: response.system,
-      userSetting: response.userSetting,
+			userSetting: response.userSetting,
 			avatarUrl: response.avatarUrl,
 			createdAt: new Date(response.createdAt),
 			updatedAt: new Date(response.updatedAt)
