@@ -35,7 +35,12 @@ export type GroupedPermissions<Type = boolean> = {
 		update: Type
 		destroy: Type
 		view: Type
-	}
+	},
+  club: {
+    update: Type
+    destroy: Type
+    view: Type
+  },
 	event: {
 		create: Type
 		update: Type
@@ -85,6 +90,11 @@ const EMPTY_GROUPED_PERMISSIONS: GroupedPermissions = {
 		destroy: false,
 		view: false
 	},
+  club: {
+    update: false,
+    destroy: false,
+    view: false
+  },
 	event: {
 		create: false,
 		update: false,
@@ -197,7 +207,8 @@ export default class GroupsService extends FetchBasedService {
 			teammate: 'Membro',
 			scout: 'Scout',
 			scoringSystem: 'Sistemi di punteggio',
-			shirt: 'Maglie'
+			shirt: 'Maglie',
+      club: 'Club'
 		}
 		return translationMapping[resource]
 	}

@@ -1,7 +1,7 @@
 import Media from '#models/Media'
 import { Context, withUser, withTransaction } from './base.manager.js'
-import Drive from '@adonisjs/drive/services/main'
 import { cuid } from '@adonisjs/core/helpers'
+import Drive from '@adonisjs/drive/services/main'
 import path from 'path'
 import fs from 'fs/promises'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
@@ -90,7 +90,6 @@ export default class MediaManager {
     }
     context?: Context
   }): Promise<Media> {
-    // const { default: mime } = await import('mime')
     let trx = params.context?.trx
     const drive = Drive.use(params.data.driveName)
 
@@ -136,8 +135,8 @@ export default class MediaManager {
     await drive.put(
       mediaFileName,
       !!params.data.from.drive
-        ? (await Drive.use(params.data.from.drive).get(params.data.from.path)).toString()
-        : (await fs.readFile(params.data.from.path)).toString()
+        ? await Drive.use(params.data.from.drive).get(params.data.from.path)
+        : await fs.readFile(params.data.from.path)
     )
 
     const fileStat = await drive.getMetaData(mediaFileName)
@@ -254,8 +253,8 @@ export default class MediaManager {
 
     let thumbnail: Buffer
     try {
-      thumbnail = await sharp(buffer)
-        .resize(Number(params.data.width) || 200, Number(params.data.height) || 200, { fit: params.data.fit || 'cover' })
+      thumbnail = await sharp(Buffer.from(buffer))
+        .resize(Number(params.data.width) || 100, Number(params.data.height) || 100, { fit: params.data.fit || 'cover' })
         .jpeg()
         .toBuffer()
     } catch(e) {

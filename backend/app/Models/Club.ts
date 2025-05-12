@@ -33,6 +33,14 @@ export default class Club extends CamelCaseBaseModel {
   public logo: BelongsTo<typeof Media>
 
   @column()
+  public headerMediaId: number | null
+
+  @belongsTo(() => Media, {
+    foreignKey: 'headerMediaId'
+  })
+  public header: BelongsTo<typeof Media>
+
+  @column()
   public ownerId: number | null
 
   @belongsTo(() => User, {

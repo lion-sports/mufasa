@@ -3,8 +3,8 @@ import cuid2 from '@paralleldrive/cuid2'
 import type { VolleyballScoutEventParameters } from './volleyball'
 import { Subject } from 'rxjs'
 import { concatMap } from 'rxjs/operators'
-import { toast } from 'svelte-sonner'
 import { browser } from '$app/environment'
+import { addErrorToast } from '@/lib/components/ui/sonner'
 
 let subject = new Subject<{
 	event: VolleyballScoutEventParameters
@@ -28,7 +28,9 @@ subject
 				}
 			}
 
-			toast.error('Evento non recapitato per troppi tentativi falliti')
+      addErrorToast({
+        title: 'Evento non recapitato per troppi tentativi falliti'
+      })
 			e.service.moveToStatus({
 				clientIdentifier: e.clientIdentifier,
 				status: 'failed'

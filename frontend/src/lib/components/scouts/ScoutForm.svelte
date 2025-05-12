@@ -4,7 +4,7 @@
 	import { DatePickerTextField } from '@likable-hair/svelte'
 	import LabelAndTextfield from '../common/LabelAndTextfield.svelte'
 	import ScoringSystemAsyncAutocomplete from '../scoringSystems/ScoringSystemAsyncAutocomplete.svelte'
-	import ScoutSportAutocomplete from './ScoutSportAutocomplete.svelte'
+	import ScoutSportAutocomplete from '../common/SportAutocomplete.svelte'
 
 	interface Props {
 		scout?: Partial<Scout>

@@ -46,6 +46,7 @@ export type ApiClient = {
 	delete: (params: DeleteParams) => Promise<any>
 	get: (params: GetParams) => Promise<any>
 	getWithDownload: (params: GetWithDownloadParams) => Promise<any>
+  getBlob: (params: GetParams) => Promise<Blob>
 }
 
 export abstract class FetchBasedService {
@@ -67,7 +68,8 @@ export abstract class FetchBasedService {
 			put: this.__put.bind(this),
 			delete: this.__delete.bind(this),
 			get: this.__get.bind(this),
-			getWithDownload: this.__getWithDownload.bind(this)
+			getWithDownload: this.__getWithDownload.bind(this),
+      getBlob: this.__getBlob.bind(this)
 		}
 	}
 
@@ -230,4 +232,20 @@ export abstract class FetchBasedService {
 
 		return headers
 	}
+
+  private async __getBlob(params: GetWithDownloadParams) {
+    return await this.fetch(
+      this._calculateApiUrl(params.url, params.baseUrl)
+      + '?'
+      + qs.stringify(params.params),
+      {
+        headers: this._calculateHeaders(params.headers, true), length
+      }
+    ).then((response: any) => {
+      if (response.status != 200) throw response
+      else {
+        return response.blob()
+      }
+    })
+  }
 }

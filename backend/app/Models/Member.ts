@@ -1,6 +1,6 @@
 import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime, } from 'luxon'
-import { column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { column, belongsTo, hasMany, computed } from '@adonisjs/lucid/orm'
 import User from '#app/Models/User'
 import Team from '#app/Models/Team'
 import Group from '#app/Models/Group'
@@ -25,6 +25,12 @@ export default class Member extends CamelCaseBaseModel {
 
   @column()
   public clubId: number
+
+  @computed()
+  get fullname() {
+    if(!!this.alias) return this.alias
+    else if(!!this.user) return `${this.user.firstname} ${this.user.lastname}`
+  }
 
   @belongsTo(() => Club, {
     foreignKey: 'clubId'

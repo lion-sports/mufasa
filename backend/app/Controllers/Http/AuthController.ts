@@ -53,7 +53,7 @@ export default class AuthController {
     if (!auth.user) return
 
     let user = await User.query().where('id', auth.user.id)
-      .preload('userSettings')
+      .preload('userSetting')
       .firstOrFail()
 
     return user

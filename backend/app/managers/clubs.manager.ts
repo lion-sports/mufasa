@@ -7,6 +7,7 @@ import User from '#models/User'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { ModelObject } from '@adonisjs/lucid/types/model'
 import type { Sport } from 'lionn-common'
+import MediaManager from './media.manager.js'
 
 export default class ClubsManager {
   @withTransaction
@@ -128,6 +129,96 @@ export default class ClubsManager {
 
   @withTransaction
   @withUser
+  public async uploadMedia(params: {
+    data: {
+      club: { id: number }
+      logo?: Parameters<MediaManager['upload']>[0]['data']
+      header?: Parameters<MediaManager['upload']>[0]['data']
+    }
+    context?: Context
+  }): Promise<Club> {
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
+
+    let club = await Club.query({
+        client: trx,
+      })
+      .where('id', params.data.club.id)
+      .firstOrFail()
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        action: 'update',
+        resource: 'club',
+        entities: {
+          club
+        },
+      },
+      context: {
+        trx: trx,
+      },
+    })
+
+    let mediaManager = new MediaManager()
+
+    if(!!params.data.logo) {
+      if(!!club.logoMediaId) {
+        await mediaManager.delete({
+          data: {
+            media: {
+              id: club.logoMediaId
+            }
+          },
+          context: {
+            user, trx
+          }
+        })
+      }
+
+      let logoMedia = await mediaManager.upload({
+        data: params.data.logo,
+        context: {
+          user,
+          trx,
+        },
+      })
+      club.logoMediaId = logoMedia.id
+    }
+
+    if(!!params.data.header) {
+      if (!!club.headerMediaId) {
+        await mediaManager.delete({
+          data: {
+            media: {
+              id: club.headerMediaId
+            }
+          },
+          context: {
+            user, trx
+          }
+        })
+      }
+
+      let headerMedia = await mediaManager.upload({
+        data: params.data.header,
+        context: {
+          user,
+          trx,
+        },
+      })
+      club.headerMediaId = headerMedia.id
+    }
+
+    await club.save()
+    if(!!club.logoMediaId) await club.load('logo')
+    if(!!club.headerMediaId) await club.load('header')
+
+    return club
+  }
+
+  @withTransaction
+  @withUser
   public async destroy(params: {
     data: {
       id: number
@@ -169,6 +260,8 @@ export default class ClubsManager {
 
     let club = await Club.query({ client: trx })
       .where('id', params.data.id)
+      .preload('owner')
+      .preload('members', b => b.preload('group').preload('user'))
       .firstOrFail()
 
     await AuthorizationManager.canOrFail({

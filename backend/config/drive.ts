@@ -13,10 +13,9 @@ const driveConfig = defineConfig({
       routeBasePath: '/public/serve',
     }),
     local: services.fs({
-      visibility: 'public',
+      visibility: 'private',
       location: app.makePath('media'),
-      serveFiles: true,
-      routeBasePath: '/public/media',
+      serveFiles: false
     }),
     tmp: services.fs({
       visibility: 'private',

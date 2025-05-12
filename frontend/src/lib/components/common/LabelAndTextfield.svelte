@@ -40,12 +40,12 @@
 </script>
 
 {#if label}
-	<label style:font-weight="500" style:margin-left="3px" for={name} class={clazz.label}
+	<label style:font-weight="500" style:margin-left="4px" for={name} class={clazz.label}
 		>{label || ''}</label
 	>
 {/if}
 
-<div style:margin-top="5px">
+<div style:margin-top="4px">
 	<StandardTextfield
 		bind:value
 		{type}
@@ -55,6 +55,7 @@
 		{placeholder}
 		{...rest}
 		class={clazz.input}
+    --simple-textfield-default-hint-color={error ? 'rgb(var(--global-color-error-500))' : undefined}
 	>
 		{#snippet appendInner()}
 			{@render appendInner_render?.()}

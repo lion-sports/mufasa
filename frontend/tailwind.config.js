@@ -6,7 +6,7 @@ const config = {
 	darkMode: ['class'],
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	safelist: ['dark'],
-	plugins: [containerQueryPlugin],
+	plugins: [containerQueryPlugin, require('@tailwindcss/typography')],
 	theme: {
 		container: {
 			center: true,
@@ -58,7 +58,64 @@ const config = {
 			},
 			fontFamily: {
 				sans: [...fontFamily.sans]
-			}
+			},
+      typography: {
+        DEFAULT: {
+          css: {
+            color: 'inherit',
+            maxWidth: 'auto',
+            p: {
+              marginTop: '4px',
+              marginBottom: '0px'
+            },
+            strong: {
+              color: 'inherit'
+            },
+            h1: {
+              color: 'inherit',
+              fontWeight: '800',
+              marginBottom: '8px'
+            },
+            'h1 strong': {
+              fontWeight: '900',
+              color: 'inherit',
+              marginBottom: '8px'
+            },
+            h2: {
+              color: 'inherit',
+              fontWeight: '700',
+              marginBottom: '8px',
+              marginTop: '8px'
+            },
+            'h2 strong': {
+              fontWeight: '800',
+              color: 'inherit',
+              marginBottom: '8px'
+            },
+            h3: {
+              color: 'inherit',
+              fontWeight: '600',
+              marginBottom: '8px'
+            },
+            'h3 strong': {
+              fontWeight: '700',
+              color: 'inherit',
+              marginBottom: '8px'
+            },
+            h4: {
+              color: 'inherit',
+              fontWeight: '600',
+              marginBottom: '8px'
+            }
+          }
+        },
+        lg: {
+          p: {
+            marginTop: '0px',
+            marginBottom: '0px'
+          }
+        }
+      }
 		}
 	}
 }

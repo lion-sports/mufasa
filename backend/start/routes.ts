@@ -216,6 +216,17 @@ router.resource('dashboards', DashboardController)
     })
   )
 
+router.group(() => {
+  router.post('/:id/uploadMedia', [ClubsController, 'uploadMedia'])
+  router.get('/media/:id/downloadThumbnail', [ClubsController, 'downloadThumbnail'])
+  router.get('/media/:id/download', [ClubsController, 'downloadMedia'])
+  router.get('/media/:id/show', [ClubsController, 'showMedia'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/clubs')
+
 router.resource('clubs', ClubsController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
   .middleware(
@@ -223,17 +234,6 @@ router.resource('clubs', ClubsController)
       guards: ['api']
     })
   )
-
-router.group(() => {
-  router.get('/:id/downloadThumbnail', [MediaController, 'downloadThumbnail'])
-  router.get('/:id/download', [MediaController, 'download'])
-  router.get('/:id/show', [MediaController, 'show'])
-  router.get('/:id/:filename', [MediaController, 'downloadWithFilename'])
-})
-  .use(middleware.auth({
-    guards: ['api']
-  }))
-  .prefix('/media')
 
 router.group(() => {
   router.get('/loadDistribution', [WidgetsController, 'loadDistribution'])

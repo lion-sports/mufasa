@@ -6,6 +6,7 @@ import user from '$lib/stores/auth/user'
 import { DateTime, Duration } from 'luxon'
 import { get, writable } from 'svelte/store'
 import phantom from '$lib/stores/provider/phantom'
+import type { UserSetting } from '../userSettings/usersSettings.service'
 
 export type RegistrationStep = 'credentials' | 'team' | 'review' | 'invite-email' | 'invite-token'
 
@@ -13,9 +14,11 @@ export type User = {
 	id: number
 	firstname: string
 	lastname: string
+  fullname: string
 	email: string
 	system: boolean
 	solanaPublicKey: string
+  userSetting: UserSetting
 	avatarUrl?: string
 	createdAt: Date
 	updatedAt: Date
@@ -228,8 +231,10 @@ export default class AuthService extends FetchBasedService {
 			email: response.email,
 			firstname: response.firstname,
 			lastname: response.lastname,
+      fullname: response.fullname,
 			solanaPublicKey: response.solanaPublicKey,
 			system: response.system,
+      userSetting: response.userSetting,
 			avatarUrl: response.avatarUrl,
 			createdAt: new Date(response.createdAt),
 			updatedAt: new Date(response.updatedAt)

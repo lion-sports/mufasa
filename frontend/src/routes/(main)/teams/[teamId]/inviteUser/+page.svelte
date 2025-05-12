@@ -8,7 +8,7 @@
 	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
 	import { Icon, MediaQuery } from '@likable-hair/svelte'
-	import UsersList from '$lib/components/users/UsersList.svelte'
+	import UsersList from '@/lib/components/users/UsersTable.svelte'
 	import InvitationList from '$lib/components/invitations/InvitationList.svelte'
 	import StandardAutocomplete from '$lib/components/common/StandardAutocomplete.svelte'
 	import type { ComponentProps } from 'svelte'
@@ -26,7 +26,7 @@
 		if (!!searchText) {
 			userInvited = false
 			let service = new UserService({ fetch })
-			results = await service.search({ email: searchText })
+			results = await service.search({ searchText })
 		}
 	}
 

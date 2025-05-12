@@ -8,7 +8,7 @@ export default class UsersController {
       data: {
         page: request.input('page'),
         perPage: request.input('perPage'),
-        filters: request.input('filters'),
+        filtersBuilder: request.input('filtersBuilder'),
       },
     })
   }

@@ -3,7 +3,7 @@
 
 	import type { ScoringSystem } from '$lib/services/scoringSystems/scoringSystems.service'
 	import LabelAndTextfield from '../common/LabelAndTextfield.svelte'
-	import ScoutSportAutocomplete from '../scouts/ScoutSportAutocomplete.svelte'
+	import ScoutSportAutocomplete from '../common/SportAutocomplete.svelte'
 	import LabelAndCheckbox from '../common/LabelAndCheckbox.svelte'
 	import ButtonGroup from '../common/ButtonGroup.svelte'
 	import { Icon } from '@likable-hair/svelte'

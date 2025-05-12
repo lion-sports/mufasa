@@ -36,26 +36,32 @@
 			})
 	}
 
-	let backgroundColor: string = $state('')
-	run(() => {
-		if (style == 'primary') backgroundColor = 'rgb(var(--global-color-primary-500))'
-		else if (style == 'secondary') backgroundColor = 'rgb(var(--global-color-background-600), .4)'
+	let backgroundColor: string = $derived.by(() => {
+    let backgroundColor = ''
+    if (style == 'primary') backgroundColor = 'rgb(var(--global-color-primary-500))'
+		else if (style == 'secondary') backgroundColor = 'transparent'
 		else if (style == 'danger') backgroundColor = 'rgb(var(--global-color-error-500))'
-	})
+    return backgroundColor
+  })
 
-	let color: string = $state('')
-	run(() => {
-		if (style == 'primary') color = 'rgb(var(--global-color-grey-50))'
-		else if (style == 'secondary') color = 'rgb(var(--global-color-contrast-900))'
-		else if (style == 'danger') color = 'rgb(var(--global-color-grey-50))'
-	})
+  let color: string = $derived.by(() => {
+    if (style == 'primary') return 'rgb(var(--global-color-grey-50))'
+    else if (style == 'secondary') return 'rgb(var(--global-color-contrast-900))'
+    else if (style == 'danger') return 'rgb(var(--global-color-grey-50))'
+    return ''
+  })
 
-	let activeColor: string = $state('')
-	run(() => {
-		if (style == 'primary') activeColor = 'rgb(var(--global-color-primary-500), .7)'
-		else if (style == 'secondary') activeColor = 'rgb(var(--global-color-primary-500))'
-		else if (style == 'danger') activeColor = 'rgb(var(--global-color-error-500), .7)'
-	})
+  let activeColor: string = $derived.by(() => {
+    if (style == 'primary') return 'rgb(var(--global-color-primary-500), .7)'
+    else if (style == 'secondary') return 'rgb(var(--global-color-primary-500))'
+    else if (style == 'danger') return 'rgb(var(--global-color-error-500), .7)'
+    return ''
+  })
+
+  let boxShadow: string = $derived.by(() => {
+    if (style == 'secondary') return '0 0 0 2px rgb(var(--global-color-primary-500), .6)'
+    return ''
+  })
 </script>
 
 {#if !!href}
@@ -65,6 +71,7 @@
 		style:--link-button-active-background-color={activeColor}
 		style:--link-button-focus-background-color={activeColor}
 		style:--link-button-color={color}
+    style:--link-button-box-shadow={boxShadow}
 		class:disabled
 		class="link-button"
 		{href}
@@ -89,6 +96,7 @@
 		--button-active-background-color={activeColor}
 		--button-focus-background-color={activeColor}
 		--button-color={color}
+    --button-box-shadow={boxShadow}
 		--circular-loader-height="20px"
 	>
 		<div
@@ -110,6 +118,7 @@
 		border-radius: 8px;
 		background-color: var(--link-button-background-color);
 		color: var(--link-button-color);
+    box-shadow: var(--link-button-box-shadow);
 		transition: all 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
 	}
 

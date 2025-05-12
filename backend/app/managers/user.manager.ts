@@ -6,49 +6,7 @@ import SolanaManager from './solana.manager.js'
 import { ModelObject } from '@adonisjs/lucid/types/model'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { DateTime } from 'luxon'
-
-export type CreateParams = {
-  data: {
-    email: string
-    password: string
-    firstname: string
-    lastname: string
-    birthday: DateTime
-    solanaPublicKey?: string
-  }
-  context?: Context
-}
-
-export type UpdateParams = {
-  data: {
-    id?: number
-    email?: string
-    password?: string
-    firstname?: string
-    birthday?: DateTime
-    lastname?: string
-  }
-  context?: Context
-}
-
-export type ListParams = {
-  data: {
-    page?: number
-    perPage?: number
-    filters?: {
-      email?: string
-    }
-  }
-  context?: Context
-}
-
-export type GetParams = {
-  data: {
-    id: number
-    username?: string
-  }
-  context?: Context
-}
+import FilterModifierApplier, { Modifier } from '#services/FilterModifierApplier'
 
 // TODO add authorization manager
 class UsersManager {
@@ -56,7 +14,16 @@ class UsersManager {
 
   @withTransaction
   @withUser
-  public async list(params: ListParams): Promise<{ data: ModelObject[]; meta: any }> {
+  public async list(params: {
+    data: {
+      page?: number
+      perPage?: number
+      filtersBuilder?: {
+        modifiers: Modifier[]
+      }
+    }
+    context?: Context
+  }): Promise<{ data: ModelObject[]; meta: any }> {
     const trx = params.context?.trx as TransactionClientContract
 
     if (!params.data.page) params.data.page = 1
@@ -64,8 +31,9 @@ class UsersManager {
 
     let query = User.query({ client: trx })
 
-    if (!!params.data.filters) {
-      if (!!params.data.filters.email) query = query.whereILike('email', params.data.filters.email)
+    if (!!params.data.filtersBuilder?.modifiers) {
+      let filtersApplier = new FilterModifierApplier()
+      filtersApplier.applyModifiers(query, params.data.filtersBuilder?.modifiers)
     }
 
     const results = await query.paginate(params.data.page, params.data.perPage)
@@ -74,7 +42,17 @@ class UsersManager {
 
   // TODO review signup logics
   @withTransaction
-  public async create(params: CreateParams): Promise<User> {
+  public async create(params: {
+    data: {
+      email: string
+      password: string
+      firstname: string
+      lastname: string
+      birthday: DateTime
+      solanaPublicKey?: string
+    }
+    context?: Context
+  }): Promise<User> {
     const trx = params.context?.trx as TransactionClientContract
 
     await validator.validate({
@@ -102,7 +80,13 @@ class UsersManager {
     return userCreated
   }
 
-  public async get(params: GetParams): Promise<User | null> {
+  public async get(params: {
+    data: {
+      id: number
+      username?: string
+    }
+    context?: Context
+  }): Promise<User | null> {
     const trx = params.context?.trx as TransactionClientContract
 
     let userByUsername: User
@@ -118,11 +102,24 @@ class UsersManager {
 
   @withTransaction
   @withUser
-  public async update(params: UpdateParams): Promise<User> {
+  public async update(params: {
+    data: {
+      id?: number
+      email?: string
+      password?: string
+      firstname?: string
+      birthday?: DateTime
+      lastname?: string
+    }
+    context?: Context
+  }): Promise<User> {
     const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User
 
     const id = params.data.id
     delete params.data.id
+
+    if (id !== user.id) throw new Error('cannot update the user')
 
     await validator.validate({
       schema: new UpdateUserValidator().schema,

@@ -2,7 +2,7 @@ import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import encryption from '@adonisjs/core/services/encryption'
-import { column, beforeSave, manyToMany, hasMany, hasOne } from '@adonisjs/lucid/orm'
+import { column, beforeSave, manyToMany, hasMany, hasOne, computed } from '@adonisjs/lucid/orm'
 import Team from '#app/Models/Team'
 import Dashboard from './Dashboard.js'
 import { type ManyToMany } from '@adonisjs/lucid/types/relations'
@@ -40,6 +40,12 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
 
   @column()
   public lastname?: string
+
+  @computed()
+  get fullname() {
+    if (!!this.firstname && !!this.lastname) return `${this.firstname} ${this.lastname}`
+    else if(!!this.name) return this.name
+  }
 
   @column()
   public color?: string
@@ -128,7 +134,7 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
     localKey: 'id',
     foreignKey: 'userId',
   })
-  public userSettings: HasOne<typeof UserSetting>
+  public userSetting: HasOne<typeof UserSetting>
 
   @hasMany(() => Dashboard, {
     localKey: 'id',

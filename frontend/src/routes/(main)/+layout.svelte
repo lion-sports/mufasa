@@ -88,6 +88,7 @@
 			{options}
 			bind:drawerOpened
 			expandOn="hover"
+      --unstable-divided-side-bar-layout-content-padding="16px"
 		>
 			{#snippet innerMenuSnippet({ hamburgerVisible })}
 				{#if !!hamburgerVisible}
