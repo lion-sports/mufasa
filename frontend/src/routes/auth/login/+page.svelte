@@ -95,7 +95,7 @@
 					<!-- Credentials Box -->
 					<div class="w-full flex-grow flex justify-center items-center">
 						<div class="w-full flex flex-col items-center justify-center">
-							<div class="text-2xl my-3">Welcome to LiONN</div>
+							<div class="text-2xl my-3">Benvenuto su LiONN</div>
 
 							<div class="w-full mt-5">
 								<StandardTextfield
@@ -131,7 +131,7 @@
 										class="text-[rgb(var(--global-color-error-500))]">{errorMessage}</span
 									>
 								{/if}
-								<a class="ml-auto tracking-tight" href="/"> Forgot password? </a>
+								<a class="ml-auto tracking-tight" href="/"> Password dimenticata? </a>
 							</div>
 
 							<!-- Next Button -->
@@ -148,7 +148,7 @@
 								<div
 									class="border-t border-[rgb(var(--global-color-background-400))] border-[1.3px] w-full"
 								></div>
-								<div class="flex-grow min-w-fit text-sm">or continue with</div>
+								<div class="flex-grow min-w-fit text-sm">oppure continua con</div>
 								<div
 									class="border-t border-[rgb(var(--global-color-background-400))] border-[1.3px] w-full"
 								></div>
@@ -174,7 +174,7 @@
 					<div
 						class="mx-auto flex sm:flex-col md:flex-row items-center gap-2 sm:gap-0 md:gap-2 text-sm"
 					>
-						<div>Don't have an account?</div>
+						<div>Non hai un account?</div>
 						<a class="text-[rgb(var(--global-color-primary-500))]" href="/auth/signup"> Sign up </a>
 					</div>
 				</div>

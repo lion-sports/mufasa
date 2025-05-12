@@ -43,7 +43,7 @@
 		<div class="w-full">
 			<LabelAndTextfield
 				error={error && !firstname}
-				placeholder="Firstname"
+				placeholder="Nome"
 				name="firstname"
 				bind:value={firstname}
 				--simple-textfield-width="100%"
@@ -52,7 +52,7 @@
 		<div class="w-full">
 			<LabelAndTextfield
 				error={error && !lastname}
-				placeholder="Lastname"
+				placeholder="Cognome"
 				name="lastname"
 				bind:value={lastname}
 				--simple-textfield-width="100%"
@@ -67,7 +67,7 @@
 		<StandardDatepicker
 			class={{ textfield: { row: '!mb-0 !pb-0', field: 'flex items-center' } }}
 			bind:value={birthday}
-			placeholder="Birthday"
+			placeholder="Data di nascita"
 			--simple-textfield-height="40px"
 			--simple-textfield-default-width="100%"
 			--simple-textfield-max-width="100%"
@@ -101,7 +101,7 @@
 		error={error && (!passwordConfirmation || password !== passwordConfirmation)}
 		type={showPasswordConfirmation ? 'text' : 'password'}
 		bind:value={passwordConfirmation}
-		placeholder="Confirm Password"
+		placeholder="Conferma Password"
 		--simple-textfield-width="100%"
 	>
 		{#snippet appendInner()}
@@ -123,10 +123,10 @@
 	{/if}
 </div>
 
-<div class="w-full mt-1 text-xs">
+<div class="w-full mt-1 text-xs {error && !acceptPrivacy ? "text-[rgb(var(--global-color-error-500))]" : "text-[rgb(var(--global-color-foreground))]"}">
 	<LabelAndCheckbox
 		bind:value={acceptPrivacy}
 		id="accept-privacy"
-		label="I accept all privacy terms and conditions"
+		label="Accetto tutti i termini e le condizioni sulla privacy"
 	/>
 </div>

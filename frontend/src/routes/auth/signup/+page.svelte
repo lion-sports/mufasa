@@ -57,7 +57,9 @@
 			.finally(() => (loading = false))
 	}
 
-	let passValid = $derived(!!password && !!passwordConfirmation && password == passwordConfirmation)
+	let passValid = $derived(
+		!!password && password.length > 6 && !!passwordConfirmation && password == passwordConfirmation
+	)
 	let disabled = $derived(
 		!passValid || !lastname || !firstname || !email || !acceptPrivacy || !birthday
 	)
@@ -163,7 +165,7 @@
 									/>
 								{:else}
 									<div class="w-full text-center text-small my-5">
-										Something went wrong! Please reload the page.
+										Qualcosa è andato storto! Per favore ricarica la pagina.
 									</div>
 								{/if}
 							</div>
@@ -216,7 +218,7 @@
 					<div
 						class="mx-auto flex sm:flex-col md:flex-row items-center gap-2 sm:gap-0 md:gap-2 text-sm"
 					>
-						<div>Already have an account?</div>
+						<div>Hai già un account?</div>
 						<a class="text-[rgb(var(--global-color-primary-500))]" href="/auth/login"> Login </a>
 					</div>
 				</div>

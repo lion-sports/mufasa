@@ -46,11 +46,11 @@
 		{/snippet}
 		{#snippet reviewContent()}
 			<div class="flex items-center justify-between">
-				<div class="font-medium">Name:</div>
+				<div class="font-medium">Nome:</div>
 				<div>{firstname && lastname ? `${firstname} ${lastname}` : '-'}</div>
 			</div>
 			<div class="flex items-center justify-between">
-				<div class="font-medium">Birthday:</div>
+				<div class="font-medium">Data di nascita:</div>
 				<div>
 					{birthday ? birthday.toLocaleString().split(',')[0] : '-'}
 				</div>
@@ -72,7 +72,7 @@
 		{/snippet}
 		{#snippet reviewContent()}
 			<div class="flex items-center justify-between">
-				<div class="font-medium">Team Name:</div>
+				<div class="font-medium">Nome:</div>
 				<div>{teamName || '-'}</div>
 			</div>
 			<div class="flex items-center justify-between">
@@ -80,7 +80,7 @@
 				<div>{sport || '-'}</div>
 			</div>
 			<div class="w-full flex items-center">
-				<div class="w-full flex-grow font-medium mr-1 text-left">Notes:</div>
+				<div class="w-full flex-grow font-medium mr-1 text-left">Note:</div>
 				<span class="line-clamp-1">{notes || '-'}</span>
 			</div>
 		{/snippet}
@@ -96,16 +96,16 @@
 		{/snippet}
 		{#snippet reviewContent()}
 			<div class="flex items-center justify-between">
-				<div class="font-medium">Collaborators n.:</div>
+				<div class="font-medium">Collaboratori n.:</div>
 				<div>{collaborators ? collaborators.length : 0}</div>
 			</div>
 
 			<div class="flex items-center justify-between">
-				<div class="font-medium">Invite token:</div>
+				<div class="font-medium">Token di invito:</div>
 				<div>{token || '-'}</div>
 			</div>
 		{/snippet}
 	</ReviewCard>
 
-	<div class="w-full text-left opacity-50">Click on the card to review each step</div>
+	<div class="w-full text-left opacity-50">Puoi rivedere ogni step cliccando sulle schede qui sopra.</div>
 </div>
