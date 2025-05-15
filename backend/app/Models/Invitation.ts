@@ -5,6 +5,7 @@ import User from '#app/Models/User'
 import Team from '#app/Models/Team'
 import Group from '#app/Models/Group'
 import { type BelongsTo } from "@adonisjs/lucid/types/relations";
+import Club from './Club.js'
 
 export default class Invitation extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -33,6 +34,14 @@ export default class Invitation extends CamelCaseBaseModel {
     foreignKey: 'teamId'
   })
   public team: BelongsTo<typeof Team>
+
+  @column()
+  public clubId: number
+
+  @belongsTo(() => Club, {
+    foreignKey: 'clubId'
+  })
+  public club: BelongsTo<typeof Club>
 
   @column()
   public groupId: number

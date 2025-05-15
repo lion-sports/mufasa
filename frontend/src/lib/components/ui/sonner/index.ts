@@ -18,3 +18,21 @@ export function addErrorToast(params: {
     ...params.options
   })
 }
+
+export function addSuccessToast(params: {
+  title: string
+  options?: NonNullable<Parameters<typeof toast['error']>[1]>
+}) {
+  toast.success(params.title, {
+    classes: {
+      toast: '!bg-[rgb(var(--global-color-success-500),.5)]',
+      cancelButton: '!bg-[rgb(var(--global-color-success-400))] !text-black',
+      ...(params.options?.classes || {})
+    },
+    cancel: {
+      label: 'Chiudi',
+      ...(params.options?.cancel || {}),
+    },
+    ...params.options
+  })
+}

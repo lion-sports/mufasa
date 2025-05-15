@@ -1,5 +1,4 @@
 import type { Club } from "./clubs.service";
-import lodash from 'lodash'
 
 export type ClubValidationData = {
   [Key in keyof Club]?: {
@@ -26,7 +25,7 @@ export class ClubState {
     }
   }
 
-  public validatedClub: Omit<Club, 'id' | 'ownerId' | 'owner' | 'createdAt' | 'updatedAt'> | undefined = $derived.by(() => {
+  public validatedClub: Omit<Club, 'id' | 'ownerId' | 'owner' | 'createdAt' | 'updatedAt' | 'members'> | undefined = $derived.by(() => {
     if(!!this.club.name && !!this.club.completeName) {
       return {
         name: this.club.name,

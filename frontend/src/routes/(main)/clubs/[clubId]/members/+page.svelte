@@ -75,6 +75,8 @@
   title="Invita utente"
 >
   <div class="w-[400px] max-w-[90vh]">
-    <ClubsInviteMembers></ClubsInviteMembers>
+    <ClubsInviteMembers
+      club={data.club}
+    ></ClubsInviteMembers>
   </div>
 </StandardDialog>

@@ -62,7 +62,6 @@ router.group(() => {
   router.post('/:id/removeUser', [TeamsController, 'removeUser'])
   router.post('/:id/exit', [TeamsController, 'exit'])
   router.post('/:id/updatePreference', [TeamsController, 'updatePreference'])
-  router.get('/:teamId/groups', [GroupsController, 'index'])
 })
   .use(middleware.auth({
     guards: ['api']
@@ -88,6 +87,7 @@ router.group(() => {
 
 
 router.group(() => {
+  router.get('/', [GroupsController, 'index'])
   router.post('/', [GroupsController, 'store'])
   router.put('/:id', [GroupsController, 'update'])
   router.delete('/:id', [GroupsController, 'destroy'])
@@ -107,12 +107,12 @@ router.resource('users', UsersController)
   )
 
 router.group(() => {
-  router.post('/inviteUser', [InvitationsController, 'inviteUser'])
-  router.get('/list', [InvitationsController, 'list'])
-  router.post('/accept', [InvitationsController, 'accept'])
-  router.post('/reject', [InvitationsController, 'reject'])
-  router.post('/discard', [InvitationsController, 'discard'])
-})
+    router.post('/inviteUser', [InvitationsController, 'inviteUser'])
+    router.get('/list', [InvitationsController, 'list'])
+    router.post('/accept', [InvitationsController, 'accept'])
+    router.post('/reject', [InvitationsController, 'reject'])
+    router.post('/discard', [InvitationsController, 'discard'])
+  })
   .use(middleware.auth({
     guards: ['api']
   }))

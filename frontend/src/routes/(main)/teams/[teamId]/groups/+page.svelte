@@ -1,5 +1,5 @@
 <script lang="ts">
-	import GroupsList from '$lib/components/groups/GroupsList.svelte'
+	import GroupsList from '@/lib/components/groups/GroupsTable.svelte'
 	import type { PageData } from './$types'
 	import { invalidate } from '$app/navigation'
 

@@ -13,6 +13,8 @@ import { Context } from './base.manager.js'
 import WidgetSetting from '#app/Models/WidgetSetting'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import Club from '#models/Club'
+import { LucidModel, type ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import { RelationSubQueryBuilderContract } from '@adonisjs/lucid/types/relations'
 
 export type GroupedPermissions<Type = boolean> = {
   team: {
@@ -21,11 +23,13 @@ export type GroupedPermissions<Type = boolean> = {
     view: Type,
     invite: Type,
     removeUser: Type,
+    create: Type
   },
   club: {
     update: Type
     destroy: Type
-    view: Type
+    view: Type,
+    invite: Type
   },
   teammate: {
     update: Type,
@@ -110,7 +114,8 @@ export default class AuthorizationManager {
       destroy: AuthorizationManager._canDestroyTeam,
       view: AuthorizationManager._canViewTeam,
       invite: AuthorizationManager._canInviteToTeam,
-      removeUser: AuthorizationManager._canRemoveUserFromTeam
+      removeUser: AuthorizationManager._canRemoveUserFromTeam,
+      create: AuthorizationManager._canCreateTeam
     },
     teammate: {
       update: AuthorizationManager._canUpdateTeammate
@@ -118,7 +123,8 @@ export default class AuthorizationManager {
     club: {
       update: AuthorizationManager._canUpdateClub,
       destroy: AuthorizationManager._canDestroyClub,
-      view: AuthorizationManager._canViewClub
+      view: AuthorizationManager._canViewClub,
+      invite: AuthorizationManager._canInviteToClub,
     },
     invitation: {
       accept: AuthorizationManager._canAcceptInvitation,
@@ -294,6 +300,26 @@ export default class AuthorizationManager {
         user: params.actor,
         team: {id: teamId},
         resource: 'team',
+        action: 'invite'
+      },
+      context
+    })
+
+    return userCanInvite
+  }
+
+  private static async _canInviteToClub(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.club?.id) throw new Error('club must be defined')
+    let clubId: number = params.entities.club.id
+
+    const userCanInvite = await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: params.actor,
+        club: { id: clubId },
+        resource: 'club',
         action: 'invite'
       },
       context
@@ -939,6 +965,23 @@ export default class AuthorizationManager {
     })
   }
 
+  private static async _canCreateTeam(
+    params: { actor: User, entities: Entities },
+    context?: { trx?: TransactionClientContract }
+  ): Promise<boolean> {
+    if (!params.entities.club?.id) throw new Error('club id must be defined')
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: params.actor,
+        club: { id: params.entities.club.id },
+        action: 'create',
+        resource: 'team'
+      },
+      context
+    })
+  }
+
   private static async _canDestroyClub(
     params: { actor: User, entities: Entities },
     context?: { trx?: TransactionClientContract }
@@ -1005,6 +1048,60 @@ export class AuthorizationHelpers {
     }).where('users.id', params.data.user.id)
 
     return userHasGroup.length != 0
+  }
+
+  // the query to get all the teams in which the paramter user has permission 
+  // to execute the parameter action on the parameter resource
+  public static userCanInTeamQuery<R extends Resource>(
+    params: {
+      data: {
+        query: ModelQueryBuilderContract<typeof Team> | RelationSubQueryBuilderContract<typeof Team>,
+        user: { id: number }
+        resource: R
+        action: Action<R>
+      },
+      context?: Context
+    },
+  ): ModelQueryBuilderContract<typeof Team> | RelationSubQueryBuilderContract<typeof Team> {
+    return params.data.query.where(teamsBuilder => {
+      teamsBuilder
+        .whereHas('groups', groupsBuilder => {
+          groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
+            resource: params.data.resource,
+            action: params.data.action.toString()
+          }).whereHas('teammatesUser', memberUserBuilder => {
+            memberUserBuilder.where('users.id', params.data.user.id)
+          })
+        })
+        .orWhere('ownerId', params.data.user.id)
+    })
+  }
+
+  // the query to get all the clubs in which the paramter user has permission 
+  // to execute the parameter action on the parameter resource
+  public static userCanInClubQuery<R extends Resource>(
+    params: {
+      data: {
+        query: ModelQueryBuilderContract<typeof Club> | RelationSubQueryBuilderContract<typeof Club>,
+        user: { id: number }
+        resource: R
+        action: Action<R>
+      },
+      context?: Context
+    },
+  ): ModelQueryBuilderContract<typeof Club> | RelationSubQueryBuilderContract<typeof Club> {
+    return params.data.query.where(clubsBuilder => {
+      clubsBuilder
+        .whereHas('groups', groupsBuilder => {
+          groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
+            resource: params.data.resource,
+            action: params.data.action.toString()
+          }).whereHas('membersUser', memberUserBuilder => {
+            memberUserBuilder.where('users.id', params.data.user.id)
+          })
+        })
+        .orWhere('ownerId', params.data.user.id)
+    })
   }
 
   public static async userCanInClub<R extends Resource>(

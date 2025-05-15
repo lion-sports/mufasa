@@ -11,7 +11,8 @@
 		prependRoute?: string | undefined
 		prepend?: import('svelte').Snippet
 		titleSnippet?: import('svelte').Snippet
-		append?: import('svelte').Snippet
+		append?: import('svelte').Snippet,
+    titleClass?: string
 	}
 
 	let {
@@ -21,9 +22,10 @@
 		paddingTop = '',
 		prependVisible = false,
 		prependRoute = undefined,
+    titleClass = 'text-4xl font-bold',
 		prepend,
 		titleSnippet,
-		append
+		append,
 	}: Props = $props()
 
 	function handleBackClick() {
@@ -48,7 +50,7 @@
 	<div style:display="flex" style:align-items="center">
 		<div style:font-weight="700" style:font-size="22pt">
 			{#if titleSnippet}{@render titleSnippet()}{:else}
-				<div class="mt-2 mb-1 text-4xl font-bold title">
+				<div class="mt-2 mb-1 {titleClass} title">
 					{title}
 				</div>
 				<div class="mb-4 text-base font-normal">

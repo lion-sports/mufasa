@@ -36,9 +36,10 @@
     ],
     selectedTab: ComponentProps<typeof StandardTabSwitcher>['selected'] = $derived.by(() => {
       let selectedTab = 'general'
-      if(page.url.pathname.endsWith('general')) selectedTab = 'general'
-      else if(page.url.pathname.endsWith('members')) selectedTab = 'members'
-      else if(page.url.pathname.endsWith('settings')) selectedTab = 'settings'
+      let baseUrl = `/clubs/${data.club.id}`
+      if(page.url.pathname.startsWith(`${baseUrl}/general`)) selectedTab = 'general'
+      else if(page.url.pathname.startsWith(`${baseUrl}/members`)) selectedTab = 'members'
+      else if(page.url.pathname.startsWith(`${baseUrl}/settings`)) selectedTab = 'settings'
       return selectedTab
     })
 

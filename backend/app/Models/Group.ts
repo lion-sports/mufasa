@@ -1,12 +1,14 @@
 import Team from '#app/Models/Team';
 import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime } from 'luxon'
-import { belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import { belongsTo, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
 import type { Action, Resource } from '#app/managers/authorization.manager';
 import Teammate from './Teammate.js';
-import { type BelongsTo } from "@adonisjs/lucid/types/relations";
+import { type ManyToMany, type BelongsTo } from "@adonisjs/lucid/types/relations";
 import { type HasMany } from "@adonisjs/lucid/types/relations";
 import Club from './Club.js';
+import User from './User.js';
+import Member from './Member.js';
 
 export type GroupCans = {
   [resource in Resource]?: {
@@ -47,6 +49,29 @@ export default class Group extends CamelCaseBaseModel {
     foreignKey: 'groupId'
   })
   public teammates: HasMany<typeof Teammate>
+
+  @hasMany(() => Member, {
+    foreignKey: 'groupId'
+  })
+  public members: HasMany<typeof Member>
+
+  @manyToMany(() => User, {
+    pivotTable: 'members',
+    localKey: 'id',
+    pivotForeignKey: 'groupId',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'userId',
+  })
+  public membersUser: ManyToMany<typeof User>
+
+  @manyToMany(() => User, {
+    pivotTable: 'teammates',
+    localKey: 'id',
+    pivotForeignKey: 'groupId',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'userId',
+  })
+  public teammatesUser: ManyToMany<typeof User>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

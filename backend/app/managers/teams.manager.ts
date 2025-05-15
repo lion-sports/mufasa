@@ -10,7 +10,7 @@ import { ModelObject } from '@adonisjs/lucid/types/model'
 import Team from '#app/Models/Team'
 import User from '#app/Models/User'
 import Teammate from '#app/Models/Teammate'
-import Sport from '#app/Models/Scout'
+import { Sport } from 'lionn-common'
 
 export default class TeamsManager {
   constructor() {}
@@ -73,7 +73,9 @@ export default class TeamsManager {
       },
     })
 
-    const createdTeam = await Team.create(params.data, {
+    const createdTeam = await Team.create({
+      ...params.data
+    }, {
       client: trx,
     })
 
@@ -235,7 +237,6 @@ export default class TeamsManager {
     return await team.save()
   }
 
-  // TODO check if this method is used
   @withTransaction
   @withUser
   public async addUser(params: {

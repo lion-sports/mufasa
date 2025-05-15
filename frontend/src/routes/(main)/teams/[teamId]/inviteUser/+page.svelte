@@ -9,7 +9,7 @@
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
 	import { Icon, MediaQuery } from '@likable-hair/svelte'
 	import UsersList from '@/lib/components/users/UsersTable.svelte'
-	import InvitationList from '$lib/components/invitations/InvitationList.svelte'
+	import InvitationTable from '@/lib/components/invitations/InvitationTable.svelte'
 	import StandardAutocomplete from '$lib/components/common/StandardAutocomplete.svelte'
 	import type { ComponentProps } from 'svelte'
 	import type { PageData } from './$types'
@@ -55,17 +55,17 @@
 		}
 	}
 
-	function handleInvitationDiscard(event: CustomEvent<{ invitation: Invitation }>) {
+	function handleInvitationDiscard(params: { invitation: Invitation }) {
 		if (!!$team) {
 			let service = new InvitationsService({ fetch })
 			service
 				.discardInvitation({
-					invitation: event.detail.invitation
+					invitation: params.invitation
 				})
 				.then((newInvitation) => {
 					if (!!$team)
 						$team.invitations = $team.invitations?.filter(
-							(el) => el.id != event.detail.invitation.id
+							(el) => el.id != params.invitation.id
 						)
 				})
 		}
@@ -148,7 +148,7 @@
 		{/if}
 		<div class="font-bold mt-6">Inviti in attesa</div>
 		<div style:margin-top="10px">
-			<InvitationList invitations={$team?.invitations} on:discard={handleInvitationDiscard} />
+			<InvitationTable invitations={$team?.invitations} ondiscard={handleInvitationDiscard} />
 		</div>
 	{/snippet}
 </MediaQuery>

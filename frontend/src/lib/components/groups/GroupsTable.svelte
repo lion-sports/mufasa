@@ -6,23 +6,21 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
 	import GroupsService from '$lib/services/groups/groups.service'
-	import { createEventDispatcher, type ComponentProps } from 'svelte'
+	import { type ComponentProps } from 'svelte'
 	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte'
 	import { SimpleTable, Icon } from '@likable-hair/svelte'
 
-	let dispatch = createEventDispatcher<{
-		destroy: undefined
-	}>()
-
 	interface Props {
 		groups?: Group[]
 		team?: Team | undefined
 		searchable?: boolean
+    ondestroy?: () => void,
+    rowActionsSnippet?: ComponentProps<typeof SimpleTable>['rowActionsSnippet']
 	}
 
-	let { groups = [], team = undefined, searchable = false }: Props = $props()
+	let { groups = [], team = undefined, searchable = false, ondestroy, rowActionsSnippet }: Props = $props()
 
 	let headers: ComponentProps<typeof SimpleTable>['headers'] = [
 		{
@@ -62,18 +60,16 @@
 		confirmDialogOpen = true
 	}
 
-	function confirmGroupDeletion() {
+	async function confirmGroupDeletion() {
 		confirmDialogOpen = false
 
 		if (!!deletingGroup) {
 			let service = new GroupsService({ fetch })
-			service
-				.destroy({
-					id: deletingGroup.id
-				})
-				.then(() => {
-					dispatch('destroy')
-				})
+			await service.destroy({
+        id: deletingGroup.id
+      })
+
+			if(!!ondestroy) ondestroy()
 		}
 	}
 </script>
@@ -93,19 +89,24 @@
 	</div>
 {/if}
 
-<SimpleTable {headers} items={filteredGroups}>
-	{#snippet rowActionsSnippet({ item })}
-		<div style:display="flex" style:justify-content="end">
-			<div style:margin-right="10px">
-				<Icon name="mdi-pencil" onclick={() => goToEdit(item)} />
-			</div>
-			<Icon
-				name="mdi-delete"
-				--icon-color="rgb(var(--global-color-error-500))"
-				onclick={() => handleDeleteClick(item)}
-			/>
-		</div>
-	{/snippet}
+{#snippet rowActionsSnippetDefault({ item }: Parameters<NonNullable<ComponentProps<typeof SimpleTable>['rowActionsSnippet']>>[0])}
+  <div style:display="flex" style:justify-content="end">
+    <div style:margin-right="10px">
+      <Icon name="mdi-pencil" onclick={() => goToEdit(item)} />
+    </div>
+    <Icon
+      name="mdi-delete"
+      --icon-color="rgb(var(--global-color-error-500))"
+      onclick={() => handleDeleteClick(item)}
+    />
+  </div>
+{/snippet}
+
+<SimpleTable 
+  {headers} 
+  items={filteredGroups}
+  rowActionsSnippet={rowActionsSnippet || rowActionsSnippetDefault}
+>
 </SimpleTable>
 
 <ConfirmDialog

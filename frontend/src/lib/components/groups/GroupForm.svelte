@@ -2,32 +2,24 @@
 	import LabelAndTextfield from '$lib/components/common/LabelAndTextfield.svelte'
 	import GroupsService, {
 		RESOURCES,
+		RESOURCES_ICONS,
 		type Group,
 		type Resource
 	} from '$lib/services/groups/groups.service'
-	import { Icon } from '@likable-hair/svelte'
 	import LabelAndCheckbox from '$lib/components/common/LabelAndCheckbox.svelte'
-	import { slide } from 'svelte/transition'
+	import { Icon } from '@likable-hair/svelte'
 
 	interface Props {
 		group?: DeepPartial<Group>
-		padding?: string | undefined
-		margin?: string | undefined
-		width?: string | undefined
-		height?: string | undefined
+    view?: 'team' | 'club'
 	}
 
 	let {
 		group = $bindable({
 			name: undefined
 		}),
-		padding = undefined,
-		margin = undefined,
-		width = undefined,
-		height = undefined
+    view = 'team'
 	}: Props = $props()
-
-	let closureStatus: { [key: string]: boolean } = $state({})
 
 	function getActions(resource: Resource) {
 		return GroupsService.getActionsForResource(resource)
@@ -37,107 +29,61 @@
 		return GroupsService.translateActions(action)
 	}
 
-	function handleCheckChange(resource: string, action: string, event: any) {
-		// @ts-ignore
+	function handleCheckChange<R extends Resource>(resource: R, action: string, event: any) {
 		if (!group.cans) group.cans = {}
-		// @ts-ignore
 		if (!group.cans[resource]) group.cans[resource] = {}
-		// @ts-ignore
-		group.cans[resource][action] = event.target.checked
+    // @ts-ignore
+    if (!!group.cans[resource]) group.cans[resource][action] = event.target.checked
 	}
 </script>
 
-<form style:padding style:margin style:width style:height>
-	<LabelAndTextfield label="Nome" name="name" bind:value={group.name} />
-	<div class="font-bold mt-4">Poteri</div>
-	<div class="resources-container">
-		{#each RESOURCES as resource}
-			{#if !!getActions(resource)}
-				<div class="resource">
-					<button
-						class="resource-title-container"
-						type="button"
-						onclick={() => (closureStatus[resource] = !closureStatus[resource])}
-					>
-						<div class="resource-title">{GroupsService.translateResource(resource)}</div>
-						<div class="expand-icon" class:reverse={closureStatus[resource]}>
-							<Icon name="mdi-menu-down" />
-						</div>
-					</button>
-					{#if closureStatus[resource]}
-						<div transition:slide|local={{ duration: 200 }}>
-							{#each getActions(resource) as action}
-								<div style:margin-top="10px">
-									<LabelAndCheckbox
-										value={!!group.cans && !!group.cans[resource]
-											? // @ts-ignore
-												group.cans[resource][action]
-											: false}
-										label={translateAction(action)}
-										id={`${resource}-${action}`}
-										onchange={(event) => handleCheckChange(resource, action, event)}
-									/>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			{/if}
-		{/each}
-	</div>
-	<div class="convocable-flag">
-		<LabelAndCheckbox label="Convocabile" bind:value={group.convocable} id="convocable" />
-	</div>
-</form>
-
-<style>
-	@media (max-width: 768px) {
-		.resource {
-			width: 100%;
-		}
-	}
-
-	@media (min-width: 769px) {
-		.resource {
-			width: 300px;
-		}
-	}
-
-	.reverse {
-		transform: rotate(180deg);
-	}
-
-	.expand-icon {
-		transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
-	}
-
-	.resources-container {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 10px;
-		margin-top: 20px;
-	}
-
-	.convocable-flag {
-		margin-top: 20px;
-	}
-
-	.resource {
-		background-color: rgb(var(--global-color-background-300));
-		padding: 10px;
-		border-radius: 5px;
-		height: fit-content;
-	}
-
-	.resource-title-container {
-		display: flex;
-		width: 100%;
-	}
-
-	.resource-title {
-		font-weight: 700;
-		font-size: 1.2rem;
-		flex-grow: 1;
-		text-align: left;
-	}
-</style>
+<div class="flex flex-col gap-4">
+  <div>
+    <LabelAndTextfield label="Nome" name="name" bind:value={group.name} />
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {#each RESOURCES as resource}
+      {@const actions = getActions(resource)}
+      {@const isTeamResource = GroupsService.isTeamPermission({ resource })}
+      {@const isClubResource = GroupsService.isClubPermission({ resource })}
+      {#if !!actions && (
+        (view == 'club' && isClubResource) || (view == 'team' && isTeamResource)
+      )}
+        <div class="ring-[1px] ring-[rgb(var(--global-color-background-400),.5)] rounded p-2 flex flex-col gap-2">
+          <div class="font-semibold text-xl mb-2">
+            {#if !!RESOURCES_ICONS[resource]}
+              <span class="mr-2">
+                <Icon name={RESOURCES_ICONS[resource]}></Icon>
+              </span>
+            {/if}
+            {GroupsService.translateResource(resource)}
+          </div>
+          <div class="grid grid-cols-2 gap-1">
+            {#each actions as action}
+              {@const isTeamAction = GroupsService.isTeamPermission({ resource, action: action as any })}
+              {@const isClubAction = GroupsService.isClubPermission({ resource, action: action as any })}
+              {#if (isTeamAction && view == 'team') || (isClubAction && view == 'club')}
+                <div>
+                  <LabelAndCheckbox
+                    value={!!group.cans && !!group.cans[resource]
+                      ? // @ts-ignore
+                        group.cans[resource][action]
+                      : false}
+                    label={translateAction(action)}
+                    id={`${resource}-${action}`}
+                    onchange={(event) => handleCheckChange(resource, action, event.detail.nativeEvent)}
+                  />
+                </div>
+              {/if}
+            {/each}
+          </div>
+        </div>
+      {/if}
+    {/each}
+  </div>
+  {#if view == 'team'}
+    <div class="mt-2">
+      <LabelAndCheckbox label="Convocabile" bind:value={group.convocable} id="convocable" />
+    </div>
+  {/if}
+</div>

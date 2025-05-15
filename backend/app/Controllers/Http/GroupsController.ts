@@ -8,9 +8,7 @@ export default class GroupsController {
       data: {
         page: request.input('page'),
         perPage: request.input('perPage'),
-        team: {
-          id: params.teamId
-        }
+        filtersBuilder: request.input('filtersBuilder')
       }
     })
   }

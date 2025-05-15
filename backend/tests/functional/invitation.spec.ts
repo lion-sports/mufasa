@@ -79,9 +79,10 @@ test.group('Invitations', (group) => {
 
     const response = await client.get('/invitations/list').loginAs(invitedUser)
 
+    
     const invitation = response.body()
     response.assertAgainstApiSpec()
-    assert.isTrue(invitation.length > 0, 'should has at least one invitation')
+    assert.isTrue(invitation.data.length > 0, 'should has at least one invitation')
   })
 
   test('accept an invitations', async ({ client, assert }) => {

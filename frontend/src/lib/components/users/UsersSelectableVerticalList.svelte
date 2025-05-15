@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { User } from '$lib/services/auth/auth.service'
-	import { SimpleTable, SelectableVerticalList } from '@likable-hair/svelte'
+	import { SimpleTable, SelectableVerticalList, Icon } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
 
 	type Props = {
@@ -24,4 +24,19 @@
 <SelectableVerticalList
   {elements}
   {...rest}
-></SelectableVerticalList>
+>
+  {#snippet elementSnippet({ element })}
+    <div class="flex gap-4 items-center w-full">
+      <div class="h-[32px] w-[32px] rounded-full bg-[rgb(var(--global-color-primary-500))] flex justify-center items-center text-[rgb(var(--global-color-primary-foreground))]">
+        <Icon name="mdi-account" --icon-size="16px"></Icon>
+      </div>
+      <div class="flex flex-col grow">
+        <div class="text-lg">{element.title}</div>
+        <div class="opacity-50 text-sm">{element.data?.user.email}</div>
+      </div>
+      <div>
+        <Icon name="mdi-arrow-right"></Icon>
+      </div>
+    </div>
+  {/snippet}
+</SelectableVerticalList>

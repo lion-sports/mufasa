@@ -2,11 +2,12 @@ import { createGroupValidator } from '#validators/groups/CreateGroupValidator';
 import { updateGroupValidator } from '#validators/groups/UpdateGroupValidator';
 import Group from '#app/Models/Group'
 import User from '#app/Models/User';
-import AuthorizationManager from './authorization.manager.js';
+import AuthorizationManager, { AuthorizationHelpers } from './authorization.manager.js';
 import type { GroupCans } from '#app/Models/Group';
 import { withTransaction, type Context, withUser } from './base.manager.js';
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { ModelObject } from "@adonisjs/lucid/types/model";
+import FilterModifierApplier, { Modifier } from '#services/FilterModifierApplier';
 
 export default class GroupsManager {
   @withTransaction
@@ -15,8 +16,8 @@ export default class GroupsManager {
     data: {
       page?: number,
       perPage?: number,
-      team: {
-        id: number
+      filtersBuilder?: {
+        modifiers: Modifier[]
       }
     },
     context?: Context
@@ -26,23 +27,41 @@ export default class GroupsManager {
 
     if (!params.data.page) params.data.page = 1
     if (!params.data.perPage) params.data.perPage = 100
-    if (!params.data.team.id) throw new Error('can only get groups for a specific team')
 
-    await AuthorizationManager.canOrFail({
-      data: {
-        actor: user,
-        action: 'view',
-        resource: 'team',
-        entities: {
-          team: params.data.team
-        }
-      },
-      context: { trx }
-    })
-
-    let results = await Group
+    let query = Group
       .query({ client: trx })
-      .where('teamId', params.data.team.id)
+
+    if (!!params.data.filtersBuilder?.modifiers) {
+      let filtersApplier = new FilterModifierApplier()
+      filtersApplier.applyModifiers(query, params.data.filtersBuilder?.modifiers)
+    }
+
+    let results = await query
+      .where((b) => {
+        b.orWhereHas('team', b => {
+          b.orWhere(b => {
+            return AuthorizationHelpers.userCanInTeamQuery({
+              data: {
+                query: b,
+                user: user,
+                resource: 'group',
+                action: 'view'
+              }
+            })
+          })
+        }).orWhereHas('club', b => {
+          b.orWhere(b => {
+            return AuthorizationHelpers.userCanInClubQuery({
+              data: {
+                query: b,
+                user: user,
+                resource: 'group',
+                action: 'view'
+              }
+            })
+          })
+        })
+      })
       .orderBy('createdAt')
       .paginate(params.data.page, params.data.perPage)
 
@@ -76,7 +95,8 @@ export default class GroupsManager {
         action: 'create',
         resource: 'group',
         entities: {
-          team: params.data.team
+          team: params.data.team,
+          club: params.data.club
         }
       },
       context: {

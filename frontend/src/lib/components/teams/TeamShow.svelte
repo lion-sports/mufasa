@@ -4,7 +4,7 @@
 
 <script lang="ts">
 	import StandardTabSwitcher from '$lib/components/common/StandardTabSwitcher.svelte'
-	import GroupsList from '$lib/components/groups/GroupsList.svelte'
+	import GroupsList from '@/lib/components/groups/GroupsTable.svelte'
 	import { DateTime } from 'luxon'
 	interface Props {
 		team: Team

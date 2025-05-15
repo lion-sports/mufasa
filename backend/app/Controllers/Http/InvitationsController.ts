@@ -7,6 +7,7 @@ export default class InvitationsController {
 
     const user = request.input('user')
     const team = request.input('team')
+    const club = request.input('club')
     const group = request.input('group')
 
     return await manager.inviteUser({
@@ -15,17 +16,26 @@ export default class InvitationsController {
           email: user.email
         },
         team: {
-          id: team.id
+          id: team?.id
+        },
+        club: {
+          id: club?.id
         },
         group: group
       }
     })
   }
 
-  public async list({ }: HttpContext) {
+  public async list({ request }: HttpContext) {
     const manager = new InvitationsManager()
 
-    return await manager.getUserInvitations()
+    return await manager.list({
+      data: {
+        page: request.input('page'),
+        perPage: request.input('perPage'),
+        filtersBuilder: request.input('filtersBuilder')
+      }
+    })
   }
 
   public async accept({ request }: HttpContext) {

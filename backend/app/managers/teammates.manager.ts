@@ -27,9 +27,6 @@ export type AbsencesForTeammates = {
 }[]
 
 export default class TeammatesManager {
-  constructor() {
-  }
-
   @withTransaction
   @withUser
   public async update(params: {

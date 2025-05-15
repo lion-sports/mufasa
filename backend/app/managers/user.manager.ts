@@ -119,7 +119,7 @@ class UsersManager {
     const id = params.data.id
     delete params.data.id
 
-    if (id !== user.id) throw new Error('cannot update the user')
+    if (id != user.id) throw new Error('cannot update the user')
 
     await validator.validate({
       schema: new UpdateUserValidator().schema,

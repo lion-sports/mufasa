@@ -8,6 +8,7 @@ import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { ModelObject } from '@adonisjs/lucid/types/model'
 import type { Sport } from 'lionn-common'
 import MediaManager from './media.manager.js'
+import Member from '#models/Member'
 
 export default class ClubsManager {
   @withTransaction
@@ -279,5 +280,71 @@ export default class ClubsManager {
     })
 
     return club
+  }
+
+  @withTransaction
+  @withUser
+  public async userBelogsToClub(params: {
+    data: {
+      club: { id: number }
+      user: { id: number }
+    }
+    context?: Context
+  }) {
+    const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User
+
+    if (!params.data.club || !params.data.club.id) throw new Error('team must be defined')
+    if (!params.data.user || !params.data.user.id) throw new Error('user must be defined')
+
+    const userBelongs = await User.query({
+        client: trx,
+      })
+      .whereHas('clubs', (builder) => {
+        builder.where('clubs.id', params.data.club.id)
+      })
+      .where('users.id', params.data.user.id)
+
+    return userBelongs.length != 0
+  }
+
+  @withTransaction
+  @withUser
+  public async addUser(params: {
+    data: {
+      club: {
+        id: number
+      }
+      user: {
+        id: number
+      }
+      group?: {
+        id: number
+      }
+    }
+    context?: Context
+  }): Promise<void> {
+    const trx = params.context?.trx as TransactionClientContract
+    const user = params.context?.user as User
+
+    if (!params.data.club || !params.data.club.id) throw new Error('club must be defined')
+    if (!params.data.user || !params.data.user.id) throw new Error('user must be defined')
+
+    let existingMembers = await Member.query({
+        client: trx,
+      })
+      .where('clubId', params.data.club.id)
+      .where('userId', params.data.user.id)
+
+    if (existingMembers.length != 0) return
+
+    const club = await Club.findOrFail(params.data.club.id, {
+      client: trx,
+    })
+
+    await club.related('members').create({
+      groupId: params.data.group?.id,
+      userId: params.data.user.id
+    })
   }
 }
