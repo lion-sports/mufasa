@@ -109,17 +109,14 @@ export default class TeamsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'view',
-        resource: 'team',
-        entities: {
+        ability: 'team_view',
+        data: {
           team: {
             id: params.data.id,
           },
         },
       },
-      context: {
-        trx,
-      },
+      context: params.context,
     })
 
     return await Team.query({
@@ -165,17 +162,14 @@ export default class TeamsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'team',
-        entities: {
+        ability: 'team_update',
+        data: {
           team: {
             id: params.data.id,
           },
         },
       },
-      context: {
-        trx,
-      },
+      context: params.context,
     })
 
     let validatedData = await validator.validate({
@@ -207,9 +201,8 @@ export default class TeamsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'team',
-        entities: {
+        ability: 'team_update',
+        data: {
           team: {
             id: params.data.id,
           },
@@ -305,9 +298,8 @@ export default class TeamsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'removeUser',
-        resource: 'team',
-        entities: {
+        ability: 'team_removeUser',
+        data: {
           team: {
             id: params.data.team.id,
           },
@@ -316,9 +308,7 @@ export default class TeamsManager {
           },
         },
       },
-      context: {
-        trx: trx,
-      },
+      context: params.context
     })
 
     const isTeamOwner = await Team.query({ client: trx })
@@ -353,17 +343,14 @@ export default class TeamsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'destroy',
-        resource: 'team',
-        entities: {
+        ability: 'team_destroy',
+        data: {
           team: {
             id: params.data.id,
           },
         },
       },
-      context: {
-        trx,
-      },
+      context: params.context,
     })
 
     const results = await Team.query({ client: trx }).where('id', params.data.id)

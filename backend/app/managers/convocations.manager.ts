@@ -62,17 +62,14 @@ export default class ConvocationsManager {
       await AuthorizationManager.canOrFail({
         data: {
           actor: user,
-          action: 'convocate',
-          resource: 'event',
-          entities: {
+          ability: 'event_convocate',
+          data: {
             event: {
               id: params.data.event.id
             }
           }
         },
-        context: {
-          trx: trx
-        }
+        context: params.context
       })
 
       await validator.validate({
@@ -134,17 +131,14 @@ export default class ConvocationsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'convocate',
-        resource: 'event',
-        entities: {
+        ability: 'event_convocate',
+        data: {
           event: {
             id: params.data.event.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     await validator.validate({
@@ -200,15 +194,12 @@ export default class ConvocationsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'confirm',
-        resource: 'convocation',
-        entities: {
+        ability: 'convocation_confirm',
+        data: {
           convocation: convocation
         }
       },
-      context: {
-        trx: trx
-      }
+      context: params.context
     })
 
     convocation.confirmationStatus = 'confirmed'
@@ -249,15 +240,12 @@ export default class ConvocationsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'deny',
-        resource: 'convocation',
-        entities: {
+        ability: 'convocation_deny',
+        data: {
           convocation: convocation
         }
       },
-      context: {
-        trx: trx
-      }
+      context: params.context
     })
 
     convocation.confirmationStatus = 'denied'

@@ -52,9 +52,8 @@ export default class TeammatesManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'teammate',
-        entities: {
+        ability: 'teammate_update',
+        data: {
           teammate: {
             id: params.data.id
           }

@@ -1,7 +1,7 @@
 import Club from '#models/Club'
 import FilterModifierApplier, { type Modifier } from '#app/Services/FilterModifierApplier'
 import { createClubValidator, updateClubValidator } from '#validators/clubs/index'
-import AuthorizationManager from './authorization.manager.js'
+import AuthorizationManager, { AuthorizationHelpers } from './authorization.manager.js'
 import { Context, withTransaction, withUser } from './base.manager.js'
 import User from '#models/User'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
@@ -107,15 +107,12 @@ export default class ClubsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'club',
-        entities: {
+        ability: 'club_update',
+        data: {
           club
         },
       },
-      context: {
-        trx: trx,
-      },
+      context: params.context
     })
 
     let validatedData = await updateClubValidator.validate(params.data)
@@ -150,15 +147,12 @@ export default class ClubsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'club',
-        entities: {
+        ability: 'club_update',
+        data: {
           club
         },
       },
-      context: {
-        trx: trx,
-      },
+      context: params.context
     })
 
     let mediaManager = new MediaManager()
@@ -234,15 +228,12 @@ export default class ClubsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'destroy',
-        resource: 'club',
-        entities: {
+        ability: 'club_destroy',
+        data: {
           club
         },
       },
-      context: {
-        trx: trx,
-      },
+      context: params.context,
     })
 
     await club.delete()
@@ -259,25 +250,34 @@ export default class ClubsManager {
     let user = params.context?.user as User
     let trx = params.context?.trx as TransactionClientContract
 
+    let canViewTeams = await AuthorizationManager.can({
+      data: {
+        actor: user,
+        ability: 'team_view',
+        data: {
+          club: { id: params.data.id }
+        },
+      },
+      context: params.context
+    })
+
     let club = await Club.query({ client: trx })
       .where('id', params.data.id)
       .preload('owner')
       .preload('members', b => b.preload('group').preload('user'))
+      .preload('teams', b => {
+        b.if(!canViewTeams, b => {
+          return AuthorizationHelpers.viewableTeamsQuery({
+            data: {
+              query: b,
+              user
+            },
+            context: params.context
+          })
+        })
+      })
+      .preload('groups')
       .firstOrFail()
-
-    await AuthorizationManager.canOrFail({
-      data: {
-        actor: user,
-        action: 'view',
-        resource: 'club',
-        entities: {
-          club
-        },
-      },
-      context: {
-        trx: trx,
-      },
-    })
 
     return club
   }

@@ -88,14 +88,10 @@ export default class InvitationsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'invite',
-        resource: 'team',
-        entities: {
+        ability: 'team_invite',
+        data: {
           team: {
             id: params.data.team.id
-          },
-          invitee: {
-            email: params.data.user.email
           }
         }
       },
@@ -179,14 +175,10 @@ export default class InvitationsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'invite',
-        resource: 'club',
-        entities: {
+        ability: 'club_invite',
+        data: {
           club: {
             id: params.data.club.id
-          },
-          invitee: {
-            email: params.data.user.email
           }
         }
       },
@@ -321,11 +313,9 @@ export default class InvitationsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'accept',
-        resource: 'invitation',
-        entities: {
-          invitation: invitation,
-          invitee: user
+        ability: 'invitation_accept',
+        data: {
+          invitation: invitation
         }
       },
       context: { trx }
@@ -403,11 +393,9 @@ export default class InvitationsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'reject',
-        resource: 'invitation',
-        entities: {
-          invitation: invitation,
-          invitee: user
+        ability: 'invitation_reject',
+        data: {
+          invitation: invitation
         }
       },
       context: { trx }
@@ -442,9 +430,8 @@ export default class InvitationsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'discard',
-        resource: 'invitation',
-        entities: {
+        ability: 'invitation_discard',
+        data: {
           invitation: invitation,
         }
       },

@@ -121,12 +121,11 @@ export default class ClubsController {
 
     await AuthorizationManager.canOrFail({
       data: {
-        actor: auth.user,
-        action: 'view',
-        resource: 'club',
-        entities: {
+        ability: 'club_view',
+        data: {
           club
         },
+        actor: auth.user
       }
     })
 
@@ -162,9 +161,8 @@ export default class ClubsController {
     await AuthorizationManager.canOrFail({
       data: {
         actor: auth.user,
-        action: 'view',
-        resource: 'club',
-        entities: {
+        ability: 'club_view',
+        data: {
           club
         },
       }
@@ -205,9 +203,8 @@ export default class ClubsController {
     await AuthorizationManager.canOrFail({
       data: {
         actor: auth.user,
-        action: 'view',
-        resource: 'club',
-        entities: {
+        ability: 'club_view',
+        data: {
           club
         },
       }

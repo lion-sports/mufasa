@@ -7,6 +7,7 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import User from './User.js'
 import Group from './Group.js'
 import Member from './Member.js'
+import Team from './Team.js'
 
 export default class Club extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -52,6 +53,11 @@ export default class Club extends CamelCaseBaseModel {
     foreignKey: 'clubId'
   })
   public groups: HasMany<typeof Group>
+
+  @hasMany(() => Team, {
+    foreignKey: 'clubId'
+  })
+  public teams: HasMany<typeof Team>
 
   @hasMany(() => Member, {
     foreignKey: 'clubId'

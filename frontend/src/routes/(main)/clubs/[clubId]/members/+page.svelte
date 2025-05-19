@@ -34,10 +34,12 @@
         <Icon name="mdi-plus" --icon-size="24px"></Icon>
       </button>
     </div>
-    <ClubsMemberList
-      members={data.club.members}
-      bind:selected={selectedMember}
-    ></ClubsMemberList>
+    {#if !!data.club.members}
+      <ClubsMemberList
+        members={data.club.members}
+        bind:selected={selectedMember}
+      ></ClubsMemberList>
+    {/if}
   </div>
   <div class="col-span-9 hidden lg:block">
     {#if !selectedMember}
@@ -77,6 +79,8 @@
   <div class="w-[400px] max-w-[90vh]">
     <ClubsInviteMembers
       club={data.club}
+      groups={data.club.groups}
+      teams={data.club.teams}
     ></ClubsInviteMembers>
   </div>
 </StandardDialog>

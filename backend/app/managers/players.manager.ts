@@ -94,17 +94,14 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: params.data.scoutId
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let validatedData = await validator.validate({
@@ -195,17 +192,14 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'view',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_view',
+        data: {
           scout: {
             id: player.scout.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     return player
@@ -235,9 +229,8 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: player.scoutId
           }
@@ -291,9 +284,8 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: player.scoutId
           }
@@ -329,9 +321,8 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: params.data.scout.id
           }
@@ -389,9 +380,8 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: params.data.scout.id
           }

@@ -76,17 +76,14 @@ export default class ShirtManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'create',
-        resource: 'shirt',
-        entities: {
+        ability: 'shirt_create',
+        data: {
           teammate: {
             id: params.data.teammateId
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let validatedData = await validator.validate({
@@ -114,17 +111,14 @@ export default class ShirtManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'view',
-        resource: 'shirt',
-        entities: {
+        ability: 'shirt_view',
+        data: {
           shirt: {
             id: params.data.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let shirt = await Shirt
@@ -154,17 +148,14 @@ export default class ShirtManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'shirt',
-        entities: {
+        ability: 'shirt_update',
+        data: {
           shirt: {
             id: params.data.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let validatedData = await validator.validate({
@@ -195,17 +186,14 @@ export default class ShirtManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'destroy',
-        resource: 'shirt',
-        entities: {
+        ability: 'shirt_destroy',
+        data: {
           shirt: {
             id: params.data.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     await Shirt.query({ client: trx }).where('id', params.data.id).del()

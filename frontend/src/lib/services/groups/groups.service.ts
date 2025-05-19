@@ -191,6 +191,7 @@ const EMPTY_CLUB_GROUPED_PERMISSIONS: {
 } = {
   team: {
     create: false,
+    view: false
   },
   club: {
     update: false,

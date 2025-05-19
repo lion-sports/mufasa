@@ -87,17 +87,14 @@ export default class ScoringSystemsManager {
       await AuthorizationManager.canOrFail({
         data: {
           actor: user,
-          action: 'create',
-          resource: 'scoringSystem',
-          entities: {
+          ability: 'scoringSystem_create',
+          data: {
             team: {
               id: params.data.createdForTeamId,
             },
           },
         },
-        context: {
-          trx,
-        },
+        context: params.context,
       })
     }
 
@@ -128,17 +125,14 @@ export default class ScoringSystemsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'view',
-        resource: 'scoringSystem',
-        entities: {
+        ability: 'scoringSystem_view',
+        data: {
           scoringSystem: {
             id: params.data.id,
           },
         },
       },
-      context: {
-        trx,
-      },
+      context: params.context,
     })
 
     let scoringSystem = await ScoringSystem.query({ client: trx })
@@ -168,17 +162,14 @@ export default class ScoringSystemsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scoringSystem',
-        entities: {
+        ability: 'scoringSystem_manage',
+        data: {
           scoringSystem: {
             id: params.data.id,
           },
         },
       },
-      context: {
-        trx,
-      },
+      context: params.context,
     })
 
     await validator.validate({
@@ -209,17 +200,14 @@ export default class ScoringSystemsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scoringSystem',
-        entities: {
+        ability: 'scoringSystem_manage',
+        data: {
           scoringSystem: {
             id: params.data.id,
           },
         },
       },
-      context: {
-        trx,
-      },
+      context: params.context,
     })
 
     await ScoringSystem.query({ client: trx }).where('id', params.data.id).del()

@@ -3,7 +3,7 @@ import { validator } from "@adonisjs/validator"
 import User from "#app/Models/User";
 import AuthorizationManager from "../authorization.manager.js";
 import FilterModifierApplier, { Modifier } from "#app/Services/FilterModifierApplier";
-import Scout, { Sport } from "#app/Models/Scout";
+import Scout from "#app/Models/Scout";
 import Event from "#app/Models/Event";
 import { DateTime } from "luxon";
 import { CreateScoutValidator, UpdateScoutValidator } from "#app/Validators/scouts/index";
@@ -26,7 +26,8 @@ import {
   type VolleyballPlayersPosition, 
   type VolleyballPoints,
   type ScoutInfoGeneral, 
-  type ScoutInfoSettings
+  type ScoutInfoSettings,
+  Sport
 } from "lionn-common";
 import { ModelObject } from "@adonisjs/lucid/types/model";
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
@@ -159,17 +160,14 @@ export default class ScoutsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           event: {
             id: params.data.eventId
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let validatedData = await validator.validate({
@@ -241,17 +239,14 @@ export default class ScoutsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'view',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_view',
+        data: {
           scout: {
             id: params.data.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let scout = await Scout.query({ client: trx })
@@ -336,9 +331,8 @@ export default class ScoutsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'view',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_view',
+        data: {
           scout: {
             id: params.data.id
           }
@@ -396,17 +390,14 @@ export default class ScoutsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: params.data.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let validatedData = await validator.validate({
@@ -470,9 +461,8 @@ export default class ScoutsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: params.data.id
           }
@@ -512,9 +502,8 @@ export default class ScoutsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'view',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_view',
+        data: {
           scout: {
             id: params.data.id
           }
@@ -633,7 +622,7 @@ export default class ScoutsManager {
 
       for (let i = 0; i < lastPositionsEvent.length; i += 1) {
         let event = lastPositionsEvent[i]
-        let position = event._id[0]
+        let position = event._id[0] as unknown as (keyof typeof lastPositionFound['enemy'])
         let isOpponent = event._id[1]
   
         if(isOpponent) lastPositionFound.enemy[position] = {
@@ -1246,7 +1235,7 @@ export default class ScoutsManager {
 
       for (let i = 0; i < lastPositionsEvent.length; i += 1) {
         let event = lastPositionsEvent[i]
-        let position = event._id[0]
+        let position = event._id[0] as unknown as (keyof typeof lastPositionFound['enemy'])
         let isOpponent = event._id[1]
 
         if (isOpponent) lastPositionFound.enemy[position] = {

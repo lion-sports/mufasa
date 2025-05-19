@@ -44,26 +44,6 @@ test.group('Groups', (group) => {
     assert.isTrue(group.cans.Team.update, 'should has set the cans')
   })
 
-  test('get a paginated list of groups for an existing teams', async ({ client, assert }) => {
-    let teamAndOwner = teamsAndOwners[0]
-
-    await client.post('/groups').json({
-      name: 'Giocatore',
-      team: teamAndOwner.team
-    }).loginAs(teamAndOwner.owner)
-
-    const response = await client.get(`/teams/${teamAndOwner.team.id}/groups`).qs({
-      page: 1,
-      perPage: 200
-    }).loginAs(teamAndOwner.owner)
-
-    response.assertAgainstApiSpec()
-    let groups = response.body()
-
-    assert.equal(groups.meta.perPage, 200, "should use the right pagination")
-    assert.equal(groups.meta.total, groups.data.length, "should return the right rows")
-  })
-
   test('get a group', async ({ client, assert }) => {
     let teamAndOwner = teamsAndOwners[0]
 

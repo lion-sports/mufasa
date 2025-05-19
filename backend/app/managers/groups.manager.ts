@@ -92,9 +92,8 @@ export default class GroupsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'create',
-        resource: 'group',
-        entities: {
+        ability: 'group_create',
+        data: {
           team: params.data.team,
           club: params.data.club
         }
@@ -127,9 +126,8 @@ export default class GroupsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'view',
-        resource: 'group',
-        entities: {
+        ability: 'group_view',
+        data: {
           group: {
             id: params.data.id
           }
@@ -166,9 +164,8 @@ export default class GroupsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'group',
-        entities: {
+        ability: 'group_update',
+        data: {
           group: {
             id: params.data.id
           }
@@ -217,9 +214,8 @@ export default class GroupsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'destroy',
-        resource: 'group',
-        entities: {
+        ability: 'group_destroy',
+        data: {
           group: {
             id: params.data.id
           }

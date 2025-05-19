@@ -7,19 +7,29 @@
 	import ConfirmOrCancelDialog from '../common/ConfirmOrCancelDialog.svelte'
 	import InvitationsService from '@/lib/services/invitations/invitations.service'
 	import { addErrorToast, addSuccessToast } from '../ui/sonner'
+	import { scale, slide } from 'svelte/transition'
+	import GroupsAutocomplete from '../groups/GroupsAutocomplete.svelte'
+	import type { Group } from '@/lib/services/groups/groups.service'
+	import type { ComponentProps } from 'svelte'
+	import TeamsAutocomplete from '../teams/TeamsAutocomplete.svelte'
+	import type { Team } from '@/lib/services/teams/teams.service'
 
 	type Props = {
     club: {
       id: number
     },
+    groups?: Group[]
+    teams?: Team[]
     oninvite?: (params: { user: User }) => void
   }
 
-	let { club, oninvite }: Props = $props()
+	let { club, oninvite, groups, teams }: Props = $props()
 
 	let searchText: string | undefined = $state(),
 		foundUsers: User[] = $state([]),
-		loadingSearch: boolean = $state(false)
+		loadingSearch: boolean = $state(false),
+    selectedGroups: NonNullable<ComponentProps<typeof GroupsAutocomplete>['values']> = $state([]),
+    selectedTeams: NonNullable<ComponentProps<typeof TeamsAutocomplete>['values']> = $state([])
 
 	let debounceTimeout: NodeJS.Timeout | undefined = undefined
 	async function handleSearchInput() {
@@ -86,22 +96,62 @@
 
     loadingInvitation = false
   }
+
+  let additionalFieldVisible: boolean = $state(false)
 </script>
 
 <div class="flex flex-col gap-2 @container">
-	<StandardTextfield
-		placeholder="Continua a scrivere ..."
-		bind:value={searchText}
-		hint="Cerca utenti per nome, email o username"
-		--simple-textfield-width="100%"
-		oninput={handleSearchInput}
-	>
-		{#snippet prependInner()}
-			<span class="mr-2">
-				<Icon name="mdi-magnify"></Icon>
-			</span>
-		{/snippet}
-	</StandardTextfield>
+  <div>
+    <div class="flex gap-2 items-start">
+      <div class="grow">
+        <StandardTextfield
+          placeholder="Continua a scrivere ..."
+          bind:value={searchText}
+          hint="Cerca utenti per nome, email o username"
+          --simple-textfield-width="100%"
+          oninput={handleSearchInput}
+        >
+          {#snippet prependInner()}
+            <span class="mr-2">
+              <Icon name="mdi-magnify"></Icon>
+            </span>
+          {/snippet}
+        </StandardTextfield>
+      </div>
+      <div class="relative">
+        {#if selectedGroups.length > 0}
+          <div class="absolute right-0 top-0 w-[12px] h-[12px] bg-red-500 rounded-full" transition:scale></div>
+        {/if}
+        <button 
+          class="h-[44px] w-[44px] flex items-center justify-center rounded-full hover:bg-[rgb(var(--global-color-contrast-900),.1)]"
+          onclick={() => additionalFieldVisible = !additionalFieldVisible}
+        >
+          {#if additionalFieldVisible}
+            <Icon name="mdi-chevron-up"></Icon>
+          {:else}
+            <Icon name="mdi-chevron-down"></Icon>
+          {/if}
+        </button>
+      </div>
+    </div>
+    {#if additionalFieldVisible}
+      <div transition:slide={{duration: 200}} class="mt-2 flex flex-col gap-2">
+        <div>
+          <GroupsAutocomplete
+            {groups}
+            bind:values={selectedGroups}
+          ></GroupsAutocomplete>
+        </div>
+        <div>
+          <TeamsAutocomplete
+            {teams}
+            multiple
+            bind:values={selectedTeams}
+          ></TeamsAutocomplete>
+        </div>
+      </div>
+    {/if}
+  </div>
 	<div class="search-results">
 		{#if loadingSearch}
 			<div class="h-full w-full text-xs flex justify-center items-center text-center">

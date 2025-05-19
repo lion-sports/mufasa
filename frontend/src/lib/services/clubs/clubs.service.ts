@@ -4,6 +4,8 @@ import type { Sport } from 'lionn-common'
 import type { User } from '../auth/auth.service'
 import type { Media } from '../media/media.service'
 import type { Member } from '../members/members.service'
+import type { Group } from '../groups/groups.service'
+import type { Team } from '../teams/teams.service'
 
 export type Club = {
 	id: number
@@ -17,7 +19,9 @@ export type Club = {
   header?: Media
   logoMediaId?: number
   logo?: Media
-  members: Member[]
+  members?: Member[]
+  groups?: Group[]
+  teams?: Team[]
 	createdAt: Date
 	updatedAt: Date
 }

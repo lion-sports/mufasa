@@ -4,111 +4,27 @@ import Team from '#app/Models/Team'
 import Event from '#app/Models/Event'
 import Frequency from '#app/Models/Frequency';
 import { validator } from "@adonisjs/validator"
-import AuthorizationManager from './authorization.manager.js';
+import AuthorizationManager, { AuthorizationHelpers } from './authorization.manager.js';
 import ConvocationManager from './convocations.manager.js';
 import { withUser, Context, withTransaction } from './base.manager.js';
 import User from '#app/Models/User';
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
-export type ListParams = {
-  data: {
-    filters: {
-      from: DateTime,
-      to: DateTime,
-      team?: {
-        id: number
-      }
-    },
-  },
-  context?: Context
-}
-
-export type CreateParams = {
-  data: {
-    start: DateTime,
-    end: DateTime,
-    name: string,
-    description?: string,
-    status?: 'confirmed' | 'notConfirmed',
-    team: {
-      id: number
-    },
-    convocations?: {
-      teammateId: number
-    }[]
-  },
-  context?: Context
-}
-
-export type CreateWithFrequencyParams = {
-  data: {
-    event: {
-      start: DateTime,
-      end: DateTime,
-      name: string,
-      description?: string,
-      status?: 'confirmed' | 'notConfirmed',
-      team: {
-        id: number
-      }
-    },
-    rule: {
-      frequency: 'week' | 'month',
-      from: DateTime,
-      to: DateTime,
-      daysOfWeek: number[], // 1 | 2 | 3 | 4 | 5 | 6 | 7
-      daysOfMonth: number[] // 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31
-    }
-  },
-  context?: Context
-}
-
-export type UpdateParams = {
-  data: {
-    id: number,
-    start?: DateTime,
-    end?: DateTime,
-    name?: string,
-    description?: string,
-    status?: 'confirmed' | 'notConfirmed',
-    updateAllFrequency?: boolean
-  },
-  context?: Context
-}
-
-export type CopyWeekParams = {
-  data: {
-    fromWeekNumber: number,
-    fromWeekYear: number,
-    toWeekNumber: number,
-    toWeekYear: number,
-    team: { id: number }
-  },
-  context?: Context
-}
-
-export type DeleteParams = {
-  data: {
-    id: number,
-    deleteAllFrequency?: boolean
-  },
-  context?: Context
-}
-
-export type GetParams = {
-  data: {
-    id: number,
-  },
-  context?: Context
-}
-
 export default class EventsManager {
-  constructor() {
-  }
-
   @withTransaction
   @withUser
-  public async list(params: ListParams) {
+  public async list(params: {
+    data: {
+      filters: {
+        from: DateTime,
+        to: DateTime,
+        team?: {
+          id: number
+        }
+      },
+    },
+    context?: Context
+  }) {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -147,7 +63,22 @@ export default class EventsManager {
 
   @withTransaction
   @withUser
-  public async create(params: CreateParams): Promise<Event> {
+  public async create(params: {
+    data: {
+      start: DateTime,
+      end: DateTime,
+      name: string,
+      description?: string,
+      status?: 'confirmed' | 'notConfirmed',
+      team: {
+        id: number
+      },
+      convocations?: {
+        teammateId: number
+      }[]
+    },
+    context?: Context
+  }): Promise<Event> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -161,15 +92,12 @@ export default class EventsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'create',
-        resource: 'event',
-        entities: {
+        ability: 'event_create',
+        data: {
           team: params.data.team
         }
       },
-      context: {
-        trx: trx
-      }
+      context: params.context
     })
 
     // check if team exists
@@ -215,7 +143,28 @@ export default class EventsManager {
 
   @withTransaction
   @withUser
-  public async createWithFrequency(params: CreateWithFrequencyParams): Promise<Event[]> {
+  public async createWithFrequency(params: {
+    data: {
+      event: {
+        start: DateTime,
+        end: DateTime,
+        name: string,
+        description?: string,
+        status?: 'confirmed' | 'notConfirmed',
+        team: {
+          id: number
+        }
+      },
+      rule: {
+        frequency: 'week' | 'month',
+        from: DateTime,
+        to: DateTime,
+        daysOfWeek: number[], // 1 | 2 | 3 | 4 | 5 | 6 | 7
+        daysOfMonth: number[] // 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31
+      }
+    },
+    context?: Context
+  }): Promise<Event[]> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -229,15 +178,12 @@ export default class EventsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'create',
-        resource: 'event',
-        entities: {
+        ability: 'event_create',
+        data: {
           team: params.data.event.team
         }
       },
-      context: {
-        trx: trx
-      }
+      context: params.context
     })
 
     // check if team exists and user belongs to it
@@ -374,22 +320,28 @@ export default class EventsManager {
 
   @withTransaction
   @withUser
-  public async copyWeek(params: CopyWeekParams): Promise<Event[]> {
+  public async copyWeek(params: {
+    data: {
+      fromWeekNumber: number,
+      fromWeekYear: number,
+      toWeekNumber: number,
+      toWeekYear: number,
+      team: { id: number }
+    },
+    context?: Context
+  }): Promise<Event[]> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'create',
-        resource: 'event',
-        entities: {
+        ability: 'event_create',
+        data: {
           team: params.data.team
         }
       },
-      context: {
-        trx: trx
-      }
+      context: params.context
     })
 
     let fromDateFrom = DateTime.fromObject({
@@ -444,7 +396,18 @@ export default class EventsManager {
 
   @withTransaction
   @withUser
-  public async update(params: UpdateParams): Promise<Event | Event[]> {
+  public async update(params: {
+    data: {
+      id: number,
+      start?: DateTime,
+      end?: DateTime,
+      name?: string,
+      description?: string,
+      status?: 'confirmed' | 'notConfirmed',
+      updateAllFrequency?: boolean
+    },
+    context?: Context
+  }): Promise<Event | Event[]> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -458,15 +421,12 @@ export default class EventsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'event',
-        entities: {
+        ability: 'event_update',
+        data: {
           event: params.data 
         }
       },
-      context: {
-        trx: trx
-      }
+      context: params.context
     })
 
     // check if event exists and belongs to user teams
@@ -518,16 +478,21 @@ export default class EventsManager {
 
   @withTransaction
   @withUser
-  public async delete(params: DeleteParams): Promise<void> {
+  public async delete(params: {
+    data: {
+      id: number,
+      deleteAllFrequency?: boolean
+    },
+    context?: Context
+  }): Promise<void> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'destroy',
-        resource: 'event',
-        entities: {
+        ability: 'event_destroy',
+        data: {
           event: params.data
         }
       },
@@ -566,7 +531,12 @@ export default class EventsManager {
 
   @withTransaction
   @withUser
-  public async get(params: GetParams): Promise<Event> {
+  public async get(params: {
+    data: {
+      id: number,
+    },
+    context?: Context
+  }): Promise<Event> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User 
 
@@ -589,20 +559,16 @@ export default class EventsManager {
       .preload('team')
       .firstOrFail()
 
-    let canViewScout = await AuthorizationManager.canOrFail({
+    let canViewScout = await AuthorizationHelpers.userCanInTeam({
       data: {
-        actor: user,
-        action: 'view',
+        user: user,
         resource: 'scout',
-        entities: {
-          team: {
-            id: event.teamId
-          }
+        action: 'view',
+        team: {
+          id: event.teamId
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     if(canViewScout) {
