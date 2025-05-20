@@ -11,6 +11,7 @@ export default await Env.create(new URL("../", import.meta.url), {
   GOOGLE_IOS_CLIENT_ID: Env.schema.string.optional(),
   GOOGLE_CLIENT_SECRET: Env.schema.string.optional(),
   GOOGLE_CALLBACK_URL: Env.schema.string.optional(),
+  FRONTEND_URL: Env.schema.string.optional(),
   MONGO_URL: Env.schema.string.optional(),
   MONGO_DB: Env.schema.string.optional(),
   TELEGRAM_FIPAV_BOT_TOKEN: Env.schema.string.optional(),

@@ -26,6 +26,26 @@ export default class InvitationsController {
     })
   }
 
+  public async inviteUserByUrl({ request }: HttpContext) {
+    const manager = new InvitationsManager()
+
+    const team = request.input('team')
+    const club = request.input('club')
+    const group = request.input('group')
+
+    return await manager.inviteUserByUrl({
+      data: {
+        team: {
+          id: team?.id
+        },
+        club: {
+          id: club?.id
+        },
+        group: group
+      }
+    })
+  }
+
   public async list({ request }: HttpContext) {
     const manager = new InvitationsManager()
 

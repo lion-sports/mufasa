@@ -57,6 +57,17 @@ export default class Invitation extends CamelCaseBaseModel {
   @column()
   public invitedEmail: string
 
+  @column()
+  public uid: string
+
+  @column({
+    serializeAs: null
+  })
+  public token: string
+
+  @column.dateTime()
+  public expirationDate: DateTime
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

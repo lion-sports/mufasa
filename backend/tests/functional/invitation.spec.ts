@@ -5,6 +5,7 @@ import Team from '#app/Models/Team'
 import { test } from '@japa/runner'
 import { TeamFactory, UserFactory } from '#database/factories/index'
 import GroupFactory from '#database/factories/GroupFactory';
+import InvitationsManager from '#app/managers/invitations.manager';
 
 test.group('Invitations', (group) => {
   let loggedInUser: User
@@ -285,5 +286,57 @@ test.group('Invitations', (group) => {
     assert.equal(teammate.alias, 'alias', 'should have update alias')
     assert.equal(teammate.defaultRole, 'setter', 'should have update the default role')
     assert.equal(teammate.availableRoles.length, 2, 'should have update the available roles')
+  })
+
+  test('invite user by url to a team', async ({ client, assert }) => {
+    let group = await GroupFactory.create()
+    await group.related('team').associate(team)
+
+    const response = await client.post('/invitations/inviteUserByUrl').json({
+      team: {
+        id: team.id
+      },
+      group: {
+        id: group.id
+      }
+    }).loginAs(loggedInUser)
+
+    response.assertAgainstApiSpec()
+    const body = response.body()
+    assert.isString(body.url, 'should return a url')
+    assert.include(body.url, '/auth/signup', 'url should contain signup path')
+  })
+
+  test('invite user by url to a team and validate token', async ({ client, assert }) => {
+    let group = await GroupFactory.create()
+    await group.related('team').associate(team)
+
+    const response = await client.post('/invitations/inviteUserByUrl').json({
+      team: {
+        id: team.id
+      },
+      group: {
+        id: group.id
+      }
+    }).loginAs(loggedInUser)
+
+    response.assertAgainstApiSpec()
+    const body = response.body()
+    assert.isString(body.url, 'should return a url')
+    assert.include(body.url, '/auth/signup', 'url should contain signup path')
+
+    // Extract token from url
+    const urlObj = new URL(body.url)
+    const token = urlObj.searchParams.get('token')
+    assert.isString(token, 'token should be present in url')
+
+    // Validate token using InvitationsManager directly
+    const manager = new InvitationsManager()
+    const result = await manager.validateInvitation({
+      data: { token: token! },
+      context: { user: loggedInUser }
+    })
+    assert.isTrue(result.valid, 'invitation token should be valid')
+    assert.exists(result.invitation, 'invitation should be returned')
   })
 })

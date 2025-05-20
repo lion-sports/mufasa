@@ -10,6 +10,11 @@ import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import ClubsManager from './clubs.manager.js'
 import Club from '#models/Club'
 import FilterModifierApplier, { Modifier } from '#services/FilterModifierApplier'
+import encryption from '@adonisjs/core/services/encryption'
+import string from '@adonisjs/core/helpers/string'
+import { cuid } from '@adonisjs/core/helpers'
+import env from '#start/env'
+import { DateTime } from 'luxon'
 
 export default class InvitationsManager {
   @withTransaction
@@ -440,5 +445,151 @@ export default class InvitationsManager {
 
     invitation.status = 'discarded'
     return await invitation.save()
+  }
+
+
+  @withTransaction
+  @withUser
+  public async inviteUserByUrl(params: {
+    data: {
+      team?: {
+        id: number
+      },
+      club?: {
+        id: number
+      },
+      group?: {
+        id: number
+      }
+    },
+    context?: Context
+  }): Promise<{
+    url: string
+  }> {
+    const trx = params.context?.trx!
+    const user = params.context?.user!
+
+    let team: Team | undefined = undefined
+    let club: Club | undefined = undefined
+    let group: Group | undefined = undefined
+
+    if(!!params.data.team) {
+      await AuthorizationManager.canOrFail({
+        data: {
+          ability: 'team_invite',
+          actor: user,
+          data: {
+            team: params.data.team
+          }
+        },
+        context: params.context
+      })
+
+      team = await Team.query({ client: trx })
+        .where('id', params.data.team.id)
+        .firstOrFail()
+
+      if(!!params.data.group) {
+        group = await Group.query({ client: trx })
+          .where('id', params.data.group.id)
+          .whereHas('team', b => b.where('id', team!.id))
+          .firstOrFail()
+      }
+    } else if(!!params.data.club) {
+      await AuthorizationManager.canOrFail({
+        data: {
+          ability: 'club_invite',
+          actor: user,
+          data: {
+            club: params.data.club
+          }
+        },
+        context: params.context
+      })
+
+      club = await Club.query({ client: trx })
+        .where('id', params.data.club.id)
+        .firstOrFail()
+
+      if (!!params.data.group) {
+        group = await Group.query({ client: trx })
+          .where('id', params.data.group.id)
+          .whereHas('team', b => b.where('id', team!.id))
+          .firstOrFail()
+      }
+    } else throw new Error('club or team must be defined')
+
+    let expirationDate = DateTime.now().plus({ day: 1 })
+
+    let token = string.random(128)
+    let uid = cuid()
+    let baseUrl = `${env.get('FRONTEND_URL') || 'http://localhost:5173'}/auth/signup`
+    let urlToken = encryption.encrypt({
+      token,
+      uid
+    })
+    let finalUrl = `${baseUrl}?token=${urlToken}`
+
+    let invitation = await Invitation.create({
+        teamId: team?.id,
+        clubId: club?.id,
+        invitedByUserId: user.id,
+        groupId: group?.id,
+        status: 'pending',
+        expirationDate,
+        uid,
+        token
+      }, { client: trx })
+
+    return {
+      url: finalUrl
+    }
+  }
+
+  @withTransaction
+  @withUser
+  public async validateInvitation(params: {
+    data: {
+      token: string
+    },
+    context?: Context
+  }): Promise<{
+    valid: boolean,
+    message?: string,
+    invitation?: Invitation
+  }> {
+    const trx = params.context?.trx!
+    const user = params.context?.user!
+
+    let decryptedToken: {
+      uid: string,
+      token: string
+    } | null = await encryption.decrypt(params.data.token)
+
+    if (!decryptedToken) return {
+      valid: false,
+      message: 'invalid token'
+    }
+
+    let invitation = await Invitation.query({ client: trx })
+      .where('uid', decryptedToken.uid)
+      .firstOrFail()
+
+    if (invitation.expirationDate && DateTime.now() > invitation.expirationDate) {
+      return {
+        valid: false,
+        message: 'invitation expired'
+      }
+    } else if(decryptedToken.token !== invitation.token) {
+      return {
+        valid: false,
+        message: 'invalid token'
+      }
+    }
+    
+    return {
+      valid: true,
+      invitation
+    }
   }
 }

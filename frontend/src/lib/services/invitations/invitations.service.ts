@@ -37,6 +37,21 @@ export default class InvitationsService extends FetchBasedService {
 		return response
 	}
 
+  public async inviteUserByUrl(params: {
+    team?: { id: number }
+    group?: { id: number }
+    club?: { id: number }
+  }): Promise<{
+    url: string
+  }> {
+    let response = await this.client.post({
+      url: '/invitations/inviteUserByUrl',
+      body: params
+    })
+
+    return response
+  }
+
   public async list(params?: {
     page?: number
     perPage?: number

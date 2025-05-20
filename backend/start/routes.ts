@@ -108,6 +108,7 @@ router.resource('users', UsersController)
 
 router.group(() => {
     router.post('/inviteUser', [InvitationsController, 'inviteUser'])
+    router.post('/inviteUserByUrl', [InvitationsController, 'inviteUserByUrl'])
     router.get('/list', [InvitationsController, 'list'])
     router.post('/accept', [InvitationsController, 'accept'])
     router.post('/reject', [InvitationsController, 'reject'])

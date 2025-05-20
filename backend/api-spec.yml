@@ -723,6 +723,49 @@ paths:
           properties:
             id:
               type: integer
+  /invitations/inviteUserByUrl:
+    post:
+      summary: Invite a user by generating a signup URL for a team or club.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                team:
+                  type: object
+                  required:
+                    - id
+                  properties:
+                    id:
+                      type: integer
+                  nullable: true
+                club:
+                  type: object
+                  required:
+                    - id
+                  properties:
+                    id:
+                      type: integer
+                  nullable: true
+                group:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                  nullable: true
+      responses:
+        "200":
+          description: The invitation signup URL.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    description: The generated signup URL for the invitation.
   /invitations/list:
     get:
       summary: Get my invitations
