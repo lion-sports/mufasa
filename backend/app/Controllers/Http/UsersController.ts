@@ -13,20 +13,6 @@ export default class UsersController {
     })
   }
 
-  public async store({ request }: HttpContext) {
-    const manager = new UsersManager()
-    return await manager.create({
-      data: {
-        email: request.input('email'),
-        birthday: request.input('birthday'),
-        password: request.input('password'),
-        firstname: request.input('firstname'),
-        lastname: request.input('lastname'),
-        solanaPublicKey: request.input('solanaPublicKey'),
-      },
-    })
-  }
-
   public async show({ params }: HttpContext) {
     const manager = new UsersManager()
     return await manager.get({
@@ -49,6 +35,4 @@ export default class UsersController {
       },
     })
   }
-
-  public async destroy({}: HttpContext) {}
 }

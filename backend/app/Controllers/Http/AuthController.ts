@@ -60,25 +60,18 @@ export default class AuthController {
   }
 
   public async signup({ request }: HttpContext) {
-    if (!request.input('email')) throw new Error('email required')
-
-    let existingUser = await User.query().where('email', request.input('email')).first()
-
-    if (!!existingUser) throw new Error('User already exists')
-
-    const manager = new UsersManager()
-    await manager.create({
+    let manager = new UsersManager()
+    return await manager.signup({
       data: {
         email: request.input('email'),
         password: request.input('password'),
-        birthday: request.input('birthday'),
         firstname: request.input('firstname'),
         lastname: request.input('lastname'),
+        birthday: request.input('birthday'),
         solanaPublicKey: request.input('solanaPublicKey'),
-      },
+        invitationToken: request.input('invitationToken')
+      }
     })
-
-    return true
   }
 
   public async googleRedirect({ ally }: HttpContext) {

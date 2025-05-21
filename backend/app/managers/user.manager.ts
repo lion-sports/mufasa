@@ -7,6 +7,23 @@ import { ModelObject } from '@adonisjs/lucid/types/model'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { DateTime } from 'luxon'
 import FilterModifierApplier, { Modifier } from '#services/FilterModifierApplier'
+import InvitationsManager from './invitations.manager.js'
+import Invitation from '#models/Invitation'
+import vine from '@vinejs/vine'
+
+export const signupValidator = vine.compile(
+  vine.object({
+    email: vine.string().maxLength(255),
+    password: vine.string().maxLength(255),
+    firstname: vine.string().maxLength(255),
+    lastname: vine.string().maxLength(255),
+    birthday: vine.date({
+      formats: { utc: true }
+    }),
+    solanaPublicKey: vine.string().optional(),
+    invitationToken: vine.string().optional()
+  })
+)
 
 // TODO add authorization manager
 class UsersManager {
@@ -38,6 +55,68 @@ class UsersManager {
 
     const results = await query.paginate(params.data.page, params.data.perPage)
     return results.toJSON()
+  }
+
+  @withTransaction
+  public async signup(params: {
+    data: {
+      email: string
+      password: string
+      firstname: string
+      lastname: string
+      birthday: DateTime,
+      solanaPublicKey?: string
+      invitationToken?: string
+    }
+    context?: Context
+  }): Promise<User> {
+    let trx = params.context?.trx!
+
+    let validatedData = await signupValidator.validate(params.data)
+
+    let existingUser = await User.query({ client: trx })
+      .where('email', validatedData.email)
+      .first()
+
+    if (!!existingUser) throw new Error('user already exists')
+
+    let invitation: Invitation | undefined = undefined
+    if(!!validatedData.invitationToken) {
+      let invitationManager = new InvitationsManager()
+      let tokenValid = await invitationManager.validateInvitationToken({
+        data: {
+          token: validatedData.invitationToken
+        },
+        context: params.context
+      })
+
+      if(!tokenValid.valid) {
+        throw new Error(tokenValid.message)
+      } else if(!!tokenValid.invitation) {
+        invitation = tokenValid.invitation
+      }
+    }
+
+    const manager = new UsersManager()
+    let user = await manager.create({
+      data: {
+        email: params.data.email,
+        password: params.data.password,
+        birthday: params.data.birthday,
+        firstname: params.data.firstname,
+        lastname: params.data.lastname,
+        solanaPublicKey: params.data.solanaPublicKey,
+      },
+      context: params.context
+    })
+
+    if(!!invitation) {
+      invitation.invitedEmail = user.email
+      invitation.invitedUserId = user.id
+      await invitation.useTransaction(trx).save()
+    }
+
+    return user
   }
 
   // TODO review signup logics

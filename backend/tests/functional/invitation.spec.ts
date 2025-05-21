@@ -332,7 +332,7 @@ test.group('Invitations', (group) => {
 
     // Validate token using InvitationsManager directly
     const manager = new InvitationsManager()
-    const result = await manager.validateInvitation({
+    const result = await manager.validateInvitationToken({
       data: { token: token! },
       context: { user: loggedInUser }
     })
