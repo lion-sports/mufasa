@@ -19,13 +19,16 @@ export const signupValidator = vine.compile(
     firstname: vine.string().maxLength(255),
     lastname: vine.string().maxLength(255),
     birthday: vine.date({
-      formats: { utc: true }
+      formats: { utc: true },
     }),
     solanaPublicKey: vine.string().optional(),
-    invitationToken: vine.string().optional()
+    invitationToken: vine.string().optional(),
   })
 )
 import ConfirmationNotification from '#app/mails/ConfirmationNotification'
+import string from '@adonisjs/core/helpers/string'
+import env from '#start/env'
+import ApiToken from '#models/ApiToken'
 
 // TODO add authorization manager
 class UsersManager {
@@ -66,7 +69,7 @@ class UsersManager {
       password: string
       firstname: string
       lastname: string
-      birthday: DateTime,
+      birthday: DateTime
       solanaPublicKey?: string
       invitationToken?: string
     }
@@ -76,25 +79,23 @@ class UsersManager {
 
     let validatedData = await signupValidator.validate(params.data)
 
-    let existingUser = await User.query({ client: trx })
-      .where('email', validatedData.email)
-      .first()
+    let existingUser = await User.query({ client: trx }).where('email', validatedData.email).first()
 
     if (!!existingUser) throw new Error('user already exists')
 
     let invitation: Invitation | undefined = undefined
-    if(!!validatedData.invitationToken) {
+    if (!!validatedData.invitationToken) {
       let invitationManager = new InvitationsManager()
       let tokenValid = await invitationManager.validateInvitationToken({
         data: {
-          token: validatedData.invitationToken
+          token: validatedData.invitationToken,
         },
-        context: params.context
+        context: params.context,
       })
 
-      if(!tokenValid.valid) {
+      if (!tokenValid.valid) {
         throw new Error(tokenValid.message)
-      } else if(!!tokenValid.invitation) {
+      } else if (!!tokenValid.invitation) {
         invitation = tokenValid.invitation
       }
     }
@@ -109,10 +110,10 @@ class UsersManager {
         lastname: params.data.lastname,
         solanaPublicKey: params.data.solanaPublicKey,
       },
-      context: params.context
+      context: params.context,
     })
 
-    if(!!invitation) {
+    if (!!invitation) {
       invitation.invitedEmail = user.email
       invitation.invitedUserId = user.id
       await invitation.useTransaction(trx).save()
@@ -221,6 +222,35 @@ class UsersManager {
   }
 
   @withTransaction
+  public async generateResetPasswordUrl(params: {
+    data: {
+      user: User
+    }
+    context?: Context
+  }): Promise<string> {
+    let trx = params.context?.trx!
+
+    const confirmRegistrationToken = string.generateRandom(64)
+    const expiration = DateTime.now().plus({ hour: 1 })
+
+    await ApiToken.create(
+      {
+        userId: params.data.user.id,
+        name: 'Confirm Registration Token',
+        type: 'confirmRegistration',
+        token: confirmRegistrationToken,
+        expires_at: expiration,
+      },
+      { client: trx }
+    )
+
+    const url = `${env.get('CONFIRMATION_EMAIL_URL')}?token=${confirmRegistrationToken}&userId=${
+      params.data.user.id
+    }`
+    return url
+  }
+
+  @withTransaction
   public async sendConfirmationEmail(params: {
     data: {
       user: {
@@ -234,9 +264,12 @@ class UsersManager {
 
     const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
 
-    // TODO: generate a token to validate request
+    const verificationUrl = await this.generateResetPasswordUrl({
+      data: { user },
+      context: { trx },
+    })
 
-    const email = new ConfirmationNotification({ user })
+    const email = new ConfirmationNotification({ user, verificationUrl })
     await mail.sendLater(email)
   }
 }

@@ -5,10 +5,12 @@ import { BaseMail } from '@adonisjs/mail'
 
 export default class ConfirmationNotification extends BaseMail {
   private user: User
+  private verificationUrl: string
 
-  constructor(params: { user: User }) {
+  constructor(params: { user: User; verificationUrl: string }) {
     super()
     this.user = params.user
+    this.verificationUrl = params.verificationUrl
   }
 
   /**
@@ -20,7 +22,10 @@ export default class ConfirmationNotification extends BaseMail {
     this.message
       .from(senderMail)
       .subject('Conferma registrazione')
-      .htmlView('emails/confirmation_email')
+      .htmlView('emails/confirmation_email', {
+        user: this.user,
+        verificationUrl: this.verificationUrl,
+      })
 
     const testMail = env.get('TEST_EMAIL')
     if (!app.inProduction && !testMail) throw new Error('no test mail provided')
