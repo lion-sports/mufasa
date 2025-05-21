@@ -1,34 +1,13 @@
 <script lang="ts">
-	import type { Sport } from 'lionn-common'
 	import ReviewCard from './ReviewCard.svelte'
 	import { Icon } from '@likable-hair/svelte'
-	import type { RegistrationStep } from '@/lib/services/auth/auth.service'
+	import type { SignupState } from '@/lib/services/auth/signup.svelte'
 
 	interface Props {
-		email: string
-		firstname: string
-		lastname: string
-		birthday: Date | undefined
-		sport: Sport | undefined
-		teamName: string
-		notes: string
-		collaborators?: string[]
-		step: RegistrationStep
-		token: string
+		signupState: SignupState
 	}
 
-	let {
-		email,
-		firstname,
-		lastname,
-		birthday,
-		sport,
-		teamName,
-		notes,
-		collaborators,
-		token,
-		step = $bindable()
-	}: Props = $props()
+	let { signupState = $bindable() }: Props = $props()
 </script>
 
 <div class="w-full text-sm text-[rgb(var(--global-color-contrast-300))] mt-2 text-left">
@@ -37,7 +16,7 @@
 
 <div class="h-full w-full flex flex-col gap-2 my-1 mb-1 text-xs justify-center">
 	<!-- User Card -->
-	<ReviewCard onclick={() => (step = 'credentials')}>
+	<ReviewCard onclick={() => (signupState.step = 'credentials')}>
 		{#snippet icon()}
 			<div class="w-20 text-4xl flex items-center justify-center">
 				<Icon name="mdi-account-circle" />
@@ -47,23 +26,29 @@
 		{#snippet reviewContent()}
 			<div class="flex items-center justify-between">
 				<div class="font-medium">Nome:</div>
-				<div>{firstname && lastname ? `${firstname} ${lastname}` : '-'}</div>
+				<div>
+					{signupState.signup.firstname && signupState.signup.lastname
+						? `${signupState.signup.firstname} ${signupState.signup.lastname}`
+						: '-'}
+				</div>
 			</div>
 			<div class="flex items-center justify-between">
 				<div class="font-medium">Data di nascita:</div>
 				<div>
-					{birthday ? birthday.toLocaleString().split(',')[0] : '-'}
+					{signupState.signup.birthday
+						? signupState.signup.birthday.toLocaleString().split(',')[0]
+						: '-'}
 				</div>
 			</div>
 			<div class="flex items-center justify-between">
 				<div class="font-medium">Email:</div>
-				<div>{email || '-'}</div>
+				<div>{signupState.signup.email || '-'}</div>
 			</div>
 		{/snippet}
 	</ReviewCard>
 
 	<!-- Team Card -->
-	<ReviewCard onclick={() => (step = 'team')}>
+	<ReviewCard onclick={() => (signupState.step = 'club')}>
 		{#snippet icon()}
 			<div class="w-20 text-4xl flex items-center justify-center">
 				<Icon name="mdi-account-group" />
@@ -72,22 +57,22 @@
 		{/snippet}
 		{#snippet reviewContent()}
 			<div class="flex items-center justify-between">
-				<div class="font-medium">Nome:</div>
-				<div>{teamName || '-'}</div>
+				<div class="font-medium">Handle:</div>
+				<div>{signupState.signup.clubName || '-'}</div>
+			</div>
+			<div class="flex items-center justify-between">
+				<div class="font-medium">Nome Completo:</div>
+				<div>{signupState.signup.clubCompleteName || '-'}</div>
 			</div>
 			<div class="flex items-center justify-between">
 				<div class="font-medium">Sport:</div>
-				<div>{sport || '-'}</div>
-			</div>
-			<div class="w-full flex items-center">
-				<div class="w-full flex-grow font-medium mr-1 text-left">Note:</div>
-				<span class="line-clamp-1">{notes || '-'}</span>
+				<div>{signupState.signup.clubSport || '-'}</div>
 			</div>
 		{/snippet}
 	</ReviewCard>
 
 	<!-- Some Other -->
-	<ReviewCard onclick={() => (step = 'invite-email')}>
+	<ReviewCard onclick={() => (signupState.step = 'inviteEmail')}>
 		{#snippet icon()}
 			<div class="w-20 text-4xl flex items-center justify-center">
 				<Icon name="mdi-information" />
@@ -97,15 +82,15 @@
 		{#snippet reviewContent()}
 			<div class="flex items-center justify-between">
 				<div class="font-medium">Collaboratori n.:</div>
-				<div>{collaborators ? collaborators.length : 0}</div>
-			</div>
-
-			<div class="flex items-center justify-between">
-				<div class="font-medium">Token di invito:</div>
-				<div>{token || '-'}</div>
+				<div>
+					<!-- {collaborators ? collaborators.length : 0} -->
+					0
+				</div>
 			</div>
 		{/snippet}
 	</ReviewCard>
 
-	<div class="w-full text-left opacity-50">Puoi rivedere ogni step cliccando sulle schede qui sopra.</div>
+	<div class="w-full text-left opacity-50">
+		Puoi rivedere ogni step cliccando sulle schede qui sopra.
+	</div>
 </div>

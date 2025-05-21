@@ -7,6 +7,7 @@ import { DateTime } from 'luxon'
 import { get } from 'svelte/store'
 import phantom from '$lib/stores/provider/phantom'
 import type { UserSetting } from '../userSettings/usersSettings.service'
+import type { Sport } from 'lionn-common'
 
 export type RegistrationStep = 'credentials' | 'team' | 'review' | 'invite-email' | 'invite-token'
 
@@ -57,6 +58,9 @@ export type SignupParams = {
 		lastname: string
 		birthday?: Date
 		solanaPublicKey?: string
+		clubName: string
+		completeClubName: string
+		clubSport?: Sport
 	}
 	context?: {}
 }
@@ -90,21 +94,22 @@ export default class AuthService extends FetchBasedService {
 	}
 
 	async signup(params: SignupParams) {
-		if (browser) {
-			const response = await this.client.post({
-				url: '/auth/signup',
-				body: {
-					email: params.data.email,
-					password: params.data.password,
-					firstname: params.data.firstname,
-					birthday: params.data.birthday,
-					lastname: params.data.lastname,
-					solanaPublicKey: params.data.solanaPublicKey
-				}
-			})
+		const response = await this.client.post({
+			url: '/auth/signup',
+			body: {
+				email: params.data.email,
+				password: params.data.password,
+				firstname: params.data.firstname,
+				birthday: params.data.birthday,
+				lastname: params.data.lastname,
+				solanaPublicKey: params.data.solanaPublicKey,
+				clubName: params.data.clubName,
+				completeClubName: params.data.completeClubName,
+				clubSport: params.data.clubSport
+			}
+		})
 
-			return response
-		}
+		return response
 	}
 
 	async authenticateApi(params: AuthenticateApiParams) {

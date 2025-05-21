@@ -4,92 +4,72 @@
 	import type { Sport } from 'lionn-common'
 	import UserCredentialsForm from '@/lib/components/auth/UserCredentialsForm.svelte'
 	import { Icon } from '@likable-hair/svelte'
-	import NewTeamForm from '@/lib/components/auth/NewTeamForm.svelte'
+	import NewClubForm from '@/lib/components/auth/NewClubForm.svelte'
 	import ConfirmForm from '@/lib/components/auth/ConfirmForm.svelte'
 	import { goto } from '$app/navigation'
 	import InviteEmailForm from '@/lib/components/auth/InviteEmailForm.svelte'
-	import InviteTokenForm from '@/lib/components/auth/InviteTokenForm.svelte'
-	import { FIELDS_FOR_STEPS, SIGNUP_FORM_STEPS, SignupState } from '@/lib/services/auth/signup.svelte'
+	import {
+		FIELDS_FOR_STEPS,
+		SIGNUP_FORM_STEPS,
+		SignupState
+	} from '@/lib/services/auth/signup.svelte'
+	import { addErrorToast } from '@/lib/components/ui/sonner'
 
-  let signupState = $state(new SignupState())
-
-	// User Data
-	let email: string = $state('')
-	let password: string = $state('')
-	let passwordConfirmation: string = $state('')
-	let firstname: string = $state('')
-	let lastname: string = $state('')
-	let birthday: Date | undefined = $state(undefined)
-	let acceptPrivacy: boolean = $state(false)
+	let signupState = $state(new SignupState())
 
 	// Collaborators Data
 	let collaborators: string[] = $state([])
-	let token: string = '#AABBCC' // Add a token generator
-
-	// Team Data
-	let sport: Sport | undefined = $state()
-	let name: string = $state('')
-	let notes: string = $state('')
 
 	let loading: boolean = false
 	let error: boolean = $state(false)
 	let errorMessage: string = $state('')
 
 	function signup() {
-		if (password != passwordConfirmation) {
-			error = true
-			errorMessage = "Password doesn't match with confirmation."
-			return
-		}
-		if (disabled) {
-			error = true
-			errorMessage = 'Some required fields are missing.'
-			return
-		}
-
 		loading = true
 
 		const service = new AuthService({ fetch })
 		service
-			.signup({ data: { email, password, firstname, lastname, birthday } })
-			.then(() => goto('/auth/login'))
-			.catch(() => {
-				error = true
-				errorMessage = 'Ops, something went wrong.'
+			.signup({
+				data: {
+					email: signupState.signup.email!,
+					password: signupState.signup.password!,
+					firstname: signupState.signup.firstname!,
+					lastname: signupState.signup.lastname!,
+					birthday: signupState.signup.birthday,
+					clubName: signupState.signup.clubName!,
+					completeClubName: signupState.signup.clubCompleteName!,
+					clubSport: signupState.signup.clubSport
+				}
 			})
+			.then(() => goto('/auth/login'))
+			.catch((err) =>
+				addErrorToast({
+					title: "Errore durante l'operazione",
+					options: { description: err.message }
+				})
+			)
 			.finally(() => (loading = false))
 	}
 
-	let passValid = $derived(
-		!!password && password.length > 6 && !!passwordConfirmation && password == passwordConfirmation
-	)
-	let disabled = $derived(
-		!passValid || !lastname || !firstname || !email || !acceptPrivacy || !birthday
-	)
+	function nextStep() {
+		if (!signupState.currentStepValid) {
+			signupState.dirtyFields = FIELDS_FOR_STEPS[signupState.step] || []
+			return
+		}
 
-	let teamDisabled = $derived(!name || !sport)
+		let currentStepIndex = SIGNUP_FORM_STEPS.findIndex((e) => e == signupState.step)
+		if (currentStepIndex !== -1 && currentStepIndex !== SIGNUP_FORM_STEPS.length - 2) {
+			let nextStep = SIGNUP_FORM_STEPS[currentStepIndex + 1]
+			signupState.step = nextStep
+		}
+	}
 
-	let currStep: RegistrationStep = $state('credentials')
-
-  function nextStep() {
-    if(!signupState.currentStepValid) {
-      signupState.dirtyFields = FIELDS_FOR_STEPS[signupState.step] || []
-      return
-    }
-
-    let currentStepIndex = SIGNUP_FORM_STEPS.findIndex((e) => e == signupState.step)
-    if(currentStepIndex !== -1 && currentStepIndex !== (SIGNUP_FORM_STEPS.length - 2)) {
-      let nextStep = SIGNUP_FORM_STEPS[currentStepIndex + 1]
-      signupState.step = nextStep
-    }
-  }
-  
 	function prevStep() {
 		let currentStepIndex = SIGNUP_FORM_STEPS.findIndex((e) => e == signupState.step)
 
-    if(currentStepIndex !== -1 && currentStepIndex >= 1) {
-      signupState.step = SIGNUP_FORM_STEPS[currentStepIndex - 1]
-    }
+		if (currentStepIndex !== -1 && currentStepIndex >= 1) {
+			signupState.step = SIGNUP_FORM_STEPS[currentStepIndex - 1]
+		}
 	}
 </script>
 
@@ -127,31 +107,16 @@
 
 							<div class="flex-grow w-full flex flex-col items-center h-full">
 								{#if signupState.step == 'credentials'}
-                  <div class="mt-8">
-                    <UserCredentialsForm
-                      bind:signupState
-                    />
-                  </div>
-								{:else if signupState.step == 'team'}
-									<NewTeamForm bind:sport bind:name bind:notes bind:error />
+									<div class="mt-8">
+										<UserCredentialsForm bind:signupState />
+									</div>
+								{:else if signupState.step == 'club'}
+									<NewClubForm bind:signupState />
 								{:else if signupState.step == 'inviteEmail'}
 									<!-- Optional -->
 									<InviteEmailForm bind:collaborators />
-								{:else if signupState.step == 'inviteToken'}
-									<!-- Optional -->
-									<InviteTokenForm {token} />
 								{:else if signupState.step == 'review'}
-									<ConfirmForm
-										bind:step={currStep}
-										teamName={name}
-										{firstname}
-										{lastname}
-										{birthday}
-										{email}
-										{notes}
-										{sport}
-										{token}
-									/>
+									<ConfirmForm bind:signupState />
 								{:else}
 									<div class="w-full text-center text-small my-5">
 										Qualcosa è andato storto! Per favore ricarica la pagina.
@@ -164,7 +129,7 @@
 					<!-- Action Button -->
 					<div class="mb-6 w-full text-sm">
 						<div class="flex items-center justify-between gap-10">
-							{#if currStep == 'review'}
+							{#if signupState.step == 'review'}
 								<div class="w-full">
 									<StandardButton
 										on:click={signup}
@@ -174,19 +139,16 @@
 									>
 								</div>
 							{:else}
-                <div>
-                  {#if signupState.currentStepIndex > 0}
-                    <button
-                      onclick={prevStep}
-                      class="py-1.5"
-                    >
-                      <div class="mx-auto w-fit flex items-center gap-1">
-                        <Icon name="mdi-arrow-left" />
-                        <span class="underline underline-offset-2">Back</span>
-                      </div>
-                    </button>
-                  {/if}
-                </div>
+								<div>
+									{#if signupState.currentStepIndex > 0}
+										<button onclick={prevStep} class="py-1.5">
+											<div class="mx-auto w-fit flex items-center gap-1">
+												<Icon name="mdi-arrow-left" />
+												<span class="underline underline-offset-2">Back</span>
+											</div>
+										</button>
+									{/if}
+								</div>
 
 								<div class="flex justify-center items-center gap-1">
 									{#each SIGNUP_FORM_STEPS as step}
@@ -198,15 +160,16 @@
 									{/each}
 								</div>
 
-                
-								<button 
-                  onclick={nextStep}
-                  class="p-1.5"
-                  style:opacity={!signupState.currentStepValid && !signupState.currentStepSkippable ? '50%' : undefined}
-                >
+								<button
+									onclick={nextStep}
+									class="p-1.5"
+									style:opacity={!signupState.currentStepValid && !signupState.currentStepSkippable
+										? '50%'
+										: undefined}
+								>
 									<div class="flex items-center gap-1">
 										<span class="underline underline-offset-2"
-											>{currStep.includes('invite') ? 'Next / Skip' : 'Next'}</span
+											>{signupState.step.includes('invite') ? 'Next / Skip' : 'Next'}</span
 										>
 										<Icon name="mdi-arrow-right" />
 									</div>
