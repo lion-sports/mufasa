@@ -1,3 +1,4 @@
+import mail from '@adonisjs/mail/services/main'
 import { CreateUserValidator, UpdateUserValidator } from '#app/Validators/users/index'
 import { validator } from '@adonisjs/validator'
 import User from '#app/Models/User'
@@ -7,6 +8,7 @@ import { ModelObject } from '@adonisjs/lucid/types/model'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { DateTime } from 'luxon'
 import FilterModifierApplier, { Modifier } from '#services/FilterModifierApplier'
+import ConfirmationNotification from '#app/mails/ConfirmationNotification'
 
 // TODO add authorization manager
 class UsersManager {
@@ -40,7 +42,6 @@ class UsersManager {
     return results.toJSON()
   }
 
-  // TODO review signup logics
   @withTransaction
   public async create(params: {
     data: {
@@ -73,10 +74,16 @@ class UsersManager {
       }
     )
     const manager = new SolanaManager()
-
     if (!userCreated.solanaPublicKey) {
       await manager.keygen({ data: { userId: userCreated.id }, context: params.context })
     }
+
+    // TODO send confirmation email
+    await this.sendConfirmationEmail({
+      data: { user: userCreated },
+      context: { trx },
+    })
+
     return userCreated
   }
 
@@ -132,6 +139,26 @@ class UsersManager {
       password: params.data.password,
     })
     return await updatedUser.save()
+  }
+
+  @withTransaction
+  public async sendConfirmationEmail(params: {
+    data: {
+      user: {
+        id: number
+      }
+    }
+    context?: Context
+  }): Promise<void> {
+    const trx = params.context?.trx
+    if (!params.data.user.id) throw new Error('No user id supplied')
+
+    const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
+
+    // TODO: generate a token to validate request
+
+    const email = new ConfirmationNotification({ user })
+    await mail.sendLater(email)
   }
 }
 

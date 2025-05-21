@@ -1,6 +1,6 @@
-import { Env } from "@adonisjs/core/env"
+import { Env } from '@adonisjs/core/env'
 
-export default await Env.create(new URL("../", import.meta.url), {
+export default await Env.create(new URL('../', import.meta.url), {
   HOST: Env.schema.string({ format: 'host' }),
   PORT: Env.schema.number(),
   APP_KEY: Env.schema.string(),
@@ -31,6 +31,15 @@ export default await Env.create(new URL("../", import.meta.url), {
   AWS_SECRET_ACCESS_KEY: Env.schema.string.optional(),
   AWS_REGION: Env.schema.string.optional(),
   S3_BUCKET: Env.schema.string.optional(),
-  LOG_INTERNAL_SERVER_ERRORS: Env.schema.boolean.optional()
-})
+  LOG_INTERNAL_SERVER_ERRORS: Env.schema.boolean.optional(),
 
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the mail package
+  |----------------------------------------------------------
+  */
+  SMTP_HOST: Env.schema.string(),
+  SMTP_PORT: Env.schema.string(),
+  SMTP_USERNAME: Env.schema.string.optional(),
+  SMTP_PASSWORD: Env.schema.string.optional(),
+})

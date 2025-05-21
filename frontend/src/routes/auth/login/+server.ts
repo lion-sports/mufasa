@@ -12,7 +12,7 @@ export const POST = (async ({ request, cookies, fetch }) => {
 			data: { email, password, generateRefreshToken }
 		})
 	} catch (err: any) {
-		throw error(500, { message: err.errors[0].message })
+		throw error(500, { message: err.errors?.[0]?.message })
 	}
 
 	return json(response)
