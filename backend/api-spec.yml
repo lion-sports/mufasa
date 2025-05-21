@@ -552,15 +552,6 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/User"
-    post:
-      summary: Create a user.
-      responses:
-        "200":
-          description: The new user.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
   /users/{userId}:
     get:
       summary: Returns a certain user.

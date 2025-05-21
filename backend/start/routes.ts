@@ -99,7 +99,7 @@ router.group(() => {
   .prefix('/groups')
   
 router.resource('users', UsersController)
-  .only(['index', 'store', 'update', 'show', 'destroy'])
+  .only(['index', 'update', 'show', 'destroy'])
   .middleware(
     '*', middleware.auth({
       guards: ['api']

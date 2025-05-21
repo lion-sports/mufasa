@@ -548,7 +548,7 @@ export default class InvitationsManager {
 
   @withTransaction
   @withUser
-  public async validateInvitation(params: {
+  public async validateInvitationToken(params: {
     data: {
       token: string
     },

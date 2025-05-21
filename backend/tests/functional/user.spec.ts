@@ -18,23 +18,6 @@ test.group('Users', (group) => {
     response.assertAgainstApiSpec()
   })
 
-  test('create a new user', async ({ client }) => {
-    const response = await client
-      .post('/users')
-      .json({
-        email: 'someemail@email.com',
-        password: 'some_secret_password',
-        firstname: 'some name',
-        birthday: '1982-05-25',
-        lastname: 'some lastname',
-      })
-      .loginAs(loggedInUser)
-
-    response.assertAgainstApiSpec()
-    const user = response.body()
-    assert.hasAnyKeys(user, ['id'], 'should have the id key')
-  })
-
   test('get a user', async ({ client }) => {
     const newUser = await UserFactory.create()
     const response = await client.get('/users/' + newUser.id).loginAs(loggedInUser)

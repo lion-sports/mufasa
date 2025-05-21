@@ -9,6 +9,9 @@
 	import { goto } from '$app/navigation'
 	import InviteEmailForm from '@/lib/components/auth/InviteEmailForm.svelte'
 	import InviteTokenForm from '@/lib/components/auth/InviteTokenForm.svelte'
+	import { FIELDS_FOR_STEPS, SIGNUP_FORM_STEPS, SignupState } from '@/lib/services/auth/signup.svelte'
+
+  let signupState = $state(new SignupState())
 
 	// User Data
 	let email: string = $state('')
@@ -67,33 +70,26 @@
 	let teamDisabled = $derived(!name || !sport)
 
 	let currStep: RegistrationStep = $state('credentials')
-	const formSteps = ['credentials', 'team', 'invite-email', 'invite-token']
 
-	function nextStep() {
-		switch (currStep) {
-			case 'credentials':
-				if (disabled) error = true
-				else currStep = 'team'
-				break
-			case 'team':
-				if (teamDisabled) error = true
-				else currStep = 'invite-email'
-				break
-			case 'invite-email':
-				currStep = 'invite-token'
-				break
-			default: {
-				currStep = 'review'
-			}
-		}
+  function nextStep() {
+    if(!signupState.currentStepValid) {
+      signupState.dirtyFields = FIELDS_FOR_STEPS[signupState.step] || []
+      return
+    }
 
-		if (!error && !teamDisabled) error = false
-	}
-
+    let currentStepIndex = SIGNUP_FORM_STEPS.findIndex((e) => e == signupState.step)
+    if(currentStepIndex !== -1 && currentStepIndex !== (SIGNUP_FORM_STEPS.length - 2)) {
+      let nextStep = SIGNUP_FORM_STEPS[currentStepIndex + 1]
+      signupState.step = nextStep
+    }
+  }
+  
 	function prevStep() {
-		if (currStep == 'invite-token') currStep = 'invite-email'
-		else if (currStep == 'invite-email') currStep = 'team'
-		else currStep = 'credentials'
+		let currentStepIndex = SIGNUP_FORM_STEPS.findIndex((e) => e == signupState.step)
+
+    if(currentStepIndex !== -1 && currentStepIndex >= 1) {
+      signupState.step = SIGNUP_FORM_STEPS[currentStepIndex - 1]
+    }
 	}
 </script>
 
@@ -129,29 +125,22 @@
 								<div class="text-2xl">Sign Up</div>
 							</div>
 
-							<div class="flex-grow w-full flex flex-col justify-start items-center">
-								{#if currStep == 'credentials'}
-									<UserCredentialsForm
-										{disabled}
-										{errorMessage}
-										bind:firstname
-										bind:lastname
-										bind:birthday
-										bind:email
-										bind:error
-										bind:password
-										bind:passwordConfirmation
-										bind:acceptPrivacy
-									/>
-								{:else if currStep == 'team'}
+							<div class="flex-grow w-full flex flex-col items-center h-full">
+								{#if signupState.step == 'credentials'}
+                  <div class="mt-8">
+                    <UserCredentialsForm
+                      bind:signupState
+                    />
+                  </div>
+								{:else if signupState.step == 'team'}
 									<NewTeamForm bind:sport bind:name bind:notes bind:error />
-								{:else if currStep == 'invite-email'}
+								{:else if signupState.step == 'inviteEmail'}
 									<!-- Optional -->
 									<InviteEmailForm bind:collaborators />
-								{:else if currStep == 'invite-token'}
+								{:else if signupState.step == 'inviteToken'}
 									<!-- Optional -->
 									<InviteTokenForm {token} />
-								{:else if currStep == 'review'}
+								{:else if signupState.step == 'review'}
 									<ConfirmForm
 										bind:step={currStep}
 										teamName={name}
@@ -185,27 +174,36 @@
 									>
 								</div>
 							{:else}
-								<button
-									onclick={prevStep}
-									class="py-1.5 {currStep == 'credentials' ? 'opacity-0' : ''}"
-								>
-									<div class="mx-auto w-fit flex items-center gap-1">
-										<Icon name="mdi-arrow-left" />
-										<span class="underline underline-offset-2">Back</span>
-									</div>
-								</button>
+                <div>
+                  {#if signupState.currentStepIndex > 0}
+                    <button
+                      onclick={prevStep}
+                      class="py-1.5"
+                    >
+                      <div class="mx-auto w-fit flex items-center gap-1">
+                        <Icon name="mdi-arrow-left" />
+                        <span class="underline underline-offset-2">Back</span>
+                      </div>
+                    </button>
+                  {/if}
+                </div>
 
 								<div class="flex justify-center items-center gap-1">
-									{#each formSteps as step}
+									{#each SIGNUP_FORM_STEPS as step}
 										<div
-											class="rounded-full {step == currStep
+											class="rounded-full {step == signupState.step
 												? 'bg-[rgb(var(--global-color-primary-500))]'
 												: 'bg-[rgb(var(--global-color-contrast-500))]'} h-[7px] w-[7px]"
 										></div>
 									{/each}
 								</div>
 
-								<button onclick={nextStep} class="!p-1.5">
+                
+								<button 
+                  onclick={nextStep}
+                  class="p-1.5"
+                  style:opacity={!signupState.currentStepValid && !signupState.currentStepSkippable ? '50%' : undefined}
+                >
 									<div class="flex items-center gap-1">
 										<span class="underline underline-offset-2"
 											>{currStep.includes('invite') ? 'Next / Skip' : 'Next'}</span
