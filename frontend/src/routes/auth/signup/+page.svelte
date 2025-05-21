@@ -9,7 +9,7 @@
 	import { goto } from '$app/navigation'
 	import InviteEmailForm from '@/lib/components/auth/InviteEmailForm.svelte'
 	import InviteTokenForm from '@/lib/components/auth/InviteTokenForm.svelte'
-	import { SIGNUP_FORM_STEPS, SignupState } from '@/lib/services/auth/signup.svelte'
+	import { FIELDS_FOR_STEPS, SIGNUP_FORM_STEPS, SignupState } from '@/lib/services/auth/signup.svelte'
 
   let signupState = $state(new SignupState())
 
@@ -72,7 +72,10 @@
 	let currStep: RegistrationStep = $state('credentials')
 
   function nextStep() {
-    if(!signupState.currentStepValid) return
+    if(!signupState.currentStepValid) {
+      signupState.dirtyFields = FIELDS_FOR_STEPS[signupState.step] || []
+      return
+    }
 
     let currentStepIndex = SIGNUP_FORM_STEPS.findIndex((e) => e == signupState.step)
     if(currentStepIndex !== -1 && currentStepIndex !== (SIGNUP_FORM_STEPS.length - 2)) {
@@ -197,9 +200,8 @@
 
                 
 								<button 
-                  onclick={nextStep} 
+                  onclick={nextStep}
                   class="p-1.5"
-                  disabled={!signupState.currentStepValid && !signupState.currentStepSkippable}
                   style:opacity={!signupState.currentStepValid && !signupState.currentStepSkippable ? '50%' : undefined}
                 >
 									<div class="flex items-center gap-1">

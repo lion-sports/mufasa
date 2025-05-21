@@ -20,15 +20,24 @@ export type SignupFormStep = typeof SIGNUP_FORM_STEPS[number]
 
 export const SIGNUP_FORM_SKIPPABLE_STEPS: SignupFormStep[] = ['team', 'inviteEmail', 'inviteToken', 'review']
 
-export class SignupState {
-  constructor() {
-    $effect(() => {
-      console.log(this.step)
-    })
-  }
+export const FIELDS_FOR_STEPS: {
+  [Key in SignupFormStep]?: (keyof SignupData)[]
+} = {
+  'credentials': [
+    'firstname',
+    'lastname',
+    'email',
+    'password',
+    'passwordConfirmation',
+    'acceptTermsAndCondition',
+    'birthday'
+  ]
+}
 
+export class SignupState {
   public signup: Partial<SignupData> = $state({})
   public step: SignupFormStep = $state('credentials')
+  public dirtyFields: string[] = $state([])
 
   public validationData: SignupValidationData = $derived.by(() => {
     let validationData: SignupValidationData = {}
@@ -82,16 +91,29 @@ export class SignupState {
     return validationData
   })
 
+  public dirtyValidationData: SignupValidationData = $derived.by(() => {
+    let dirtyValidationData: SignupValidationData = {}
+
+    for(const [key, value] of Object.entries(this.validationData)) {
+      let field = key as keyof SignupData
+      if(this.dirtyFields.includes(field)) {
+        dirtyValidationData[field] = value
+      }
+    }
+
+    return dirtyValidationData
+  })
+
   public stepValid: {
     [Key in SignupFormStep]: boolean
   } = $derived.by(() => {
-    let credentialsValid = !this.validationData.firstname?.error &&
-      !this.validationData.lastname?.error &&
-      !this.validationData.email &&
-      !this.validationData.password &&
-      !this.validationData.passwordConfirmation &&
-      !this.validationData.acceptTermsAndCondition &&
-      !this.validationData.birthday
+    let credentialsValid = true
+    for(const [key, value] of Object.entries(this.validationData)) {
+      let field = key as keyof SignupData
+      if (FIELDS_FOR_STEPS.credentials?.includes(field)) {
+        credentialsValid = credentialsValid && !this.validationData[field]?.error
+      }
+    }
 
     return {
       credentials: credentialsValid,
