@@ -1,7 +1,7 @@
 import { belongsTo, column } from '@adonisjs/lucid/orm'
 import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import User from './User.js'
-import { BelongsTo } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 
 export type ApiTokenType = 'api' | 'refresh' | 'resetPassword' | 'confirmRegistration'
