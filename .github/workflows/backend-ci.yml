@@ -6,6 +6,9 @@ on:
     branches: ["master", "testing"]
     tags:
       - "v*"
+    paths:
+      - backend/**
+      - common/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
