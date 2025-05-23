@@ -8,6 +8,7 @@
 	import type { ComponentProps } from 'svelte'
 	import { page } from '$app/state'
 	import { goto } from '$app/navigation'
+	import { SPORT_ICON } from '@/lib/services/sport'
 
   let { data, children }: { 
     data: LayoutData,
@@ -32,6 +33,7 @@
   let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = [
       { name: 'general', icon: 'mdi-card-account-details', label: 'Generale'},
       { name: 'members', icon: 'mdi-account-multiple', label: 'Membri'},
+      { name: 'teams', icon: SPORT_ICON[data.club.sport || 'none'], label: 'Teams'},
       { name: 'settings', icon: 'mdi-cog', label: 'Impostazioni'}
     ],
     selectedTab: ComponentProps<typeof StandardTabSwitcher>['selected'] = $derived.by(() => {
@@ -40,6 +42,7 @@
       if(page.url.pathname.startsWith(`${baseUrl}/general`)) selectedTab = 'general'
       else if(page.url.pathname.startsWith(`${baseUrl}/members`)) selectedTab = 'members'
       else if(page.url.pathname.startsWith(`${baseUrl}/settings`)) selectedTab = 'settings'
+      else if(page.url.pathname.startsWith(`${baseUrl}/teams`)) selectedTab = 'teams'
       return selectedTab
     })
 
@@ -47,6 +50,7 @@
     if(e.detail.tab.name == 'general') goto((`/clubs/${data.club.id}/general`))
     else if(e.detail.tab.name == 'members') goto((`/clubs/${data.club.id}/members`))
     else if(e.detail.tab.name == 'settings') goto((`/clubs/${data.club.id}/settings`))
+    else if(e.detail.tab.name == 'teams') goto((`/clubs/${data.club.id}/teams`))
   }
 
 </script>
