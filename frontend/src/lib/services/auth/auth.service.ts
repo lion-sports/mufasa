@@ -9,8 +9,6 @@ import phantom from '$lib/stores/provider/phantom'
 import type { UserSetting } from '../userSettings/usersSettings.service'
 import type { Sport } from 'lionn-common'
 
-export type RegistrationStep = 'credentials' | 'team' | 'review' | 'invite-email' | 'invite-token'
-
 export type User = {
 	id: number
 	firstname: string

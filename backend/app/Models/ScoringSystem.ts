@@ -5,7 +5,7 @@ import { DateTime } from 'luxon'
 import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { belongsTo, column } from '@adonisjs/lucid/orm'
 import { type BelongsTo } from '@adonisjs/lucid/types/relations'
-import { Sport } from 'lionn-common'
+import type { Sport } from 'lionn-common'
 
 export type ScoringSystemConfigPoints =
   | {

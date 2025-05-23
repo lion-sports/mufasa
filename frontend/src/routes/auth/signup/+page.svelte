@@ -1,7 +1,6 @@
 <script lang="ts">
-	import AuthService, { type RegistrationStep } from '$lib/services/auth/auth.service'
+	import AuthService from '$lib/services/auth/auth.service'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
-	import type { Sport } from 'lionn-common'
 	import UserCredentialsForm from '@/lib/components/auth/UserCredentialsForm.svelte'
 	import { Icon } from '@likable-hair/svelte'
 	import NewClubForm from '@/lib/components/auth/NewClubForm.svelte'
@@ -21,8 +20,6 @@
 	let collaborators: string[] = $state([])
 
 	let loading: boolean = false
-	let error: boolean = $state(false)
-	let errorMessage: string = $state('')
 
 	function signup() {
 		loading = true
@@ -58,7 +55,7 @@
 		}
 
 		let currentStepIndex = SIGNUP_FORM_STEPS.findIndex((e) => e == signupState.step)
-		if (currentStepIndex !== -1 && currentStepIndex !== SIGNUP_FORM_STEPS.length - 2) {
+		if (currentStepIndex !== -1 && currentStepIndex !== SIGNUP_FORM_STEPS.length - 1) {
 			let nextStep = SIGNUP_FORM_STEPS[currentStepIndex + 1]
 			signupState.step = nextStep
 		}
