@@ -36,19 +36,10 @@
 
 	let { selectedSet = [], widget, loadingData = false }: Props = $props()
 
-	let data: ComponentProps<typeof BarChart>['data'] = $state({
-		labels: [],
-		datasets: []
-	})
+	let data: ComponentProps<typeof BarChart>['data'] = $derived.by(() => {
+    let data: ComponentProps<typeof BarChart>['data'] = undefined
 
-	let setting = $derived(
-		widget.widgetSetting?.settings?.widget == 'VolleyballServeSummary'
-			? widget.widgetSetting?.settings
-			: undefined
-	)
-
-	run(() => {
-		if (!!widget.data?.totalServe) {
+    if (!!widget.data?.totalServe) {
 			data = {
 				labels: ['Punti', 'Errori', 'Ricevuti'],
 				datasets: []
@@ -97,7 +88,15 @@
 				data.datasets[datasetIndex].data = [totalServeRow.points, totalServeRow.errors, received]
 			}
 		}
-	})
+
+    return data
+  })
+
+	let setting = $derived(
+		widget.widgetSetting?.settings?.widget == 'VolleyballServeSummary'
+			? widget.widgetSetting?.settings
+			: undefined
+	)
 
 	let settingsOpened: boolean = $state(false)
 	let selectedTeamFilter: TeamFilter | undefined = $state(undefined)
@@ -142,7 +141,7 @@
 				<Skeleton --skeleton-card-height="100%" --skeleton-card-width="100%"></Skeleton>
 			{:else}
 				<BarChart
-					{data}
+					data={data}
 					rgbTooltipBackgroundColor={$theme.colors?.[$theme.active]['dark']['background']['200']}
 					rgbTooltipColor={$theme.colors?.[$theme.active]['dark']['contrast']['200']}
 					showLegend={false}
@@ -150,9 +149,6 @@
 					showYTicks={true}
 					lineWidth={0}
 					maintainAspectRatio={false}
-					xTickLabel={(value) => {
-						return ['Punti', 'Errori', 'Ricevuti'][Number(value)]
-					}}
 				></BarChart>
 			{/if}
 		</div>

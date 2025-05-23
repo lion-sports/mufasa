@@ -1,6 +1,5 @@
 import User from './User.js'
 import Team from './Team.js'
-
 import { DateTime } from 'luxon'
 import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { belongsTo, column } from '@adonisjs/lucid/orm'
