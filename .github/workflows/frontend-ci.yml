@@ -1,13 +1,12 @@
 name: frontend-ci
 
 on:
+  workflow_dispatch:
   push:
-    workflow_dispatch:
     branches: ["master", "testing"]
     tags:
       - "v*"
     paths:
-      - .github/frontend-ci.yml
       - frontend/**
 
 concurrency:

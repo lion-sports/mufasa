@@ -1,13 +1,12 @@
 name: backend-ci
 
 on:
+  workflow_dispatch:
   push:
-    workflow_dispatch:
     branches: ["master", "testing"]
     tags:
       - "v*"
     paths:
-      - .github/backend-ci.yml
       - backend/**
       - common/**
 
