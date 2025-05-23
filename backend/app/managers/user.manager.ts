@@ -120,6 +120,7 @@ class UsersManager {
       throw new Error(error)
     }
 
+    // need to commit last transaction to send email with new user
     const newTrx = await db.transaction()
     try {
       await this.sendConfirmationEmail({ data: { user: user }, context: { trx: newTrx } })

@@ -22,6 +22,8 @@ export type SignupValidationData = {
 }
 
 export const SIGNUP_FORM_STEPS = ['credentials', 'club', 'inviteEmail', 'review'] as const
+export const SIGNUP_FORM_STEPS_FOR_ATHLETE = ['credentials', 'review'] as const
+
 export type SignupFormStep = (typeof SIGNUP_FORM_STEPS)[number]
 
 export const SIGNUP_FORM_SKIPPABLE_STEPS: SignupFormStep[] = ['inviteEmail', 'review']
@@ -42,9 +44,17 @@ export const FIELDS_FOR_STEPS: {
 }
 
 export class SignupState {
+	public token?: string = $state()
 	public signup: Partial<SignupData> = $state({})
 	public step: SignupFormStep = $state('credentials')
 	public dirtyFields: string[] = $state([])
+
+	public isAthleteSignup: boolean = $derived(!!this.token)
+	public steps = $derived(this.isAthleteSignup ? SIGNUP_FORM_STEPS_FOR_ATHLETE : SIGNUP_FORM_STEPS)
+
+	public constructor(params: { token?: string }) {
+		this.token = params.token
+	}
 
 	public validationData: SignupValidationData = $derived.by(() => {
 		let validationData: SignupValidationData = {}

@@ -1,5 +1,5 @@
 import AuthService from '$lib/services/auth/auth.service'
-import { error, redirect } from '@sveltejs/kit'
+import { redirect } from '@sveltejs/kit'
 import type { PageLoad } from './$types'
 import { goto } from '$app/navigation'
 

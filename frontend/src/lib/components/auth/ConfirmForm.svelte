@@ -47,50 +47,52 @@
 		{/snippet}
 	</ReviewCard>
 
-	<!-- Team Card -->
-	<ReviewCard onclick={() => (signupState.step = 'club')}>
-		{#snippet icon()}
-			<div class="w-20 text-4xl flex items-center justify-center">
-				<Icon name="mdi-account-group" />
-			</div>
-			<div class="text-xs text-center">Team Info</div>
-		{/snippet}
-		{#snippet reviewContent()}
-			<div class="flex items-center justify-between">
-				<div class="font-medium">Handle:</div>
-				<div>{signupState.signup.clubName || '-'}</div>
-			</div>
-			<div class="flex items-center justify-between">
-				<div class="font-medium">Nome Completo:</div>
-				<div>{signupState.signup.clubCompleteName || '-'}</div>
-			</div>
-			<div class="flex items-center justify-between">
-				<div class="font-medium">Sport:</div>
-				<div>{signupState.signup.clubSport || '-'}</div>
-			</div>
-		{/snippet}
-	</ReviewCard>
-
-	<!-- Some Other -->
-	<ReviewCard onclick={() => (signupState.step = 'inviteEmail')}>
-		{#snippet icon()}
-			<div class="w-20 text-4xl flex items-center justify-center">
-				<Icon name="mdi-information" />
-			</div>
-			<div class="text-xs text-center">Other info</div>
-		{/snippet}
-		{#snippet reviewContent()}
-			<div class="flex items-center justify-between">
-				<div class="font-medium">Collaboratori n.:</div>
-				<div>
-					<!-- {collaborators ? collaborators.length : 0} -->
-					0
+	{#if !signupState.isAthleteSignup}
+		<!-- Team Card -->
+		<ReviewCard onclick={() => (signupState.step = 'club')}>
+			{#snippet icon()}
+				<div class="w-20 text-4xl flex items-center justify-center">
+					<Icon name="mdi-account-group" />
 				</div>
-			</div>
-		{/snippet}
-	</ReviewCard>
+				<div class="text-xs text-center">Team Info</div>
+			{/snippet}
+			{#snippet reviewContent()}
+				<div class="flex items-center justify-between">
+					<div class="font-medium">Handle:</div>
+					<div>{signupState.signup.clubName || '-'}</div>
+				</div>
+				<div class="flex items-center justify-between">
+					<div class="font-medium">Nome Completo:</div>
+					<div>{signupState.signup.clubCompleteName || '-'}</div>
+				</div>
+				<div class="flex items-center justify-between">
+					<div class="font-medium">Sport:</div>
+					<div>{signupState.signup.clubSport || '-'}</div>
+				</div>
+			{/snippet}
+		</ReviewCard>
 
-	<div class="w-full text-left opacity-50">
-		Puoi rivedere ogni step cliccando sulle schede qui sopra.
-	</div>
+		<!-- Some Other -->
+		<ReviewCard onclick={() => (signupState.step = 'inviteEmail')}>
+			{#snippet icon()}
+				<div class="w-20 text-4xl flex items-center justify-center">
+					<Icon name="mdi-information" />
+				</div>
+				<div class="text-xs text-center">Other info</div>
+			{/snippet}
+			{#snippet reviewContent()}
+				<div class="flex items-center justify-between">
+					<div class="font-medium">Collaboratori n.:</div>
+					<div>
+						<!-- {collaborators ? collaborators.length : 0} -->
+						0
+					</div>
+				</div>
+			{/snippet}
+		</ReviewCard>
+
+		<div class="w-full text-left opacity-50">
+			Puoi rivedere ogni step cliccando sulle schede qui sopra.
+		</div>
+	{/if}
 </div>

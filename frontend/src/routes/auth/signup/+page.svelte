@@ -13,8 +13,16 @@
 		SignupState
 	} from '@/lib/services/auth/signup.svelte'
 	import { addErrorToast } from '@/lib/components/ui/sonner'
+	import type { PageData } from './$types'
 
-	let signupState = $state(new SignupState())
+	interface Props {
+		data: PageData
+	}
+
+	let { data }: Props = $props()
+
+	// IF TOKEN IN URL, SIGN UP AS ATHLETE
+	let signupState = $state(new SignupState({ token: data.token }))
 
 	// Collaborators Data
 	let collaborators: string[] = $state([])
@@ -54,18 +62,18 @@
 			return
 		}
 
-		let currentStepIndex = SIGNUP_FORM_STEPS.findIndex((e) => e == signupState.step)
-		if (currentStepIndex !== -1 && currentStepIndex !== SIGNUP_FORM_STEPS.length - 1) {
-			let nextStep = SIGNUP_FORM_STEPS[currentStepIndex + 1]
+		let currentStepIndex = signupState.steps.findIndex((e) => e == signupState.step)
+		if (currentStepIndex !== -1 && currentStepIndex !== signupState.steps.length - 1) {
+			let nextStep = signupState.steps[currentStepIndex + 1]
 			signupState.step = nextStep
 		}
 	}
 
 	function prevStep() {
-		let currentStepIndex = SIGNUP_FORM_STEPS.findIndex((e) => e == signupState.step)
+		let currentStepIndex = signupState.steps.findIndex((e) => e == signupState.step)
 
 		if (currentStepIndex !== -1 && currentStepIndex >= 1) {
-			signupState.step = SIGNUP_FORM_STEPS[currentStepIndex - 1]
+			signupState.step = signupState.steps[currentStepIndex - 1]
 		}
 	}
 </script>
