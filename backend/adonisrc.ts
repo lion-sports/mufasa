@@ -22,6 +22,7 @@ export default defineConfig({
     () => import('@adonisjs/session/session_provider'),
     () => import('@adonisjs/drive/drive_provider'),
     () => import('@adonisjs/mail/mail_provider'),
+    () => import('@adonisjs/core/providers/edge_provider')
   ],
   tests: {
     suites: [
@@ -41,4 +42,8 @@ export default defineConfig({
   hooks: {
     onBuildStarting: [() => import('@adonisjs/vite/build_hook')],
   },
+  metaFiles: [{
+    pattern: 'resources/views/**/*.edge',
+    reloadServer: false,
+  }]
 })

@@ -78,30 +78,23 @@ class UsersManager {
     let trx = params.context?.trx!
 
     let validatedData = await signupValidator.validate(params.data)
-
     let existingUser = await User.query({ client: trx }).where('email', validatedData.email).first()
-
     if (!!existingUser) throw new Error('user already exists')
 
     let invitation: Invitation | undefined = undefined
     if (!!validatedData.invitationToken) {
       let invitationManager = new InvitationsManager()
       let tokenValid = await invitationManager.validateInvitationToken({
-        data: {
-          token: validatedData.invitationToken,
-        },
+        data: { token: validatedData.invitationToken },
         context: params.context,
       })
 
-      if (!tokenValid.valid) {
-        throw new Error(tokenValid.message)
-      } else if (!!tokenValid.invitation) {
-        invitation = tokenValid.invitation
-      }
+      if (!tokenValid.valid) throw new Error(tokenValid.message)
+      else if (!!tokenValid.invitation) invitation = tokenValid.invitation
     }
 
     const manager = new UsersManager()
-    let user = await manager.create({
+    const user = await manager.create({
       data: {
         email: params.data.email,
         password: params.data.password,
@@ -118,6 +111,13 @@ class UsersManager {
       invitation.invitedUserId = user.id
       await invitation.useTransaction(trx).save()
     }
+
+    console.log('SENDING')
+    // TODO send confirmation email
+    await this.sendConfirmationEmail({
+      data: { user: user },
+      context: { trx },
+    })
 
     return user
   }
@@ -142,27 +142,17 @@ class UsersManager {
     })
 
     let userCreated = await User.firstOrCreate(
-      {
-        email: params.data.email,
-      },
+      { email: params.data.email },
       {
         ...params.data,
         name: params.data.firstname + ' ' + params.data.lastname,
       },
-      {
-        client: trx,
-      }
+      { client: trx }
     )
     const manager = new SolanaManager()
     if (!userCreated.solanaPublicKey) {
       await manager.keygen({ data: { userId: userCreated.id }, context: params.context })
     }
-
-    // TODO send confirmation email
-    await this.sendConfirmationEmail({
-      data: { user: userCreated },
-      context: { trx },
-    })
 
     return userCreated
   }
@@ -233,20 +223,8 @@ class UsersManager {
     const confirmRegistrationToken = string.generateRandom(64)
     const expiration = DateTime.now().plus({ hour: 1 })
 
-    await ApiToken.create(
-      {
-        userId: params.data.user.id,
-        name: 'Confirm Registration Token',
-        type: 'confirmRegistration',
-        token: confirmRegistrationToken,
-        expires_at: expiration,
-      },
-      { client: trx }
-    )
-
-    const url = `${env.get('CONFIRMATION_EMAIL_URL')}?token=${confirmRegistrationToken}&userId=${
-      params.data.user.id
-    }`
+    // const url = `${env.get('CONFIRMATION_EMAIL_URL')}?token=${confirmRegistrationToken}&userId=${
+    const url = `${env.get('CONFIRMATION_EMAIL_URL')}`
     return url
   }
 
@@ -260,6 +238,8 @@ class UsersManager {
     context?: Context
   }): Promise<void> {
     const trx = params.context?.trx
+    console.log('send confirmation email')
+
     if (!params.data.user.id) throw new Error('No user id supplied')
 
     const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
@@ -269,8 +249,9 @@ class UsersManager {
       context: { trx },
     })
 
+    console.log(user.firstname, user.firstname, verificationUrl, 'aa')
     const email = new ConfirmationNotification({ user, verificationUrl })
-    await mail.sendLater(email)
+    await mail.send(email)
   }
 }
 

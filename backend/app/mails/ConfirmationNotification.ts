@@ -19,6 +19,9 @@ export default class ConfirmationNotification extends BaseMail {
    */
   prepare() {
     const senderMail = env.get('SMTP_USERNAME') || ''
+    const testMail = env.get('TEST_EMAIL')
+    if (!app.inProduction && !testMail) throw new Error('no test mail provided')
+
     this.message
       .from(senderMail)
       .subject('Conferma registrazione')
@@ -26,14 +29,6 @@ export default class ConfirmationNotification extends BaseMail {
         user: this.user,
         verificationUrl: this.verificationUrl,
       })
-
-    const testMail = env.get('TEST_EMAIL')
-    if (!app.inProduction && !testMail) throw new Error('no test mail provided')
-
-    if (!!testMail) {
-      this.message.to(testMail)
-    } else {
-      this.message.to(this.user.email)
-    }
+      .to(!!testMail ? testMail : this.user.email)
   }
 }

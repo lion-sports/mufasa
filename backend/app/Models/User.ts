@@ -66,6 +66,14 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
     type: 'api',
   })
 
+  static confirmRegistrationToken = DbAccessTokensProvider.forModel(User, {
+    expiresIn: '24 hours',
+    tokenSecretLength: 64,
+    prefix: 'reg_',
+    table: 'auth_access_tokens',
+    type: 'signup',
+  })
+
   static resetPasswordTokens = DbAccessTokensProvider.forModel(User, {
     expiresIn: '10 minutes',
     tokenSecretLength: 64,

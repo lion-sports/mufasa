@@ -69,6 +69,7 @@
     "@solana/web3.js": "^1.92.3",
     "@vinejs/vine": "^3.0.1",
     "argon2": "^0.41.1",
+    "edge.js": "^6.2.1",
     "exceljs": "^4.4.0",
     "google-auth-library": "^8.7.0",
     "hot-hook": "^0.4.0",
