@@ -58,30 +58,4 @@ function withTransaction(_target: any, _propertyKey: string, descriptor: Propert
   }
 }
 
-function withAuth<R extends Resource>(resource: R, action: Action<R>, entities?: any) {
-  function withAuthDecorator(_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
-    const originalMethod = descriptor.value
-    descriptor.value = async function (...args: any[]) {
-      let user = args[0]?.context?.user
-      if (!user) throw new Error('user must be defined')
-
-      await AuthorizationManager.canOrFail({
-        data: {
-          actor: user,
-          action: action,
-          resource: resource,
-          entities: entities,
-        },
-        context: {
-          trx: args[0]?.context?.trx,
-        },
-      })
-
-      return originalMethod.apply(this, args)
-    }
-  }
-
-  return withAuthDecorator
-}
-
-export { withUser, withTransaction, withAuth }
+export { withUser, withTransaction }

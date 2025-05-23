@@ -20,7 +20,11 @@ export default class TeamRotationScoutEvent extends ScoutEvent<
   public type = 'teamRotation' as const
   public newPositions: VolleyballPlayersPosition
 
-  constructor(params: ScoutEventConstructorsParameters<'teamRotation', VolleyballPoints, TeamRotationScoutExtraProperties>) {
+  constructor(params: ScoutEventConstructorsParameters<'teamRotation', VolleyballPoints, {
+    opponent: boolean,
+    rotationType: RotationType,
+    fromPositions: VolleyballPlayersPosition
+  }>) {
     let newPositions = rotate({
       position: params.fromPositions,
       opponent: params.opponent,

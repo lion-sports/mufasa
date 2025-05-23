@@ -8,7 +8,7 @@ import scoutsSocket from "../../scouts.socket.js";
 export default class ReceiveScoutEvent extends ScoutEvent<ReceiveScoutExtraProperties, 'receive', VolleyballPoints> {
   public type = 'receive' as const
 
-  constructor(params: ScoutEventConstructorsParameters<'receive', VolleyballPoints, VolleyballPoints>) {
+  constructor(params: ScoutEventConstructorsParameters<'receive', VolleyballPoints, ReceiveScoutExtraProperties>) {
     if (!params.playerId) params.playerId = params.player.id
     if (!params.playerId) throw new Error('playerId must be defined')
 

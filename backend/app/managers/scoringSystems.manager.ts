@@ -10,7 +10,7 @@ import { ModelObject } from '@adonisjs/lucid/types/model'
 
 import ScoringSystem, { ScoringSystemConfig } from '#app/Models/ScoringSystem'
 import User from '#app/Models/User'
-import Sport from '#app/Models/Scout'
+import { Sport } from 'lionn-common'
 
 export default class ScoringSystemsManager {
   @withTransaction

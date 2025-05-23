@@ -21,7 +21,7 @@ export default class LiberoSubstitutionScoutEvent extends ScoutEvent<
     if (!params.playerId) params.playerId = params.player.id
     if (!params.playerId) throw new Error('playerId must be defined')
 
-    if (!params.liberoId) params.liberId = params.libero.id
+    if (!params.liberoId) params.liberoId = params.libero.id
     if (!params.liberoId) throw new Error('liberoId must be defined')
 
     if (params.opponent === undefined) params.opponent = params.player.isOpponent

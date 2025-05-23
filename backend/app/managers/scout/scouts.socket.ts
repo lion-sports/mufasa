@@ -219,7 +219,9 @@ class ScoutSocket {
     let Cl = TYPE_TO_VOLLEYBALL_SCOUT_EVENT[params.data.scoutEvent.type]
     let event = new Cl({
       ...params.data.scoutEvent,
+      // @ts-ignore
       createdByUserId: user.id,
+      // @ts-ignore
       clientIdentifier: params.data.clientIdentifier,
     })
     await event.preReceived({
