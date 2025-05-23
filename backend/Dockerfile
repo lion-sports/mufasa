@@ -28,4 +28,4 @@ EXPOSE $PORT
 COPY --chown=node:node --chmod=+x ./backend/docker-entrypoint.sh ./docker-entrypoint.sh
 ENTRYPOINT [ "/home/node/app/docker-entrypoint.sh" ]
 
-CMD [ "dumb-init", "node", "server.js" ]
+CMD [ "dumb-init", "node", "bin/server.js" ]
