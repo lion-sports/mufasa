@@ -129,6 +129,7 @@ jobs:
           TELEGRAM_FIPAV_BOT_TOKEN: FIPAVBotToken
           SMTP_HOST: smtp.gmail.com
           SMTP_PORT: 587
+          TEST_EMAIL: pippo.baudo@likablehair.it
 
   docker:
     runs-on: ubuntu-latest
