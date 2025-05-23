@@ -12,35 +12,6 @@ export default class AppProvider {
   }
 
   public async boot() {
-    // IoC container is ready
-    const { default: Env } = await import('#start/env')
-
-    if(this.app.getEnvironment() == 'web') {
-      const token = Env.get('TELEGRAM_FIPAV_BOT_TOKEN')
-      const publicUrl = Env.get('PUBLIC_URL')
-  
-      if(!!publicUrl && !!token) {
-        const { default: Route } = await import('@adonisjs/core/services/router')
-  
-        let fipavBot = new FipavBot({
-          token,
-          webHookUrl: `${publicUrl}/bot${token}`
-        })
-  
-        Route.post(`/bot${token}`, ({ request, response }) => {
-          // @ts-ignore
-          let update: TelegramBot.Update = request.body()
-  
-          fipavBot.bot.processUpdate(update)
-          response.send(200)
-        })
-      } else if(!!token) {
-        new FipavBot({ token })
-      } else {
-        console.warn('missing telegram bot token')
-      }
-    }
-
   }
 
   public async ready() {
@@ -117,6 +88,32 @@ export default class AppProvider {
         }
 
       })
+
+      const { default: Env } = await import('#start/env')
+
+      const token = Env.get('TELEGRAM_FIPAV_BOT_TOKEN')
+      const publicUrl = Env.get('PUBLIC_URL')
+
+      if (!!publicUrl && !!token) {
+        const { default: Route } = await import('@adonisjs/core/services/router')
+
+        let fipavBot = new FipavBot({
+          token,
+          webHookUrl: `${publicUrl}/bot${token}`
+        })
+
+        Route.post(`/bot${token}`, ({ request, response }) => {
+          // @ts-ignore
+          let update: TelegramBot.Update = request.body()
+
+          fipavBot.bot.processUpdate(update)
+          response.send(200)
+        })
+      } else if (!!token) {
+        new FipavBot({ token })
+      } else {
+        console.warn('missing telegram bot token')
+      }
     }
   }
 
