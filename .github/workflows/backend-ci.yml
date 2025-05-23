@@ -100,6 +100,7 @@ jobs:
           HOST: 0.0.0.0
           PORT: 3333
           APP_KEY: ${{github.sha}}
+          APP_NAME: mufasa
           DRIVE_DISK: local
           NODE_ENV: production
           ADMIN_USER_SEED_PASSWORD: mufasa
@@ -109,6 +110,7 @@ jobs:
           PG_HOST: localhost
           PG_PORT: 5432
           PG_USER: postgres
+          PG_DB_NAME: mufasa
           MONGO_URL: mongodb://localhost:27017
           MONGO_DB: test
           REDIS_HOST: localhost
@@ -124,6 +126,8 @@ jobs:
           GOOGLE_IOS_FRONTEND_CALLBACK_URL: mufasa://authorization
           PUBLIC_URL: http://localhost:3333
           TELEGRAM_FIPAV_BOT_TOKEN: FIPAVBotToken
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: 587
 
   docker:
     runs-on: ubuntu-latest
