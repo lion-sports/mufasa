@@ -13,6 +13,7 @@ import { DbAccessTokensProvider, AccessToken } from '@adonisjs/auth/access_token
 import { compose } from '@adonisjs/core/helpers'
 import Club from './Club.js'
 import UserSetting from './UserSetting.js'
+import stringHelpers from '@adonisjs/core/helpers/string'
 
 const AuthFinder = withAuthFinder(() => hash.use('argon'), {
   uids: ['email'],
@@ -75,7 +76,7 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
   })
 
   static rememberMeTokens = DbAccessTokensProvider.forModel(User, {
-    expiresIn: '3 months',
+    expiresIn: '90d',
     tokenSecretLength: 64,
     prefix: 'rem_',
     table: 'auth_access_tokens',
