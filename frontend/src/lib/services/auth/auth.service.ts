@@ -332,4 +332,15 @@ export default class AuthService extends FetchBasedService {
 			console.error('connect ERROR:', err)
 		}
 	}
+
+	async verifySignup(params: { token?: string; userId: string }): Promise<User> {
+		const response = await this.client.post({
+			url: '/auth/verifySignup',
+			body: {
+				userId: params.userId
+			}
+		})
+
+		return response
+	}
 }

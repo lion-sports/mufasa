@@ -11,6 +11,9 @@ import FilterModifierApplier, { Modifier } from '#services/FilterModifierApplier
 import InvitationsManager from './invitations.manager.js'
 import Invitation from '#models/Invitation'
 import vine from '@vinejs/vine'
+import ConfirmationNotification from '#app/mails/ConfirmationNotification'
+import env from '#start/env'
+import db from '@adonisjs/lucid/services/db'
 
 export const signupValidator = vine.compile(
   vine.object({
@@ -25,10 +28,6 @@ export const signupValidator = vine.compile(
     invitationToken: vine.string().optional(),
   })
 )
-import ConfirmationNotification from '#app/mails/ConfirmationNotification'
-import string from '@adonisjs/core/helpers/string'
-import env from '#start/env'
-import ApiToken from '#models/ApiToken'
 
 // TODO add authorization manager
 class UsersManager {
@@ -76,48 +75,58 @@ class UsersManager {
     context?: Context
   }): Promise<User> {
     let trx = params.context?.trx!
+    let user: User
+    try {
+      let validatedData = await signupValidator.validate(params.data)
+      let existingUser = await User.query({ client: trx })
+        .where('email', validatedData.email)
+        .first()
+      if (!!existingUser) throw new Error('user already exists')
 
-    let validatedData = await signupValidator.validate(params.data)
-    let existingUser = await User.query({ client: trx }).where('email', validatedData.email).first()
-    if (!!existingUser) throw new Error('user already exists')
+      let invitation: Invitation | undefined = undefined
+      if (!!validatedData.invitationToken) {
+        let invitationManager = new InvitationsManager()
+        let tokenValid = await invitationManager.validateInvitationToken({
+          data: { token: validatedData.invitationToken },
+          context: params.context,
+        })
 
-    let invitation: Invitation | undefined = undefined
-    if (!!validatedData.invitationToken) {
-      let invitationManager = new InvitationsManager()
-      let tokenValid = await invitationManager.validateInvitationToken({
-        data: { token: validatedData.invitationToken },
+        if (!tokenValid.valid) throw new Error(tokenValid.message)
+        else if (!!tokenValid.invitation) invitation = tokenValid.invitation
+      }
+
+      const manager = new UsersManager()
+      user = await manager.create({
+        data: {
+          email: params.data.email,
+          password: params.data.password,
+          birthday: params.data.birthday,
+          firstname: params.data.firstname,
+          lastname: params.data.lastname,
+          solanaPublicKey: params.data.solanaPublicKey,
+        },
         context: params.context,
       })
 
-      if (!tokenValid.valid) throw new Error(tokenValid.message)
-      else if (!!tokenValid.invitation) invitation = tokenValid.invitation
+      if (!!invitation) {
+        invitation.invitedEmail = user.email
+        invitation.invitedUserId = user.id
+        await invitation.useTransaction(trx).save()
+      }
+
+      trx.commit()
+    } catch (error) {
+      trx.rollback()
+      throw new Error(error)
     }
 
-    const manager = new UsersManager()
-    const user = await manager.create({
-      data: {
-        email: params.data.email,
-        password: params.data.password,
-        birthday: params.data.birthday,
-        firstname: params.data.firstname,
-        lastname: params.data.lastname,
-        solanaPublicKey: params.data.solanaPublicKey,
-      },
-      context: params.context,
-    })
-
-    if (!!invitation) {
-      invitation.invitedEmail = user.email
-      invitation.invitedUserId = user.id
-      await invitation.useTransaction(trx).save()
+    const newTrx = await db.transaction()
+    try {
+      await this.sendConfirmationEmail({ data: { user: user }, context: { trx: newTrx } })
+    } catch (error) {
+      newTrx.rollback()
+      throw new Error(error)
     }
-
-    console.log('SENDING')
-    // TODO send confirmation email
-    await this.sendConfirmationEmail({
-      data: { user: user },
-      context: { trx },
-    })
 
     return user
   }
@@ -214,17 +223,19 @@ class UsersManager {
   @withTransaction
   public async generateResetPasswordUrl(params: {
     data: {
-      user: User
+      user: { id: number }
     }
     context?: Context
   }): Promise<string> {
     let trx = params.context?.trx!
 
-    const confirmRegistrationToken = string.generateRandom(64)
-    const expiration = DateTime.now().plus({ hour: 1 })
+    const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
+    // const token = await User.confirmRegistrationToken.create(user, ['*'], {
+    //   expiresIn: '24 hours',
+    // })
 
-    // const url = `${env.get('CONFIRMATION_EMAIL_URL')}?token=${confirmRegistrationToken}&userId=${
-    const url = `${env.get('CONFIRMATION_EMAIL_URL')}`
+    // const url = `${env.get('CONFIRMATION_EMAIL_URL')}?token=${token.identifier}&userId=${params.data.user.id}`
+    const url = `${env.get('CONFIRMATION_EMAIL_URL')}?userId=${params.data.user.id}`
     return url
   }
 
@@ -237,21 +248,31 @@ class UsersManager {
     }
     context?: Context
   }): Promise<void> {
-    const trx = params.context?.trx
-    console.log('send confirmation email')
-
+    const trx = params.context?.trx!
     if (!params.data.user.id) throw new Error('No user id supplied')
 
     const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
 
     const verificationUrl = await this.generateResetPasswordUrl({
-      data: { user },
+      data: { user: { id: params.data.user.id } },
       context: { trx },
     })
 
-    console.log(user.firstname, user.firstname, verificationUrl, 'aa')
     const email = new ConfirmationNotification({ user, verificationUrl })
     await mail.send(email)
+  }
+
+  @withTransaction
+  public async verifySignup(params: {
+    data: {
+      user: { id: number }
+    }
+    context?: Context
+  }) {
+    const trx = params.context?.trx!
+
+    const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
+    return await user.merge({ registrationConfirmed: true }).save()
   }
 }
 

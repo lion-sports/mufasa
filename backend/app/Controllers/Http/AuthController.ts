@@ -10,6 +10,9 @@ export default class AuthController {
     let generateRefresh = request.input('generateRefresh')
 
     let user = await User.query().where('email', 'ILIKE', request.input('email')).firstOrFail()
+    if (!user.registrationConfirmed) {
+      throw new Error('this user has yet to confirm the registration')
+    }
 
     user = await User.verifyCredentials(user.email, request.input('password'))
 
@@ -52,9 +55,7 @@ export default class AuthController {
     await auth.use('api')
     if (!auth.user) return
 
-    let user = await User.query().where('id', auth.user.id)
-      .preload('userSetting')
-      .firstOrFail()
+    let user = await User.query().where('id', auth.user.id).preload('userSetting').firstOrFail()
 
     return user
   }
@@ -69,8 +70,8 @@ export default class AuthController {
         lastname: request.input('lastname'),
         birthday: request.input('birthday'),
         solanaPublicKey: request.input('solanaPublicKey'),
-        invitationToken: request.input('invitationToken')
-      }
+        invitationToken: request.input('invitationToken'),
+      },
     })
   }
 
@@ -189,5 +190,17 @@ export default class AuthController {
     } catch (error) {
       throw new Error('Bad token')
     }
+  }
+
+  public async verifySignup({ request, auth }: HttpContext) {
+    // change user from unverified to verified
+    const userId = request.input('userId')
+
+    let manager = new UsersManager()
+    return await manager.verifySignup({
+      data: {
+        user: { id: userId },
+      },
+    })
   }
 }

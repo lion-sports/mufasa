@@ -45,6 +45,7 @@ const ClubsController = () => import('#controllers/Http/ClubsController')
 const UserSettingsController = () => import('#controllers/Http/UserSettingsController')
 
 router.post('/auth/login', [AuthController, 'login'])
+router.post('/auth/verifySignup', [AuthController, 'verifySignup'])
 router.post('/auth/refreshToken', [AuthController, 'refreshToken'])
 router.post('/auth/signup', [AuthController, 'signup'])
 router.post('/auth/logout', [AuthController, 'logout']).use(middleware.auth({

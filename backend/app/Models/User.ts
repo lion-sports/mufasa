@@ -32,6 +32,9 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
   @column()
   public name?: string
 
+  @column()
+  public registrationConfirmed?: boolean
+
   @column.dateTime()
   public birthday?: DateTime
 
@@ -44,7 +47,7 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
   @computed()
   get fullname() {
     if (!!this.firstname && !!this.lastname) return `${this.firstname} ${this.lastname}`
-    else if(!!this.name) return this.name
+    else if (!!this.name) return this.name
   }
 
   @column()
