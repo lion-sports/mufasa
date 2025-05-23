@@ -20,9 +20,18 @@
     loading = true
     let service = new ClubsService({ fetch })
     try {
-      await service.create({
+      let createdClub = await service.create({
         ...clubState.validatedClub
       })
+
+      if(!!clubState.validatedClub.logo || !!clubState.club.header) {
+        await service.uploadMedia({
+          clubId: createdClub.id,
+          header: clubState.club.header?.[0],
+          logo: clubState.club.logo?.[0]
+        })
+      }
+
       goto('/clubs')
     } catch(err) {
       addErrorToast({
