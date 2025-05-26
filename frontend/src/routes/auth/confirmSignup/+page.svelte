@@ -20,14 +20,11 @@
 			const service = new AuthService({ fetch })
 			await service
 				.verifySignup({ token: data.token })
-				.then(() => {
-					verificationSuccessful = true
-					goto('/auth/login')
-				})
-				.catch(() => {
-					verificationSuccessful = false
-				})
+				.then(() => (verificationSuccessful = true))
+				.catch(() => (verificationSuccessful = false))
 				.finally(() => (isLoading = false))
+
+			if (verificationSuccessful) goto('/auth/login')
 		}
 	})
 </script>
