@@ -115,12 +115,14 @@ class UsersManager {
         await invitation.useTransaction(trx).save()
       }
 
+      await user.save()
       trx.commit()
     } catch (error) {
       trx.rollback()
       throw new Error(error)
     }
 
+    // TODO: certe volte non trova l'utente appena creato, da rivedere
     await this.sendConfirmationEmail({ data: { user: user } })
 
     return user
