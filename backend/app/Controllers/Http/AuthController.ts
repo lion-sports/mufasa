@@ -4,6 +4,7 @@ import User from '#app/Models/User'
 import SolanaManager from '#app/managers/solana.manager'
 import UsersManager from '#app/managers/user.manager'
 import { OAuth2Client } from 'google-auth-library'
+import { Secret } from '@adonisjs/core/helpers'
 
 export default class AuthController {
   public async login({ auth, request }: HttpContext) {
@@ -192,14 +193,12 @@ export default class AuthController {
     }
   }
 
-  public async verifySignup({ request, auth }: HttpContext) {
-    // change user from unverified to verified
-    const userId = request.input('userId')
-
-    let manager = new UsersManager()
+  public async verifySignup({ request }: HttpContext) {
+    const token = request.input('token')
+    const manager = new UsersManager()
     return await manager.verifySignup({
       data: {
-        user: { id: userId },
+        token: token,
       },
     })
   }

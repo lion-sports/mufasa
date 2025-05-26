@@ -14,6 +14,7 @@ import vine from '@vinejs/vine'
 import ConfirmationNotification from '#app/mails/ConfirmationNotification'
 import env from '#start/env'
 import db from '@adonisjs/lucid/services/db'
+import { Secret } from '@adonisjs/core/helpers'
 
 export const signupValidator = vine.compile(
   vine.object({
@@ -120,14 +121,7 @@ class UsersManager {
       throw new Error(error)
     }
 
-    // need to commit last transaction to send email with new user
-    const newTrx = await db.transaction()
-    try {
-      await this.sendConfirmationEmail({ data: { user: user }, context: { trx: newTrx } })
-    } catch (error) {
-      newTrx.rollback()
-      throw new Error(error)
-    }
+    await this.sendConfirmationEmail({ data: { user: user } })
 
     return user
   }
@@ -222,58 +216,87 @@ class UsersManager {
   }
 
   @withTransaction
-  public async generateResetPasswordUrl(params: {
+  public async generateAccountConfirmationUrl(params: {
     data: {
-      user: { id: number }
+      user: User
     }
     context?: Context
   }): Promise<string> {
-    let trx = params.context?.trx!
+    const token = await User.confirmRegistrationTokens.create(params.data.user, ['*'], {
+      expiresIn: '24 hours',
+    })
 
-    const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
-    // const token = await User.confirmRegistrationToken.create(user, ['*'], {
-    //   expiresIn: '24 hours',
-    // })
-
-    // const url = `${env.get('CONFIRMATION_EMAIL_URL')}?token=${token.identifier}&userId=${params.data.user.id}`
-    const url = `${env.get('CONFIRMATION_EMAIL_URL')}?userId=${params.data.user.id}`
+    const tokenValue = token.toJSON().token
+    const url = `${env.get('CONFIRMATION_EMAIL_URL')}?token=${tokenValue}`
     return url
   }
 
-  @withTransaction
   public async sendConfirmationEmail(params: {
     data: {
-      user: {
-        id: number
-      }
+      user: User
     }
-    context?: Context
   }): Promise<void> {
-    const trx = params.context?.trx!
-    if (!params.data.user.id) throw new Error('No user id supplied')
+    const trx = await db.transaction()
 
-    const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
+    try {
+      if (!params.data.user.id) throw new Error('No user id supplied')
+      const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
 
-    const verificationUrl = await this.generateResetPasswordUrl({
-      data: { user: { id: params.data.user.id } },
-      context: { trx },
-    })
+      const verificationUrl = await this.generateAccountConfirmationUrl({
+        data: { user },
+        context: { trx },
+      })
 
-    const email = new ConfirmationNotification({ user, verificationUrl })
-    await mail.send(email)
+      const email = new ConfirmationNotification({ user, verificationUrl })
+      await mail.send(email)
+
+      await trx.commit()
+    } catch (error) {
+      await trx.rollback()
+      throw new Error(
+        error instanceof Error ? error.message : 'Unknown error while sending confirmation mail'
+      )
+    }
   }
 
   @withTransaction
   public async verifySignup(params: {
     data: {
-      user: { id: number }
+      token: string
     }
     context?: Context
   }) {
     const trx = params.context?.trx!
 
-    const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
-    return await user.merge({ registrationConfirmed: true }).save()
+    // Generating secret from email token
+    const tokenSecret = new Secret<string>(params.data.token)
+
+    // Verify the token exists in db
+    const verifiedToken = await User.confirmRegistrationTokens.verify(tokenSecret)
+    if (!verifiedToken) throw new Error('could not verify this token')
+
+    // Expiry verification
+    if (!verifiedToken.expiresAt) throw new Error('could not verify this token')
+    if (DateTime.fromJSDate(verifiedToken.expiresAt) < DateTime.now()) {
+      throw new Error('this token is expired')
+    }
+
+    // Verify the owner exists and is valid
+    const ownerId = verifiedToken.tokenableId.toString()
+    const user = await User.query({ client: trx })
+      .where('id', ownerId)
+      .firstOrFail()
+      .catch(() => {
+        throw new Error('could not find the owner of this token')
+      })
+
+    // Update the owner to confirmed
+    await user.merge({ registrationConfirmed: true }).save()
+
+    // Delete confirmation token
+    await User.confirmRegistrationTokens.delete(user, verifiedToken.identifier)
+
+    return user
   }
 }
 

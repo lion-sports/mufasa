@@ -33,7 +33,7 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
   public name?: string
 
   @column()
-  public registrationConfirmed?: boolean
+  public registrationConfirmed?: boolean = false
 
   @column.dateTime()
   public birthday?: DateTime
@@ -69,7 +69,7 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
     type: 'api',
   })
 
-  static confirmRegistrationToken = DbAccessTokensProvider.forModel(User, {
+  static confirmRegistrationTokens = DbAccessTokensProvider.forModel(User, {
     expiresIn: '24 hours',
     tokenSecretLength: 64,
     prefix: 'reg_',

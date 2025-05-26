@@ -5,13 +5,11 @@ import { goto } from '$app/navigation'
 
 export const load: PageLoad = async ({ fetch, url }) => {
 	try {
-		const userId = url.searchParams.get('userId')
-		// const token = url.searchParams.get('token')
+		const token = url.searchParams.get('token')
 
-		if (userId) {
+		if (token) {
 			const service = new AuthService({ fetch })
-			const us = await service.verifySignup({ userId })
-			console.log(us)
+			const us = await service.verifySignup({ token })
 		}
 
 		await goto('/auth/login')
