@@ -123,6 +123,7 @@ class UsersManager {
     }
 
     // TODO: certe volte non trova l'utente appena creato, da rivedere
+    // probabile problema di transazione (?)
     await this.sendConfirmationEmail({ data: { user: user } })
 
     return user

@@ -134,7 +134,7 @@
 								<a class="ml-auto tracking-tight" href="/"> Password dimenticata? </a>
 							</div>
 
-							<!-- Next Button -->
+							<!-- Login Button -->
 							<div class="w-full mt-5">
 								<StandardButton
 									on:click={login}

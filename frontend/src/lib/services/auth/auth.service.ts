@@ -59,6 +59,7 @@ export type SignupParams = {
 		clubName: string
 		completeClubName: string
 		clubSport?: Sport
+		invitationToken?: string
 	}
 	context?: {}
 }
@@ -103,7 +104,8 @@ export default class AuthService extends FetchBasedService {
 				solanaPublicKey: params.data.solanaPublicKey,
 				clubName: params.data.clubName,
 				completeClubName: params.data.completeClubName,
-				clubSport: params.data.clubSport
+				clubSport: params.data.clubSport,
+				invitationToken: params.data.invitationToken
 			}
 		})
 

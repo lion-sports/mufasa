@@ -5,15 +5,11 @@
 	import { Icon } from '@likable-hair/svelte'
 	import NewClubForm from '@/lib/components/auth/NewClubForm.svelte'
 	import ConfirmForm from '@/lib/components/auth/ConfirmForm.svelte'
-	import { goto } from '$app/navigation'
 	import InviteEmailForm from '@/lib/components/auth/InviteEmailForm.svelte'
-	import {
-		FIELDS_FOR_STEPS,
-		SIGNUP_FORM_STEPS,
-		SignupState
-	} from '@/lib/services/auth/signup.svelte'
+	import { FIELDS_FOR_STEPS, SignupState } from '@/lib/services/auth/signup.svelte'
 	import { addErrorToast } from '@/lib/components/ui/sonner'
 	import type { PageData } from './$types'
+	import ConfirmEmailInfo from '@/lib/components/auth/ConfirmEmailInfo.svelte'
 
 	interface Props {
 		data: PageData
@@ -27,10 +23,9 @@
 	// Collaborators Data
 	let collaborators: string[] = $state([])
 
-	let loading: boolean = false
-
+	let signupLoading: boolean = $state(false)
 	function signup() {
-		loading = true
+		signupLoading = true
 
 		const service = new AuthService({ fetch })
 		service
@@ -43,17 +38,18 @@
 					birthday: signupState.signup.birthday,
 					clubName: signupState.signup.clubName!,
 					completeClubName: signupState.signup.clubCompleteName!,
-					clubSport: signupState.signup.clubSport
+					clubSport: signupState.signup.clubSport,
+					invitationToken: data?.token
 				}
 			})
-			.then(() => goto('/auth/login'))
+			.then(() => (signupState.step = 'confirmation'))
 			.catch((err) =>
 				addErrorToast({
 					title: "Errore durante l'operazione",
 					options: { description: err.message }
 				})
 			)
-			.finally(() => (loading = false))
+			.finally(() => (signupLoading = false))
 	}
 
 	function nextStep() {
@@ -107,7 +103,14 @@
 					<div class="w-full flex-grow flex justify-center items-center pt-8">
 						<div class="h-full w-full flex flex-col items-center justify-start">
 							<div class="w-full flex items-center justify-center relative">
-								<div class="text-2xl">Sign Up</div>
+								{#if signupState.step != 'confirmation'}
+									<div class="text-2xl">
+										Sign Up -
+										<span class="text-[rgb(var(--global-color-primary-600))] opacity-70 capitalize">
+											{signupState.stepLabel || ''}
+										</span>
+									</div>
+								{/if}
 							</div>
 
 							<div class="flex-grow w-full flex flex-col items-center h-full">
@@ -122,6 +125,8 @@
 									<InviteEmailForm bind:collaborators />
 								{:else if signupState.step == 'review'}
 									<ConfirmForm bind:signupState />
+								{:else if signupState.step == 'confirmation'}
+									<ConfirmEmailInfo />
 								{:else}
 									<div class="w-full text-center text-small my-5">
 										Qualcosa è andato storto! Per favore ricarica la pagina.
@@ -138,12 +143,14 @@
 								<div class="w-full">
 									<StandardButton
 										on:click={signup}
+										loading={signupLoading}
+										disabled={signupLoading}
 										--button-border-radius="999px"
 										--button-width="100%"
 										class="!p-2">Signup</StandardButton
 									>
 								</div>
-							{:else}
+							{:else if signupState.step != 'confirmation'}
 								<div>
 									{#if signupState.currentStepIndex > 0}
 										<button onclick={prevStep} class="py-1.5">
@@ -156,7 +163,7 @@
 								</div>
 
 								<div class="flex justify-center items-center gap-1">
-									{#each SIGNUP_FORM_STEPS as step}
+									{#each signupState.steps as step}
 										<div
 											class="rounded-full {step == signupState.step
 												? 'bg-[rgb(var(--global-color-primary-500))]'
@@ -183,12 +190,14 @@
 						</div>
 					</div>
 
-					<div
-						class="mx-auto flex sm:flex-col md:flex-row items-center gap-2 sm:gap-0 md:gap-2 text-sm"
-					>
-						<div>Hai già un account?</div>
-						<a class="text-[rgb(var(--global-color-primary-500))]" href="/auth/login"> Login </a>
-					</div>
+					{#if signupState.step == 'credentials'}
+						<div
+							class="mx-auto flex sm:flex-col md:flex-row items-center gap-2 sm:gap-0 md:gap-2 text-sm"
+						>
+							<div>Hai già un account?</div>
+							<a class="text-[rgb(var(--global-color-primary-500))]" href="/auth/login"> Login </a>
+						</div>
+					{/if}
 				</div>
 			</div>
 
