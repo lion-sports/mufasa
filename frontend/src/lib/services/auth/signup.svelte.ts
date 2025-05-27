@@ -12,6 +12,8 @@ export type SignupData = {
 	clubName?: string
 	clubCompleteName?: string
 	clubSport: Sport
+
+	collaborators?: string[]
 }
 
 export type SignupValidationData = {

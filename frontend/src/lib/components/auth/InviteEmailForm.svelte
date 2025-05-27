@@ -4,12 +4,14 @@
 	import type { Option } from '../common/StandardSelect.svelte'
 	import StandardButton from '../common/StandardButton.svelte'
 	import { Icon } from '@likable-hair/svelte'
+	import type { SignupState } from '@/lib/services/auth/signup.svelte'
+	import { retry } from 'rxjs'
 
 	interface Props {
-		collaborators: string[]
+		signupState: SignupState
 	}
 
-	let { collaborators = $bindable([]) }: Props = $props()
+	let { signupState = $bindable() }: Props = $props()
 
 	let currentEmail: string = $state('')
 
@@ -20,15 +22,19 @@
 
 	function handleAddNewCollaborator() {
 		if (!currentEmail || !validateEmail(currentEmail)) return
-		if (!collaborators.includes(currentEmail)) {
-			collaborators.push(currentEmail)
+		if (!signupState.signup.collaborators?.includes(currentEmail)) {
+			signupState.signup.collaborators?.push(currentEmail)
 			currentEmail = ''
 		}
 	}
 
 	function handleDeleteCollaborator(email?: string) {
 		if (!email) return
-		collaborators = collaborators.filter((currentEmail) => currentEmail != email)
+		if (!signupState.signup.collaborators) return
+
+		signupState.signup.collaborators = signupState.signup.collaborators?.filter(
+			(currentEmail) => currentEmail != email
+		)
 	}
 </script>
 
@@ -57,8 +63,8 @@
 		class="h-full w-full text-left rounded-xl bg-[rgb(var(--global-color-background-200))] min-h-10 max-h-52 md:max-h-64 xl:max-h-72 mb-5 overflow-scroll"
 	>
 		<div class="overflow-scroll">
-			{#if collaborators?.length}
-				{#each collaborators as email, i}
+			{#if signupState.signup.collaborators?.length}
+				{#each signupState.signup.collaborators as email, i}
 					<div
 						class="w-full px-[16px] py-2.5 flex justify-between {i % 2 == 0
 							? 'bg-[rgb(var(--global-color-background-300))] '

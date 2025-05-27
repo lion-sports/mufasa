@@ -60,6 +60,7 @@ export type SignupParams = {
 		completeClubName: string
 		clubSport?: Sport
 		invitationToken?: string
+		collaborators?: string[]
 	}
 	context?: {}
 }
@@ -105,7 +106,8 @@ export default class AuthService extends FetchBasedService {
 				clubName: params.data.clubName,
 				completeClubName: params.data.completeClubName,
 				clubSport: params.data.clubSport,
-				invitationToken: params.data.invitationToken
+				invitationToken: params.data.invitationToken,
+				collaborators: params.data.collaborators
 			}
 		})
 

@@ -20,9 +20,6 @@
 	// IF TOKEN IN URL, SIGN UP AS ATHLETE
 	let signupState = $state(new SignupState({ token: data.token }))
 
-	// Collaborators Data
-	let collaborators: string[] = $state([])
-
 	let signupLoading: boolean = $state(false)
 	function signup() {
 		signupLoading = true
@@ -122,7 +119,7 @@
 									<NewClubForm bind:signupState />
 								{:else if signupState.step == 'inviteEmail'}
 									<!-- Optional -->
-									<InviteEmailForm bind:collaborators />
+									<InviteEmailForm bind:signupState />
 								{:else if signupState.step == 'review'}
 									<ConfirmForm bind:signupState />
 								{:else if signupState.step == 'confirmation'}
