@@ -12,6 +12,8 @@ export type SignupData = {
 	clubName?: string
 	clubCompleteName?: string
 	clubSport: Sport
+
+	collaborators?: string[]
 }
 
 export type SignupValidationData = {
@@ -21,8 +23,25 @@ export type SignupValidationData = {
 	}
 }
 
-export const SIGNUP_FORM_STEPS = ['credentials', 'club', 'inviteEmail', 'review'] as const
-export const SIGNUP_FORM_STEPS_FOR_ATHLETE = ['credentials', 'review'] as const
+export const SIGNUP_FORM_STEPS = [
+	'credentials',
+	'club',
+	'inviteEmail',
+	'review',
+	'confirmation'
+] as const
+
+export const SIGNUP_FORM_STEPS_FOR_ATHLETE = ['credentials', 'review', 'confirmation'] as const
+
+export const STEP_LABELS: {
+	[key: string]: string
+} = {
+	credentials: 'Credenziali',
+	club: 'Club',
+	inviteEmail: 'Collaboratori',
+	review: 'Review',
+	confirmation: 'Conferma'
+}
 
 export type SignupFormStep = (typeof SIGNUP_FORM_STEPS)[number]
 
@@ -168,10 +187,12 @@ export class SignupState {
 			credentials: credentialsValid,
 			club: clubDataValid,
 			inviteEmail: true,
-			review: true
+			review: true,
+			confirmation: true
 		}
 	})
 
+	public stepLabel: string = $derived(STEP_LABELS[this.step])
 	public currentStepValid: boolean = $derived(this.stepValid[this.step])
 	public currentStepSkippable: boolean = $derived(SIGNUP_FORM_SKIPPABLE_STEPS.includes(this.step))
 	public currentStepIndex: number = $derived(SIGNUP_FORM_STEPS.findIndex((e) => e === this.step))

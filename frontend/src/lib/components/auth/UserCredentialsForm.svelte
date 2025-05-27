@@ -89,7 +89,7 @@
     }}
 	/>
 
-  <div class="w-full text-sm text-[rgb(var(--global-color-contrast-300))] mb-2 mt-8 text-left">
+  <div class="w-full text-sm text-[rgb(var(--global-color-contrast-300))] mb-2 mt-6 text-left">
     Inserisci la password del tuo account
   </div>
 
