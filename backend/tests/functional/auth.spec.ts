@@ -7,6 +7,7 @@ test.group('Auth', () => {
     const user = await UserFactory.merge({
       email: 'test@example.com',
       password: 'passwordtest',
+      registrationConfirmed: true,
     }).create()
 
     const response = await client.post('/auth/login').json({
@@ -51,6 +52,7 @@ test.group('Auth', () => {
     const user = await UserFactory.merge({
       email: 'test2@example.com',
       password: 'passwordtest',
+      registrationConfirmed: true,
     }).create()
 
     let response = await client.post('/auth/login').json({
@@ -70,6 +72,23 @@ test.group('Auth', () => {
     data = response.body()
 
     assert.isNotEmpty(data.token, 'should generate the api token')
+    await user.delete()
+  })
+
+  test('cannot login without email confirmation complete', async ({ client, assert }) => {
+    const user = await UserFactory.merge({
+      email: 'test2@example.com',
+      password: 'passwordtest',
+    }).create()
+
+    const response = await client.post('/auth/login').json({
+      email: 'test2@example.com',
+      password: 'passwordtest',
+      generateRefresh: true,
+    })
+
+    response.assertAgainstApiSpec()
+    response.assertStatus(500)
     await user.delete()
   })
 })
