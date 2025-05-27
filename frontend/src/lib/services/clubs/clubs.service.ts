@@ -76,6 +76,36 @@ export default class ClubsService extends FetchBasedService {
 		return response
 	}
 
+  public async mine(params?: {
+    page?: number
+    perPage?: number
+    filtersBuilder?: FilterBuilder
+  }): Promise<PaginatedClubs> {
+    if (!params)
+      params = {
+        page: 1,
+        perPage: 300
+      }
+    if (!params.page) params.page = 1
+    if (!params.perPage) params.perPage = 300
+
+    let response: PaginatedClubs = await this.client.get({
+      url: '/clubs/mine',
+      params: {
+        page: params.page,
+        perPage: params.perPage,
+        filtersBuilder: params.filtersBuilder?.toJson()
+      }
+    })
+
+    for (let i = 0; i < response.data.length; i += 1) {
+      response.data[i].createdAt = new Date(response.data[i].createdAt)
+      response.data[i].updatedAt = new Date(response.data[i].updatedAt)
+    }
+
+    return response
+  }
+
 	public async get(params: { id: number }): Promise<Club> {
 		let response = await this.client.get({
 			url: '/clubs/' + params.id

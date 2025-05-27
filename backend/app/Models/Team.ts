@@ -51,7 +51,7 @@ export default class Team extends CamelCaseBaseModel {
   public owner: BelongsTo<typeof User>
 
   @column()
-  public clubId: number
+  public clubId: number | null
 
   @belongsTo(() => Club, {
     foreignKey: 'clubId'

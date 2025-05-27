@@ -13,7 +13,6 @@ import Invitation from '#models/Invitation'
 import vine from '@vinejs/vine'
 import ConfirmationNotification from '#app/mails/ConfirmationNotification'
 import env from '#start/env'
-import db from '@adonisjs/lucid/services/db'
 import { Secret } from '@adonisjs/core/helpers'
 
 export const signupValidator = vine.compile(
@@ -77,53 +76,50 @@ class UsersManager {
   }): Promise<User> {
     let trx = params.context?.trx!
     let user: User
-    try {
-      let validatedData = await signupValidator.validate(params.data)
-      let existingUser = await User.query({ client: trx })
-        .where('email', validatedData.email)
-        .first()
-      if (!!existingUser) throw new Error('user already exists')
 
-      let invitation: Invitation | undefined = undefined
-      if (!!validatedData.invitationToken) {
-        let invitationManager = new InvitationsManager()
-        let tokenValid = await invitationManager.validateInvitationToken({
-          data: { token: validatedData.invitationToken },
-          context: params.context,
-        })
+    let validatedData = await signupValidator.validate(params.data)
+    let existingUser = await User.query({ client: trx })
+      .where('email', validatedData.email)
+      .first()
+    if (!!existingUser) throw new Error('user already exists')
 
-        if (!tokenValid.valid) throw new Error(tokenValid.message)
-        else if (!!tokenValid.invitation) invitation = tokenValid.invitation
-      }
-
-      const manager = new UsersManager()
-      user = await manager.create({
-        data: {
-          email: params.data.email,
-          password: params.data.password,
-          birthday: params.data.birthday,
-          firstname: params.data.firstname,
-          lastname: params.data.lastname,
-          solanaPublicKey: params.data.solanaPublicKey,
-        },
+    let invitation: Invitation | undefined = undefined
+    if (!!validatedData.invitationToken) {
+      let invitationManager = new InvitationsManager()
+      let tokenValid = await invitationManager.validateInvitationToken({
+        data: { token: validatedData.invitationToken },
         context: params.context,
       })
 
-      if (!!invitation) {
-        invitation.invitedEmail = user.email
-        invitation.invitedUserId = user.id
-        await invitation.useTransaction(trx).save()
-      }
-
-      await user.save()
-      trx.commit()
-    } catch (error) {
-      trx.rollback()
-      throw new Error(error)
+      if (!tokenValid.valid) throw new Error(tokenValid.message)
+      else if (!!tokenValid.invitation) invitation = tokenValid.invitation
     }
 
-    // TODO: certe volte non trova l'utente appena creato, da rivedere
-    await this.sendConfirmationEmail({ data: { user: user } })
+    const manager = new UsersManager()
+    user = await manager.create({
+      data: {
+        email: params.data.email,
+        password: params.data.password,
+        birthday: params.data.birthday,
+        firstname: params.data.firstname,
+        lastname: params.data.lastname,
+        solanaPublicKey: params.data.solanaPublicKey,
+      },
+      context: params.context,
+    })
+
+    if (!!invitation) {
+      invitation.invitedEmail = user.email
+      invitation.invitedUserId = user.id
+      await invitation.useTransaction(trx).save()
+    }
+
+    await user.save()
+
+    await this.sendConfirmationEmail({ 
+      data: { user: user },
+      context: params.context
+    })
 
     return user
   }
@@ -224,8 +220,11 @@ class UsersManager {
     }
     context?: Context
   }): Promise<string> {
+    let trx = params.context?.trx!
+
     const token = await User.confirmRegistrationTokens.create(params.data.user, ['*'], {
       expiresIn: '24 hours',
+      trx
     })
 
     const tokenValue = token.toJSON().token
@@ -233,32 +232,25 @@ class UsersManager {
     return url
   }
 
+  @withTransaction
   public async sendConfirmationEmail(params: {
     data: {
       user: User
-    }
+    },
+    context?: Context
   }): Promise<void> {
-    const trx = await db.transaction()
+    const trx = params.context?.trx!
 
-    try {
-      if (!params.data.user.id) throw new Error('No user id supplied')
-      const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
+    if (!params.data.user.id) throw new Error('No user id supplied')
+    const user = await User.query({ client: trx }).where('id', params.data.user.id).firstOrFail()
 
-      const verificationUrl = await this.generateAccountConfirmationUrl({
-        data: { user },
-        context: { trx },
-      })
+    const verificationUrl = await this.generateAccountConfirmationUrl({
+      data: { user },
+      context: params.context,
+    })
 
-      const email = new ConfirmationNotification({ user, verificationUrl })
-      await mail.send(email)
-
-      await trx.commit()
-    } catch (error) {
-      await trx.rollback()
-      throw new Error(
-        error instanceof Error ? error.message : 'Unknown error while sending confirmation mail'
-      )
-    }
+    const email = new ConfirmationNotification({ user, verificationUrl })
+    await mail.send(email)
   }
 
   @withTransaction

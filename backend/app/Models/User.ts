@@ -13,6 +13,7 @@ import { DbAccessTokensProvider, AccessToken } from '@adonisjs/auth/access_token
 import { compose } from '@adonisjs/core/helpers'
 import Club from './Club.js'
 import UserSetting from './UserSetting.js'
+import { TransactableDbAccessTokensProvider } from '#services/TransactableDbAccessTokenProvider'
 
 const AuthFinder = withAuthFinder(() => hash.use('argon'), {
   uids: ['email'],
@@ -69,7 +70,7 @@ export default class User extends compose(CamelCaseBaseModel, AuthFinder) {
     type: 'api',
   })
 
-  static confirmRegistrationTokens = DbAccessTokensProvider.forModel(User, {
+  static confirmRegistrationTokens = TransactableDbAccessTokensProvider.forModel(User, {
     expiresIn: '24 hours',
     tokenSecretLength: 64,
     prefix: 'reg_',

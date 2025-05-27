@@ -18,7 +18,8 @@ export default class TeamsController {
       data: {
         name: request.input('name'),
         notes: request.input('notes'),
-        sport: request.input('sport')
+        sport: request.input('sport'),
+        clubId: request.input('clubId')
       }
     })
   }

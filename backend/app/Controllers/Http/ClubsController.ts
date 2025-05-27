@@ -20,6 +20,18 @@ export default class ClubsController {
     })
   }
 
+  public async mine({ request }: HttpContext) {
+    const manager = new ClubsManager()
+
+    return await manager.mine({
+      data: {
+        page: request.input('page'),
+        perPage: request.input('perPage'),
+        filtersBuilder: request.input('filtersBuilder'),
+      },
+    })
+  }
+
   public async store({ request }: HttpContext) {
     const manager = new ClubsManager()
 

@@ -219,6 +219,7 @@ router.resource('dashboards', DashboardController)
   )
 
 router.group(() => {
+  router.get('/mine', [ClubsController, 'mine'])
   router.post('/:id/uploadMedia', [ClubsController, 'uploadMedia'])
   router.get('/media/:id/downloadThumbnail', [ClubsController, 'downloadThumbnail'])
   router.get('/media/:id/download', [ClubsController, 'downloadMedia'])

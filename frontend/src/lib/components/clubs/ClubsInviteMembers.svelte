@@ -159,11 +159,11 @@
 			</div>
 		{:else if foundUsers.length === 0}
 			<div class="h-full w-full text-xs flex flex-col justify-center items-center text-center">
-        {#if !searchText}
-          Nessun utente trovato
-        {:else}
+        {#if !!searchText}
           <div>Nessun utente trovato</div>
-          <button class="underline text-[rgb(var(--global-color-primary-500))]">Invita lo stesso per email</button>
+          <button 
+            class="underline text-[rgb(var(--global-color-primary-500))]"
+          >Invita lo stesso per email</button>
         {/if}
 			</div>
 		{:else}

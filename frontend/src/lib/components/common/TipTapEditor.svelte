@@ -19,6 +19,7 @@
 	export let disabled: boolean = false
 	export let basic: boolean = false
 	export let editorTwStyles: string = ''
+  export let placeholder: string = 'Write something ...'
 
 	let element: HTMLElement | undefined = undefined
 
@@ -39,7 +40,7 @@
 			extensions: [
 				StarterKit,
 				Placeholder.configure({
-					placeholder: 'Write something ...'
+					placeholder
 				}),
 				TextAlign.configure({
 					types: ['heading', 'paragraph']

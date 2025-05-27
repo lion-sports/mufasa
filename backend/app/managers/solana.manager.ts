@@ -1,5 +1,5 @@
 import User from '#app/Models/User'
-import { Context } from './base.manager.js'
+import { Context, withTransaction } from './base.manager.js'
 import { Keypair, Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import SolanaConfig from '#app/Models/SolanaConfig'
 import UsersManager from './user.manager.js'
@@ -53,6 +53,7 @@ export type RewardTokenParams = {
 export default class SolanaManager {
   constructor() {}
 
+  @withTransaction
   public async keygen(params: SolanaParams): Promise<{ publicKey: string; privateKey: string }> {
     let trx = params.context?.trx
     let userContext = params.context?.user as User

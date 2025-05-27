@@ -49,6 +49,53 @@ export default class ClubsManager {
 
   @withTransaction
   @withUser
+  public async mine(params: {
+    data: {
+      page: number
+      perPage: number
+      filtersBuilder?: {
+        modifiers: Modifier[]
+      }
+    }
+    context?: Context
+  }): Promise<{ data: ModelObject[]; meta: any }> {
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
+
+    let query = Club.query({ client: trx })
+      .where(b => {
+        b.where('ownerId', user.id)
+          .orWhereHas('members', b => {
+            b.where('userId', user.id)
+          })
+      })
+      .where(b => {
+        return AuthorizationHelpers.userCanInClubQuery({
+          data: {
+            query: b,
+            user,
+            resource: 'team',
+            action: 'create'
+          },
+          context: params.context
+        })
+      })
+
+    if (!!params.data.filtersBuilder?.modifiers) {
+      let filtersApplier = new FilterModifierApplier()
+      filtersApplier.applyModifiers(query, params.data.filtersBuilder?.modifiers)
+    }
+
+    if (!params.data.page) params.data.page = 1
+    if (!params.data.perPage) params.data.perPage = 100
+
+    let results = await query.paginate(params.data.page, params.data.perPage)
+
+    return results.toJSON()
+  }
+
+  @withTransaction
+  @withUser
   public async create(params: {
     data: {
       name: string,
@@ -275,6 +322,7 @@ export default class ClubsManager {
             context: params.context
           })
         })
+        .preload('teammates')
       })
       .preload('groups')
       .firstOrFail()

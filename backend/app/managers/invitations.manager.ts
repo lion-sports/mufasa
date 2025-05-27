@@ -15,6 +15,8 @@ import string from '@adonisjs/core/helpers/string'
 import { cuid } from '@adonisjs/core/helpers'
 import env from '#start/env'
 import { DateTime } from 'luxon'
+import InvitationMail from '#app/mails/InvitationMail'
+import mail from '@adonisjs/mail/services/main'
 
 export default class InvitationsManager {
   @withTransaction
@@ -125,20 +127,43 @@ export default class InvitationsManager {
       if (invitedUserBelongs) throw new Error('invited user already exists')
     }
 
-    // if it does not exists then send a mail to invite him
+    let invitation: Invitation
+    if(!invitedUser) {
+      const {
+        url, invitation: urlInvitation
+      } = await this.inviteUserByUrl({
+        data: {
+          group,
+          team
+        },
+        context: params.context,
+      })
 
-    // create the invitiation
-    let invitation = await Invitation.firstOrCreate({
-      invitedEmail: params.data.user.email,
-      status: 'pending',
-      teamId: team.id
-    }, {}, { client: trx })
+      invitation = urlInvitation
+      invitation.invitedEmail = params.data.user.email
+      await invitation.save()
 
-    if (!!invitedUser) await invitation.related('invite').associate(invitedUser)
+      const email = new InvitationMail({ 
+        invitationUrl: url, 
+        invitedBy: user,
+        invitedUserEmail: params.data.user.email
+      })
+      await mail.sendLater(email)
+    } else {
+      invitation = await Invitation.firstOrCreate({
+        invitedEmail: params.data.user.email,
+        status: 'pending',
+        teamId: team.id
+      }, {}, { client: trx })
+
+      await invitation.related('invite').associate(invitedUser)
+    }
+    
     if (!!group) {
       invitation.groupId = group.id
       await invitation.related('group').associate(group)
     }
+
     await invitation.related('invitedBy').associate(user)
 
     if (!!invitation.invitedByUserId) await invitation.load('invitedBy')
@@ -212,20 +237,41 @@ export default class InvitationsManager {
       if (invitedUserBelongs) throw new Error('invited user already exists')
     }
 
-    // if it does not exists then send a mail to invite him
+    let invitation: Invitation
+    if (!invitedUser) {
+      const {
+        url, invitation: urlInvitation
+      } = await this.inviteUserByUrl({
+        data: {
+          group,
+          club
+        },
+        context: params.context,
+      })
 
-    // create the invitiation
-    let invitation = await Invitation.firstOrCreate({
-      invitedEmail: params.data.user.email,
-      status: 'pending',
-      clubId: club.id
-    }, {}, { client: trx })
+      invitation = urlInvitation
 
-    if (!!invitedUser) await invitation.related('invite').associate(invitedUser)
+      const email = new InvitationMail({
+        invitationUrl: url,
+        invitedBy: user,
+        invitedUserEmail: params.data.user.email
+      })
+      await mail.sendLater(email)
+    } else {
+      invitation = await Invitation.firstOrCreate({
+        invitedEmail: params.data.user.email,
+        status: 'pending',
+        clubId: club.id
+      }, {}, { client: trx })
+
+      await invitation.related('invite').associate(invitedUser)
+    }
+
     if (!!group) {
       invitation.groupId = group.id
       await invitation.related('group').associate(group)
     }
+
     await invitation.related('invitedBy').associate(user)
 
     if (!!invitation.invitedByUserId) await invitation.load('invitedBy')
@@ -447,7 +493,6 @@ export default class InvitationsManager {
     return await invitation.save()
   }
 
-
   @withTransaction
   @withUser
   public async inviteUserByUrl(params: {
@@ -464,7 +509,8 @@ export default class InvitationsManager {
     },
     context?: Context
   }): Promise<{
-    url: string
+    url: string,
+    invitation: Invitation
   }> {
     const trx = params.context?.trx!
     const user = params.context?.user!
@@ -531,18 +577,19 @@ export default class InvitationsManager {
     let finalUrl = `${baseUrl}?token=${urlToken}`
 
     let invitation = await Invitation.create({
-        teamId: team?.id,
-        clubId: club?.id,
-        invitedByUserId: user.id,
-        groupId: group?.id,
-        status: 'pending',
-        expirationDate,
-        uid,
-        token
-      }, { client: trx })
+      teamId: team?.id,
+      clubId: club?.id,
+      invitedByUserId: user.id,
+      groupId: group?.id,
+      status: 'pending',
+      expirationDate,
+      uid,
+      token
+    }, { client: trx })
 
     return {
-      url: finalUrl
+      url: finalUrl,
+      invitation
     }
   }
 

@@ -34,7 +34,7 @@ function withUser(target: any, propertyKey: string, descriptor: PropertyDescript
   }
 }
 
-function withTransaction(_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
+function withTransaction(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
   const originalMethod = descriptor.value
   descriptor.value = async function (...args: any[]) {
     let trx = args[0]?.context?.trx
@@ -42,10 +42,7 @@ function withTransaction(_target: any, _propertyKey: string, descriptor: Propert
 
     try {
       let res = await originalMethod.apply(this, [
-        {
-          ...(!!args[0] ? args[0] : {}),
-          context: { ...(!!args[0]?.context ? args[0].context : {}), trx: trx },
-        },
+        { ...args[0], context: { ...(args[0].context || {}), trx: trx } },
         ...args.slice(1),
       ])
 

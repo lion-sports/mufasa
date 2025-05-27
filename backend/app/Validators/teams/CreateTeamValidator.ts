@@ -14,7 +14,8 @@ export default class TeamValidator {
     owner: schema.object().members({
       id: schema.number()
     }),
-    sport: schema.enum.nullableAndOptional(SPORTS)
+    sport: schema.enum.nullableAndOptional(SPORTS),
+    clubId: schema.number.nullableAndOptional()
   })
 
   public messages: CustomMessages = {}

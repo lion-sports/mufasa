@@ -57,13 +57,14 @@ export default class TeamsManager {
       name: string
       notes?: string | null
       sport?: Sport
+      clubId?: number
     }
     context?: Context
   }): Promise<Team> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User
 
-    await validator.validate({
+    let validatedData = await validator.validate({
       schema: new CreateTeamValidator().schema,
       data: {
         ...params.data,
@@ -74,7 +75,7 @@ export default class TeamsManager {
     })
 
     const createdTeam = await Team.create({
-      ...params.data
+      ...validatedData
     }, {
       client: trx,
     })
