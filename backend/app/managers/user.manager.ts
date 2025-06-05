@@ -16,6 +16,7 @@ import env from '#start/env'
 import { Secret } from '@adonisjs/core/helpers'
 import ClubsManager from './clubs.manager.js'
 import { Sport } from 'lionn-common'
+import Club from '#models/Club'
 
 export const signupValidator = vine.compile(
   vine.object({
@@ -71,6 +72,7 @@ class UsersManager {
       firstname: string
       lastname: string
       birthday: DateTime
+      collaborators?: string[]
       solanaPublicKey?: string
       invitationToken?: string
       club?: {
@@ -132,18 +134,30 @@ class UsersManager {
       context: params.context,
     })
 
+    let club: Club | undefined = undefined
     if (!!params.data.club) {
       const clubManager = new ClubsManager()
-      await clubManager
-        .create({
+      club = await clubManager.create({
+        data: {
+          name: params.data.club.clubName,
+          completeName: params.data.club.completeClubName,
+          sport: params.data.club.clubSport as Sport,
+        },
+        context: { user, trx },
+      })
+    }
+
+    if (!!club && params.data.collaborators) {
+      const invitationManager = new InvitationsManager()
+      for (const collaboratorEmail of params.data.collaborators) {
+        await invitationManager.inviteUserToClub({
           data: {
-            name: params.data.club.clubName,
-            completeName: params.data.club.completeClubName,
-            sport: params.data.club.clubSport as Sport,
+            user: { email: collaboratorEmail },
+            club: { id: club.id },
           },
           context: { user, trx },
         })
-        .catch((err) => console.error('unable to create club', err?.message))
+      }
     }
 
     return user

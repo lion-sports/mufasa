@@ -70,6 +70,7 @@ export default class AuthController {
         firstname: request.input('firstname'),
         lastname: request.input('lastname'),
         birthday: request.input('birthday'),
+        collaborators: request.input('collaborators'),
         solanaPublicKey: request.input('solanaPublicKey'),
         invitationToken: request.input('invitationToken'),
         club: {

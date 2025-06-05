@@ -36,6 +36,7 @@
 					clubName: signupState.signup.clubName!,
 					completeClubName: signupState.signup.clubCompleteName!,
 					clubSport: signupState.signup.clubSport,
+					collaborators: signupState.signup.collaborators,
 					invitationToken: data?.token
 				}
 			})
