@@ -131,6 +131,7 @@ jobs:
           SMTP_HOST: smtp.gmail.com
           SMTP_PORT: 587
           TEST_EMAIL: pippo.baudo@likablehair.it
+          LOG_INTERNAL_SERVER_ERRORS: true
 
   docker:
     runs-on: ubuntu-latest
