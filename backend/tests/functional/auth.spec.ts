@@ -1,6 +1,7 @@
 import { test } from '@japa/runner'
 import User from '#app/Models/User'
 import { UserFactory } from '#database/factories/index'
+import mail from '@adonisjs/mail/services/main'
 
 test.group('Auth', () => {
   test('return a token for a user', async ({ client }) => {
@@ -21,6 +22,8 @@ test.group('Auth', () => {
   })
 
   test('signup the user', async ({ client, assert }) => {
+    mail.fake()
+
     const response = await client.post('/auth/signup').json({
       email: 'test2@example.com',
       password: 'passwordtest',
@@ -33,6 +36,8 @@ test.group('Auth', () => {
     let users = await User.query().where('email', 'test2@example.com')
     assert.lengthOf(users, 1)
     await User.query().delete()
+
+    mail.restore()
   })
 
   test('revoke a token for a user', async ({ client }) => {
