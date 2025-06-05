@@ -133,11 +133,17 @@ export class SignupState {
 				message: 'Devi accettare i termini e le condizioni per poter procedere'
 			}
 
-		if (!this.signup.clubName)
+		if (!this.signup.clubName) {
 			validationData.clubName = {
 				error: true,
 				message: 'Il nome è obbligatorio e deve essere univoco'
 			}
+		} else if (!/^[a-zA-Z0-9_.]+$/.test(this.signup.clubName)) {
+			validationData.clubName = {
+				error: true,
+				message: 'Il nome del club può contenere solo lettere, numeri, underscore e punti'
+			}
+		}
 
 		if (!this.signup.clubCompleteName)
 			validationData.clubCompleteName = {
