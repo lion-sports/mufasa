@@ -84,8 +84,7 @@
 				<div class="flex items-center justify-between">
 					<div class="font-medium">Collaboratori n.:</div>
 					<div>
-						<!-- {collaborators ? collaborators.length : 0} -->
-						0
+						{signupState.signup?.collaborators?.length || 0}
 					</div>
 				</div>
 			{/snippet}

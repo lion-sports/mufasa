@@ -121,23 +121,27 @@ class UsersManager {
       await invitation.useTransaction(trx).save()
 
       const invitationManager = new InvitationsManager()
-      await invitationManager.acceptInvitation({
-        data: { invitation },
-        context: { user, trx },
-      })
+      await invitationManager
+        .acceptInvitation({
+          data: { invitation },
+          context: { user, trx },
+        })
+        .catch((err) => {
+          throw new Error('Cannot accept invitation:', err?.message)
+        })
     }
 
     await user.save()
 
     await this.sendConfirmationEmail({
       data: { user: user },
-      context: params.context,
+      context: { user, trx },
     })
 
-    let club: Club | undefined = undefined
-    if (!!params.data.club) {
+    // CHECKS FOR DIRIGENTS
+    if (!!params.data.club && !!params.data.club.clubName && !!params.data.club.completeClubName) {
       const clubManager = new ClubsManager()
-      club = await clubManager.create({
+      const club = await clubManager.create({
         data: {
           name: params.data.club.clubName,
           completeName: params.data.club.completeClubName,
@@ -145,18 +149,18 @@ class UsersManager {
         },
         context: { user, trx },
       })
-    }
 
-    if (!!club && params.data.collaborators) {
-      const invitationManager = new InvitationsManager()
-      for (const collaboratorEmail of params.data.collaborators) {
-        await invitationManager.inviteUserToClub({
-          data: {
-            user: { email: collaboratorEmail },
-            club: { id: club.id },
-          },
-          context: { user, trx },
-        })
+      if (!!club && params.data.collaborators) {
+        const invitationManager = new InvitationsManager()
+        for (const collaboratorEmail of params.data.collaborators) {
+          await invitationManager.inviteUserToClub({
+            data: {
+              user: { email: collaboratorEmail },
+              club: { id: club.id },
+            },
+            context: { user, trx },
+          })
+        }
       }
     }
 
@@ -328,8 +332,6 @@ class UsersManager {
 
     // Delete confirmation token
     await User.confirmRegistrationTokens.delete(user, verifiedToken.identifier)
-
-    console.log(user)
 
     return user
   }

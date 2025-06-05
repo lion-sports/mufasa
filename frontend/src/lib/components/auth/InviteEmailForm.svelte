@@ -22,8 +22,9 @@
 
 	function handleAddNewCollaborator() {
 		if (!currentEmail || !validateEmail(currentEmail)) return
-		if (!signupState.signup.collaborators?.includes(currentEmail)) {
-			signupState.signup.collaborators?.push(currentEmail)
+		if (!signupState.signup.collaborators) signupState.signup.collaborators = []
+		if (!signupState.signup.collaborators.includes(currentEmail)) {
+			signupState.signup.collaborators = signupState.signup.collaborators.concat(currentEmail)
 			currentEmail = ''
 		}
 	}
@@ -39,7 +40,7 @@
 </script>
 
 <div class="w-full text-sm text-[rgb(var(--global-color-contrast-300))] mt-2 text-left">
-	Si può invitare dei collaboratori tramite link email...
+	Si può invitare dei collaboratori tramite link email.
 </div>
 <div class="w-full h-full flex flex-col gap-2 mt-1">
 	<div class="w-full mt-1 flex items-center gap-2">
