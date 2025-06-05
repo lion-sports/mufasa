@@ -10,14 +10,13 @@ export default class TeammatesController {
         alias: request.input('alias'),
         defaultRole: request.input('defaultRole'),
         availableRoles: request.input('availableRoles'),
-        groupId: request.input('groupId')
-      }
+        groupId: request.input('groupId'),
+      },
     })
   }
 
-  public async mostAbsenceForTeammates({ }: HttpContext) {
+  public async mostAbsenceForTeammates({}: HttpContext) {
     const manager = new TeammatesManager()
-    // return await manager.mostAbsenceForTeammates()
-    return {}
+    return await manager.mostAbsenceForTeammates({})
   }
 }
