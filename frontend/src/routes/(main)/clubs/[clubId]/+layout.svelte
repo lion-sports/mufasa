@@ -34,6 +34,7 @@
       { name: 'general', icon: 'mdi-card-account-details', label: 'Generale'},
       { name: 'members', icon: 'mdi-account-multiple', label: 'Membri'},
       { name: 'teams', icon: SPORT_ICON[data.club.sport || 'none'], label: 'Teams'},
+      { name: 'invitations', icon: 'mdi-email', label: 'Inviti'},
       { name: 'settings', icon: 'mdi-cog', label: 'Impostazioni'}
     ],
     selectedTab: ComponentProps<typeof StandardTabSwitcher>['selected'] = $derived.by(() => {
@@ -43,6 +44,7 @@
       else if(page.url.pathname.startsWith(`${baseUrl}/members`)) selectedTab = 'members'
       else if(page.url.pathname.startsWith(`${baseUrl}/settings`)) selectedTab = 'settings'
       else if(page.url.pathname.startsWith(`${baseUrl}/teams`)) selectedTab = 'teams'
+      else if(page.url.pathname.startsWith(`${baseUrl}/invitations`)) selectedTab = 'invitations'
       return selectedTab
     })
 
@@ -51,6 +53,7 @@
     else if(e.detail.tab.name == 'members') goto((`/clubs/${data.club.id}/members`))
     else if(e.detail.tab.name == 'settings') goto((`/clubs/${data.club.id}/settings`))
     else if(e.detail.tab.name == 'teams') goto((`/clubs/${data.club.id}/teams`))
+    else if(e.detail.tab.name == 'invitations') goto((`/clubs/${data.club.id}/invitations`))
   }
 
 </script>

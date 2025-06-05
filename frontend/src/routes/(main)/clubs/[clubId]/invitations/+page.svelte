@@ -16,8 +16,8 @@
   }
 </script>
 
-<div class="flex gap-2">
-  <div class="text-3xl font-semibold flex-grow">Inviti</div>
+<div class="flex gap-2 mt-4">
+  <div class="text-3xl font-semibold flex-grow"></div>
   <div>
     <StandardButton
       on:click={() => inviteMemberDialog = true}
