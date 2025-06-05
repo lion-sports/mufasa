@@ -117,6 +117,12 @@ class UsersManager {
       invitation.invitedEmail = user.email
       invitation.invitedUserId = user.id
       await invitation.useTransaction(trx).save()
+
+      const invitationManager = new InvitationsManager()
+      await invitationManager.acceptInvitation({
+        data: { invitation },
+        context: { user, trx },
+      })
     }
 
     await user.save()

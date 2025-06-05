@@ -3,9 +3,9 @@ import User from '#app/Models/User'
 import TeamsManager from './teams.manager.js'
 import Team from '#app/Models/Team'
 import Group from '#app/Models/Group'
-import AuthorizationManager, { AuthorizationHelpers } from './authorization.manager.js';
-import { Context, withTransaction, withUser } from './base.manager.js';
-import { ModelObject } from "@adonisjs/lucid/types/model";
+import AuthorizationManager, { AuthorizationHelpers } from './authorization.manager.js'
+import { Context, withTransaction, withUser } from './base.manager.js'
+import { ModelObject } from '@adonisjs/lucid/types/model'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import ClubsManager from './clubs.manager.js'
 import Club from '#models/Club'
@@ -25,39 +25,39 @@ export default class InvitationsManager {
     data: {
       user: {
         email: string
-      },
+      }
       team?: {
         id: number
-      },
+      }
       club?: {
         id: number
-      },
+      }
       group?: {
         id: number
       }
-    },
+    }
     context?: Context
   }): Promise<Invitation> {
     const trx = params.context?.trx as TransactionClientContract
-    const user = params.context?.user as User 
-    
-    if(!!params.data.team?.id) {
+    const user = params.context?.user as User
+
+    if (!!params.data.team?.id) {
       return await this.inviteUserToTeam({
         data: {
           user: params.data.user,
           team: params.data.team,
-          group: params.data.group
+          group: params.data.group,
         },
-        context: { user, trx }
+        context: { user, trx },
       })
-    } else if(!!params.data.club?.id) {
+    } else if (!!params.data.club?.id) {
       return await this.inviteUserToClub({
         data: {
           user: params.data.user,
           club: params.data.club,
-          group: params.data.group
+          group: params.data.group,
         },
-        context: { user, trx }
+        context: { user, trx },
       })
     } else throw new Error('no club or team defined')
   }
@@ -68,28 +68,24 @@ export default class InvitationsManager {
     data: {
       user: {
         email: string
-      },
+      }
       team: {
         id: number
-      },
+      }
       group?: {
         id: number
       }
-    },
+    }
     context?: Context
   }): Promise<Invitation> {
     const trx = params.context?.trx as TransactionClientContract
-    const user = params.context?.user as User 
+    const user = params.context?.user as User
 
-    const team = await Team.query({ client: trx })
-      .where('id', params.data.team.id)
-      .firstOrFail()
+    const team = await Team.query({ client: trx }).where('id', params.data.team.id).firstOrFail()
 
     let group: Group | undefined = undefined
     if (!!params.data.group?.id) {
-      group = await Group.query({ client: trx })
-        .where('id', params.data.group.id)
-        .firstOrFail()
+      group = await Group.query({ client: trx }).where('id', params.data.group.id).firstOrFail()
     }
 
     await AuthorizationManager.canOrFail({
@@ -98,11 +94,11 @@ export default class InvitationsManager {
         ability: 'team_invite',
         data: {
           team: {
-            id: params.data.team.id
-          }
-        }
+            id: params.data.team.id,
+          },
+        },
       },
-      context: { trx }
+      context: { trx },
     })
 
     if (!params.data.user.email) throw new Error('invited user email must be defined')
@@ -116,25 +112,23 @@ export default class InvitationsManager {
       const invitedUserBelongs = await teamsManager.userBelogsToTeam({
         data: {
           user: invitedUser,
-          team: params.data.team
+          team: params.data.team,
         },
         context: {
           trx,
-          user
-        }
+          user,
+        },
       })
 
       if (invitedUserBelongs) throw new Error('invited user already exists')
     }
 
     let invitation: Invitation
-    if(!invitedUser) {
-      const {
-        url, invitation: urlInvitation
-      } = await this.inviteUserByUrl({
+    if (!invitedUser) {
+      const { url, invitation: urlInvitation } = await this.inviteUserByUrl({
         data: {
           group,
-          team
+          team,
         },
         context: params.context,
       })
@@ -143,22 +137,26 @@ export default class InvitationsManager {
       invitation.invitedEmail = params.data.user.email
       await invitation.save()
 
-      const email = new InvitationMail({ 
-        invitationUrl: url, 
+      const email = new InvitationMail({
+        invitationUrl: url,
         invitedBy: user,
-        invitedUserEmail: params.data.user.email
+        invitedUserEmail: params.data.user.email,
       })
       await mail.sendLater(email)
     } else {
-      invitation = await Invitation.firstOrCreate({
-        invitedEmail: params.data.user.email,
-        status: 'pending',
-        teamId: team.id
-      }, {}, { client: trx })
+      invitation = await Invitation.firstOrCreate(
+        {
+          invitedEmail: params.data.user.email,
+          status: 'pending',
+          teamId: team.id,
+        },
+        {},
+        { client: trx }
+      )
 
       await invitation.related('invite').associate(invitedUser)
     }
-    
+
     if (!!group) {
       invitation.groupId = group.id
       await invitation.related('group').associate(group)
@@ -178,28 +176,24 @@ export default class InvitationsManager {
     data: {
       user: {
         email: string
-      },
+      }
       club: {
         id: number
-      },
+      }
       group?: {
         id: number
       }
-    },
+    }
     context?: Context
   }): Promise<Invitation> {
     const trx = params.context?.trx as TransactionClientContract
     const user = params.context?.user as User
 
-    const club = await Club.query({ client: trx })
-      .where('id', params.data.club.id)
-      .firstOrFail()
+    const club = await Club.query({ client: trx }).where('id', params.data.club.id).firstOrFail()
 
     let group: Group | undefined = undefined
     if (!!params.data.group?.id) {
-      group = await Group.query({ client: trx })
-        .where('id', params.data.group.id)
-        .firstOrFail()
+      group = await Group.query({ client: trx }).where('id', params.data.group.id).firstOrFail()
     }
 
     await AuthorizationManager.canOrFail({
@@ -208,11 +202,11 @@ export default class InvitationsManager {
         ability: 'club_invite',
         data: {
           club: {
-            id: params.data.club.id
-          }
-        }
+            id: params.data.club.id,
+          },
+        },
       },
-      context: { trx }
+      context: { trx },
     })
 
     if (!params.data.user.email) throw new Error('invited user email must be defined')
@@ -226,12 +220,12 @@ export default class InvitationsManager {
       const invitedUserBelongs = await clubsManager.userBelogsToClub({
         data: {
           user: invitedUser,
-          club: params.data.club
+          club: params.data.club,
         },
         context: {
           trx,
-          user
-        }
+          user,
+        },
       })
 
       if (invitedUserBelongs) throw new Error('invited user already exists')
@@ -239,12 +233,10 @@ export default class InvitationsManager {
 
     let invitation: Invitation
     if (!invitedUser) {
-      const {
-        url, invitation: urlInvitation
-      } = await this.inviteUserByUrl({
+      const { url, invitation: urlInvitation } = await this.inviteUserByUrl({
         data: {
           group,
-          club
+          club,
         },
         context: params.context,
       })
@@ -254,15 +246,19 @@ export default class InvitationsManager {
       const email = new InvitationMail({
         invitationUrl: url,
         invitedBy: user,
-        invitedUserEmail: params.data.user.email
+        invitedUserEmail: params.data.user.email,
       })
       await mail.sendLater(email)
     } else {
-      invitation = await Invitation.firstOrCreate({
-        invitedEmail: params.data.user.email,
-        status: 'pending',
-        clubId: club.id
-      }, {}, { client: trx })
+      invitation = await Invitation.firstOrCreate(
+        {
+          invitedEmail: params.data.user.email,
+          status: 'pending',
+          clubId: club.id,
+        },
+        {},
+        { client: trx }
+      )
 
       await invitation.related('invite').associate(invitedUser)
     }
@@ -302,32 +298,35 @@ export default class InvitationsManager {
       filtersApplier.applyModifiers(query, params.data.filtersBuilder?.modifiers)
     }
 
-    query.where(b => {
-      b.where('invitedEmail', user.email)
-        .orWhereHas('team', b => {
-          b.orWhere(b => {
-            return AuthorizationHelpers.userCanInTeamQuery({
-              data: {
-                query: b,
-                user: user,
-                resource: 'team',
-                action: 'invite'
-              }
+    query
+      .where((b) => {
+        b.where('invitedEmail', user.email)
+          .orWhereHas('team', (b) => {
+            b.orWhere((b) => {
+              return AuthorizationHelpers.userCanInTeamQuery({
+                data: {
+                  query: b,
+                  user: user,
+                  resource: 'team',
+                  action: 'invite',
+                },
+              })
             })
           })
-        }).orWhereHas('club', b => {
-          b.orWhere(b => {
-            return AuthorizationHelpers.userCanInClubQuery({
-              data: {
-                query: b,
-                user: user,
-                resource: 'club',
-                action: 'invite'
-              }
+          .orWhereHas('club', (b) => {
+            b.orWhere((b) => {
+              return AuthorizationHelpers.userCanInClubQuery({
+                data: {
+                  query: b,
+                  user: user,
+                  resource: 'club',
+                  action: 'invite',
+                },
+              })
             })
           })
-        })
-    }).preload('invitedBy')
+      })
+      .preload('invitedBy')
       .orderBy('invitations.createdAt', 'desc')
 
     if (!params.data.page) params.data.page = 1
@@ -345,20 +344,19 @@ export default class InvitationsManager {
       invitation: {
         id: number
       }
-    },
+    }
     context?: Context
   }): Promise<Invitation> {
     const trx = params.context?.trx as TransactionClientContract
-    const user = params.context?.user as User 
+    const user = params.context?.user as User
 
-    const invitation = await Invitation
-      .query({ client: trx })
+    const invitation = await Invitation.query({ client: trx })
       .preload('club')
       .preload('team')
       .where('id', params.data.invitation.id)
       .firstOrFail()
 
-    if(invitation.status != 'pending') throw new Error('cannot accept invitation')
+    if (invitation.status != 'pending') throw new Error('cannot accept invitation')
 
     // check if the invitation match the user
     await AuthorizationManager.canOrFail({
@@ -366,10 +364,10 @@ export default class InvitationsManager {
         actor: user,
         ability: 'invitation_accept',
         data: {
-          invitation: invitation
-        }
+          invitation: invitation,
+        },
       },
-      context: { trx }
+      context: { trx },
     })
 
     // change status to the invitation
@@ -377,22 +375,22 @@ export default class InvitationsManager {
     const results = await invitation.useTransaction(trx).save()
 
     // join the team
-    if(!!invitation.team) {
+    if (!!invitation.team) {
       let teamsManager = new TeamsManager()
       await teamsManager.addUser({
         data: {
           user: user,
           team: {
-            id: invitation.teamId
+            id: invitation.teamId,
           },
           group: {
-            id: invitation.groupId
-          }
+            id: invitation.groupId,
+          },
         },
         context: {
           trx,
-          user
-        }
+          user,
+        },
       })
     }
 
@@ -403,16 +401,16 @@ export default class InvitationsManager {
         data: {
           user: user,
           club: {
-            id: invitation.clubId
+            id: invitation.clubId,
           },
           group: {
-            id: invitation.groupId
-          }
+            id: invitation.groupId,
+          },
         },
         context: {
           trx,
-          user
-        }
+          user,
+        },
       })
     }
 
@@ -426,15 +424,14 @@ export default class InvitationsManager {
       invitation: {
         id: number
       }
-    },
+    }
     context?: Context
   }): Promise<Invitation> {
     const trx = params.context?.trx as TransactionClientContract
-    const user = params.context?.user as User 
+    const user = params.context?.user as User
 
     // check if invitation exists
-    const invitation = await Invitation
-      .query({ client: trx })
+    const invitation = await Invitation.query({ client: trx })
       .where('id', params.data.invitation.id)
       .firstOrFail()
 
@@ -446,10 +443,10 @@ export default class InvitationsManager {
         actor: user,
         ability: 'invitation_reject',
         data: {
-          invitation: invitation
-        }
+          invitation: invitation,
+        },
       },
-      context: { trx }
+      context: { trx },
     })
 
     invitation.status = 'rejected'
@@ -463,15 +460,14 @@ export default class InvitationsManager {
       invitation: {
         id: number
       }
-    },
+    }
     context?: Context
   }): Promise<Invitation> {
     const trx = params.context?.trx as TransactionClientContract
-    const user = params.context?.user as User 
+    const user = params.context?.user as User
 
     // check if invitation exists
-    const invitation = await Invitation
-      .query({ client: trx })
+    const invitation = await Invitation.query({ client: trx })
       .where('id', params.data.invitation.id)
       .firstOrFail()
 
@@ -484,9 +480,9 @@ export default class InvitationsManager {
         ability: 'invitation_discard',
         data: {
           invitation: invitation,
-        }
+        },
       },
-      context: { trx }
+      context: { trx },
     })
 
     invitation.status = 'discarded'
@@ -499,17 +495,17 @@ export default class InvitationsManager {
     data: {
       team?: {
         id: number
-      },
+      }
       club?: {
         id: number
-      },
+      }
       group?: {
         id: number
       }
-    },
+    }
     context?: Context
   }): Promise<{
-    url: string,
+    url: string
     invitation: Invitation
   }> {
     const trx = params.context?.trx!
@@ -519,48 +515,44 @@ export default class InvitationsManager {
     let club: Club | undefined = undefined
     let group: Group | undefined = undefined
 
-    if(!!params.data.team) {
+    if (!!params.data.team) {
       await AuthorizationManager.canOrFail({
         data: {
           ability: 'team_invite',
           actor: user,
           data: {
-            team: params.data.team
-          }
+            team: params.data.team,
+          },
         },
-        context: params.context
+        context: params.context,
       })
 
-      team = await Team.query({ client: trx })
-        .where('id', params.data.team.id)
-        .firstOrFail()
+      team = await Team.query({ client: trx }).where('id', params.data.team.id).firstOrFail()
 
-      if(!!params.data.group) {
+      if (!!params.data.group) {
         group = await Group.query({ client: trx })
           .where('id', params.data.group.id)
-          .whereHas('team', b => b.where('id', team!.id))
+          .whereHas('team', (b) => b.where('id', team!.id))
           .firstOrFail()
       }
-    } else if(!!params.data.club) {
+    } else if (!!params.data.club) {
       await AuthorizationManager.canOrFail({
         data: {
           ability: 'club_invite',
           actor: user,
           data: {
-            club: params.data.club
-          }
+            club: params.data.club,
+          },
         },
-        context: params.context
+        context: params.context,
       })
 
-      club = await Club.query({ client: trx })
-        .where('id', params.data.club.id)
-        .firstOrFail()
+      club = await Club.query({ client: trx }).where('id', params.data.club.id).firstOrFail()
 
       if (!!params.data.group) {
         group = await Group.query({ client: trx })
           .where('id', params.data.group.id)
-          .whereHas('team', b => b.where('id', team!.id))
+          .whereHas('team', (b) => b.where('id', team!.id))
           .firstOrFail()
       }
     } else throw new Error('club or team must be defined')
@@ -572,51 +564,53 @@ export default class InvitationsManager {
     let baseUrl = `${env.get('FRONTEND_URL') || 'http://localhost:5173'}/auth/signup`
     let urlToken = encryption.encrypt({
       token,
-      uid
+      uid,
     })
     let finalUrl = `${baseUrl}?token=${urlToken}`
 
-    let invitation = await Invitation.create({
-      teamId: team?.id,
-      clubId: club?.id,
-      invitedByUserId: user.id,
-      groupId: group?.id,
-      status: 'pending',
-      expirationDate,
-      uid,
-      token
-    }, { client: trx })
+    let invitation = await Invitation.create(
+      {
+        teamId: team?.id,
+        clubId: club?.id,
+        invitedByUserId: user.id,
+        groupId: group?.id,
+        status: 'pending',
+        expirationDate,
+        uid,
+        token,
+      },
+      { client: trx }
+    )
 
     return {
       url: finalUrl,
-      invitation
+      invitation,
     }
   }
 
   @withTransaction
-  @withUser
   public async validateInvitationToken(params: {
     data: {
       token: string
-    },
+    }
     context?: Context
   }): Promise<{
-    valid: boolean,
-    message?: string,
+    valid: boolean
+    message?: string
     invitation?: Invitation
   }> {
     const trx = params.context?.trx!
-    const user = params.context?.user!
 
     let decryptedToken: {
-      uid: string,
+      uid: string
       token: string
     } | null = await encryption.decrypt(params.data.token)
 
-    if (!decryptedToken) return {
-      valid: false,
-      message: 'invalid token'
-    }
+    if (!decryptedToken)
+      return {
+        valid: false,
+        message: 'invalid token',
+      }
 
     let invitation = await Invitation.query({ client: trx })
       .where('uid', decryptedToken.uid)
@@ -625,18 +619,18 @@ export default class InvitationsManager {
     if (invitation.expirationDate && DateTime.now() > invitation.expirationDate) {
       return {
         valid: false,
-        message: 'invitation expired'
+        message: 'invitation expired',
       }
-    } else if(decryptedToken.token !== invitation.token) {
+    } else if (decryptedToken.token !== invitation.token) {
       return {
         valid: false,
-        message: 'invalid token'
+        message: 'invalid token',
       }
     }
-    
+
     return {
       valid: true,
-      invitation
+      invitation,
     }
   }
 }
