@@ -39,27 +39,170 @@ export default class InvitationsManager {
     context?: Context
   }): Promise<Invitation> {
     const trx = params.context?.trx as TransactionClientContract
+
     const user = params.context?.user as User
 
+    let team: Team | undefined = undefined
+    let club: Club | undefined = undefined
+    let teamGroup: Group | undefined = undefined
+    let clubGroup: Group | undefined = undefined
+
     if (!!params.data.team?.id) {
-      return await this.inviteUserToTeam({
+      team = await Team.query({ client: trx }).where('id', params.data.team.id).firstOrFail()
+
+      if (!!params.data.group?.id) {
+        teamGroup = await Group.query({ client: trx })
+          .where('id', params.data.group.id)
+          .whereHas('team', (b) => b.where('id', team!.id))
+          .firstOrFail()
+      }
+    }
+
+    if (!!params.data.club?.id) {
+      club = await Club.query({ client: trx }).where('id', params.data.club.id).firstOrFail()
+
+      if (!!params.data.group?.id) {
+        clubGroup = await Group.query({ client: trx })
+          .where('id', params.data.group.id)
+          .whereHas('club', (b) => b.where('id', club!.id))
+          .firstOrFail()
+      }
+    }
+
+    if (!!club) {
+      await AuthorizationManager.canOrFail({
         data: {
-          user: params.data.user,
-          team: params.data.team,
-          group: params.data.group,
+          actor: user,
+          ability: 'club_invite',
+          data: {
+            club: {
+              id: club.id,
+            },
+          },
         },
-        context: { user, trx },
+        context: { trx },
       })
-    } else if (!!params.data.club?.id) {
-      return await this.inviteUserToClub({
+    } else if (!!team) {
+      await AuthorizationManager.canOrFail({
         data: {
-          user: params.data.user,
-          club: params.data.club,
-          group: params.data.group,
+          actor: user,
+          ability: 'team_invite',
+          data: {
+            team: {
+              id: team.id,
+            },
+          },
         },
-        context: { user, trx },
+        context: { trx },
       })
-    } else throw new Error('no club or team defined')
+    }
+
+    if (!params.data.user.email) throw new Error('invited user email must be defined')
+    const invitedUser = await User.query({ client: trx })
+      .where('email', params.data.user.email)
+      .first()
+
+    let invitedUserBelogsToTeam: boolean = false,
+      invitedUserBelogsToClub: boolean = false
+
+    if (!!invitedUser) {
+      if (!!team) {
+        const teamsManager = new TeamsManager()
+        invitedUserBelogsToTeam = await teamsManager.userBelogsToTeam({
+          data: {
+            user: invitedUser,
+            team,
+          },
+          context: params.context,
+        })
+      }
+
+      if (!!club) {
+        const clubsManager = new ClubsManager()
+        invitedUserBelogsToClub = await clubsManager.userBelogsToClub({
+          data: {
+            user: invitedUser,
+            club,
+          },
+          context: params.context,
+        })
+      }
+    }
+
+    let invitation: Invitation | undefined = undefined
+    if (!invitedUserBelogsToClub && !!club) {
+      if (!!invitedUser) {
+        invitation = await Invitation.firstOrCreate(
+          {
+            invitedEmail: params.data.user.email,
+            status: 'pending',
+            clubId: club.id,
+          },
+          {},
+          { client: trx }
+        )
+
+        await invitation.related('invite').associate(invitedUser)
+
+        if (!!clubGroup) {
+          invitation.groupId = clubGroup.id
+        }
+      }
+    }
+
+    if (!invitedUserBelogsToTeam && !!team) {
+      if (!!invitedUser) {
+        if (!invitation) {
+          invitation = await Invitation.firstOrCreate(
+            {
+              invitedEmail: params.data.user.email,
+              status: 'pending',
+              teamId: team.id,
+            },
+            {},
+            { client: trx }
+          )
+        }
+
+        await invitation.related('invite').associate(invitedUser)
+
+        if (!!teamGroup) {
+          invitation.groupId = teamGroup.id
+        }
+      }
+    }
+
+    if (!invitedUser) {
+      const { url, invitation: urlInvitation } = await this.inviteUserByUrl({
+        data: {
+          group: teamGroup,
+          team,
+          club,
+        },
+        context: params.context,
+      })
+
+      invitation = urlInvitation
+      invitation.invitedEmail = params.data.user.email
+      await invitation.save()
+
+      const email = new InvitationMail({
+        invitationUrl: url,
+        invitedBy: user,
+        invitedUserEmail: params.data.user.email,
+      })
+      await mail.sendLater(email)
+    }
+
+    if (!invitation) throw new Error('cannot invite either to a team or a club')
+
+    await invitation.related('invitedBy').associate(user)
+    if (!!invitation.invitedByUserId) await invitation.load('invitedBy')
+    if (!!invitation.teamId) await invitation.load('team')
+    if (!!invitation.clubId) await invitation.load('club')
+    if (!!invitation.groupId) await invitation.load('group')
+
+    return invitation
   }
 
   @withTransaction
@@ -242,6 +385,8 @@ export default class InvitationsManager {
       })
 
       invitation = urlInvitation
+      invitation.invitedEmail = params.data.user.email
+      await invitation.save()
 
       const email = new InvitationMail({
         invitationUrl: url,
@@ -353,6 +498,7 @@ export default class InvitationsManager {
     const invitation = await Invitation.query({ client: trx })
       .preload('club')
       .preload('team')
+      .preload('group')
       .where('id', params.data.invitation.id)
       .firstOrFail()
 
@@ -383,9 +529,12 @@ export default class InvitationsManager {
           team: {
             id: invitation.teamId,
           },
-          group: {
-            id: invitation.groupId,
-          },
+          group:
+            invitation.group?.teamId == invitation.teamId
+              ? {
+                  id: invitation.groupId,
+                }
+              : undefined,
         },
         context: {
           trx,
@@ -403,9 +552,12 @@ export default class InvitationsManager {
           club: {
             id: invitation.clubId,
           },
-          group: {
-            id: invitation.groupId,
-          },
+          group:
+            invitation.group?.clubId == invitation.clubId
+              ? {
+                  id: invitation.groupId,
+                }
+              : undefined,
         },
         context: {
           trx,
@@ -494,13 +646,13 @@ export default class InvitationsManager {
   public async inviteUserByUrl(params: {
     data: {
       team?: {
-        id: number
+        id?: number
       }
       club?: {
-        id: number
+        id?: number
       }
       group?: {
-        id: number
+        id?: number
       }
     }
     context?: Context
@@ -515,47 +667,49 @@ export default class InvitationsManager {
     let club: Club | undefined = undefined
     let group: Group | undefined = undefined
 
-    if (!!params.data.team) {
+    if (!!params.data.team?.id) {
       await AuthorizationManager.canOrFail({
         data: {
           ability: 'team_invite',
           actor: user,
           data: {
-            team: params.data.team,
+            team: { id: params.data.team.id },
           },
         },
         context: params.context,
       })
 
       team = await Team.query({ client: trx }).where('id', params.data.team.id).firstOrFail()
+    }
 
-      if (!!params.data.group) {
-        group = await Group.query({ client: trx })
-          .where('id', params.data.group.id)
-          .whereHas('team', (b) => b.where('id', team!.id))
-          .firstOrFail()
-      }
-    } else if (!!params.data.club) {
+    if (!!params.data.club?.id) {
       await AuthorizationManager.canOrFail({
         data: {
           ability: 'club_invite',
           actor: user,
           data: {
-            club: params.data.club,
+            club: { id: params.data.club.id },
           },
         },
         context: params.context,
       })
 
       club = await Club.query({ client: trx }).where('id', params.data.club.id).firstOrFail()
+    }
 
-      if (!!params.data.group) {
-        group = await Group.query({ client: trx })
-          .where('id', params.data.group.id)
-          .whereHas('team', (b) => b.where('id', team!.id))
-          .firstOrFail()
-      }
-    } else throw new Error('club or team must be defined')
+    if (!club && !team) throw new Error('club or team must be defined')
+
+    if (!!params.data.group?.id && !!params.data.club?.id) {
+      group = await Group.query({ client: trx })
+        .where('id', params.data.group.id)
+        .whereHas('club', (b) => b.where('id', params.data.club!.id!))
+        .firstOrFail()
+    } else if (!!params.data.group?.id && !!params.data.team?.id) {
+      group = await Group.query({ client: trx })
+        .where('id', params.data.group.id)
+        .whereHas('team', (b) => b.where('id', params.data.team?.id!))
+        .firstOrFail()
+    }
 
     let expirationDate = DateTime.now().plus({ day: 1 })
 

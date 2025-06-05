@@ -20,7 +20,7 @@
     },
     groups?: Group[]
     teams?: Team[]
-    oninvite?: (params: { user: User }) => void
+    oninvite?: (params: { user: { email: string } }) => void
   }
 
 	let { club, oninvite, groups, teams }: Props = $props()
@@ -64,14 +64,19 @@
   }
 
   async function handleConfirmInvitation() {
-    if(!userToInvite) return
+    let invitationUser: { email: string } | undefined = userToInvite
+    if(!invitationUser && !!searchText && searchTextIsEmail) invitationUser = { email: searchText }
+    if(!invitationUser) return
+
     loadingInvitation = true
 
     try {
       let service = new InvitationsService({ fetch })
       await service.inviteUser({
         club,
-        user: userToInvite,
+        user: invitationUser,
+        group: selectedGroups[0],
+        team: selectedTeams[0]
       })
 
       addSuccessToast({
@@ -81,7 +86,7 @@
         }
       })
 
-      if(!!oninvite) oninvite({ user: userToInvite })
+      if(!!oninvite) oninvite({ user: invitationUser })
 
       confirmationDialog = false
     } catch(e) {
@@ -98,6 +103,8 @@
   }
 
   let additionalFieldVisible: boolean = $state(false)
+
+  let searchTextIsEmail: boolean = $derived(!!searchText && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(searchText))
 </script>
 
 <div class="flex flex-col gap-2 @container">
@@ -145,7 +152,6 @@
         <div>
           <TeamsAutocomplete
             {teams}
-            multiple
             bind:values={selectedTeams}
           ></TeamsAutocomplete>
         </div>
@@ -161,9 +167,12 @@
 			<div class="h-full w-full text-xs flex flex-col justify-center items-center text-center">
         {#if !!searchText}
           <div>Nessun utente trovato</div>
-          <button 
-            class="underline text-[rgb(var(--global-color-primary-500))]"
-          >Invita lo stesso per email</button>
+          {#if searchTextIsEmail}
+            <button 
+              class="underline text-[rgb(var(--global-color-primary-500))]"
+              onclick={handleConfirmInvitation}
+            >Invita lo stesso per email</button>
+          {/if}
         {/if}
 			</div>
 		{:else}
