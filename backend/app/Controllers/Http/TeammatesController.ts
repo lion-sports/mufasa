@@ -17,6 +17,7 @@ export default class TeammatesController {
 
   public async mostAbsenceForTeammates({ }: HttpContext) {
     const manager = new TeammatesManager()
-    return await manager.mostAbsenceForTeammates()
+    // return await manager.mostAbsenceForTeammates()
+    return {}
   }
 }

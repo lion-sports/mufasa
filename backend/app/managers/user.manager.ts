@@ -14,6 +14,8 @@ import vine from '@vinejs/vine'
 import ConfirmationNotification from '#app/mails/ConfirmationNotification'
 import env from '#start/env'
 import { Secret } from '@adonisjs/core/helpers'
+import ClubsManager from './clubs.manager.js'
+import { Sport } from 'lionn-common'
 
 export const signupValidator = vine.compile(
   vine.object({
@@ -71,6 +73,11 @@ class UsersManager {
       birthday: DateTime
       solanaPublicKey?: string
       invitationToken?: string
+      club?: {
+        clubName: string
+        completeClubName: string
+        clubSport: string
+      }
     }
     context?: Context
   }): Promise<User> {
@@ -78,9 +85,7 @@ class UsersManager {
     let user: User
 
     let validatedData = await signupValidator.validate(params.data)
-    let existingUser = await User.query({ client: trx })
-      .where('email', validatedData.email)
-      .first()
+    let existingUser = await User.query({ client: trx }).where('email', validatedData.email).first()
     if (!!existingUser) throw new Error('user already exists')
 
     let invitation: Invitation | undefined = undefined
@@ -116,10 +121,24 @@ class UsersManager {
 
     await user.save()
 
-    await this.sendConfirmationEmail({ 
+    await this.sendConfirmationEmail({
       data: { user: user },
-      context: params.context
+      context: params.context,
     })
+
+    if (!!params.data.club) {
+      const clubManager = new ClubsManager()
+      await clubManager
+        .create({
+          data: {
+            name: params.data.club.clubName,
+            completeName: params.data.club.completeClubName,
+            sport: params.data.club.clubSport as Sport,
+          },
+          context: { user, trx },
+        })
+        .catch((err) => console.error('unable to create club', err?.message))
+    }
 
     return user
   }
@@ -224,7 +243,7 @@ class UsersManager {
 
     const token = await User.confirmRegistrationTokens.create(params.data.user, ['*'], {
       expiresIn: '24 hours',
-      trx
+      trx,
     })
 
     const tokenValue = token.toJSON().token
@@ -236,7 +255,7 @@ class UsersManager {
   public async sendConfirmationEmail(params: {
     data: {
       user: User
-    },
+    }
     context?: Context
   }): Promise<void> {
     const trx = params.context?.trx!
@@ -289,6 +308,8 @@ class UsersManager {
 
     // Delete confirmation token
     await User.confirmRegistrationTokens.delete(user, verifiedToken.identifier)
+
+    console.log(user)
 
     return user
   }
