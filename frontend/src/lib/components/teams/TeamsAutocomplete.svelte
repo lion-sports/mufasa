@@ -55,8 +55,4 @@
 	bind:values={selectedValues}
 	onchange={handleSelectionChange}
   {...rest}
->
-  {#snippet itemSnippet({ item })}
-    <div>{item.label}</div>
-  {/snippet}
-</StandardAutocomplete>
+></StandardAutocomplete>

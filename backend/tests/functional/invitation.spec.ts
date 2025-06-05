@@ -3,18 +3,23 @@ import TeamsManager from '#app/managers/teams.manager';
 import User from '#app/Models/User'
 import Team from '#app/Models/Team'
 import { test } from '@japa/runner'
-import { TeamFactory, UserFactory } from '#database/factories/index'
+import { ClubFactory, TeamFactory, UserFactory } from '#database/factories/index'
 import GroupFactory from '#database/factories/GroupFactory';
 import InvitationsManager from '#app/managers/invitations.manager';
+import Club from '#models/Club';
 
 test.group('Invitations', (group) => {
   let loggedInUser: User
   let team: Team
+  let club: Club
 
   group.setup(async () => {
     team = await TeamFactory.with('owner').create()
     await team.load('owner')
     loggedInUser = team.owner
+
+    club = await ClubFactory.create()
+    await club.related('owner').associate(loggedInUser)
 
     let manager = new TeamsManager()
     team = await manager.create({
@@ -63,6 +68,26 @@ test.group('Invitations', (group) => {
     response.assertAgainstApiSpec()
     assert.equal(invitation.status, 'pending', 'invitation should be pending')
     assert.equal(invitation.team.id, team.id, 'invitation should be for the right team')
+    assert.equal(invitation.invitedEmail, invitedUser.email, 'invitation should be at the right user')
+  })
+
+  test('invite a exising user to a club', async ({ client, assert }) => {
+    let invitedUser = await UserFactory.create()
+
+    const response = await client.post('/invitations/inviteUser').json({
+      user: {
+        email: invitedUser.email
+      },
+      club: {
+        id: club.id
+      }
+    }).loginAs(loggedInUser)
+
+
+    const invitation = response.body()
+    response.assertAgainstApiSpec()
+    assert.equal(invitation.status, 'pending', 'invitation should be pending')
+    assert.equal(invitation.club.id, club.id, 'invitation should be for the right club')
     assert.equal(invitation.invitedEmail, invitedUser.email, 'invitation should be at the right user')
   })
 
