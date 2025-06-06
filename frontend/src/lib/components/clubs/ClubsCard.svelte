@@ -71,9 +71,3 @@
     {@html club.bio}
   </div> -->
 </div>
-
-<style>
-  .gradient {
-    background: linear-gradient(to bottom, transparent, rgb(var(--global-color-background-100)));
-  }
-</style>

@@ -1,9 +1,8 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
 import type { FilterBuilder } from '@likable-hair/svelte'
 import type { User } from '../auth/auth.service'
-import type { Event } from '../events/events.service'
-import type { Sport } from '../scouts/scouts.service'
 import type { Team } from '../teams/teams.service'
+import type { Sport } from 'lionn-common'
 
 export type ScoringSystemConfigPoints =
 	| {
