@@ -10,7 +10,6 @@
   let selectedMenu: string | undefined = $derived.by(() => {
     let selectedMenu = 'general'
     if(page.url.pathname.includes('/settings/general')) selectedMenu = 'general'
-    else if(page.url.pathname.includes('/settings/invitations')) selectedMenu = 'invitations'
     else if(page.url.pathname.includes('/settings/groups')) selectedMenu = 'groups'
     return selectedMenu
   })
@@ -23,7 +22,6 @@
     }
   }) {
     if(e.detail.option.name == 'general') goto(`/clubs/${data.club.id}/settings/general`)
-    else if(e.detail.option.name == 'invitations') goto(`/clubs/${data.club.id}/settings/invitations`)
     else if(e.detail.option.name == 'groups') goto(`/clubs/${data.club.id}/settings/groups`)
   }
 
@@ -39,7 +37,6 @@
           <HierarchyMenu
             options={[
               { name: 'general', label: 'Generali', icon: 'mdi-cog'},
-              { name: 'invitations', label: 'Inviti', icon: 'mdi-email'},
               { name: 'groups', label: 'Gruppi e permessi', icon: 'mdi-lock'}
             ]}
             selected={selectedMenu}
