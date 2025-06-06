@@ -5,6 +5,7 @@
 	import { Icon } from '@likable-hair/svelte'
 	import type { PageData } from './$types'
 	import AuthService from '@/lib/services/auth/auth.service'
+	import { addSuccessToast } from '@/lib/components/ui/sonner'
 
 	interface Props {
 		data: PageData
@@ -20,7 +21,10 @@
 			const service = new AuthService({ fetch })
 			await service
 				.verifySignup({ token: data.token })
-				.then(() => (verificationSuccessful = true))
+				.then(() => {
+					verificationSuccessful = true
+					addSuccessToast({ title: 'Verifica avvenuta con successo' })
+				})
 				.catch(() => (verificationSuccessful = false))
 				.finally(() => (isLoading = false))
 
