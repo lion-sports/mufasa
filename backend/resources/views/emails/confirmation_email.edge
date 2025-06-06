@@ -5,122 +5,213 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="x-apple-disable-message-reformatting">
-  <title></title>
+  <title>Conferma Email - LiONN</title>
   <!--[if mso]>
-  <style>
-    table {border-collapse:collapse;border-spacing:0;border:none;margin:0;}
-    div, td {padding:0;}
-    div {margin:0 !important;}
-  </style>
-  <noscript>
-    <xml>
-      <o:OfficeDocumentSettings>
-        <o:PixelsPerInch>96</o:PixelsPerInch>
-      </o:OfficeDocumentSettings>
-    </xml>
-  </noscript>
-  <![endif]-->
+<noscript>
+<xml>
+<o:OfficeDocumentSettings>
+<o:AllowPNG/>
+<o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings>
+</xml>
+</noscript>
+<![endif]-->
   <style>
     table,
     td,
     div,
     h1,
     p {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: Arial, sans-serif;
     }
 
-    /* Media queries for mobile responsiveness */
-    @media screen and (max-width: 530px) {
-      .unsub {
-        display: block;
-        padding: 8px;
-        margin-top: 14px;
-        border-radius: 6px;
-        background-color: #555555;
-        text-decoration: none !important;
-        font-weight: bold;
-      }
-
-      .col-lge {
-        max-width: 100% !important;
-      }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f7f8fc;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
     }
 
-    @media screen and (min-width: 531px) {
-      .col-sml {
-        max-width: 27% !important;
+    table {
+      border-collapse: collapse;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    img {
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+      -ms-interpolation-mode: bicubic;
+    }
+
+    /* Outlook-specific fixes */
+    .ExternalClass {
+      width: 100%;
+    }
+
+    .ExternalClass,
+    .ExternalClass p,
+    .ExternalClass span,
+    .ExternalClass font,
+    .ExternalClass td,
+    .ExternalClass div {
+      line-height: 100%;
+    }
+
+    /* Mobile styles */
+    @media screen and (max-width: 600px) {
+      .mobile-padding {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
       }
 
-      .col-lge {
-        max-width: 73% !important;
+      .mobile-center {
+        text-align: center !important;
+      }
+
+      .mobile-font-size {
+        font-size: 18px !important;
       }
     }
   </style>
 </head>
 
-<body style="margin:0;padding:0;word-spacing:normal;background-color:#f4f4f4;">
-  <div role="article" aria-roledescription="email" lang="en"
-    style="text-size-adjust:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;background-color:#f4f4f4;">
-    <table role="presentation" style="width:100%;border:none;border-spacing:0; margin: 0 auto;">
-      <tr>
-        <td align="center" style="padding:0;">
-          <!--[if mso]>
-          <table role="presentation" align="center" style="width:600px;">
-          <tr>
-          <td>
-          <![endif]-->
-          <table role="presentation" style="width:94%;max-width:600px;border:none;border-spacing:0;text-align:center;
-            font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:16px;line-height:22px;color:#363636;">
-            <tr>
-              <td
-                style="padding:40px 30px 30px 30px;text-align:center;font-size:24px;font-weight:bold; background-color:#fff;">
-                <div style="width: 100%; display:flex; justify-content:center; align-items:center;">
-                  <a href="https://lionsport.likablehair.it/" style="text-decoration:none;">
-                    <img src="https://lionsport.likablehair.it/favicon.png" width="auto" height="50" alt="Logo"
-                      style="max-width:80%;height:auto;border:none;text-decoration:none;color:#ffffff;">
-                  </a>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:30px;background-color:#ffffff; text-align: center;">
-                <h1
-                  style="margin-top:0;margin-bottom:16px;font-size:26px;line-height:32px;font-weight:bold;letter-spacing:-0.02em;">
-                  Conferma Email
-                </h1>
-                <p style="margin:0; text-align: left;">
-                  Ciao, {{user.firstname}} {{user.lastname}}!
-                  Grazie per esserti unito a Lionn, per favore conferma la tua email cliccando il pulsante qui sotto.
-                </p>
+<body style="margin: 0; padding: 0; background-color: #f7f8fc;">
+  <!--[if mso | IE]>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="600" role="presentation">
+<tr>
+<td>
+<![endif]-->
 
-                <div style="width: 100%; display:flex; justify-content:center;">
-                  <a href="{{verificationUrl}}"
-                    style="background-color: #4CAF50; border: none; color: white; padding: 14px 28px;
-                    cursor: pointer; border-radius: 5px; font-weight: 500; font-size: 1.1rem;
-                    transition: all .3s ease-in-out; text-decoration: none; display: inline-block; margin-top: 20px; margin-bottom: 20px;">
-                    Conferma la tua Email
-                  </a>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:30px;text-align:center;font-size:12px;background-color:#fff;color:#525252;">
-                <p style="margin:0;font-size:14px;line-height:20px;">Copyright © Lionn. All Rights Reserved</p>
-              </td>
-            </tr>
-            <tr>
-              <td height="40" style="font-size:40px;line-height:40px;">&nbsp;</td>
-            </tr>
-          </table>
-          <!--[if mso]>
-          </td>
+  <table role="presentation" style="width: 100%; border: none; border-spacing: 0; background-color: #f7f8fc;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="width: 100%; max-width: 600px; border: none; border-spacing: 0;">
+
+          <!-- Logo Section -->
+          <tr>
+            <td style="padding: 0 0 40px 0;">
+              <table role="presentation" style="width: 100%; border: none; border-spacing: 0;">
+                <tr>
+                  <td style="text-align: left; padding: 0;">
+                    <a href="https://lionsport.likablehair.it/" style="text-decoration: none;">
+                      <img src="https://lionsport.likablehair.it/favicon.png" width="32" height="32" alt="LiONN"
+                        style="vertical-align: middle; margin-right: 8px; border: none;">
+                      <span style="font-size: 24px; font-weight: bold; color: #2563eb; vertical-align: middle;">
+                        LiONN
+                      </span>
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
           </tr>
-          </table>
-          <![endif]-->
-        </td>
-      </tr>
-    </table>
-  </div>
+
+          <!-- Main Card -->
+          <tr>
+            <td>
+              <table role="presentation"
+                style="width: 100%; border: 1px solid #e1e5e9; border-spacing: 0; background-color: #ffffff;">
+                <tr>
+                  <td style="padding: 60px 40px; text-align: center;" class="mobile-padding">
+
+                    <!-- Icon -->
+                    <table role="presentation"
+                      style="width: 60px; height: 60px; margin: 0 auto 32px auto; border: none; border-spacing: 0;">
+                      <tr>
+                        <td
+                          style="width: 60px; height: 60px; background-color: #4CAF50; text-align: center; vertical-align: middle; font-size: 24px; color: white;">
+                          ✓
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Title -->
+                    <h1 style="font-size: 24px; font-weight: 600; color: #2d3748; margin: 0 0 24px 0; line-height: 1.3;"
+                      class="mobile-font-size">
+                      Conferma la tua email
+                    </h1>
+
+                    <!-- Content -->
+                    <p style="font-size: 16px; color: #718096; margin: 0 0 8px 0; line-height: 1.5;">
+                      Ciao, <strong>{{user.firstname}} {{user.lastname}}</strong>!
+                    </p>
+                    <p style="font-size: 16px; color: #718096; margin: 0 0 24px 0; line-height: 1.5;">
+                      Grazie per esserti unito a <strong style="color: #2563eb;">LiONN</strong>.
+                    </p>
+
+                    <p style="font-size: 16px; color: #2d3748; margin: 0 0 32px 0; line-height: 1.5;">
+                      Per completare la registrazione, conferma la tua email<br>
+                      cliccando il pulsante qui sotto.
+                    </p>
+
+                    <!-- CTA Button -->
+                    <table role="presentation" style="margin: 0 auto; border: none; border-spacing: 0;">
+                      <tr>
+                        <td style="background-color: #4CAF50; text-align: center;">
+                          <a href="{{verificationUrl}}"
+                            style="display: inline-block; padding: 14px 28px; font-size: 16px; font-weight: 500; color: #ffffff; text-decoration: none; font-family: Arial, sans-serif;">
+                            Conferma la tua Email
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Divider -->
+                    <p style="margin: 32px 0; color: #a0aec0; font-size: 14px; font-weight: 500;">
+                      OPPURE
+                    </p>
+
+                    <p style="font-size: 14px; color: #718096; margin: 0 0 40px 0;">
+                      copia e incolla questo link nel tuo browser
+                    </p>
+
+                    <p style="font-size: 13px; color: #718096; margin: 0 0 35px 0; max-width: 300p">
+                      {{invitationUrl}}
+                    </p>
+
+                    <!-- Disclaimer Section -->
+                    <table role="presentation"
+                      style="width: 100%; border-top: 1px solid #e2e8f0; border-spacing: 0; margin-top: 40px;">
+                      <tr>
+                        <td style="padding: 24px 0 0 0; text-align: center;">
+                          <p style="font-size: 14px; color: #718096; margin: 0; line-height: 1.5;">
+                            <strong>Problemi con il link?</strong><br>
+                            Se il pulsante non funziona, copia e incolla l'URL completo nel tuo browser.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 40px 0 0 0; text-align: center;">
+              <p style="font-size: 14px; color: #a0aec0; margin: 0;">
+                Copyright © <strong style="color: #2563eb;">LiONN</strong>. All Rights Reserved
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!--[if mso | IE]>
+</td>
+</tr>
+</table>
+<![endif]-->
 </body>
 
 </html>
