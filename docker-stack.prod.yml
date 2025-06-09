@@ -1,0 +1,128 @@
+networks:
+  public:
+    name: public
+    external: true
+  postgres:
+  mongo:
+  redis:
+
+volumes:
+  postgres_data:
+    driver_opts:
+      type: none
+      device: /mnt/sites/mufasa/postgres/data
+      o: bind
+  mongo_data:
+    driver_opts:
+      type: none
+      device: /mnt/sites/mufasa/mongo/data
+      o: bind
+  redis_data:
+    driver_opts:
+      type: none
+      device: /mnt/sites/mufasa/redis/data
+      o: bind
+
+configs:
+  mongo_initdb:
+    file: mongo/initdb.prod.sh
+  psql_initdb:
+    file: psql/initdb.prod.sh
+
+services:
+  backend:
+    image: cr.likablehair.it/mufasa_backend:master
+    env_file:
+      - backend/.env
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        order: start-first
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.mufasa-api.rule=Host(`api.lionn.xyz`)
+        - traefik.http.services.mufasa-api.loadbalancer.server.port=3333
+        - traefik.http.routers.mufasa-api.entrypoints=websecure
+    networks:
+      - public
+      - redis
+      - postgres
+      - mongo
+
+  frontend:
+    image: cr.likablehair.it/mufasa_frontend:master
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://0.0.0.0:3000']
+    env_file:
+      - frontend/.env
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        order: start-first
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.mufasa.rule=Host(`app.lionn.xyz`)
+        - traefik.http.services.mufasa.loadbalancer.server.port=3000
+        - traefik.http.routers.mufasa.entrypoints=websecure
+    networks:
+      - public
+
+  redis:
+    image: redis:7.2.4-alpine
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - TZ=Europe/Rome
+    volumes:
+      - redis_data:/data
+    networks:
+      - redis
+
+  postgresql:
+    image: postgres:16.3-alpine
+    ports:
+      - mode: host
+        target: 5432
+        published: 5441
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    configs:
+      - source: psql_initdb
+        target: /docker-entrypoint-initdb.d/initdb.sh
+    env_file:
+      - psql/.env
+    networks:
+      - postgres
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        order: stop-first
+      placement:
+        constraints:
+          - node.hostname==kubrick
+
+  mongo:
+    image: mongo:7.0.12-jammy
+    ports:
+      - mode: host
+        target: 27017
+        published: 27018
+    env_file:
+      - mongo/.env
+    volumes:
+      - mongo_data:/data/db
+    configs:
+      - source: mongo_initdb
+        target: /docker-entrypoint-initdb.d/initdb.sh
+    networks:
+      - mongo
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        order: stop-first
+      placement:
+        constraints:
+          - node.hostname==kubrick
