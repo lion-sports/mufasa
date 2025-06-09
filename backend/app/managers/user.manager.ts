@@ -307,13 +307,14 @@ class UsersManager {
 
     // Generating secret from email token
     const tokenSecret = new Secret<string>(params.data.token)
+    console.log('Got token:', params.data.token.substring(0, 5), '...')
 
     // Verify the token exists in db
     const verifiedToken = await User.confirmRegistrationTokens.verify(tokenSecret)
     if (!verifiedToken) throw new Error('could not verify this token')
 
     // Expiry verification
-    if (!verifiedToken.expiresAt) throw new Error('could not verify this token')
+    if (verifiedToken.expiresAt === null) throw new Error('missing expiration date for this token')
     if (DateTime.fromJSDate(verifiedToken.expiresAt) < DateTime.now()) {
       throw new Error('this token is expired')
     }
