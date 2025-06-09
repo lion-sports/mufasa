@@ -1,13 +1,14 @@
 import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime } from 'luxon'
-import { column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import { column, belongsTo, hasMany, manyToMany } from '@adonisjs/lucid/orm'
 import Frequency from '#app/Models/Frequency'
 import Team from '#app/Models/Team'
 import User from '#app/Models/User'
 import Convocation from '#app/Models/Convocation'
 import Scout from './Scout.js'
-import { type BelongsTo } from "@adonisjs/lucid/types/relations";
-import { type HasMany } from "@adonisjs/lucid/types/relations";
+import { type HasMany, type ManyToMany, type BelongsTo } from "@adonisjs/lucid/types/relations";
+import EventSession from './EventSession.js'
+import EventStatus from './EventStatus.js'
 
 export default class Event extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -26,9 +27,6 @@ export default class Event extends CamelCaseBaseModel {
   public description: string
 
   @column()
-  public status: 'confirmed' | 'notConfirmed'
-
-  @column()
   public frequencyId: number
 
   @belongsTo(() => Frequency, {
@@ -45,12 +43,29 @@ export default class Event extends CamelCaseBaseModel {
   public team: BelongsTo<typeof Team>
 
   @column()
+  public eventStatusId: number
+
+  @belongsTo(() => EventStatus, {
+    foreignKey: 'eventStatusId'
+  })
+  public eventStatus: BelongsTo<typeof EventStatus>
+
+  @column()
   public createdByUserId: number
 
   @belongsTo(() => User, {
     foreignKey: 'createdByUserId'
   })
   public createdBy: BelongsTo<typeof User>
+
+  @manyToMany(() => EventSession, {
+    pivotTable: 'event_sessions_events',
+    localKey: 'id',
+    pivotForeignKey: 'eventId',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'eventSessionId',
+  })
+  declare eventSessions: ManyToMany<typeof EventSession>
 
   @hasMany(() => Convocation, {
     foreignKey: 'eventId'

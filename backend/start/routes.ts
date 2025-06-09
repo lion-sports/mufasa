@@ -136,6 +136,17 @@ router.group(() => {
   }))
   .prefix('/events')
 
+
+router.group(() => {
+  router.post('/:id/addEvents', [EventSessionsController, 'addEvents'])
+  router.post('/:id/removeEvents', [EventSessionsController, 'removeEvents'])
+  router.post('/:id/setEvents', [EventSessionsController, 'setEvents'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/eventSessions')
+
 router.resource('eventSessions', EventSessionsController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
   .middleware(

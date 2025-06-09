@@ -1514,3 +1514,92 @@ paths:
       responses:
         '200':
           description: The requested user setting value.
+  /eventSessions/{eventSessionId}/addEvents:
+    post:
+      summary: Attach events to an event session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                eventSession:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+      responses:
+        '200':
+          description: The updated event session with attached events.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSession'
+
+  /eventSessions/{eventSessionId}/removeEvents:
+    post:
+      summary: Detach events from an event session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                eventSession:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+      responses:
+        '200':
+          description: The updated event session with detached events.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSession'
+
+  /eventSessions/{eventSessionId}/setEvents:
+    post:
+      summary: Sync events for an event session (replace all attached events).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                eventSession:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+      responses:
+        '200':
+          description: The updated event session with synced events.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventSession'

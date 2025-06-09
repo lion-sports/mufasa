@@ -69,7 +69,7 @@ export default class EventsManager {
       end: DateTime,
       name: string,
       description?: string,
-      status?: 'confirmed' | 'notConfirmed',
+      eventStatusId?: number,
       team: {
         id: number
       },
@@ -107,15 +107,20 @@ export default class EventsManager {
       .whereHas('teammateUsers', builder => {
         builder.where('users.id', user.id)
       })
+      .preload('eventStatuses')
       .where('teams.id', params.data.team.id)
       .firstOrFail()
+    
+    if(!!params.data.eventStatusId && !team.eventStatuses.map((e) => e.id).includes(params.data.eventStatusId)) {
+      throw new Error('cannot find status')
+    }
 
     const createdEvent = await Event.create({
       start: params.data.start,
       end: params.data.end,
       name: params.data.name,
       description: params.data.description,
-      status: params.data.status || 'confirmed',
+      eventStatusId: params.data.eventStatusId,
       createdByUserId: user.id
     }, {
       client: trx
@@ -150,10 +155,10 @@ export default class EventsManager {
         end: DateTime,
         name: string,
         description?: string,
-        status?: 'confirmed' | 'notConfirmed',
         team: {
           id: number
-        }
+        },
+        eventStatusId?: number
       },
       rule: {
         frequency: 'week' | 'month',
@@ -210,8 +215,8 @@ export default class EventsManager {
         end: DateTime,
         name: string,
         description?: string,
-        status: 'confirmed' | 'notConfirmed',
         teamId: number,
+        eventStatusId?: number,
         frequencyId: number
       }[] = []
       
@@ -241,8 +246,8 @@ export default class EventsManager {
             end: end,
             name: params.data.event.name,
             description: params.data.event.description,
-            status: params.data.event.status || 'confirmed',
             teamId: params.data.event.team.id,
+            eventStatusId: params.data.event.eventStatusId,
             frequencyId: frequency.id
           })
         }
@@ -267,7 +272,7 @@ export default class EventsManager {
         end: DateTime,
         name: string,
         description?: string,
-        status: 'confirmed' | 'notConfirmed',
+        eventStatusId?: number,
         teamId: number,
         frequencyId: number
       }[] = []
@@ -298,7 +303,7 @@ export default class EventsManager {
             end: end,
             name: params.data.event.name,
             description: params.data.event.description,
-            status: params.data.event.status || 'confirmed',
+            eventStatusId: params.data.event.eventStatusId,
             teamId: params.data.event.team.id,
             frequencyId: frequency.id
           })
@@ -374,11 +379,9 @@ export default class EventsManager {
     for(let i = 0; i < events.length; i += 1) {
       let event = await this.create({
         data: {
+          ...events[i],
           start: events[i].start.set({ weekNumber: params.data.toWeekNumber }),
           end: events[i].end.set({ weekNumber: params.data.toWeekYear }),
-          name: events[i].name,
-          description: events[i].description,
-          status: events[i].status,
           team: params.data.team,
           convocations: events[i].convocations.map((el) => {
             return {
@@ -403,7 +406,7 @@ export default class EventsManager {
       end?: DateTime,
       name?: string,
       description?: string,
-      status?: 'confirmed' | 'notConfirmed',
+      eventStatusId?: number,
       updateAllFrequency?: boolean
     },
     context?: Context
@@ -437,9 +440,16 @@ export default class EventsManager {
           tuBuilder.where('users.id', user.id)
         })
       })
+      .preload('team', b => {
+        b.preload('eventStatuses')
+      })
       .firstOrFail()
     
     let results: Event | Event[]
+
+    if(!!params.data.eventStatusId && !event.team.eventStatuses.map(e => e.id).includes(params.data.eventStatusId)) {
+      throw new Error('cannot find status')
+    }
     
     if(params.data.updateAllFrequency && !!event.frequencyId) {
       // search for the events in the frequency
@@ -452,7 +462,6 @@ export default class EventsManager {
         end?: DateTime,
         name?: string,
         description?: string,
-        status?: 'confirmed' | 'notConfirmed',
         updateAllFrequency?: boolean
       } = {...params.data}
 
@@ -468,7 +477,7 @@ export default class EventsManager {
       if (params.data.end !== undefined) event.end = params.data.end
       if (params.data.name !== undefined) event.name = params.data.name
       if (params.data.description !== undefined) event.description = params.data.description
-      if (params.data.status !== undefined) event.status = params.data.status
+      if (params.data.eventStatusId !== undefined) event.eventStatusId = params.data.eventStatusId
 
       results = await event.save()
     }

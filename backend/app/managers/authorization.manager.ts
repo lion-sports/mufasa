@@ -13,6 +13,7 @@ import Scout from "#models/Scout";
 import ScoringSystem from "#models/ScoringSystem";
 import Convocation from "#models/Convocation";
 import Widget from "#models/Widget";
+import EventSession from "#models/EventSession";
 
 export type GroupedPermissions<Type = boolean> = {
   team: {
@@ -911,5 +912,31 @@ export class AuthorizationHelpers {
     }).where('users.id', params.data.user.id)
 
     return userHasGroup.length != 0
+  }
+
+  // the query to get all the teams the user can see
+  public static viewableEventSessionsQuery(
+    params: {
+      data: {
+        query: ModelQueryBuilderContract<typeof EventSession> | RelationSubQueryBuilderContract<typeof EventSession> | HasManyQueryBuilderContract<typeof EventSession, any>,
+        user: { id: number }
+      },
+      context?: Context
+    },
+  ): ModelQueryBuilderContract<typeof EventSession> | RelationSubQueryBuilderContract<typeof EventSession> | HasManyQueryBuilderContract<typeof EventSession, any> {
+    return params.data.query.where(eventSessionBuilder => {
+      eventSessionBuilder.where('ownedByUserId', params.data.user.id)
+        .orWhere(b => {
+          b.whereHas('team', b => {
+              return this.viewableTeamsQuery({
+                data: {
+                  query: b,
+                  user: params.data.user
+                },
+                context: params.context
+              })
+            })
+        })
+    })
   }
 }

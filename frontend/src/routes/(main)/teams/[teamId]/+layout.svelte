@@ -99,12 +99,6 @@
 			icon: 'mdi-calendar'
 		})
 
-		tabs.push({
-			name: 'weeks',
-			label: 'Settimane',
-			icon: 'mdi-clock'
-		})
-
 		return tabs
 	})
 
@@ -149,8 +143,6 @@
 			selectedTab = 'groups'
 		} else if ($page.url.href.endsWith('calendar')) {
 			selectedTab = 'calendar'
-		} else if ($page.url.href.endsWith('weeks')) {
-			selectedTab = 'weeks'
 		}
 	})
 
