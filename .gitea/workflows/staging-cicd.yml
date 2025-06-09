@@ -26,6 +26,12 @@ jobs:
           cache: "npm"
           cache-dependency-path: "./**/package-lock.json"
 
+      - name: Install common dependencies
+        run: cd common; npm ci
+
+      - name: Build common
+        run: cd common; npm run build --if-present
+
       - name: Install breeze dependencies
         run: cd breeze; npm ci
 
@@ -72,6 +78,12 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
           cache-dependency-path: "./backend/package-lock.json"
+
+      - name: Install common dependencies
+        run: cd common; npm ci
+
+      - name: Build common
+        run: cd common; npm run build --if-present
 
       - name: Install breeze dependencies
         run: cd breeze; npm ci
