@@ -273,18 +273,6 @@ jobs:
           export-type: "file"
           file-output-path: "/frontend/.env"
 
-      - name: Populate mongo .env file with Infisical
-        uses: https://gitea.likablehair.it/Likablehair/infisical-secrets-action@v1.0.8
-        with:
-          domain: https://infisical.likablehair.it
-          client-id: ${{ secrets.INFISICAL_IDENTITY_CLIENT_ID }}
-          client-secret: ${{ secrets.INFISICAL_IDENTITY_CLIENT_SECRET }}
-          env-slug: staging
-          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
-          secret-path: /mongo/
-          export-type: "file"
-          file-output-path: "/mongo/.env.mongo"
-
       - name: Deploy stack to swarm
         uses: kitconcept/docker-stack-deploy@v1.0.1
         with:
