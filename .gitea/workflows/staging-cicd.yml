@@ -281,7 +281,7 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
           remote_host: ${{ secrets.STAGE_REMOTE_HOST }}
           remote_user: lh
-          remote_port: 22
+          remote_port: 24842
           remote_private_key: ${{ secrets.STAGE_REMOTE_PRIVATE_KEY }}
           stack_file: "./docker-stack.stage.yml"
           stack_name: ${{ env.REPO_NAME }}_test
