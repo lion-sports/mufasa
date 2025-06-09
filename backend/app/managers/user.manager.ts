@@ -306,12 +306,15 @@ class UsersManager {
     const trx = params.context?.trx!
 
     // Generating secret from email token
-    const tokenSecret = new Secret<string>(params.data.token)
-    console.log('Got token:', params.data.token.substring(0, 5), '...')
+    const tokenSecret = new Secret(params.data.token)
+    console.info(`Got token: ${params.data.token.substring(0, 10)}...`)
 
     // Verify the token exists in db
     const verifiedToken = await User.confirmRegistrationTokens.verify(tokenSecret)
-    if (!verifiedToken) throw new Error('could not verify this token')
+    if (!verifiedToken) {
+      console.warn(`Token not found or not verified: ${verifiedToken}`)
+      throw new Error('could not verify this token')
+    }
 
     // Expiry verification
     if (verifiedToken.expiresAt === null) throw new Error('missing expiration date for this token')
