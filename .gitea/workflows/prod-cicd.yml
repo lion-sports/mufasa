@@ -277,7 +277,7 @@ jobs:
           export-type: "file"
           file-output-path: "/frontend/.env"
 
-      - name: Populate psql0 .env file with Infisical
+      - name: Populate psql .env file with Infisical
         uses: https://gitea.likablehair.it/Likablehair/infisical-secrets-action@v1.0.8
         with:
           domain: https://infisical.likablehair.it

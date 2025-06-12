@@ -93,7 +93,7 @@ services:
       - source: psql_initdb
         target: /docker-entrypoint-initdb.d/initdb.sh
     env_file:
-      - psql/.env
+      - psql/.env.psq
     networks:
       - postgres
     deploy:
@@ -112,7 +112,7 @@ services:
         target: 27017
         published: 27018
     env_file:
-      - mongo/.env
+      - mongo/.env.mongo
     volumes:
       - mongo_data:/data/db
     configs:
