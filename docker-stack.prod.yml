@@ -1,3 +1,5 @@
+version: '3.8'
+
 networks:
   public:
     name: public
@@ -10,22 +12,22 @@ volumes:
   postgres_data:
     driver_opts:
       type: none
-      device: /mnt/sites/mufasa/postgres/data
+      device: /mnt/mufasa/postgres/data
       o: bind
   mongo_data:
     driver_opts:
       type: none
-      device: /mnt/sites/mufasa/mongo/data
+      device: /mnt/mufasa/mongo/data
       o: bind
   redis_data:
     driver_opts:
       type: none
-      device: /mnt/sites/mufasa/redis/data
+      device: /mnt/mufasa/redis/data
       o: bind
 
 configs:
   mongo_initdb:
-    file: mongo/initdb.prod.sh
+    file: mongo/initdb.prod.js
   psql_initdb:
     file: psql/initdb.prod.sh
 
@@ -78,6 +80,14 @@ services:
       - redis_data:/data
     networks:
       - redis
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        order: stop-first
+      placement:
+        constraints:
+          - node.hostname==kubrick
 
   postgresql:
     image: postgres:16.3-alpine
@@ -91,7 +101,7 @@ services:
       - source: psql_initdb
         target: /docker-entrypoint-initdb.d/initdb.sh
     env_file:
-      - psql/.env
+      - psql/.env.psq
     networks:
       - postgres
     deploy:
@@ -108,9 +118,9 @@ services:
     ports:
       - mode: host
         target: 27017
-        published: 27018
+        published: 27019
     env_file:
-      - mongo/.env
+      - mongo/.env.mongo
     volumes:
       - mongo_data:/data/db
     configs:
