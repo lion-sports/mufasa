@@ -27,7 +27,7 @@ volumes:
 
 configs:
   mongo_initdb:
-    file: mongo/initdb.prod.sh
+    file: mongo/initdb.prod.js
   psql_initdb:
     file: psql/initdb.prod.sh
 
