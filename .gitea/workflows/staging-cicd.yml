@@ -100,10 +100,10 @@ jobs:
           HOST: 0.0.0.0
           PORT: 3333
           APP_KEY: OMu5MZtp6zHCzPSrF6TOedRCNSh2_3sF
-          APP_NAME: ganymede
+          APP_NAME: mufasa
           DRIVE_DISK: local
           NODE_ENV: production
-          ADMIN_USER_SEED_PASSWORD: ganymede
+          ADMIN_USER_SEED_PASSWORD: mufasa
           FRONTEND_URL: http://locahost:3333
           SESSION_DRIVER: cookie
           MAILGUN_API_KEY: mailgun-api-key
