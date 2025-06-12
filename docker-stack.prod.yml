@@ -12,17 +12,17 @@ volumes:
   postgres_data:
     driver_opts:
       type: none
-      device: /mnt/sites/mufasa/postgres/data
+      device: /mnt/mufasa/postgres/data
       o: bind
   mongo_data:
     driver_opts:
       type: none
-      device: /mnt/sites/mufasa/mongo/data
+      device: /mnt/mufasa/mongo/data
       o: bind
   redis_data:
     driver_opts:
       type: none
-      device: /mnt/sites/mufasa/redis/data
+      device: /mnt/mufasa/redis/data
       o: bind
 
 configs:
