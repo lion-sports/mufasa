@@ -9,6 +9,7 @@ export const load = (async ({ fetch, cookies, url, depends }) => {
 	let fetchedUser
 	if (
 		url.pathname != '/auth/login' &&
+		url.pathname != '/auth/confirmSignup' &&
 		url.pathname != '/auth/signup' &&
 		url.pathname != '/auth/google/callback'
 	) {

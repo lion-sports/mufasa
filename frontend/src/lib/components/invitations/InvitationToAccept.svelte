@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Invitation } from '$lib/services/invitations/invitations.service'
 </script>
 
@@ -16,7 +16,11 @@
 		}
 	}>()
 
-	export let invitations: Invitation[] = []
+	interface Props {
+		invitations?: Invitation[]
+	}
+
+	let { invitations = [] }: Props = $props()
 
 	function handleReject(invitation: Invitation) {
 		let service = new InvitationsService({ fetch })
@@ -53,7 +57,7 @@
 			</div>
 			<div class="button-container">
 				<div class="link-button-container">
-					<button on:click={() => handleReject(invitation)}>Rifiuta</button>
+					<button onclick={() => handleReject(invitation)}>Rifiuta</button>
 				</div>
 				<StandardButton on:click={() => handleAccept(invitation)}>Accetta</StandardButton>
 			</div>

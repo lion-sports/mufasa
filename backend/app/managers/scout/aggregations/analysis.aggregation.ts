@@ -1,4 +1,4 @@
-import { TeamFilter } from "../analysis/scoutAnalysis.manager"
+import { TeamFilter } from "../analysis/scoutAnalysis.manager.js"
 
 export function analysis(params?: {
   scoutIds?: number[],

@@ -1,8 +1,8 @@
-import User from 'App/Models/User'
-import { Context } from './base.manager'
+import User from '#app/Models/User'
+import { Context, withTransaction } from './base.manager.js'
 import { Keypair, Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
-import SolanaConfig from 'App/Models/SolanaConfig'
-import UsersManager from './user.manager'
+import SolanaConfig from '#app/Models/SolanaConfig'
+import UsersManager from './user.manager.js'
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, transfer } from '@solana/spl-token'
 
 export type SolanaParams = {
@@ -53,6 +53,7 @@ export type RewardTokenParams = {
 export default class SolanaManager {
   constructor() {}
 
+  @withTransaction
   public async keygen(params: SolanaParams): Promise<{ publicKey: string; privateKey: string }> {
     let trx = params.context?.trx
     let userContext = params.context?.user as User
@@ -187,7 +188,7 @@ export default class SolanaManager {
     let transaction = await this.transfer(paramsTransfer)
   }
 
-  public async timeout(ms) {
+  public async timeout(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms))
   }
 }

@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type Option = {
 		value: string | number | undefined
 		text: string
@@ -6,14 +6,25 @@
 </script>
 
 <script lang="ts">
-	export let options: Option[],
-		value: string | number | undefined = undefined,
-		disabled: boolean = false
+	interface Props {
+		options: Option[]
+		value?: string | number | undefined
+		disabled?: boolean
+		onclick?: (e: Event) => void
+		onchange?: (e: Event) => void
+	}
+
+	let {
+		options,
+		value = $bindable(undefined),
+		disabled = false,
+		onclick,
+		onchange
+	}: Props = $props()
 </script>
 
 <select
 	bind:value
-	on:change
 	class="select"
 	style:color="rgb(var(--global-color-contrast-900))"
 	style:background-color="transparent"
@@ -23,6 +34,8 @@
 	style:font-size="inherit"
 	style:padding-left="5px"
 	style:padding-right="5px"
+	{onclick}
+	{onchange}
 	{disabled}
 >
 	{#each options as option}

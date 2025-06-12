@@ -1,192 +1,211 @@
-import Env from '@ioc:Adonis/Core/Env';
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import User from 'App/Models/User';
-import SolanaManager from 'App/managers/solana.manager';
-import UsersManager from 'App/managers/user.manager';
-import { OAuth2Client } from 'google-auth-library';
+import env from '#start/env'
+import type { HttpContext } from '@adonisjs/core/http'
+import User from '#app/Models/User'
+import SolanaManager from '#app/managers/solana.manager'
+import UsersManager from '#app/managers/user.manager'
+import { OAuth2Client } from 'google-auth-library'
+import { Secret } from '@adonisjs/core/helpers'
 
 export default class AuthController {
-  public async login({ auth, request }: HttpContextContract) {
-
-    await User.query().where('email', 'ILIKE', request.input('email'))
+  public async login({ auth, request }: HttpContext) {
     let generateRefresh = request.input('generateRefresh')
 
-    const token = await auth.use('api').attempt(
-      request.input('email'), 
-      request.input('password'), 
-      {
-        expiresIn: '7days'
-      }
-    )
+    let user = await User.query().where('email', 'ILIKE', request.input('email')).firstOrFail()
+    if (!user.registrationConfirmed) {
+      throw new Error('this user has yet to confirm the registration')
+    }
+
+    user = await User.verifyCredentials(user.email, request.input('password'))
+
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '7 days',
+    })
 
     let finalToken: any = {
-      ...token.toJSON()
+      ...token.toJSON(),
     }
 
     if (generateRefresh) {
-      const refreshToken = await auth.use('refresh').generate(
-        token.user,
-        {
-          expiresIn: '180days'
-        }
-      )
+      const refreshToken = await User.rememberMeTokens.create(user, ['*'], {
+        expiresIn: '180days',
+      })
 
       finalToken = {
         ...finalToken,
-        userId: refreshToken.user.id,
-        refreshToken: refreshToken.token,
-        refreshTokenExpiration: refreshToken.expiresAt?.toJSDate()
+        userId: user.id,
+        refreshToken: refreshToken.toJSON().token,
+        refreshTokenExpiration: refreshToken.expiresAt,
       }
     }
 
     return finalToken
   }
 
-  public async logout({ auth }: HttpContextContract) {
-    await auth.use('api').revoke()
+  public async logout({ auth }: HttpContext) {
+    let user = auth.use('api').user
+    if (!user) return { revoked: false }
+
+    await User.accessTokens.delete(user, user.currentAccessToken.identifier)
+
     return {
-      revoked: true
+      revoked: true,
     }
   }
 
-  public async me({ auth }: HttpContextContract) {
+  public async me({ auth }: HttpContext) {
     await auth.use('api')
-    return auth.user
+    if (!auth.user) return
+
+    let user = await User.query().where('id', auth.user.id).preload('userSetting').firstOrFail()
+
+    return user
   }
 
-  public async signup({ request }: HttpContextContract) {
-    if(!request.input('email')) throw new Error('email required')
-
-    let existingUser = await User.query()
-      .where('email', request.input('email'))
-      .first()
-
-    if(!!existingUser) throw new Error('User already exists')
-
-    const manager = new UsersManager()
-    await manager.create({
+  public async signup({ request }: HttpContext) {
+    let manager = new UsersManager()
+    return await manager.signup({
       data: {
         email: request.input('email'),
         password: request.input('password'),
         firstname: request.input('firstname'),
         lastname: request.input('lastname'),
-        solanaPublicKey: request.input('solanaPublicKey')
-      }
+        birthday: request.input('birthday'),
+        collaborators: request.input('collaborators'),
+        solanaPublicKey: request.input('solanaPublicKey'),
+        invitationToken: request.input('invitationToken'),
+        club: {
+          clubName: request.input('clubName'),
+          completeClubName: request.input('completeClubName'),
+          clubSport: request.input('clubSport'),
+        },
+      },
     })
-
-    return true
   }
 
-  public async googleRedirect({ ally }: HttpContextContract) {
+  public async googleRedirect({ ally }: HttpContext) {
     return ally.use('google').redirect()
   }
 
-  public async googleCallback({ auth, ally, response }: HttpContextContract) {
+  public async googleCallback({ auth, ally, response }: HttpContext) {
     const google = ally.use('google')
 
-
     if (google.accessDenied()) {
-      throw new Error("Access denied");
+      throw new Error('Access denied')
     } else if (google.stateMisMatch()) {
-      throw new Error('Request expired. Retry again');
+      throw new Error('Request expired. Retry again')
     } else if (google.hasError()) {
       throw google.getError()
     }
 
     const googleUser = await google.user()
 
-    
-    const user = await User.updateOrCreate({
-      email: googleUser.email || undefined,
-    }, {
-      name: googleUser.name || undefined,
-      firstname: googleUser.original.given_name,
-      lastname: googleUser.original.family_name,
-      avatarUrl: googleUser.avatarUrl || undefined,
-      googleToken: googleUser.token.token
-    })
+    const user = await User.updateOrCreate(
+      {
+        email: googleUser.email || undefined,
+      },
+      {
+        name: googleUser.name || undefined,
+        firstname: googleUser.original.given_name,
+        lastname: googleUser.original.family_name,
+        avatarUrl: googleUser.avatarUrl || undefined,
+        googleToken: googleUser.token.token,
+      }
+    )
 
-    
-    const manager = new SolanaManager();
-    if(!user.solanaPublicKey) {
-      await manager.keygen( { data: {userId: user.id}})
+    const manager = new SolanaManager()
+    if (!user.solanaPublicKey) {
+      await manager.keygen({ data: { userId: user.id } })
     }
 
-    const token = await auth.use('api').login(user, {
-      expiresIn: '7days'
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '7 days',
     })
 
-    const refreshToken = await auth.use('refresh').generate(user, {
-      expiresIn: '180days'
-    })
+    const refreshToken = await User.rememberMeTokens.create(user, ['*'])
 
     const tokenJson = token.toJSON()
     const finalToken = {
       ...tokenJson,
-      userId: token.user.id,
-      refreshToken: refreshToken.token,
-      refreshTokenExpiration: refreshToken.expiresAt?.toJSDate()
+      userId: user.id,
+      refreshToken: refreshToken.toJSON().token,
+      refreshTokenExpiration: refreshToken.expiresAt,
     }
 
-    response.redirect().withQs(finalToken).toPath(Env.get('GOOGLE_FRONTEND_CALLBACK_URL') || 'http://localhost:3000/auth/google/callback')
+    response
+      .redirect()
+      .withQs(finalToken)
+      .toPath(
+        env.get('GOOGLE_FRONTEND_CALLBACK_URL') || 'http://localhost:3000/auth/google/callback'
+      )
   }
 
-  public async refreshToken({ auth }: HttpContextContract) {
+  public async refreshToken({ auth, request }: HttpContext) {
     let user = await auth.use('refresh').authenticate()
-    
-    let apiToken = await auth.use('api').generate(user, {
-      expiresIn: '7days'
+
+    const token = await User.accessTokens.create(user, ['*'], {
+      expiresIn: '7 days',
     })
 
-    return apiToken
+    return token
   }
 
-  public async loginWithIosGoogleToken({ request, auth }: HttpContextContract) {
+  public async loginWithIosGoogleToken({ request, auth }: HttpContext) {
     let googleToken = request.input('token')
-    const client = new OAuth2Client(Env.get('GOOGLE_IOS_CLIENT_ID'))
+    const client = new OAuth2Client(env.get('GOOGLE_IOS_CLIENT_ID'))
 
     try {
       let ticket = await client.verifyIdToken({
         idToken: googleToken,
-        audience: [Env.get('GOOGLE_IOS_CLIENT_ID'), Env.get('GOOGLE_CLIENT_ID')]
+        audience: [
+          env.get('GOOGLE_IOS_CLIENT_ID', 'some_ios_client_id'),
+          env.get('GOOGLE_CLIENT_ID', 'some_client_id'),
+        ],
       })
 
       let googleUser = ticket.getPayload()
 
-      if(!!googleUser) {
-        const user = await User.firstOrCreate({
-          email: googleUser.email || undefined,
-        }, {
-          name: googleUser.name || undefined,
-          avatarUrl: googleUser.picture || undefined,
-          googleToken: googleToken
+      if (!!googleUser) {
+        const user = await User.firstOrCreate(
+          {
+            email: googleUser.email || undefined,
+          },
+          {
+            name: googleUser.name || undefined,
+            avatarUrl: googleUser.picture || undefined,
+            googleToken: googleToken,
+          }
+        )
+
+        const token = await User.accessTokens.create(user, ['*'], {
+          expiresIn: '7 days',
         })
 
-        const token = await auth.use('api').login(user, {
-          expiresIn: '7days'
-        })
-
-        const refreshToken = await auth.use('refresh').generate(user, {
-          expiresIn: '180days'
-        })
+        const refreshToken = await User.rememberMeTokens.create(user, ['*'])
 
         const tokenJson = token.toJSON()
         const finalToken = {
           ...tokenJson,
-          userId: token.user.id,
-          refreshToken: refreshToken.token,
-          refreshTokenExpiration: refreshToken.expiresAt?.toJSDate()
+          userId: user.id,
+          refreshToken: refreshToken.toJSON().token,
+          refreshTokenExpiration: refreshToken.expiresAt,
         }
 
         return finalToken
       } else {
-        throw new Error("Bad google user")
+        throw new Error('Bad google user')
       }
-      
-    } catch(error) {
-      throw new Error("Bad token");
+    } catch (error) {
+      throw new Error('Bad token')
     }
   }
 
-  
+  public async verifySignup({ request }: HttpContext) {
+    const token = request.input('token')
+    const manager = new UsersManager()
+    return await manager.verifySignup({
+      data: {
+        token: token,
+      },
+    })
+  }
 }

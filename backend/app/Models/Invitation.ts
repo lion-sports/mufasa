@@ -1,9 +1,11 @@
-import { CamelCaseBaseModel } from './CamelCaseBaseModel'
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime } from 'luxon'
-import { belongsTo, BelongsTo, column } from '@ioc:Adonis/Lucid/Orm'
-import User from 'App/Models/User'
-import Team from 'App/Models/Team'
-import Group from 'App/Models/Group'
+import { belongsTo, column } from '@adonisjs/lucid/orm'
+import User from '#app/Models/User'
+import Team from '#app/Models/Team'
+import Group from '#app/Models/Group'
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
+import Club from './Club.js'
 
 export default class Invitation extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -34,6 +36,14 @@ export default class Invitation extends CamelCaseBaseModel {
   public team: BelongsTo<typeof Team>
 
   @column()
+  public clubId: number
+
+  @belongsTo(() => Club, {
+    foreignKey: 'clubId'
+  })
+  public club: BelongsTo<typeof Club>
+
+  @column()
   public groupId: number
 
   @belongsTo(() => Group, {
@@ -46,6 +56,17 @@ export default class Invitation extends CamelCaseBaseModel {
 
   @column()
   public invitedEmail: string
+
+  @column()
+  public uid: string
+
+  @column({
+    serializeAs: null
+  })
+  public token: string
+
+  @column.dateTime()
+  public expirationDate: DateTime
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

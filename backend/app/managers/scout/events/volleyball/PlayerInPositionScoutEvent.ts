@@ -1,14 +1,14 @@
 import type { PlayerInPositionScoutExtraProperties, VolleyballPoints } from "lionn-common";
-import ScoutEvent from "../../ScoutEvent";
-import PlayersManager from "App/managers/players.manager";
-import Scout from "App/Models/Scout";
-import { Context } from "App/managers/base.manager";
-import scoutsSocket from "../../scouts.socket";
+import ScoutEvent, { ScoutEventConstructorsParameters } from "../../ScoutEvent.js";
+import PlayersManager from "#app/managers/players.manager";
+import Scout from "#app/Models/Scout";
+import { Context } from "#app/managers/base.manager";
+import scoutsSocket from "../../scouts.socket.js";
 
 export default class PlayerInPositionScoutEvent extends ScoutEvent<PlayerInPositionScoutExtraProperties, 'playerInPosition', VolleyballPoints> {
   public type = 'playerInPosition' as const
 
-  constructor(params) {
+  constructor(params: ScoutEventConstructorsParameters<'playerInPosition', VolleyballPoints, PlayerInPositionScoutExtraProperties>) {
     if (!params.playerId) params.playerId = params.player.id
     if (!params.playerId) throw new Error('playerId must be defined')
 

@@ -1,2 +1,2 @@
-export { default as CreateDashboardValidator } from './CreateDashboardValidator'
-export { default as UpdateDashboardValidator } from './UpdateDashboardValidator'
+export { default as CreateDashboardValidator } from './CreateDashboardValidator.js'
+export { default as UpdateDashboardValidator } from './UpdateDashboardValidator.js'

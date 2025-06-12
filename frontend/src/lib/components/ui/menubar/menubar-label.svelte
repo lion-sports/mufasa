@@ -1,19 +1,24 @@
 <script lang="ts">
-	import { Menubar as MenubarPrimitive } from "bits-ui";
-	import { cn } from "$lib/utils.js";
+	import { Menubar as MenubarPrimitive } from 'bits-ui'
+	import { cn } from '$lib/utils.js'
 
 	type $$Props = MenubarPrimitive.LabelProps & {
-		inset?: boolean;
-	};
+		inset?: boolean
+	}
 
-	let className: $$Props["class"] = undefined;
-	export let inset: $$Props["inset"] = undefined;
-	export { className as class };
+	interface Props {
+		class?: $$Props['class']
+		inset?: $$Props['inset']
+		children?: import('svelte').Snippet
+		[key: string]: any
+	}
+
+	let { class: className = undefined, inset = undefined, children, ...rest }: Props = $props()
 </script>
 
 <MenubarPrimitive.Label
-	class={cn("px-2 py-1.5 text-sm font-semibold", inset && "pl-8", className)}
-	{...$$restProps}
+	class={cn('px-2 py-1.5 text-sm font-semibold', inset && 'pl-8', className)}
+	{...rest}
 >
-	<slot />
+	{@render children?.()}
 </MenubarPrimitive.Label>

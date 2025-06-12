@@ -1,30 +1,51 @@
 <script lang="ts">
-	let clazz: {
-		label?: string
-		input?: {
-			container?: string
-			row?: string
-			input?: string
-		}
-	} = {}
-	export { clazz as class }
-
-	export let value: string | number | undefined = undefined,
-		label: string | undefined = undefined,
-		placeholder: string = '',
-		name: string,
-		type: 'password' | 'text' | 'number' = 'text',
-		readonly: boolean = false,
-		error: boolean = false,
-		disabled: boolean = false
-
+	import type { ComponentProps } from 'svelte'
 	import StandardTextfield from '$lib/components/common/StandardTextfield.svelte'
+
+	interface Props {
+		class?: {
+			label?: string
+			input?: {
+				container?: string
+				row?: string
+				input?: string
+			}
+		}
+		value?: string | number | undefined
+		label?: string | undefined
+		placeholder?: string
+		name: string
+		type?: 'password' | 'text' | 'number'
+		readonly?: boolean
+		error?: boolean
+		disabled?: boolean
+		appendInner?: import('svelte').Snippet
+	}
+
+	let {
+		class: clazz = {},
+		value = $bindable(undefined),
+		label = undefined,
+		placeholder = '',
+		name,
+		type = 'text',
+		readonly = false,
+		error = false,
+		disabled = false,
+		appendInner,
+		...rest
+	}: Props & ComponentProps<typeof StandardTextfield> = $props()
+
+	const appendInner_render = $derived(appendInner)
 </script>
 
-<label style:font-weight="500" style:margin-left="3px" for={name} class={clazz.label}
-	>{label || ''}</label
->
-<div style:margin-top="5px">
+{#if label}
+	<label style:font-weight="500" style:margin-left="4px" for={name} class={clazz.label}
+		>{label || ''}</label
+	>
+{/if}
+
+<div style:margin-top="4px">
 	<StandardTextfield
 		bind:value
 		{type}
@@ -32,12 +53,12 @@
 		{error}
 		{disabled}
 		{placeholder}
-		on:input
-		on:focus
+		{...rest}
 		class={clazz.input}
+    --simple-textfield-default-hint-color={error ? 'rgb(var(--global-color-error-500))' : undefined}
 	>
-		<svelte:fragment slot="append-inner">
-			<slot name="append-inner" />
-		</svelte:fragment>
+		{#snippet appendInner()}
+			{@render appendInner_render?.()}
+		{/snippet}
 	</StandardTextfield>
 </div>

@@ -1,8 +1,8 @@
-import ScoringSystemsManager from 'App/managers/scoringSystems.manager'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import ScoringSystemsManager from '#app/managers/scoringSystems.manager'
+import type { HttpContext } from '@adonisjs/core/http'
 
 export default class ScoringSystemsController {
-  public async index({ request }: HttpContextContract) {
+  public async index({ request }: HttpContext) {
     const manager = new ScoringSystemsManager()
     return await manager.list({
       data: {
@@ -14,7 +14,7 @@ export default class ScoringSystemsController {
     })
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request }: HttpContext) {
     const manager = new ScoringSystemsManager()
     return await manager.create({
       data: {
@@ -27,7 +27,7 @@ export default class ScoringSystemsController {
     })
   }
 
-  public async show({ params }: HttpContextContract) {
+  public async show({ params }: HttpContext) {
     const manager = new ScoringSystemsManager()
     return await manager.get({
       data: {
@@ -36,7 +36,7 @@ export default class ScoringSystemsController {
     })
   }
 
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params }: HttpContext) {
     const manager = new ScoringSystemsManager()
     return await manager.update({
       data: {
@@ -49,7 +49,7 @@ export default class ScoringSystemsController {
     })
   }
 
-  public async destroy({ params }: HttpContextContract) {
+  public async destroy({ params }: HttpContext) {
     const manager = new ScoringSystemsManager()
     return await manager.destroy({
       data: {

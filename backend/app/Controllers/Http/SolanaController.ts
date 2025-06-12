@@ -1,13 +1,13 @@
-import SolanaManager from "App/managers/solana.manager";
-import UsersManager from "App/managers/user.manager";
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import SolanaManager from "#app/managers/solana.manager";
+import UsersManager from "#app/managers/user.manager";
+import type { HttpContext } from '@adonisjs/core/http'
 
 export default class SolanaController {
   constructor() {
   }
 
 
-public async reward({ request }: HttpContextContract
+public async reward({ request }: HttpContext
   ) {
     const manager = new SolanaManager()
     return await manager.reward({

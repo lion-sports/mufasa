@@ -6,65 +6,75 @@
 	import type { Event } from '$lib/services/events/events.service'
 	import type { Team, Teammate } from '$lib/services/teams/teams.service'
 
-	export let team: Team,
-		teammate: Teammate | undefined = undefined,
-		events: Event[] = [],
-    canCreate: boolean = false
+	interface Props {
+		team?: Team
+		teammate?: Teammate | undefined
+		events?: Event[]
+		canCreate?: boolean
+	}
 
-	let selectedDate: Date | undefined,
-		selectedEvents: Event[] = []
+	let { team, teammate = undefined, events = $bindable([]), canCreate = false }: Props = $props()
 
-	$: formattedDate = !!selectedDate
-		? DateTime.fromJSDate(selectedDate).setLocale('it').toLocaleString(DateTime.DATE_MED)
-		: ''
+	let selectedDate: Date | undefined = $state(),
+		selectedEvents: Event[] = $state([])
+
+	let formattedDate = $derived(
+		!!selectedDate
+			? DateTime.fromJSDate(selectedDate).setLocale('it').toLocaleString(DateTime.DATE_MED)
+			: ''
+	)
 
 	function handleCloseDrawer() {
 		selectedDate = undefined
 	}
 </script>
 
-<MediaQuery let:mAndDown>
-	{#if team}
-		<div class="calendar-container">
-			<TeamsCalendar bind:selectedDate bind:selectedEvents bind:events {team} {teammate} {canCreate} />
-			{#if !mAndDown}
-				<div class="event-drawer" class:opened={!!selectedDate} class:closed={!selectedDate}>
-					<div class="title-container">
-						<div class="title">
-							{formattedDate}
+<MediaQuery>
+	{#snippet defaultSnippet({ mAndDown })}
+		{#if team}
+			<div class="calendar-container">
+				<div class="w-full">
+					<TeamsCalendar bind:selectedDate bind:selectedEvents bind:events {team} {canCreate} />
+				</div>
+				{#if !mAndDown}
+					<div class="event-drawer" class:opened={!!selectedDate} class:closed={!selectedDate}>
+						<div class="title-container">
+							<div class="title ml-2">
+								{formattedDate}
+							</div>
+							<div class="close-button">
+								<Icon name="mdi-close" onclick={handleCloseDrawer} />
+							</div>
 						</div>
-						<div class="close-button">
-							<Icon name="mdi-close" on:click={handleCloseDrawer} click />
+						<div class="events-list">
+							<EventsList
+								precompiledDate={selectedDate ? DateTime.fromJSDate(selectedDate) : undefined}
+								events={selectedEvents}
+								{team}
+								{teammate}
+								{canCreate}
+							/>
 						</div>
 					</div>
-					<div class="events-list">
-						<EventsList
-							precompiledDate={selectedDate ? DateTime.fromJSDate(selectedDate) : undefined}
-							events={selectedEvents}
-							{team}
-							{teammate}
-              {canCreate}
-						/>
-					</div>
-				</div>
-			{/if}
-		</div>
-		{#if mAndDown}
-			<div class="hr" />
-			<div class="title-container">
-				<div class="title">
-					{formattedDate}
-				</div>
+				{/if}
 			</div>
-			<EventsList
-				precompiledDate={selectedDate ? DateTime.fromJSDate(selectedDate) : undefined}
-				events={selectedEvents}
-				{team}
-				{teammate}
-        {canCreate}
-			/>
+			{#if mAndDown}
+				<div class="hr"></div>
+				<div class="title-container">
+					<div class="title">
+						{formattedDate}
+					</div>
+				</div>
+				<EventsList
+					precompiledDate={selectedDate ? DateTime.fromJSDate(selectedDate) : undefined}
+					events={selectedEvents}
+					{team}
+					{teammate}
+					{canCreate}
+				/>
+			{/if}
 		{/if}
-	{/if}
+	{/snippet}
 </MediaQuery>
 
 <style>
@@ -75,6 +85,7 @@
 	.event-drawer {
 		transition: all 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
 		height: 100%;
+		flex-grow: 1;
 	}
 
 	.events-list {

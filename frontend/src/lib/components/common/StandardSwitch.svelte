@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { Switch } from '@likable-hair/svelte'
-	export let value: boolean
+	import type { ComponentProps } from 'svelte'
+
+	interface Props {
+		value: boolean
+		onchange?: ComponentProps<typeof Switch>['onchange']
+	}
+
+	let { value = $bindable(), onchange }: Props = $props()
 </script>
 
-<Switch bind:value on:change />
+<Switch bind:value {onchange} />

@@ -20,7 +20,7 @@ export type ScoringSystemConfig = {
   tieBreak?: ScoringSystemConfigPoints
 }
 
-export const SPORTS = ['volleyball', 'basketball'] as const
+export const SPORTS = ['none', 'volleyball', 'basketball'] as const
 export type Sport = typeof SPORTS[number]
 
 export const VOLLEYBALL_ROLES = ['setter', 'outsideHitter', 'oppositeHitter', 'middleBlocker', 'libero'] as const

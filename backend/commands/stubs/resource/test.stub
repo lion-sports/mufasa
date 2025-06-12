@@ -1,0 +1,73 @@
+{{#var entity = generators.createEntity(name)}}
+{{#var modelName = generators.modelName(entity.name)}}
+{{#var modelReference = string.camelCase(modelName)}}
+{{#var pluralReference = string(string.pluralize(name)).camelCase().toString()}}
+{{#var singularReference = string(string.singular(name)).camelCase().toString()}}
+{{#var testFilename = string(singularReference).camelCase().suffix('.spec.ts').toString()}}
+{{{
+  exports({
+    to: app.makePath('tests/functional', testFilename)
+  })
+}}}
+import { test } from '@japa/runner'
+import { assert } from 'chai'
+import { {{{modelName}}}Factory, UserFactory } from '#database/factories/index'
+import User from '#models/User'
+
+test.group('{{{modelName}}}', (group) => {
+  let loggedInUser: User
+
+  group.setup(async () => {
+    loggedInUser = await UserFactory.create()
+  })
+
+  test('get a paginated list of {{{pluralReference}}}', async ({ client }) => {
+    await {{{modelName}}}Factory.create()
+    const response = await client.get('/{{{pluralReference}}}').loginAs(loggedInUser)
+    const {{{pluralReference}}} = response.body().data
+
+    response.assertAgainstApiSpec()
+    assert.isTrue({{{pluralReference}}}.length > 0, 'should have some {{{pluralReference}}} in the list')
+  })
+
+  test('create new {{{singularReference}}}', async ({ client }) => {
+    const response = await client
+      .post('/{{{pluralReference}}}')
+      .json({
+        name: 'some name'
+      })
+      .loginAs(loggedInUser)
+
+    response.assertAgainstApiSpec()
+    const {{{singularReference}}} = response.body()
+    assert.hasAllKeys(
+      {{{singularReference}}},
+      ['id', 'name', 'createdAt', 'updatedAt'],
+      'should have all keys'
+    )
+  })
+
+  test('update existing {{{singularReference}}}', async ({ client }) => {
+    const new{{{modelName}}} = await {{{modelName}}}Factory.create()
+    const response = await client
+      .put('/{{{pluralReference}}}/' + new{{{modelName}}}.id)
+      .json({
+        name: 'UpdatedName'
+      })
+      .loginAs(loggedInUser)
+
+    response.assertAgainstApiSpec()
+    const {{{singularReference}}} = response.body()
+    assert.equal(new{{{modelName}}}.id, {{{singularReference}}}.id, 'should update the correct {{{singularReference}}}')
+    assert.equal({{{singularReference}}}.name, 'UpdatedName', 'should update the {{{singularReference}}}')
+  })
+
+  test('get a {{{singularReference}}}', async ({ client }) => {
+    const new{{{modelName}}} = await {{{modelName}}}Factory.create()
+    const response = await client.get('/{{{pluralReference}}}/' + new{{{modelName}}}.id).loginAs(loggedInUser)
+
+    response.assertAgainstApiSpec()
+    const {{{singularReference}}} = response.body()
+    assert.equal(new{{{modelName}}}.id, {{{singularReference}}}.id, 'should return the correct {{{singularReference}}}')
+  })
+})

@@ -1,13 +1,13 @@
 import type { SpikeScoutExtraProperties, VolleyballPoints } from "lionn-common";
-import ScoutEvent from "../../ScoutEvent";
-import Scout from "App/Models/Scout";
-import { Context } from "App/managers/base.manager";
-import scoutsSocket from "../../scouts.socket";
+import ScoutEvent, { ScoutEventConstructorsParameters } from "../../ScoutEvent.js";
+import Scout from "#app/Models/Scout";
+import { Context } from "#app/managers/base.manager";
+import scoutsSocket from "../../scouts.socket.js";
 
 export default class SpikeScoutEvent extends ScoutEvent<SpikeScoutExtraProperties, 'spike', VolleyballPoints> {
   public type = 'spike' as const
 
-  constructor(params) {
+  constructor(params: ScoutEventConstructorsParameters<'spike', VolleyballPoints, SpikeScoutExtraProperties>) {
     if (!params.playerId) params.playerId = params.player.id
     if (!params.playerId) throw new Error('playerId must be defined')
 

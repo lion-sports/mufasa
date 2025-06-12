@@ -17,7 +17,13 @@
   ],
   "main": "./dist/lionn-common.umd.cjs",
   "module": "./dist/lionn-common.js",
-  "types": "./dist/src/main.d.ts",
+  "types": "./dist/lionn-common.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/lionn-common.js",
+      "require": "./dist/lionn-common.umd.cjs"
+    }
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",

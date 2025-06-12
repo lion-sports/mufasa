@@ -1,29 +1,34 @@
+import User from './User.js'
+import Team from './Team.js'
 import { DateTime } from 'luxon'
-import { CamelCaseBaseModel } from './CamelCaseBaseModel';
-import { belongsTo, BelongsTo, column } from '@ioc:Adonis/Lucid/Orm'
-import { Sport } from './Scout';
-import User from './User';
-import Team from './Team';
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
+import { belongsTo, column } from '@adonisjs/lucid/orm'
+import { type BelongsTo } from '@adonisjs/lucid/types/relations'
+import type { Sport } from 'lionn-common'
 
-export type ScoringSystemConfigPoints = {
-  mode: 'totalPoints'
-  totalPoints: number
-} | {
-  mode: 'winPoints'
-  winPoints: number
-  hasAdvantages: boolean
-  pointsLimit?: number
-}
+export type ScoringSystemConfigPoints =
+  | {
+      mode: 'totalPoints'
+      totalPoints: number
+    }
+  | {
+      mode: 'winPoints'
+      winPoints: number
+      hasAdvantages: boolean
+      pointsLimit?: number
+    }
 
 export type ScoringSystemConfig = {
-  set: {
-    mode: 'totalSet'
-    totalSets: number
-  } | {
-    mode: 'winSet'
-    winSets: number
-  },
-  points: ScoringSystemConfigPoints,
+  set:
+    | {
+        mode: 'totalSet'
+        totalSets: number
+      }
+    | {
+        mode: 'winSet'
+        winSets: number
+      }
+  points: ScoringSystemConfigPoints
   tieBreak?: ScoringSystemConfigPoints
 }
 
@@ -44,7 +49,7 @@ export default class ScoringSystem extends CamelCaseBaseModel {
   public createdByUserId: number
 
   @belongsTo(() => User, {
-    foreignKey: 'createdByUserId'
+    foreignKey: 'createdByUserId',
   })
   public createdByUser: BelongsTo<typeof User>
 
@@ -52,7 +57,7 @@ export default class ScoringSystem extends CamelCaseBaseModel {
   public createdForTeamId: number
 
   @belongsTo(() => Team, {
-    foreignKey: 'createdForTeamId'
+    foreignKey: 'createdForTeamId',
   })
   public createdForTeam: BelongsTo<typeof Team>
 

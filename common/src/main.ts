@@ -2,7 +2,8 @@ export { incrementScore } from "./scouts/points";
 export {
   BASKETBALL_ROLES,
   ROLES,
-  VOLLEYBALL_ROLES
+  VOLLEYBALL_ROLES,
+  SPORTS
 } from "./scouts/common"
 export { FIRST_POINT } from "./scouts/volleyball/volleyball"
 export { 
@@ -18,6 +19,7 @@ export {
 } from './scouts/events'
 export {
   FRIENDS_FIELD_SIDES,
+  FIELD_RENDER_ENGINES,
   POSSIBLE_AUTO_POINT_FRIENDS_EVENTS,
   POSSIBLE_AUTO_POINT_ENEMY_EVENTS,
   POSSIBLE_AUTO_PAHSE_EVENTS
@@ -32,7 +34,8 @@ export type {
   BasketballRole,
   Role,
   ScoringSystemConfigPoints,
-  VolleyballRole
+  VolleyballRole,
+  Sport
 } from "./scouts/common";
 export type { 
   VolleyballPoints, 

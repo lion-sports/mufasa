@@ -5,7 +5,11 @@
 	import { goto, invalidateAll } from '$app/navigation'
 	import user from '$lib/stores/auth/user'
 
-	export let data: PageData
+	interface Props {
+		data: PageData
+	}
+
+	let { data }: Props = $props()
 
 	onMount(async () => {
 		// if (!!data.token && !!data.expiresAt) {

@@ -1,13 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte'
 
-	export let loading: boolean = false,
-		marginTop: string = '20px',
-		cancelText: string = 'Annulla',
-		confirmText: string = 'Salva',
-		confirmDisable: boolean = false,
-		cancelDisable: boolean = false
-
 	let dispatch = createEventDispatcher<{
 		'confirm-click': {
 			nativeEvent: MouseEvent
@@ -34,20 +27,33 @@
 	}
 
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
+	interface Props {
+		loading?: boolean
+		marginTop?: string
+		cancelText?: string
+		confirmText?: string
+		confirmDisable?: boolean
+		cancelDisable?: boolean
+	}
+
+	let {
+		loading = $bindable(false),
+		marginTop = '20px',
+		cancelText = 'Annulla',
+		confirmText = 'Salva',
+		confirmDisable = false,
+		cancelDisable = false
+	}: Props = $props()
 </script>
 
 <div style:margin-top={marginTop} class="button-container">
 	<div class="link-button-container">
-		<div />
-		<slot name="cancel-button" {loading} {handleCancel} {cancelText}>
-			<button class="text-button" on:click={handleCancel}>{cancelText}</button>
-		</slot>
+		<div></div>
+		<button class="text-button" onclick={handleCancel}>{cancelText}</button>
 	</div>
-	<slot name="confirm-button" {loading} {handleConfirm} {confirmDisable} {confirmText}>
-		<StandardButton {loading} on:click={handleConfirm} disabled={confirmDisable}
-			>{confirmText}</StandardButton
-		>
-	</slot>
+	<StandardButton {loading} on:click={handleConfirm} disabled={confirmDisable}
+		>{confirmText}</StandardButton
+	>
 </div>
 
 <style>

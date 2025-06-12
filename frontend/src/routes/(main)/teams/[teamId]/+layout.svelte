@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy'
+
 	import { page } from '$app/stores'
 	import type { ComponentProps } from 'svelte'
 	import { goto } from '$app/navigation'
@@ -12,91 +14,103 @@
 	import type { LayoutData } from './$types'
 	import { slide } from 'svelte/transition'
 
-	export let data: LayoutData
-	$: $team = data.team
+	interface Props {
+		data: LayoutData
+		children?: import('svelte').Snippet
+	}
 
-	let selectedTab: string = 'general',
-		options: ComponentProps<OptionMenu>['options'] = [],
-		tabs: ComponentProps<StandardTabSwitcher>['tabs'] = []
+	let { data, children }: Props = $props()
+	run(() => {
+		$team = data.team
+	})
 
-	options = []
+	let selectedTab: string = $state('general')
 
-	if (data.groupedPermissions.team.update)
-		options.push({
-			name: 'edit',
-			title: 'Modifica',
-			icon: 'mdi-pencil'
-		})
+	let options: ComponentProps<typeof OptionMenu>['options'] = $derived.by(() => {
+		let options: ComponentProps<typeof OptionMenu>['options'] = []
+		if (data.groupedPermissions.team.update)
+			options.push({
+				name: 'edit',
+				title: 'Modifica',
+				icon: 'mdi-pencil'
+			})
 
-	if (data.groupedPermissions.team.invite)
-		options.push({
-			name: 'inviteUser',
-			title: 'Invita utente',
-			icon: 'mdi-account-plus'
-		})
+		if (data.groupedPermissions.team.invite)
+			options.push({
+				name: 'inviteUser',
+				title: 'Invita utente',
+				icon: 'mdi-account-plus'
+			})
 
-	if (data.groupedPermissions.event.create)
-		options.push({
-			name: 'addEvent',
-			title: 'Aggiungi evento',
-			icon: 'mdi-calendar-plus'
-		})
+		if (data.groupedPermissions.event.create)
+			options.push({
+				name: 'addEvent',
+				title: 'Aggiungi evento',
+				icon: 'mdi-calendar-plus'
+			})
 
-	if (data.groupedPermissions.team.destroy)
-		options.push({
-			name: 'delete',
-			title: 'Elimina',
-			icon: 'mdi-delete',
-			style: {
-				color: 'rgb(var(--global-color-error-500))'
+		if (data.groupedPermissions.team.destroy)
+			options.push({
+				name: 'delete',
+				title: 'Elimina',
+				icon: 'mdi-delete',
+				style: {
+					color: 'rgb(var(--global-color-error-500))'
+				}
+			})
+
+		if (!data.isOwner)
+			options.push({
+				name: 'exit',
+				title: 'Esci dal team',
+				icon: 'mdi-delete',
+				style: {
+					color: 'rgb(var(--global-color-error-500))'
+				}
+			})
+
+		return options
+	})
+
+	let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = $derived.by(() => {
+		let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = [
+			{
+				name: 'general',
+				label: 'Generale',
+				icon: 'mdi-text'
+			},
+			{
+				name: 'teammates',
+				label: 'Partecipanti',
+				icon: 'mdi-account'
 			}
-		})
+		]
 
-	if (!data.isOwner)
-		options.push({
-			name: 'exit',
-			title: 'Esci dal team',
-			icon: 'mdi-delete',
-			style: {
-				color: 'rgb(var(--global-color-error-500))'
-			}
-		})
+		if (data.groupedPermissions.group.update)
+			tabs.push({
+				name: 'groups',
+				label: 'Gruppi',
+				icon: 'mdi-account-multiple'
+			})
 
-	tabs = [
-		{
-			name: 'general',
-			label: 'Generale',
-      icon: 'mdi-text'
-		},
-		{
-			name: 'teammates',
-			label: 'Partecipanti',
-      icon: 'mdi-account'
-		}
-	]
-
-	if (data.groupedPermissions.group.update)
 		tabs.push({
-			name: 'groups',
-			label: 'Gruppi',
-      icon: 'mdi-account-multiple'
+			name: 'calendar',
+			label: 'Calendario',
+			icon: 'mdi-calendar'
 		})
 
-	tabs.push({
-		name: 'calendar',
-		label: 'Calendario',
-    icon: 'mdi-calendar'
+		tabs.push({
+			name: 'weeks',
+			label: 'Settimane',
+			icon: 'mdi-clock'
+		})
+
+		return tabs
 	})
 
-	tabs.push({
-		name: 'weeks',
-		label: 'Settimane',
-    icon: 'mdi-clock'
-	})
-
-	function handleOptionClick(
-		event: CustomEvent<{ element: NonNullable<ComponentProps<OptionMenu>['options']>[0] }>
-	) {
+	function handleOptionClick(event: {
+		detail: { element: NonNullable<ComponentProps<typeof OptionMenu>['options']>[0] }
+	}) {
 		if (event.detail?.element?.name == 'edit' && !!$team) {
 			goto('/teams/' + $team.id + '/edit')
 		} else if (event.detail?.element?.name == 'inviteUser' && !!$team) {
@@ -108,7 +122,7 @@
 		}
 	}
 
-	function handleTabClick(event: any) {
+	function handleTabClick() {
 		if (selectedTab == 'general') {
 			goto(`/teams/${$team?.id}/general`, { replaceState: true })
 		} else if (selectedTab == 'teammates') {
@@ -122,23 +136,25 @@
 		}
 	}
 
-	$: if ($page.url.href.endsWith('general')) {
-		selectedTab = 'general'
-	} else if (
-		$page.url.href.endsWith('teammates') ||
-		$page.url.href.endsWith('inviteUser') ||
-		$page.url.href.includes('teammates')
-	) {
-		selectedTab = 'teammates'
-	} else if ($page.url.href.endsWith('groups')) {
-		selectedTab = 'groups'
-	} else if ($page.url.href.endsWith('calendar')) {
-		selectedTab = 'calendar'
-	} else if ($page.url.href.endsWith('weeks')) {
-		selectedTab = 'weeks'
-	}
+	run(() => {
+		if ($page.url.href.endsWith('general')) {
+			selectedTab = 'general'
+		} else if (
+			$page.url.href.endsWith('teammates') ||
+			$page.url.href.endsWith('inviteUser') ||
+			$page.url.href.includes('teammates')
+		) {
+			selectedTab = 'teammates'
+		} else if ($page.url.href.endsWith('groups')) {
+			selectedTab = 'groups'
+		} else if ($page.url.href.endsWith('calendar')) {
+			selectedTab = 'calendar'
+		} else if ($page.url.href.endsWith('weeks')) {
+			selectedTab = 'weeks'
+		}
+	})
 
-	let exitTeamConfirmDialog: boolean = false
+	let exitTeamConfirmDialog: boolean = $state(false)
 
 	function confirmTeamExit() {
 		let service = new InvitationsService({ fetch })
@@ -153,24 +169,25 @@
 		}
 	}
 
-	$: headerHidden =
+	let headerHidden = $derived(
 		$page.url.pathname.endsWith('/groups/new') ||
-		/\/groups\/\d+\/edit$/.test($page.url.pathname) ||
-		$page.url.pathname.endsWith('/events/new') ||
-		/\/events\/\d+\//.test($page.url.pathname) ||
-    /\/teammates\/\d+\/edit$/.test($page.url.pathname) ||
-    /\/teammates\/\d+\/shirts.*$/.test($page.url.pathname)
+			/\/groups\/\d+\/edit$/.test($page.url.pathname) ||
+			$page.url.pathname.endsWith('/events/new') ||
+			/\/events\/\d+\//.test($page.url.pathname) ||
+			/\/teammates\/\d+\/edit$/.test($page.url.pathname) ||
+			/\/teammates\/\d+\/shirts.*$/.test($page.url.pathname)
+	)
 </script>
 
 {#if !!$team}
 	{#if !headerHidden}
 		<div transition:slide|local={{ duration: 200 }}>
 			<PageTitle title={$team.name} prependVisible={true}>
-				<svelte:fragment slot="append">
+				{#snippet append()}
 					{#if !!options && options.length > 0}
-						<OptionMenu {options} on:select={handleOptionClick} />
+						<OptionMenu {options} onselect={handleOptionClick} />
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</PageTitle>
 
 			<StandardTabSwitcher
@@ -178,12 +195,12 @@
 				marginTop="10px"
 				marginBottom="10px"
 				bind:selected={selectedTab}
-				on:tab-click={handleTabClick}
+				ontabClick={handleTabClick}
 			/>
 		</div>
 	{/if}
 
-	<slot />
+	{@render children?.()}
 {:else}
 	<CircularLoader />
 {/if}

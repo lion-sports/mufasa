@@ -2,11 +2,21 @@
 	import ConfirmOrCancelButtons from './ConfirmOrCancelButtons.svelte'
 	import StandardDialog from './StandardDialog.svelte'
 
-	export let open: boolean = false,
-		title: string = 'Conferma',
-		description: string = "Sicuro di confermare l'operazione?",
-		confirmText: string = 'Conferma',
-		cancelText: string = 'Annulla'
+	interface Props {
+		open: boolean
+		title?: string
+		description?: string
+		confirmText?: string
+		cancelText?: string
+	}
+
+	let {
+		open = $bindable(),
+		title = 'Conferma',
+		description = "Sicuro di confermare l'operazione?",
+		confirmText = 'Conferma',
+		cancelText = 'Annulla'
+	}: Props = $props()
 </script>
 
 <StandardDialog bind:open {title}>

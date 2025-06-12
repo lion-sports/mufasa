@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy'
+
 	import type { Event } from '$lib/components/events/EventForm.svelte'
 	import { page } from '$app/stores'
 	import EventService from '$lib/services/events/events.service'
@@ -10,18 +12,27 @@
 	import { DateTime } from 'luxon'
 	import type { PageData } from './$types'
 
-	export let data: PageData
+	interface Props {
+		data: PageData
+	}
 
-	let event: Event = {},
-		loading: boolean = false,
-		convocations: { [key: number]: boolean } = {}
+	let { data }: Props = $props()
+
+	let event: Event = $state({}),
+		loading: boolean = $state(false),
+		convocations: { [key: number]: boolean } = $state({})
 
 	onMount(async () => {
 		let startParams: string | null = $page.url.searchParams.get('start')
 		if (!!startParams) {
-			event = {
-				start: DateTime.fromISO(startParams).toJSDate()
-			}
+			if (!event) event = {}
+			event.start = DateTime.fromISO(startParams).toJSDate()
+		}
+
+		let endParams: string | null = $page.url.searchParams.get('end')
+		if (!!endParams) {
+			if (!event) event = {}
+			event.end = DateTime.fromISO(endParams).toJSDate()
 		}
 	})
 
@@ -58,29 +69,28 @@
 		}
 	}
 
-	$: {
+	run(() => {
 		let startParams: string | null = $page.url.searchParams.get('start')
 		if (!!startParams && !event.start) {
 			event.start = DateTime.fromISO(startParams).toJSDate()
 		}
-	}
+	})
 
-	$: confirmDisabled = !event || !event.start || !event.end || !event.name
+	let confirmDisabled = $derived(!event || !event.start || !event.end || !event.name)
 
 	function handleCancel() {
 		window.history.back()
 	}
 </script>
 
-
 <PageTitle title="Nuovo evento" prependVisible={true} />
 
 <div style:margin-top="20px">
-  <EventForm bind:event teammates={$team?.teammates} bind:convocations groups={$team?.groups} />
-  <ConfirmOrCancelButtons
-    confirmDisable={confirmDisabled}
-    {loading}
-    on:confirm-click={handleSubmit}
-    on:cancel-click={handleCancel}
-  />
+	<EventForm bind:event teammates={$team?.teammates} bind:convocations groups={$team?.groups} />
+	<ConfirmOrCancelButtons
+		confirmDisable={confirmDisabled}
+		{loading}
+		on:confirm-click={handleSubmit}
+		on:cancel-click={handleCancel}
+	/>
 </div>

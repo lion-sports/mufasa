@@ -1,15 +1,22 @@
 <script lang="ts">
-	import { DateTime } from 'luxon'
 	import { DatePickerTextField } from '@likable-hair/svelte'
+	import type { ComponentProps } from 'svelte'
 
-	export let value: Date | undefined = undefined,
-		placeholder: string | undefined = undefined
+	type Props = {
+		value?: Date | undefined
+		placeholder?: string | undefined
+	} & ComponentProps<typeof DatePickerTextField>
+
+	let {
+		value = $bindable(undefined),
+		placeholder = $bindable(undefined),
+		...rest
+	}: Props = $props()
 </script>
 
 <DatePickerTextField
-	selectedDate={value}
-	bind:placeholder
+	bind:selectedDate={value}
+	{placeholder}
 	--simple-text-field-width="fit-content"
-	on:day-click
-	on:input
+	{...rest}
 />

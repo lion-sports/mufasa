@@ -2,18 +2,33 @@
 	import { FilterBuilder, PaginatedTable } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
 	import ShirtsService, { type Shirt } from '$lib/services/shirts/shirts.service'
-  
-	export let filters: ComponentProps<PaginatedTable>['filters'] = [
+
+	interface Props {
+		filters?: ComponentProps<typeof PaginatedTable>['filters']
+		headers?: ComponentProps<typeof PaginatedTable>['headers']
+		shirts?: Shirt[]
+		teammateId?: number | undefined
+		filtersBuilder?: FilterBuilder | undefined
+		page?: number
+		perPage?: number
+		maxPage?: number
+		filterAppend?: import('svelte').Snippet
+		rowActions?: import('svelte').Snippet<[any]>
+		onrowClick?: ComponentProps<typeof PaginatedTable>['onrowClick']
+	}
+
+	let {
+		filters = $bindable([
 			{
-        type: 'number',
-        column: 'number',
-        mode: 'equal',
+				type: 'number',
+				column: 'number',
+				mode: 'equal',
 				name: 'number',
 				label: 'Nome'
 			}
-		],
-		headers: ComponentProps<PaginatedTable>['headers'] = [
-      {
+		]),
+		headers = [
+			{
 				value: 'number',
 				label: 'Number',
 				type: { key: 'number' }
@@ -22,40 +37,46 @@
 				value: 'name',
 				label: 'Nome',
 				type: { key: 'string' }
-			}, {
+			},
+			{
 				value: 'primaryColor',
 				label: 'Colore Primario',
 				type: { key: 'custom' }
-			}, {
+			},
+			{
 				value: 'secondaryColor',
 				label: 'Colore Secondario',
 				type: { key: 'custom' }
 			}
 		],
-		shirts: Shirt[] = [],
-    teammateId: number | undefined = undefined,
-		filtersBuilder: FilterBuilder | undefined = undefined,
-		page: number = 1,
-		perPage: number = 100,
-		maxPage: number = 0
+		shirts = $bindable([]),
+		teammateId = undefined,
+		filtersBuilder = $bindable(undefined),
+		page = $bindable(1),
+		perPage = $bindable(100),
+		maxPage = $bindable(0),
+		filterAppend,
+		rowActions,
+		onrowClick
+	}: Props = $props()
 
-	async function handleFilterChange(e: CustomEvent<{ builder: FilterBuilder }>) {
+	async function handleFilterChange(e: { detail: { builder: FilterBuilder } }) {
 		filtersBuilder = e.detail.builder
 
 		await fetchShirts()
 	}
 
-	async function handlePaginationChange(e: CustomEvent<{ page: number; rowsPerPage: number }>) {
+	async function handlePaginationChange(e: { detail: { page: number; rowsPerPage: number } }) {
 		page = e.detail.page
-    perPage = e.detail.rowsPerPage
+		perPage = e.detail.rowsPerPage
 
 		await fetchShirts()
 	}
 
 	async function fetchShirts() {
-    let builder = filtersBuilder
-    if(!builder) builder = new FilterBuilder()
-    if(!!teammateId) builder.where('teammateId', teammateId)
+		let builder = filtersBuilder
+		if (!builder) builder = new FilterBuilder()
+		if (!!teammateId) builder.where('teammateId', teammateId)
 
 		let service = new ShirtsService({ fetch })
 		let paginatedShirts = await service.list({
@@ -71,16 +92,24 @@
 		shirts = paginatedShirts.data
 	}
 
-	async function handleSortClick(e: CustomEvent) {
-    let builder = filtersBuilder
-    if(!builder) builder = new FilterBuilder()
+	async function handleSortClick(e: {
+		detail: {
+			sortedBy?: string | undefined
+			sortDirection: string
+		}
+	}) {
+		let builder = filtersBuilder
+		if (!builder) builder = new FilterBuilder()
 
-    if(!!e.detail.sortedBy) {
-      builder.orderBy(e.detail.sortedBy, e.detail.sortDirection)
-      filtersBuilder = builder
-      await fetchShirts()
-    }
-  }
+		if (!!e.detail.sortedBy) {
+			builder.orderBy(e.detail.sortedBy, e.detail.sortDirection as 'asc' | 'desc')
+			filtersBuilder = builder
+			await fetchShirts()
+		}
+	}
+
+	const filterAppend_render = $derived(filterAppend)
+	const rowActions_render = $derived(rowActions)
 </script>
 
 <PaginatedTable
@@ -89,25 +118,31 @@
 	items={shirts}
 	bind:page
 	bind:rowsPerPage={perPage}
-	bind:maxPage
+	{maxPage}
 	searchBarVisible={false}
-	on:filtersChange={handleFilterChange}
-	on:paginationChange={handlePaginationChange}
-	on:rowClick
-	on:sort={(e) => handleSortClick(e)}
+	onfiltersChange={handleFilterChange}
+	onpaginationChange={handlePaginationChange}
+	{onrowClick}
+	onsort={(e) => handleSortClick(e)}
 >
-	<div class="ml-auto" slot="filter-append">
-    <slot name="filter-append"></slot>
-	</div>
-  <div slot="custom" let:header let:item>
-    {#if header.value == 'primaryColor' || header.value == 'secondaryColor'}
-      <div 
-        class="h-[20px] w-[20px] min-h-[20px] min-w-[20px] rounded-full"
-        style:background-color={item[header.value]}
-      ></div>
-    {/if}
-  </div>
-  <div slot="rowActions" let:item>
-    <slot name="rowActions" {item}></slot>
-  </div>
+	{#snippet filterAppendSnippet()}
+		<div class="ml-auto">
+			{@render filterAppend_render?.()}
+		</div>
+	{/snippet}
+	{#snippet customSnippet({ header, item })}
+		<div>
+			{#if header.value == 'primaryColor' || header.value == 'secondaryColor'}
+				<div
+					class="h-[20px] w-[20px] min-h-[20px] min-w-[20px] rounded-full"
+					style:background-color={item[header.value]}
+				></div>
+			{/if}
+		</div>
+	{/snippet}
+	{#snippet rowActionsSnippet({ item })}
+		<div>
+			{@render rowActions_render?.({ item })}
+		</div>
+	{/snippet}
 </PaginatedTable>

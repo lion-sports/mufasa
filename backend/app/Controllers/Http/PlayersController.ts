@@ -1,8 +1,8 @@
-import PlayersManager from 'App/managers/players.manager'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import PlayersManager from '#app/managers/players.manager'
+import type { HttpContext } from '@adonisjs/core/http'
 
 export default class PlayersController {
-  public async index({ request }: HttpContextContract) {
+  public async index({ request }: HttpContext) {
     const manager = new PlayersManager()
     return await manager.list({
       data: {
@@ -14,7 +14,7 @@ export default class PlayersController {
     })
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request }: HttpContext) {
     const manager = new PlayersManager()
     return await manager.create({
       data: {
@@ -32,7 +32,7 @@ export default class PlayersController {
     })
   }
 
-  public async show({ params }: HttpContextContract) {
+  public async show({ params }: HttpContext) {
     const manager = new PlayersManager()
     return await manager.get({
       data: {
@@ -41,7 +41,7 @@ export default class PlayersController {
     })
   }
 
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params }: HttpContext) {
     const manager = new PlayersManager()
     return await manager.update({
       data: {
@@ -57,7 +57,7 @@ export default class PlayersController {
     })
   }
 
-  public async destroy({ params }: HttpContextContract) {
+  public async destroy({ params }: HttpContext) {
     const manager = new PlayersManager()
     return await manager.destroy({
       data: {
@@ -66,7 +66,7 @@ export default class PlayersController {
     })
   }
 
-  public async lastScoutEvents({ params, request }: HttpContextContract) {
+  public async lastScoutEvents({ params, request }: HttpContext) {
     const manager = new PlayersManager()
     return await manager.lastScoutEvents({
       data: {

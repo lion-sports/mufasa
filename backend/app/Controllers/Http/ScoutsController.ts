@@ -1,9 +1,9 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import ScoutExporter from 'App/managers/scout/scout.exporter'
-import ScoutsManager from 'App/managers/scout/scouts.manager'
+import type { HttpContext } from '@adonisjs/core/http'
+import ScoutExporter from '#app/managers/scout/scout.exporter'
+import ScoutsManager from '#app/managers/scout/scouts.manager'
 
 export default class ScoutsController {
-  public async index({ request }: HttpContextContract) {
+  public async index({ request }: HttpContext) {
     const manager = new ScoutsManager()
     return await manager.list({
       data: {
@@ -15,7 +15,7 @@ export default class ScoutsController {
     })
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request }: HttpContext) {
     const manager = new ScoutsManager()
 
     return await manager.create({
@@ -30,7 +30,7 @@ export default class ScoutsController {
     })
   }
 
-  public async show({ params }: HttpContextContract) {
+  public async show({ params }: HttpContext) {
     const manager = new ScoutsManager()
     return await manager.get({
       data: {
@@ -39,7 +39,7 @@ export default class ScoutsController {
     })
   }
 
-  public async importTeammates({ request, params }: HttpContextContract) {
+  public async importTeammates({ request, params }: HttpContext) {
     const manager = new ScoutsManager()
     return await manager.importTeammates({
       data: {
@@ -51,7 +51,7 @@ export default class ScoutsController {
     })
   }
 
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params }: HttpContext) {
     const manager = new ScoutsManager()
     return await manager.update({
       data: {
@@ -66,7 +66,7 @@ export default class ScoutsController {
     })
   }
 
-  public async destroy({ params }: HttpContextContract) {
+  public async destroy({ params }: HttpContext) {
     const manager = new ScoutsManager()
     return await manager.destroy({
       data: {
@@ -75,7 +75,7 @@ export default class ScoutsController {
     })
   }
 
-  public async studio({ params }: HttpContextContract) {
+  public async studio({ params }: HttpContext) {
     const manager = new ScoutsManager()
     return await manager.studio({
       data: {
@@ -84,7 +84,7 @@ export default class ScoutsController {
     })
   }
 
-  public async exportXlsx({ params }: HttpContextContract) {
+  public async exportXlsx({ params }: HttpContext) {
     const manager = new ScoutExporter()
     return await manager.exportXlsx({
       data: {
@@ -93,7 +93,7 @@ export default class ScoutsController {
     })
   }
 
-  public async getFirstSetStartingSix({ params }: HttpContextContract) {
+  public async getFirstSetStartingSix({ params }: HttpContext) {
     const manager = new ScoutsManager()
     return await manager.getFirstSetStartingSix({
       data: {

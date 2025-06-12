@@ -1,5 +1,5 @@
-import Scout from "App/Models/Scout";
-import { SCOUT_EVENT_COLLECTION_NAME } from "../ScoutEvent";
+import Scout from "#app/Models/Scout";
+import { SCOUT_EVENT_COLLECTION_NAME } from "../ScoutEvent.js";
 
 export function lastPlayerPositionAggregation(params: {
   scout: Scout

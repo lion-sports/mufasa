@@ -1,72 +1,48 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Team, Teammate } from '$lib/services/teams/teams.service'
 	import type { Event } from '$lib/services/events/events.service'
 </script>
 
 <script lang="ts">
+	import { run } from 'svelte/legacy'
+
 	import { DateTime } from 'luxon'
-	import { onMount } from 'svelte'
-	import EventsService from '$lib/services/events/events.service'
-	import EventsViewer from '$lib/components/events/EventsViewer.svelte'
+	import EventsCalendar from '../events/EventsCalendar.svelte'
 
-	export let team: Team,
-		teammate: Teammate | undefined = undefined,
-		selectedDate: Date = new Date(),
-		selectedEvents: Event[] = [],
-		visibleMonth: number = DateTime.now().get('month') - 1,
-		visibleYear: number = DateTime.now().get('year'),
-		events: Event[] = [],
-    canCreate: boolean = false
-
-	function loadEvents() {
-		let service = new EventsService({ fetch })
-		service
-			.list({
-				filters: {
-					from: DateTime.now()
-						.set({
-							month: visibleMonth + 1,
-							year: visibleYear
-						})
-						.startOf('month')
-						.startOf('day')
-						.startOf('hour')
-						.startOf('minute')
-						.startOf('millisecond')
-						.minus({ days: 7 })
-						.toJSDate(),
-					to: DateTime.now()
-						.set({
-							month: visibleMonth + 1,
-							year: visibleYear
-						})
-						.endOf('month')
-						.endOf('day')
-						.endOf('hour')
-						.endOf('minute')
-						.endOf('millisecond')
-						.plus({ days: 7 })
-						.toJSDate(),
-					team: {
-						id: team.id
-					}
-				}
-			})
-			.then((loadedEvents) => {
-				events = loadedEvents
-			})
+	interface Props {
+		team: Team
+		selectedDate?: Date
+		selectedEvents?: Event[]
+		visibleMonth?: number
+		visibleYear?: number
+		events?: Event[]
+		canCreate?: boolean
 	}
+
+	let {
+		team = $bindable(),
+		selectedDate = $bindable(),
+		selectedEvents = $bindable([]),
+		visibleMonth = $bindable(DateTime.now().get('month') - 1),
+		visibleYear = $bindable(DateTime.now().get('year')),
+		events = $bindable([]),
+		canCreate = $bindable(false)
+	}: Props = $props()
+
+	function calculateSelectedEvents() {
+		selectedEvents = events.filter((e) => {
+			if (!selectedDate) return false
+			let startOfDayMillis = DateTime.fromJSDate(selectedDate).startOf('day').toMillis()
+			let endOfDayMillis = DateTime.fromJSDate(selectedDate).endOf('day').toMillis()
+			let eventMillis = DateTime.fromJSDate(e.start).toMillis()
+			return eventMillis < endOfDayMillis && eventMillis >= startOfDayMillis
+		})
+	}
+
+	run(() => {
+		if (!!selectedDate) calculateSelectedEvents()
+		else calculateSelectedEvents()
+	})
 </script>
 
-<EventsViewer
-	bind:events
-	bind:selectedDate
-	bind:team
-	bind:teammate
-	bind:selectedEvents
-	bind:visibleMonth
-	bind:visibleYear
-  bind:canCreate
-	on:nextMonth={loadEvents}
-	on:previousMonth={loadEvents}
-/>
+<EventsCalendar {canCreate} {visibleMonth} {visibleYear} bind:selectedDate bind:team bind:events />

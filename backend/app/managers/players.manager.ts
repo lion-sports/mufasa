@@ -1,19 +1,21 @@
-import { Context, withTransaction, withUser } from "./base.manager";
-import { validator } from "@ioc:Adonis/Core/Validator"
-import User from "App/Models/User";
-import AuthorizationManager from "./authorization.manager";
-import FilterModifierApplier, { Modifier } from "App/Services/FilterModifierApplier";
-import { ModelAttributes, ModelObject } from "@ioc:Adonis/Lucid/Orm";
-import Scout from "App/Models/Scout";
-import Player from "App/Models/Player";
+import { Context, withTransaction, withUser } from "./base.manager.js";
+import { validator } from "@adonisjs/validator"
+import User from "#app/Models/User";
+import AuthorizationManager from "./authorization.manager.js";
+import FilterModifierApplier, { Modifier } from "#app/Services/FilterModifierApplier";
+import Scout from "#app/Models/Scout";
+import Player from "#app/Models/Player";
 import type { ScoutEventPlayer } from "lionn-common";
-import { CreatePlayerValidator, UpdatePlayerValidator } from "App/Validators/players";
-import Teammate, { Role } from "App/Models/Teammate";
-import Convocation from "App/Models/Convocation";
-import Shirt from "App/Models/Shirt";
-import Mongo from "App/Services/Mongo";
-import { SCOUT_EVENT_COLLECTION_NAME } from "./scout/ScoutEvent";
+import { CreatePlayerValidator } from "#app/Validators/players/index";
+import { updatePlayerValidator } from "#validators/players/UpdatePlayerValidator";
+import Teammate, { Role } from "#app/Models/Teammate";
+import Convocation from "#app/Models/Convocation";
+import Shirt from "#app/Models/Shirt";
+import Mongo from "#app/Services/Mongo";
+import { SCOUT_EVENT_COLLECTION_NAME } from "./scout/ScoutEvent.js";
 import type { VolleyballScoutEventJson } from 'lionn-common'
+import { ModelAttributes } from "@adonisjs/lucid/types/model";
+import { ModelObject } from "@adonisjs/lucid/types/model";
 
 export default class PlayersManager {
   @withTransaction
@@ -92,17 +94,14 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: params.data.scoutId
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let validatedData = await validator.validate({
@@ -193,17 +192,14 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'view',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_view',
+        data: {
           scout: {
             id: player.scout.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     return player
@@ -233,9 +229,8 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: player.scoutId
           }
@@ -246,10 +241,7 @@ export default class PlayersManager {
       }
     })
 
-    let validatedData = await validator.validate({
-      schema: new UpdatePlayerValidator().schema,
-      data: params.data
-    })
+    let validatedData = await updatePlayerValidator.validate(params.data)
 
     let shirt: Shirt | undefined = undefined
     if(!!validatedData.shirtId) {
@@ -292,9 +284,8 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: player.scoutId
           }
@@ -330,9 +321,8 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: params.data.scout.id
           }
@@ -390,9 +380,8 @@ export default class PlayersManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'manage',
-        resource: 'scout',
-        entities: {
+        ability: 'scout_manage',
+        data: {
           scout: {
             id: params.data.scout.id
           }

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { FileInputList } from '@likable-hair/svelte'
 
-	export let files: File[] = []
+	interface Props {
+		files?: File[]
+	}
+
+	let { files = $bindable([]) }: Props = $props()
 </script>
 
 <FileInputList bind:files />

@@ -7,48 +7,64 @@
 	import type { Group } from '$lib/services/groups/groups.service'
 	import type { ComponentProps } from 'svelte'
 
-	export let teammates: Teammate[] = [],
-		team: { id: number } | undefined = undefined,
-		searchable: boolean = false,
-		onlyConvocables: boolean = false,
-		groupFilter: boolean = false,
-		selectableGroups: Group[] = [],
-		value: {
+	interface Props {
+		teammates?: Teammate[]
+		team?: { id: number } | undefined
+		searchable?: boolean
+		onlyConvocables?: boolean
+		groupFilter?: boolean
+		selectableGroups?: Group[]
+		value?: {
 			[key: number]: boolean
-		} = {}
+		}
+	}
 
-	let searchText: string
-	$: filteredTeammates = teammates.filter((teammate) => {
-		return (
-			(!searchText ||
-				(!!searchText &&
-					(teammate.alias || teammate.user.firstname + ' ' + teammate.user.lastname)
-						.toLowerCase()
-						.includes(searchText.toLowerCase()))) &&
-			(!onlyConvocables || (!!onlyConvocables && (!teammate.group || teammate.group.convocable))) &&
-			(!selectedGroups ||
-				selectedGroups.length == 0 ||
-				(selectedGroups.length > 0 &&
-					teammate.groupId &&
-					selectedGroups.map((r) => r.value).includes(teammate.groupId?.toString())))
-		)
-	})
+	let {
+		teammates = $bindable([]),
+		team = undefined,
+		searchable = false,
+		onlyConvocables = false,
+		groupFilter = false,
+		selectableGroups = $bindable([]),
+		value = $bindable({})
+	}: Props = $props()
+
+	let searchText: string | undefined = $state()
 
 	function handleChange(teammate: Teammate, event: any) {
+		console.log(event)
 		value[teammate.id] = event.target.checked
 	}
 
-	let selectedGroups: ComponentProps<GroupMultipleSelectorChip>['value'] = []
+	let selectedGroups: ComponentProps<typeof GroupMultipleSelectorChip>['value'] = $state([])
+	let filteredTeammates = $derived(
+		teammates.filter((teammate) => {
+			return (
+				(!searchText ||
+					(!!searchText &&
+						(teammate.alias || teammate.user.firstname + ' ' + teammate.user.lastname)
+							.toLowerCase()
+							.includes(searchText.toLowerCase()))) &&
+				(!onlyConvocables ||
+					(!!onlyConvocables && (!teammate.group || teammate.group.convocable))) &&
+				(!selectedGroups ||
+					selectedGroups.length == 0 ||
+					(selectedGroups.length > 0 &&
+						teammate.groupId &&
+						selectedGroups.map((r) => r.value).includes(teammate.groupId?.toString())))
+			)
+		})
+	)
 </script>
 
 {#if searchable}
 	<div style:width="100%" style:margin-bottom="0px" style:display="flex">
 		<StandardTextfield bind:value={searchText} placeholder="Cerca partecipanti ...">
-			<svelte:fragment slot="prepend-inner">
+			{#snippet prependInner()}
 				<div style:margin-right="10px">
 					<Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
 				</div>
-			</svelte:fragment>
+			{/snippet}
 		</StandardTextfield>
 	</div>
 {/if}
@@ -68,14 +84,12 @@
 				id={`check-convocation-${teammate.id}`}
 				value={value[teammate.id]}
 				label=""
-				on:change={(event) => handleChange(teammate, event)}
+				onchange={(event) => handleChange(teammate, event.detail.nativeEvent)}
 			>
-				<svelte:fragment slot="text">
+				{#snippet text()}
 					<span>{teammate.alias || teammate.user.firstname + ' ' + teammate.user.lastname}</span>
-					<span style:margin-left="10px" style:font-weight="200" style:font-size="0.9rem"
-						>{teammate.group?.name || ''}</span
-					>
-				</svelte:fragment>
+					<span class="font-thin text-xs ml-2">{teammate.group?.name || ''}</span>
+				{/snippet}
 			</LabelAndCheckbox>
 		</div>
 	{/each}

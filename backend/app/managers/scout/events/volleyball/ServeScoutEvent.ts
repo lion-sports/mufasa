@@ -1,13 +1,13 @@
 import type { ServeScoutExtraProperties, VolleyballPoints } from "lionn-common";
-import ScoutEvent from "../../ScoutEvent";
-import Scout from "App/Models/Scout";
-import { Context } from "App/managers/base.manager";
-import scoutsSocket from "../../scouts.socket";
+import ScoutEvent, { ScoutEventConstructorsParameters } from "../../ScoutEvent.js";
+import Scout from "#app/Models/Scout";
+import { Context } from "#app/managers/base.manager";
+import scoutsSocket from "../../scouts.socket.js";
 
 export default class ServeScoutEvent extends ScoutEvent<ServeScoutExtraProperties, 'serve', VolleyballPoints> {
   public type = 'serve' as const
 
-  constructor(params) {
+  constructor(params: ScoutEventConstructorsParameters<'serve', VolleyballPoints, ServeScoutExtraProperties>) {
     if (!params.playerId) params.playerId = params.player.id
     if (!params.playerId) throw new Error('playerId must be defined')
 

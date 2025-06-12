@@ -1,34 +1,39 @@
 <script lang="ts">
-	import { ROLES, type Role } from "$lib/services/scouts/scouts.service";
-	import type { ComponentProps } from "svelte"
-	import StandardAutocomplete from "../common/StandardAutocomplete.svelte"
+	import { run } from 'svelte/legacy'
 
-  export let values: Role[] = [],
-    multiple: boolean = false,
-    roles: Role[] = ROLES,
-    height: ComponentProps<StandardAutocomplete>['height'] = undefined
+	import { ROLES, type Role } from '$lib/services/scouts/scouts.service'
+	import type { ComponentProps } from 'svelte'
+	import StandardAutocomplete from '../common/StandardAutocomplete.svelte'
 
-  let selectedValues: ComponentProps<StandardAutocomplete>['values'] = []
-  $: selectedValues = values?.map(r => ({
-    label: r,
-    value: r
-  }))
+	interface Props {
+		values?: Role[]
+		multiple?: boolean
+		roles?: Role[]
+		height?: ComponentProps<typeof StandardAutocomplete>['height']
+		onchange?: ComponentProps<typeof StandardAutocomplete>['onchange']
+	}
 
-  function handleChange() {
-    values = selectedValues?.map((sv) => sv.value) as Role[]
-  }
+	let {
+		values = $bindable([]),
+		multiple = $bindable(false),
+		roles = ROLES,
+		height = undefined,
+		onchange
+	}: Props = $props()
+
+	let selectedValues: ComponentProps<typeof StandardAutocomplete>['values'] = $state([])
+	run(() => {
+		selectedValues = values?.map((r) => ({
+			label: r,
+			value: r
+		}))
+	})
 </script>
 
 <StandardAutocomplete
-  items={roles.map((v) => {
-    return {
-      value: v,
-      label: v
-    }
-  })}
-  bind:values={selectedValues}
-  on:change={handleChange}
-  on:change
-  bind:multiple
-  {height}
+	bind:values={selectedValues}
+	items={roles.map((v) => ({ value: v, label: v }))}
+	{onchange}
+	{multiple}
+	{height}
 ></StandardAutocomplete>

@@ -1,11 +1,11 @@
-import Shirt from "App/Models/Shirt";
-import { Context, withTransaction, withUser } from "./base.manager";
-import { CreateShirtValidator, UpdateShirtValidator } from "App/Validators/shirts";
-import { validator } from "@ioc:Adonis/Core/Validator"
-import User from "App/Models/User";
-import AuthorizationManager from "./authorization.manager";
-import FilterModifierApplier, { Modifier } from "App/Services/FilterModifierApplier";
-import { ModelObject } from "@ioc:Adonis/Lucid/Orm";
+import Shirt from "#app/Models/Shirt";
+import { Context, withTransaction, withUser } from "./base.manager.js";
+import { CreateShirtValidator, UpdateShirtValidator } from "#app/Validators/shirts/index";
+import { validator } from "@adonisjs/validator"
+import User from "#app/Models/User";
+import AuthorizationManager from "./authorization.manager.js";
+import FilterModifierApplier, { Modifier } from "#app/Services/FilterModifierApplier";
+import { ModelObject } from "@adonisjs/lucid/types/model";
 
 export default class ShirtManager {
   @withTransaction
@@ -76,17 +76,14 @@ export default class ShirtManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'create',
-        resource: 'shirt',
-        entities: {
+        ability: 'shirt_create',
+        data: {
           teammate: {
             id: params.data.teammateId
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let validatedData = await validator.validate({
@@ -114,17 +111,14 @@ export default class ShirtManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'view',
-        resource: 'shirt',
-        entities: {
+        ability: 'shirt_view',
+        data: {
           shirt: {
             id: params.data.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let shirt = await Shirt
@@ -154,17 +148,14 @@ export default class ShirtManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'shirt',
-        entities: {
+        ability: 'shirt_update',
+        data: {
           shirt: {
             id: params.data.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let validatedData = await validator.validate({
@@ -195,17 +186,14 @@ export default class ShirtManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'destroy',
-        resource: 'shirt',
-        entities: {
+        ability: 'shirt_destroy',
+        data: {
           shirt: {
             id: params.data.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     await Shirt.query({ client: trx }).where('id', params.data.id).del()

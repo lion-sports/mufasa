@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type Team = {
 		name: string
 	}
@@ -16,11 +16,21 @@
 		}
 	}>()
 
-	export let teams: Team[] = [],
-		loading: boolean = false,
-		searchable: boolean = false,
-		marginTop: string | undefined = undefined,
-		marginBottom: string | undefined = undefined
+	interface Props {
+		teams?: Team[]
+		loading?: boolean
+		searchable?: boolean
+		marginTop?: string | undefined
+		marginBottom?: string | undefined
+	}
+
+	let {
+		teams = [],
+		loading = false,
+		searchable = false,
+		marginTop = undefined,
+		marginBottom = undefined
+	}: Props = $props()
 
 	function handleTeamClick(event: MouseEvent, team: Team) {
 		dispatch('teams-click', {
@@ -29,23 +39,27 @@
 		})
 	}
 
-	let searchText: string
-	$: filteredTeams = !!searchText
-		? teams.filter((team) => {
-				return team.name.toLocaleLowerCase().includes(searchText.toLocaleLowerCase())
-		  })
-		: teams
+	let searchText: string | undefined = $state()
+	let filteredTeams = $derived(
+		!!searchText
+			? teams.filter((team) => {
+					return (
+						!searchText || team.name.toLocaleLowerCase().includes(searchText.toLocaleLowerCase())
+					)
+				})
+			: teams
+	)
 </script>
 
 <div style:margin-top={marginTop} style:margin-bottom={marginBottom}>
 	{#if searchable}
 		<div style:max-width="100%" style:width="400px" style:margin-bottom="10px">
 			<StandardTextfield bind:value={searchText} placeholder="Cerca team ...">
-				<svelte:fragment slot="prepend-inner">
+				{#snippet prependInner()}
 					<div style:margin-right="10px">
 						<Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-background-400))" />
 					</div>
-				</svelte:fragment>
+				{/snippet}
 			</StandardTextfield>
 		</div>
 	{/if}
@@ -62,7 +76,8 @@
 					style:border-radius="5px"
 					style:display="flex"
 					style:cursor="pointer"
-					on:click={(event) => handleTeamClick(event, team)}
+					onclick={(event) => handleTeamClick(event, team)}
+					role="presentation"
 				>
 					<div>
 						{team.name}
@@ -73,7 +88,7 @@
 				</div>
 			{/each}
 		{:else}
-			Nessun  team trovato, 
+			Nessun team trovato,
 			<a href="/teams/new">crea il tuo</a>
 		{/if}
 	</div>

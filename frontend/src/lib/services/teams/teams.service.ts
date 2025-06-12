@@ -1,5 +1,7 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
+import type { Sport } from 'lionn-common'
 import type { User } from '../auth/auth.service'
+import type { Club } from '../clubs/clubs.service'
 import type { Group } from '../groups/groups.service'
 import type { Invitation } from '../invitations/invitations.service'
 import type { Role } from '../scouts/scouts.service'
@@ -14,9 +16,9 @@ export type Teammate = {
 	userId: number
 	user: User
 	alias?: string
-  shirts: Shirt[]
-  defaultRole: Role
-  availableRoles: Role[]
+	shirts: Shirt[]
+	defaultRole: Role
+	availableRoles: Role[]
 	createdAt: Date
 	updatedAt: Date
 }
@@ -24,8 +26,10 @@ export type Teammate = {
 export type Team = {
 	id: number
 	name: string
-	notes: string
+	notes?: string
 	ownerId?: number
+  clubId?: number
+  club?: Club
 	invitations?: Invitation[]
 	owner?: User
 	teammates: Teammate[]
@@ -40,8 +44,12 @@ export type PaginatedTeams = {
 }
 
 export default class TeamsService extends FetchBasedService {
-	public async create(params: { name?: string; notes?: string }): Promise<Team> {
-		if (!params.name) throw new Error('name must be defined')
+	public async create(params: { 
+    name: string
+    notes?: string 
+    clubId?: number
+    sport?: Sport
+  }): Promise<Team> {
 
 		let response = await this.client.post({
 			url: '/teams',
@@ -85,29 +93,32 @@ export default class TeamsService extends FetchBasedService {
 		return response
 	}
 
-  public async absencesInLatestEvents(params: {
-    forLastEvents: number
-  }): Promise<Record<number, {
-    team: {
-      id: number,
-      name: string
-    }
-    absences: {
-      eventId: number,
-      absencesNumber: number
-    }[]
-    presences: {
-      eventId: number,
-      presencesNumber: number
-    }[]
-  }>> {
-    let response = await this.client.get({
-      url: '/teams/absencesInLatestEvents',
-      params: {
-        forLastEvents: params.forLastEvents
-      }
-    })
+	public async absencesInLatestEvents(params: { forLastEvents: number }): Promise<
+		Record<
+			number,
+			{
+				team: {
+					id: number
+					name: string
+				}
+				absences: {
+					eventId: number
+					absencesNumber: number
+				}[]
+				presences: {
+					eventId: number
+					presencesNumber: number
+				}[]
+			}
+		>
+	> {
+		let response = await this.client.get({
+			url: '/teams/absencesInLatestEvents',
+			params: {
+				forLastEvents: params.forLastEvents
+			}
+		})
 
-    return response
-  }
+		return response
+	}
 }

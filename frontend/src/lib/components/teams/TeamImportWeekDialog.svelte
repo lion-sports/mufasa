@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy'
+
 	import type { Team } from '$lib/services/teams/teams.service'
 	import type { Event } from '$lib/services/events/events.service'
 	import type { Option } from '$lib/components/common/StandardSelect.svelte'
@@ -16,17 +18,29 @@
 		}
 	}>()
 
-	export let open: boolean = false,
-		team: Team,
-		selectedYear: number = DateTime.now().get('weekYear'),
-		selectedWeek: number,
-		toYear: number,
-		toWeek: number,
-		title: string = 'Importa settimana'
+	interface Props {
+		open?: boolean
+		team: Team
+		selectedYear?: number
+		selectedWeek: number
+		toYear: number
+		toWeek: number
+		title?: string
+	}
 
-	let weeksItems: Option[] = [],
-		selectedYearString: string = selectedYear.toString()
-	$: {
+	let {
+		open = $bindable(false),
+		team,
+		selectedYear = $bindable(DateTime.now().get('weekYear')),
+		selectedWeek = $bindable(),
+		toYear = $bindable(),
+		toWeek = $bindable(),
+		title = 'Importa settimana'
+	}: Props = $props()
+
+	let weeksItems: Option[] = $state([]),
+		selectedYearString: string = $state(selectedYear.toString())
+	run(() => {
 		weeksItems = []
 
 		if (
@@ -80,9 +94,9 @@
 
 			weeksItems = [...weeksItems]
 		}
-	}
+	})
 
-	let importLoading: boolean = false
+	let importLoading: boolean = $state(false)
 	async function handleConfirmation() {
 		if (!selectedWeek || !selectedYear) return
 

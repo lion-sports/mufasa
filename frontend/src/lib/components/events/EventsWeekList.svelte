@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy'
+
 	import type { Team, Teammate } from '$lib/services/teams/teams.service'
 	import type { Event } from '$lib/services/events/events.service'
 	import { DateTime, type WeekdayNumbers } from 'luxon'
@@ -11,16 +13,33 @@
 	import OptionMenu from '$lib/components/common/OptionMenu.svelte'
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte'
 
-	export let team: Team,
-		teammate: Teammate | undefined = undefined,
-		selectedDate: Date = new Date(),
-		selectedEvents: Event[] = [],
-		events: Event[],
-		visibleYear: number = DateTime.now().get('year'),
-		visibleWeek: number = DateTime.now().get('weekNumber'),
-    canUpdate: boolean = false,
-    canDestroy: boolean = false,
-    canCreate: boolean = false
+	interface Props {
+		team: Team
+		teammate?: Teammate | undefined
+		selectedDate?: Date
+		selectedEvents?: Event[]
+		events: Event[]
+		visibleYear?: number
+		visibleWeek?: number
+		canUpdate?: boolean
+		canDestroy?: boolean
+		canCreate?: boolean
+		weekListOptions?: import('svelte').Snippet
+	}
+
+	let {
+		team,
+		teammate = undefined,
+		selectedDate = $bindable(new Date()),
+		selectedEvents = $bindable([]),
+		events = $bindable(),
+		visibleYear = $bindable(),
+		visibleWeek = $bindable(),
+		canUpdate = false,
+		canDestroy = false,
+		canCreate = false,
+		weekListOptions
+	}: Props = $props()
 
 	let dispatch = createEventDispatcher<{
 		nextWeek: {
@@ -35,8 +54,8 @@
 
 	let dayGroupedEvents: {
 			[key: string]: Event[] | undefined
-		} = {},
-		options: NonNullable<ComponentProps<OptionMenu>['options']> = []
+		} = $state({}),
+		options: NonNullable<ComponentProps<typeof OptionMenu>['options']> = []
 
 	onMount(() => {
 		groupEventByDate()
@@ -81,8 +100,8 @@
 		}
 	}
 
-	let weekName: string = ''
-	$: {
+	let weekName: string = $state('')
+	run(() => {
 		let firstDayOfWeek = DateTime.fromObject({
 			weekday: 1,
 			weekNumber: visibleWeek,
@@ -106,9 +125,11 @@
 			})
 
 		weekName = `${firstDayOfWeek} - ${lastDayOfWeek} ${visibleYear}`
-	}
+	})
 
 	function nextWeek() {
+		if (visibleYear === undefined || visibleWeek === undefined) return
+
 		let currentVisibleWeek = DateTime.fromObject({
 			weekday: 1,
 			weekNumber: visibleWeek,
@@ -133,6 +154,8 @@
 	}
 
 	function previousWeek() {
+		if (visibleYear === undefined || visibleWeek === undefined) return
+
 		let currentVisibleWeek = DateTime.fromObject({
 			weekday: 1,
 			weekNumber: visibleWeek,
@@ -186,8 +209,10 @@
 		return `${fromTime} - ${toTime}`
 	}
 
-	$: if (!!events) groupEventByDate()
-	$: {
+	run(() => {
+		if (!!events) groupEventByDate()
+	})
+	run(() => {
 		if (!!selectedDate) {
 			let key = DateTime.now()
 				.set({
@@ -199,16 +224,21 @@
 
 			selectedEvents = dayGroupedEvents[key] || []
 		}
-	}
+	})
 
 	function handleEventTitleClick(event: Event) {
 		goto(`/teams/${team.id}/events/${event.id}/general`)
 	}
 
-	let confirmDeletionDialogOpen: boolean = false,
-		deletingEvent: Event | undefined,
+	let confirmDeletionDialogOpen: boolean = $state(false),
+		deletingEvent: Event | undefined = $state(),
 		loadingDelete: boolean = false
-	function handleEventOptionClick(e: CustomEvent<{ element: (typeof options)[0] }>, event: Event) {
+	function handleEventOptionClick(
+		e: {
+			detail: { element: (typeof options)[0] }
+		},
+		event: Event
+	) {
 		if (e.detail.element.name == 'edit' && !!team) {
 			goto(`/teams/${team.id}/events/${event.id}/edit`)
 		} else if (e.detail.element.name == 'view' && !!team) {
@@ -244,96 +274,101 @@
 		return !!teammate && event.convocations.some((c) => !!teammate && c.teammateId == teammate.id)
 	}
 
-  let weekdays: WeekdayNumbers[] = [1, 2, 3, 4, 5, 6, 7]
+	let weekdays: WeekdayNumbers[] = [1, 2, 3, 4, 5, 6, 7]
 </script>
 
-<MediaQuery let:mAndDown>
-	<div style:height="auto" style:width="100%">
-		{#if mAndDown}
-			<div class="week-switcher">
-				<Icon name="mdi-chevron-left" click on:click={previousWeek} />
-				<div>
-					<slot name="options" />
+<MediaQuery>
+	{#snippet defaultSnippet({ mAndDown })}
+		<div style:height="auto" style:width="100%">
+			{#if mAndDown}
+				<div class="week-switcher">
+					<Icon name="mdi-chevron-left" onclick={previousWeek} />
+					<div>
+						{@render weekListOptions?.()}
+					</div>
+					<Icon name="mdi-chevron-right" onclick={nextWeek} />
 				</div>
-				<Icon name="mdi-chevron-right" click on:click={nextWeek} />
-			</div>
-			<div class="week-name" style:margin-bottom="20px">
-				{weekName}
-			</div>
-		{:else}
-			<div class="week-switcher">
-				<Icon name="mdi-chevron-left" click on:click={previousWeek} />
-				<Icon name="mdi-chevron-right" click on:click={nextWeek} />
-				<div class="week-name">
+				<div class="week-name" style:margin-bottom="20px">
 					{weekName}
 				</div>
-				<slot name="options" />
-			</div>
-		{/if}
-		<div class="date-list">
-			{#key dayGroupedEvents}
-				{#each weekdays as weekday}
-					<div class="day-container">
-						<div class="day-name">{getWeekdayNameFromIndex(weekday)}</div>
-						<div style:flex-grow="1">
-							{#if canCreate}
-								<div>
-									<Icon name="mdi-plus" click on:click={() => handlePlusClick(weekday)} />
-								</div>
-							{/if}
-							{#if !!getEventsFromWeekDay(weekday)}
-								{#each getEventsFromWeekDay(weekday) || [] as event}
-									<div class="event">
-										<div class="event-title">
-											<button on:click={() => handleEventTitleClick(event)} style:cursor="pointer"
-												>{event.name}</button
-											>
-											<div style:margin-left="10px">
-												<OptionMenu {options} on:select={(e) => handleEventOptionClick(e, event)} />
-											</div>
-										</div>
-										<div class="event-subtitle">
-											<Icon name="mdi-clock" --icon-size="10pt" />
-											{getEventTimeRangeString(event)}
-										</div>
-										{#if !!event.description}
-											<div class="event-description" style:white-space="pre-wrap">
-												<Icon name="mdi-text" --icon-size="10pt" />
-												{event.description}
-											</div>
-										{/if}
-										{#if isConvocated(event)}
-											<div
-												class="convocated-badge"
-												style:display="flex"
-												style:align-items="center"
-												style:gap="10px"
-												style:margin-left="10px"
-											>
-												<Icon
-													name="mdi-account-check"
-													--icon-color="rgb(var(--global-color-success))"
-													--icon-size="15pt"
-												/>
-												<span
-													style:color="rgb(var(--global-color-success))"
-													style:font-size="0.9rem"
-													style:font-weight="300"
-												>
-													Convocato
-												</span>
-											</div>
-										{/if}
-									</div>
-								{/each}
-							{/if}
-						</div>
+			{:else}
+				<div class="week-switcher">
+					<Icon name="mdi-chevron-left" onclick={previousWeek} />
+					<Icon name="mdi-chevron-right" onclick={nextWeek} />
+					<div class="week-name">
+						{weekName}
 					</div>
-					<Divider marginLeft="0px" />
-				{/each}
-			{/key}
+					{@render weekListOptions?.()}
+				</div>
+			{/if}
+			<div class="date-list">
+				{#key dayGroupedEvents}
+					{#each weekdays as weekday}
+						<div class="day-container">
+							<div class="day-name">{getWeekdayNameFromIndex(weekday)}</div>
+							<div style:flex-grow="1">
+								{#if canCreate}
+									<div>
+										<Icon name="mdi-plus" onclick={() => handlePlusClick(weekday)} />
+									</div>
+								{/if}
+								{#if !!getEventsFromWeekDay(weekday)}
+									{#each getEventsFromWeekDay(weekday) || [] as event}
+										<div class="event">
+											<div class="event-title">
+												<button onclick={() => handleEventTitleClick(event)} style:cursor="pointer"
+													>{event.name}</button
+												>
+												<div style:margin-left="10px">
+													<OptionMenu
+														{options}
+														onselect={(e) => handleEventOptionClick(e, event)}
+													/>
+												</div>
+											</div>
+											<div class="event-subtitle">
+												<Icon name="mdi-clock" --icon-size="10pt" />
+												{getEventTimeRangeString(event)}
+											</div>
+											{#if !!event.description}
+												<div class="event-description" style:white-space="pre-wrap">
+													<Icon name="mdi-text" --icon-size="10pt" />
+													{event.description}
+												</div>
+											{/if}
+											{#if isConvocated(event)}
+												<div
+													class="convocated-badge"
+													style:display="flex"
+													style:align-items="center"
+													style:gap="10px"
+													style:margin-left="10px"
+												>
+													<Icon
+														name="mdi-account-check"
+														--icon-color="rgb(var(--global-color-success))"
+														--icon-size="15pt"
+													/>
+													<span
+														style:color="rgb(var(--global-color-success))"
+														style:font-size="0.9rem"
+														style:font-weight="300"
+													>
+														Convocato
+													</span>
+												</div>
+											{/if}
+										</div>
+									{/each}
+								{/if}
+							</div>
+						</div>
+						<Divider marginLeft="0px" />
+					{/each}
+				{/key}
+			</div>
 		</div>
-	</div>
+	{/snippet}
 </MediaQuery>
 
 <ConfirmDialog

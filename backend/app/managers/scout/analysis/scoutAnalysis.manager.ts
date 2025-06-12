@@ -1,10 +1,10 @@
 import { ScoutEventPlayer, VolleyballPoints, VolleyballScoutEventPosition } from "lionn-common"
-import { analysis } from "../aggregations/analysis.aggregation"
-import { SCOUT_EVENT_COLLECTION_NAME } from "../ScoutEvent"
-import Mongo from "App/Services/Mongo"
-import { Context, withTransaction, withUser } from "App/managers/base.manager"
-import { AuthorizationHelpers } from "App/managers/authorization.manager"
-import Scout from "App/Models/Scout"
+import { analysis } from "../aggregations/analysis.aggregation.js"
+import { SCOUT_EVENT_COLLECTION_NAME } from "../ScoutEvent.js"
+import Mongo from "#app/Services/Mongo"
+import { Context, withTransaction, withUser } from "#app/managers/base.manager"
+import { AuthorizationHelpers } from "#app/managers/authorization.manager"
+import Scout from "#app/Models/Scout"
 
 export type TeamFilter = 'friend' | 'opponent' | 'both'
 

@@ -1,8 +1,8 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import DashboardManager from 'App/managers/dashboard.manager'
+import type { HttpContext } from '@adonisjs/core/http'
+import DashboardManager from '#app/managers/dashboard.manager'
 
 export default class DashboardController {
-  public async index({ request }: HttpContextContract) {
+  public async index({ request }: HttpContext) {
     const manager = new DashboardManager()
     return await manager.list({
       data: {
@@ -13,7 +13,7 @@ export default class DashboardController {
     })
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request }: HttpContext) {
     const manager = new DashboardManager()
     let createdReportStatus = await manager.create({
       data: {
@@ -26,7 +26,7 @@ export default class DashboardController {
     return createdReportStatus
   }
 
-  public async show({ params }: HttpContextContract) {
+  public async show({ params }: HttpContext) {
     const manager = new DashboardManager()
     return await manager.get({
       data: {
@@ -35,7 +35,7 @@ export default class DashboardController {
     })
   }
 
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params }: HttpContext) {
     const manager = new DashboardManager()
     return await manager.update({
       data: {
@@ -47,7 +47,7 @@ export default class DashboardController {
     })
   }
 
-  public async destroy({ params }: HttpContextContract) {
+  public async destroy({ params }: HttpContext) {
     const manager = new DashboardManager()
 
     return await manager.destroy({

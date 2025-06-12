@@ -1,8 +1,8 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import EventSessionsManager from "App/managers/eventSessions.manager";
+import type { HttpContext } from '@adonisjs/core/http'
+import EventSessionsManager from "#app/managers/eventSessions.manager";
 
 export default class EventSessionsController {
-  public async index({ params }: HttpContextContract) {
+  public async index({ params }: HttpContext) {
     const manager = new EventSessionsManager()
     return await manager.list({
       data: {
@@ -12,7 +12,7 @@ export default class EventSessionsController {
     })
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request }: HttpContext) {
     const manager = new EventSessionsManager()
 
     return await manager.create({
@@ -22,7 +22,7 @@ export default class EventSessionsController {
     })
   }
 
-  public async show({ params }: HttpContextContract) {
+  public async show({ params }: HttpContext) {
     const manager = new EventSessionsManager()
     return await manager.get({
       data: {
@@ -31,7 +31,7 @@ export default class EventSessionsController {
     })
   }
 
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params }: HttpContext) {
     const manager = new EventSessionsManager()
     return await manager.update({
       data: {
@@ -41,7 +41,7 @@ export default class EventSessionsController {
     })
   }
 
-  public async destroy({ params }: HttpContextContract) {
+  public async destroy({ params }: HttpContext) {
     const manager = new EventSessionsManager()
     return await manager.destroy({
       data: {

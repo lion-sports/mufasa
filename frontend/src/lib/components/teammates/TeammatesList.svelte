@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Teammate, Team } from '$lib/services/teams/teams.service'
 </script>
 
@@ -15,14 +15,25 @@
 		destroy: undefined
 	}>()
 
-	export let teammates: Teammate[] = [],
-		team: Pick<Team, 'id' | 'ownerId'>,
-		searchable: boolean = false,
-    canInvite: boolean = false,
-    canUpdateTeam: boolean = false,
-    canRemoveTeammate: boolean = false
+	interface Props {
+		teammates?: Teammate[]
+		team: Pick<Team, 'id' | 'ownerId'>
+		searchable?: boolean
+		canInvite?: boolean
+		canUpdateTeam?: boolean
+		canRemoveTeammate?: boolean
+	}
 
-	let headers: ComponentProps<SimpleTable>['headers'] = [
+	let {
+		teammates = [],
+		team,
+		searchable = false,
+		canInvite = false,
+		canUpdateTeam = false,
+		canRemoveTeammate = false
+	}: Props = $props()
+
+	let headers: ComponentProps<typeof SimpleTable>['headers'] = [
 		{
 			value: 'name',
 			label: 'Nome',
@@ -46,22 +57,27 @@
 		}
 	]
 
-	let searchText: string
-	$: filteredTeammates = !!searchText
-		? teammates.filter((teammate) => {
-				return (
-					teammate.user.firstname.toLowerCase() + teammate.user.lastname.toLowerCase()
-				).includes(searchText.toLowerCase()) || (
-          !!teammate.alias && teammate.alias.toLowerCase().includes(searchText.toLowerCase())
-        )
-      })
-		: teammates
+	let searchText: string = $state('')
+	let filteredTeammates = $derived(
+		!!searchText
+			? teammates.filter((teammate) => {
+					return (
+						!searchText ||
+						(teammate.user.firstname.toLowerCase() + teammate.user.lastname.toLowerCase()).includes(
+							searchText.toLowerCase()
+						) ||
+						(!!teammate.alias && teammate.alias.toLowerCase().includes(searchText.toLowerCase()))
+					)
+				})
+			: teammates
+	)
 
 	function inviteUser(event: any) {
 		goto('/teams/' + team.id + '/inviteUser')
 	}
 
-	let confirmDialogOpen: boolean, deletingTeammate: Teammate | undefined
+	let confirmDialogOpen: boolean = $state(false),
+		deletingTeammate: Teammate | undefined = $state()
 	function handleDeleteClick(teammate: any) {
 		deletingTeammate = teammate
 		confirmDialogOpen = true
@@ -93,13 +109,13 @@
 {#if searchable}
 	<div style:width="100%" style:margin-bottom="0px" style:display="flex">
 		<StandardTextfield bind:value={searchText} placeholder="Cerca partecipanti ...">
-			<svelte:fragment slot="prepend-inner">
+			{#snippet prependInner()}
 				<div style:margin-right="10px">
 					<Icon name="mdi-search-web" --icon-color="rgb(var(--global-color-contrast-500), .5)" />
 				</div>
-			</svelte:fragment>
+			{/snippet}
 		</StandardTextfield>
-		<div style:flex-grow="1" />
+		<div style:flex-grow="1"></div>
 		{#if canInvite}
 			<div style:margin-left="10px">
 				<StandardButton on:click={inviteUser}>Invita</StandardButton>
@@ -110,7 +126,7 @@
 
 <div class="overflow-auto w-full mt-4">
 	<SimpleTable {headers} items={filteredTeammates}>
-		<svelte:fragment slot="custom" let:item let:header>
+		{#snippet customSnippet({ item, header })}
 			{#if header.value == 'group'}
 				{#if !!item.group?.name}
 					{item.group?.name}
@@ -124,22 +140,23 @@
 			{:else if header.value == 'email'}
 				{item.user.email}
 			{/if}
-		</svelte:fragment>
-		<div style:display="flex" style:justify-content="end" slot="rowActions" let:item>
-			{#if canUpdateTeam}
-				<span style:margin-right="10px">
-					<Icon name="mdi-pencil" click on:click={() => handleEditClick(item)} />
-				</span>
-			{/if}
-			{#if ((!!team.ownerId && item.user.id != team.ownerId) || !team.ownerId) && canRemoveTeammate}
-				<Icon
-					name="mdi-delete"
-					click
-					--icon-color="rgb(var(--global-color-error-500))"
-					on:click={() => handleDeleteClick(item)}
-				/>
-			{/if}
-		</div>
+		{/snippet}
+		{#snippet rowActionsSnippet({ item })}
+			<div style:display="flex" style:justify-content="end">
+				{#if canUpdateTeam}
+					<span style:margin-right="10px">
+						<Icon name="mdi-pencil" onclick={() => handleEditClick(item)} />
+					</span>
+				{/if}
+				{#if ((!!team.ownerId && item.user.id != team.ownerId) || !team.ownerId) && canRemoveTeammate}
+					<Icon
+						name="mdi-delete"
+						--icon-color="rgb(var(--global-color-error-500))"
+						onclick={() => handleDeleteClick(item)}
+					/>
+				{/if}
+			</div>
+		{/snippet}
 	</SimpleTable>
 </div>
 

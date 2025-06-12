@@ -1,4 +1,5 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
+import type { FilterBuilder } from '@likable-hair/svelte'
 
 export type Group = {
 	id: number
@@ -21,6 +22,13 @@ export type GroupedPermissions<Type = boolean> = {
     view: Type,
     invite: Type,
     removeUser: Type,
+    create: Type
+  },
+  club: {
+    update: Type
+    destroy: Type
+    view: Type,
+    invite: Type
   },
   teammate: {
     update: Type,
@@ -60,64 +68,187 @@ export type GroupedPermissions<Type = boolean> = {
   convocation: {
     confirm: Type,
     deny: Type,
+  },
+  widgetSetting: {
+    set: Type
   }
 }
 
 const EMPTY_GROUPED_PERMISSIONS: GroupedPermissions = {
-  team: {
+	team: {
+		update: false,
+		destroy: false,
+		view: false,
+		invite: false,
+		removeUser: false,
+    create: false
+	},
+	teammate: {
+		update: false
+	},
+	invitation: {
+		accept: false,
+		reject: false,
+		discard: false
+	},
+	group: {
+		create: false,
+		update: false,
+		destroy: false,
+		view: false
+	},
+  club: {
+    invite: false,
     update: false,
     destroy: false,
-    view: false,
+    view: false
+  },
+	event: {
+		create: false,
+		update: false,
+		convocate: false,
+		destroy: false
+	},
+	shirt: {
+		create: false,
+		update: false,
+		view: false,
+		destroy: false
+	},
+	scout: {
+		manage: false,
+		view: false
+	},
+	scoringSystem: {
+		view: false,
+		manage: false,
+		create: false
+	},
+	convocation: {
+		confirm: false,
+		deny: false
+	},
+  widgetSetting: {
+    set: false
+  }
+}
+
+const EMPTY_TEAM_GROUPED_PERMISSIONS: {
+  [resource in Resource]?: {
+    [action in Action<resource>]?: boolean
+  }
+} = {
+  team: {
+    update: false,
     invite: false,
-    removeUser: false,
+    removeUser: false
   },
   teammate: {
-    update: false,
+    update: false
   },
   invitation: {
     accept: false,
     reject: false,
-    discard: false,
+    discard: false
   },
   group: {
     create: false,
     update: false,
     destroy: false,
-    view: false,
+    view: false
   },
   event: {
     create: false,
     update: false,
     convocate: false,
-    destroy: false,
+    destroy: false
   },
   shirt: {
     create: false,
     update: false,
     view: false,
-    destroy: false,
+    destroy: false
   },
   scout: {
     manage: false,
-    view: false,
+    view: false
   },
   scoringSystem: {
     view: false,
     manage: false,
-    create: false,
+    create: false
   },
   convocation: {
     confirm: false,
-    deny: false,
+    deny: false
   }
+}
+
+const EMPTY_CLUB_GROUPED_PERMISSIONS: {
+  [resource in Resource]?: {
+    [action in Action<resource>]?: boolean
+  }
+} = {
+  team: {
+    create: false,
+    view: false
+  },
+  club: {
+    update: false,
+    destroy: false,
+    view: false,
+    invite: false
+  },
+  invitation: {
+    accept: false,
+    reject: false,
+    discard: false
+  },
+  group: {
+    create: false,
+    update: false,
+    destroy: false,
+    view: false
+  },
+  shirt: {
+    create: false,
+    update: false,
+    view: false,
+    destroy: false
+  },
 }
 
 export type Resource = keyof GroupedPermissions
 export type Action<R extends Resource> = keyof GroupedPermissions[R]
 export const RESOURCES = Object.keys(EMPTY_GROUPED_PERMISSIONS) as Resource[]
 
+export const RESOURCES_ICONS: {
+  [Key in Resource]?: string
+} = {
+  team: 'mdi-account-multiple',
+  teammate: 'mdi-handball',
+  invitation: 'mdi-email',
+  group: 'mdi-lock',
+  club: 'mdi-domain',
+  event: 'mdi-calendar',
+  shirt: 'mdi-tshirt-crew',
+  scout: 'mdi-developer-board',
+  scoringSystem: 'mdi-scoreboard',
+  convocation: 'mdi-format-list-bulleted'
+}
+
 export default class GroupsService extends FetchBasedService {
-	public async create(params: { name?: string; convocable?: boolean; cans?: any }): Promise<Group> {
+	public async create(params: { 
+    name?: string
+    convocable?: boolean
+    cans?: any
+    club?: {
+      id: number
+    },
+    team?: {
+      id: number
+    }
+  }): Promise<Group> {
 		if (!params.name) throw new Error('name must be defined')
 
 		let response = await this.client.post({
@@ -131,22 +262,17 @@ export default class GroupsService extends FetchBasedService {
 	public async list(params: {
 		page?: number
 		perPage?: number
-		team: {
-			id: number
-		}
+    filtersBuilder?: FilterBuilder
 	}): Promise<PaginatedGroups> {
-		if (!params.team || !params.team.id) throw new Error('team must be defined')
 		if (!params.page) params.page = 1
 		if (!params.perPage) params.perPage = 300
 
 		let response = await this.client.get({
-			url: `/teams/${params.team.id}/groups`,
+			url: `/groups`,
 			params: {
 				page: params.page,
 				perPage: params.perPage,
-				team: {
-					id: params.team.id
-				}
+        filtersBuilder: params.filtersBuilder?.toJson()
 			}
 		})
 
@@ -165,7 +291,7 @@ export default class GroupsService extends FetchBasedService {
 		id: number
 		name?: string
 		convocable?: boolean
-    cans?: DeepPartial<GroupedPermissions>
+		cans?: DeepPartial<GroupedPermissions>
 	}): Promise<Group> {
 		let response = await this.client.put({
 			url: '/groups/' + params.id,
@@ -194,10 +320,12 @@ export default class GroupsService extends FetchBasedService {
 			event: 'Eventi',
 			convocation: 'Convocazioni',
 			group: 'Gruppi',
-      teammate: 'Membro',
-      scout: 'Scout',
-      scoringSystem: 'Sistemi di punteggio',
-      shirt: 'Maglie'
+			teammate: 'Giocatore',
+			scout: 'Scout',
+			scoringSystem: 'Sistemi di punteggio',
+			shirt: 'Maglie',
+      club: 'Club',
+      widgetSetting: 'Impostazioni widget'
 		}
 		return translationMapping[resource]
 	}
@@ -218,28 +346,50 @@ export default class GroupsService extends FetchBasedService {
 			confirm: 'Confermare',
 			deny: 'Non confermare',
 			convocate: 'Convocare',
-      manage: 'Gestire'
+			manage: 'Gestire',
+      set: 'Impostare'
 		}
 		return translationMapping[action]
 	}
 
-  public static getGroupedPermissions(params: { 
-    owner: boolean,
-    group?: {
-      cans?: DeepPartial<GroupedPermissions>
-    }
-  }): GroupedPermissions {
-    let basePermissions = {
-      ...EMPTY_GROUPED_PERMISSIONS
-    }
-
-    for(const resource of Object.keys(basePermissions) as Resource[]) {
-      for(const action of Object.keys(basePermissions[resource]) as (Action<typeof resource>)[]) {
-        // @ts-ignore
-        basePermissions[resource][action] = !!params.owner || !!params.group?.cans?.[resource]?.[action]
-      }
-    }
-
-    return basePermissions
+  public static isTeamPermission<R extends Resource>(params: {
+    resource: R,
+    action?: Action<R>
+  }): boolean {
+    if(!!params.action)
+      return EMPTY_TEAM_GROUPED_PERMISSIONS[params.resource]?.[params.action] !== undefined
+    else 
+      return EMPTY_TEAM_GROUPED_PERMISSIONS[params.resource] !== undefined
   }
+
+  public static isClubPermission<R extends Resource>(params: {
+    resource: R,
+    action?: Action<R>
+  }): boolean {
+    if(!!params.action)
+      return EMPTY_CLUB_GROUPED_PERMISSIONS[params.resource]?.[params.action] !== undefined
+    else 
+      return EMPTY_CLUB_GROUPED_PERMISSIONS[params.resource] !== undefined
+  }
+
+	public static getGroupedPermissions(params: {
+		owner: boolean
+		group?: {
+			cans?: DeepPartial<GroupedPermissions>
+		}
+	}): GroupedPermissions {
+		let basePermissions = {
+			...EMPTY_GROUPED_PERMISSIONS
+		}
+
+		for (const resource of Object.keys(basePermissions) as Resource[]) {
+			for (const action of Object.keys(basePermissions[resource]) as Action<typeof resource>[]) {
+				// @ts-ignore
+				basePermissions[resource][action] =
+					!!params.owner || !!params.group?.cans?.[resource]?.[action]
+			}
+		}
+
+		return basePermissions
+	}
 }

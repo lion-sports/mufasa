@@ -1,113 +1,142 @@
 <script lang="ts">
-	import type { Shirt } from "$lib/services/shirts/shirts.service"
-  import { Autocomplete, Dropdown, Icon } from "@likable-hair/svelte";
-  import { createEventDispatcher, type ComponentProps } from "svelte";
-	import ShirtIcon from "./ShirtIcon.svelte"
+	import { run } from 'svelte/legacy'
 
-  type ShirtWithPartialTeammate = Omit<Shirt, 'teammateId' | 'id'> & { teammateId?: number, id?: number }
-  type Item = NonNullable<ComponentProps<Dropdown>['items']>[number]
+	import type { Shirt } from '$lib/services/shirts/shirts.service'
+	import { Autocomplete, Dropdown } from '@likable-hair/svelte'
+	import { createEventDispatcher, type ComponentProps } from 'svelte'
+	import ShirtIcon from './ShirtIcon.svelte'
 
-  let dispatch = createEventDispatcher<{
-    change: {
-      unselect: ShirtWithPartialTeammate | undefined;
-      select: ShirtWithPartialTeammate | undefined;
-      selection: ShirtWithPartialTeammate[];
-    }
-  }>()
+	type ShirtWithPartialTeammate = Omit<Shirt, 'teammateId' | 'id'> & {
+		teammateId?: number
+		id?: number
+	}
+	type Item = NonNullable<
+		ComponentProps<typeof Dropdown<{ shirt: ShirtWithPartialTeammate }>>['items']
+	>[number]
 
-  export let items: ShirtWithPartialTeammate[] = [],
-    values: ShirtWithPartialTeammate[] = [],
-    disabled: boolean = false,
-    width: string | undefined = "auto",
-    minWidth: string | undefined = "auto",
-    menuWidth: string | undefined = "auto"
+	let dispatch = createEventDispatcher<{
+		change: {
+			unselect: ShirtWithPartialTeammate | undefined
+			select: ShirtWithPartialTeammate | undefined
+			selection: ShirtWithPartialTeammate[]
+		}
+	}>()
 
-  let dropdownValues: ComponentProps<Dropdown>['items'] = []
+	interface Props {
+		items?: ShirtWithPartialTeammate[]
+		values?: ShirtWithPartialTeammate[]
+		disabled?: boolean
+		width?: string | undefined
+		minWidth?: string | undefined
+		menuWidth?: string | undefined
+	}
 
-  $: dropdownValues = values.map((e) => ({
-    value: e.id || `${e.number}_${e.primaryColor}_${e.secondaryColor}`,
-    data: {
-      shirt: e
-    }
-  }))
+	let {
+		items = [],
+		values = $bindable([]),
+		disabled = $bindable(false),
+		width = 'auto',
+		minWidth = 'auto',
+		menuWidth = 'auto'
+	}: Props = $props()
 
-  $: dropDownItems = items.map((e) => ({
-    value: e.id || `${e.number}_${e.primaryColor}_${e.secondaryColor}`,
-    data: {
-      shirt: e
-    }
-  }))
+	let dropdownValues: ComponentProps<
+		typeof Dropdown<{ shirt: ShirtWithPartialTeammate }>
+	>['items'] = $state([])
 
-  function handleChange(event: CustomEvent<{
-    unselect: Item | undefined;
-    select: Item | undefined;
-    selection: Item[];
-  }>) {
-    values = event.detail.selection.map((e) => e.data.shirt)
+	run(() => {
+		dropdownValues = values.map((e) => ({
+			value: e.id || `${e.number}_${e.primaryColor}_${e.secondaryColor}`,
+			data: {
+				shirt: e
+			}
+		}))
+	})
 
-    dispatch('change', {
-      unselect: !!event.detail.unselect ? event.detail.unselect.data.shirt : undefined,
-      select: !!event.detail.select ? event.detail.select.data.shirt : undefined,
-      selection: values
-    })
-  }
+	let dropDownItems = $derived(
+		items.map((e) => ({
+			value: e.id || `${e.number}_${e.primaryColor}_${e.secondaryColor}`,
+			data: {
+				shirt: e
+			}
+		}))
+	)
+
+	function handleChange(event: {
+		detail: {
+			unselect: Item | undefined
+			select: Item | undefined
+			selection: Item[]
+		}
+	}) {
+		values = []
+		for (let i = 0; i < event.detail.selection.length; i += 1) {
+			let shirt = event.detail.selection[i].data?.shirt
+			if (!!shirt) {
+				values = [...values, shirt]
+			}
+		}
+
+		dispatch('change', {
+			unselect: !!event.detail.unselect ? event.detail.unselect.data?.shirt : undefined,
+			select: !!event.detail.select ? event.detail.select.data?.shirt : undefined,
+			selection: values
+		})
+	}
 </script>
 
 <Autocomplete
-  items={dropDownItems}
-  placeholder=""
-  bind:disabled
-  bind:values={dropdownValues}
-  on:change={handleChange}
-  {width}
-  {minWidth}
-  {menuWidth}
-  mobileDrawer
+	items={dropDownItems}
+	placeholder=""
+	{disabled}
+	bind:values={dropdownValues}
+	onchange={handleChange}
+	{width}
+	{minWidth}
+	{menuWidth}
+	mobileDrawer
 >
-  <svelte:fragment slot="selection-container" let:openMenu let:handleKeyDown let:values>
-    <button
-      class="unstyled-button"
-      on:click={openMenu}
-      on:keydown={(event) => {
-        handleKeyDown(event)
-        if(event.key == 'ArrowDown' || event.key == 'ArrowUp') {
-          event.stopPropagation()
-          event.preventDefault()
-        }
-      }}
-    >
-      {#if values.length == 1}
-        <ShirtIcon 
-          primaryColor={values[0].data.shirt.primaryColor}
-          secondaryColor={values[0].data.shirt.secondaryColor}
-          number={values[0].data.shirt.number}
-        ></ShirtIcon>
-      {:else}
-        <ShirtIcon 
-          primaryColor="transparent"
-          secondaryColor="transparent"
-          number={undefined}
-        ></ShirtIcon>
-      {/if}
-    </button>
-  </svelte:fragment>
-  <svelte:fragment slot="item-label" let:item>
-    <div class="label-container">
-      <ShirtIcon 
-        primaryColor={item.data.shirt.primaryColor}
-        secondaryColor={item.data.shirt.secondaryColor}
-        number={item.data.shirt.number}
-      ></ShirtIcon>
-      <div>{item.data.shirt.name || ''}</div>
-    </div>
-  </svelte:fragment>
+	{#snippet selectionContainerSnippet({ openMenu, handleKeyDown, values })}
+		<button
+			class="unstyled-button"
+			onclick={openMenu}
+			onkeydown={(event) => {
+				handleKeyDown(event)
+				if (event.key == 'ArrowDown' || event.key == 'ArrowUp') {
+					event.stopPropagation()
+					event.preventDefault()
+				}
+			}}
+		>
+			{#if values.length == 1}
+				<ShirtIcon
+					primaryColor={values[0].data?.shirt.primaryColor}
+					secondaryColor={values[0].data?.shirt.secondaryColor}
+					number={values[0].data?.shirt.number}
+				></ShirtIcon>
+			{:else}
+				<ShirtIcon primaryColor="transparent" secondaryColor="transparent" number={undefined}
+				></ShirtIcon>
+			{/if}
+		</button>
+	{/snippet}
+	{#snippet itemLabelSnippet({ item })}
+		<div class="label-container">
+			<ShirtIcon
+				primaryColor={item.data?.shirt.primaryColor}
+				secondaryColor={item.data?.shirt.secondaryColor}
+				number={item.data?.shirt.number}
+			></ShirtIcon>
+			<div>{item.data?.shirt.name || ''}</div>
+		</div>
+	{/snippet}
 </Autocomplete>
 
 <style>
-  .label-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-  }
+	.label-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 8px;
+	}
 </style>

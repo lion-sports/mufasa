@@ -1,11 +1,15 @@
-import Group from 'App/Models/Group';
-import User from 'App/Models/User';
-import Invitation from 'App/Models/Invitation';
+import Group from '#app/Models/Group';
+import User from '#app/Models/User';
+import Invitation from '#app/Models/Invitation';
 import { DateTime } from 'luxon'
-import { CamelCaseBaseModel } from './CamelCaseBaseModel';
-import { BelongsTo, belongsTo, column, hasMany, HasMany, manyToMany, ManyToMany } from '@ioc:Adonis/Lucid/Orm'
-import Teammate from './Teammate'
-import { Sport } from './Scout';
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js';
+import { belongsTo, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
+import Teammate from './Teammate.js'
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
+import { type HasMany } from "@adonisjs/lucid/types/relations";
+import { type ManyToMany } from "@adonisjs/lucid/types/relations";
+import Club from './Club.js';
+import { Sport } from 'lionn-common';
 
 export default class Team extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -45,6 +49,14 @@ export default class Team extends CamelCaseBaseModel {
     foreignKey: 'ownerId'
   })
   public owner: BelongsTo<typeof User>
+
+  @column()
+  public clubId: number | null
+
+  @belongsTo(() => Club, {
+    foreignKey: 'clubId'
+  })
+  public club: BelongsTo<typeof Club>
 
   @manyToMany(() => User, {
     localKey: 'id',

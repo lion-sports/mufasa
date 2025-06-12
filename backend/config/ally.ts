@@ -1,34 +1,16 @@
-/**
- * Config source: https://git.io/JOdi5
- *
- * Feel free to let us know via PR, if you find something broken in this config
- * file.
- */
+import env from '#start/env'
+import { defineConfig, services } from '@adonisjs/ally'
 
-import Env from '@ioc:Adonis/Core/Env'
-import { AllyConfig } from '@ioc:Adonis/Addons/Ally'
-
-/*
-|--------------------------------------------------------------------------
-| Ally Config
-|--------------------------------------------------------------------------
-|
-| The `AllyConfig` relies on the `SocialProviders` interface which is
-| defined inside `contracts/ally.ts` file.
-|
-*/
-const allyConfig: AllyConfig = {
-	/*
-	|--------------------------------------------------------------------------
-	| Google driver
-	|--------------------------------------------------------------------------
-	*/
-	google: {
-		driver: 'google',
-		clientId: Env.get('GOOGLE_CLIENT_ID'),
-		clientSecret: Env.get('GOOGLE_CLIENT_SECRET'),
-		callbackUrl: Env.get('GOOGLE_CALLBACK_URL') || 'http://127.0.0.1:3333/auth/google/callback',
-  	}
-}
+const allyConfig = defineConfig({
+  google: services.google({
+    clientId: env.get('GOOGLE_CLIENT_ID', 'some_client_id'),
+    clientSecret: env.get('GOOGLE_CLIENT_SECRET', 'some_secret'),
+    callbackUrl: env.get('GOOGLE_CALLBACK_URL') || 'http://127.0.0.1:3333/auth/google/callback',
+  }),
+})
 
 export default allyConfig
+
+declare module '@adonisjs/ally/types' {
+  interface SocialProviders extends InferSocialProviders<typeof allyConfig> {}
+}

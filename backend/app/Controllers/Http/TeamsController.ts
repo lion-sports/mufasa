@@ -1,8 +1,8 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import TeamsManager from "App/managers/teams.manager";
+import type { HttpContext } from '@adonisjs/core/http'
+import TeamsManager from "#app/managers/teams.manager";
 
 export default class TeamsController {
-  public async index({ request }: HttpContextContract) {
+  public async index({ request }: HttpContext) {
     const manager = new TeamsManager()
     return await manager.list({
       data: {
@@ -12,18 +12,19 @@ export default class TeamsController {
     })
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request }: HttpContext) {
     const manager = new TeamsManager()
     return await manager.create({
       data: {
         name: request.input('name'),
         notes: request.input('notes'),
-        sport: request.input('sport')
+        sport: request.input('sport'),
+        clubId: request.input('clubId')
       }
     })
   }
 
-  public async show({ params }: HttpContextContract) {
+  public async show({ params }: HttpContext) {
     const manager = new TeamsManager()
     return await manager.get({
       data: {
@@ -32,7 +33,7 @@ export default class TeamsController {
     })
   }
 
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params }: HttpContext) {
     const manager = new TeamsManager()
     return await manager.update({
       data: {
@@ -44,7 +45,7 @@ export default class TeamsController {
     })
   }
 
-  public async updatePreference({ request, params }: HttpContextContract) {
+  public async updatePreference({ request, params }: HttpContext) {
     const manager = new TeamsManager()
     return await manager.updatePreference({
       data: {
@@ -55,7 +56,7 @@ export default class TeamsController {
     })
   }
 
-  public async destroy({ params }: HttpContextContract) {
+  public async destroy({ params }: HttpContext) {
     const manager = new TeamsManager()
     return await manager.destroy({
       data: {
@@ -64,7 +65,7 @@ export default class TeamsController {
     })
   }
 
-  public async removeUser({ params, request }: HttpContextContract) {
+  public async removeUser({ params, request }: HttpContext) {
     const manager = new TeamsManager()
     return await manager.removeUser({
       data: {
@@ -76,7 +77,7 @@ export default class TeamsController {
     })
   }
 
-  public async exit({ params, auth }: HttpContextContract) {
+  public async exit({ params, auth }: HttpContext) {
     if(!!auth.user) {
       const manager = new TeamsManager()
       return await manager.removeUser({
@@ -92,7 +93,7 @@ export default class TeamsController {
     }
   }
 
-  public async absencesInLatestEvents({ request }: HttpContextContract) {
+  public async absencesInLatestEvents({ request }: HttpContext) {
     const manager = new TeamsManager()
     return await manager.absencesInLatestEvents({
       data: {

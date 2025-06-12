@@ -1,5 +1,5 @@
-import Factory from '@ioc:Adonis/Lucid/Factory'
-import Player from 'App/Models/Player'
+import Factory from '@adonisjs/lucid/factories'
+import Player from '#app/Models/Player'
 
 export default Factory.define(Player, (_params) => {
   return {

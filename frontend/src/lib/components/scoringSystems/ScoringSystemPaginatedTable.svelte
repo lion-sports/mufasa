@@ -1,12 +1,25 @@
 <script lang="ts">
 	import { FilterBuilder, PaginatedTable } from '@likable-hair/svelte'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
-  import ScoringSystemsService, { type ScoringSystem } from '$lib/services/scoringSystems/scoringSystems.service'
-	import { DateTime } from 'luxon'
+	import ScoringSystemsService, {
+		type ScoringSystem
+	} from '$lib/services/scoringSystems/scoringSystems.service'
 	import type { ComponentProps } from 'svelte'
 	import StandardCheckbox from '../common/StandardCheckbox.svelte'
 
-	export let filters: ComponentProps<PaginatedTable>['filters'] = [
+	interface Props {
+		filters?: ComponentProps<typeof PaginatedTable>['filters']
+		headers?: ComponentProps<typeof PaginatedTable>['headers']
+		onrowClick?: ComponentProps<typeof PaginatedTable>['onrowClick']
+		scoringSystems?: ScoringSystem[]
+		filtersBuilder?: FilterBuilder | undefined
+		page?: number
+		perPage?: number
+		maxPage?: number
+	}
+
+	let {
+		filters = $bindable([
 			{
 				type: 'string',
 				column: 'name',
@@ -15,32 +28,34 @@
 				name: 'name',
 				label: 'Nome'
 			}
-		],
-		headers: ComponentProps<PaginatedTable>['headers'] = [
+		]),
+		headers = [
 			{
 				value: 'name',
 				label: 'Nome',
 				type: { key: 'string' }
 			},
-      {
+			{
 				value: 'public',
 				label: 'Pubblico',
 				type: { key: 'custom' }
 			}
 		],
-		scoringSystems: ScoringSystem[] = [],
-		filtersBuilder: FilterBuilder | undefined = undefined,
-		page: number = 1,
-		perPage: number = 100,
-		maxPage: number = 0
+		scoringSystems = $bindable([]),
+		filtersBuilder = $bindable(undefined),
+		page = $bindable(1),
+		perPage = $bindable(100),
+		maxPage = $bindable(0),
+		onrowClick
+	}: Props = $props()
 
-	async function handleFilterChange(e: CustomEvent<{ builder: FilterBuilder }>) {
+	async function handleFilterChange(e: { detail: { builder: FilterBuilder } }) {
 		filtersBuilder = e.detail.builder
 
 		await fetchScoringSystems()
 	}
 
-	async function handlePaginationChange(e: CustomEvent<{ page: number; rowsPerPage: number }>) {
+	async function handlePaginationChange(e: { detail: { page: number; rowsPerPage: number } }) {
 		;(page = e.detail.page), (perPage = e.detail.rowsPerPage)
 
 		await fetchScoringSystems()
@@ -61,14 +76,19 @@
 		scoringSystems = paginatedScoringSystems.data
 	}
 
-	async function handleSortClick(e: CustomEvent) {
-    let builder = new FilterBuilder()
-    if(!!e.detail.sortedBy) {
-      builder.orderBy(e.detail.sortedBy, e.detail.sortDirection)
-      filtersBuilder = builder
-      await fetchScoringSystems()
-    }
-  }
+	async function handleSortClick(e: {
+		detail: {
+			sortedBy?: string | undefined
+			sortDirection: string
+		}
+	}) {
+		let builder = new FilterBuilder()
+		if (!!e.detail.sortedBy) {
+			builder.orderBy(e.detail.sortedBy, e.detail.sortDirection as 'asc' | 'desc')
+			filtersBuilder = builder
+			await fetchScoringSystems()
+		}
+	}
 </script>
 
 <PaginatedTable
@@ -77,22 +97,26 @@
 	items={scoringSystems}
 	bind:page
 	bind:rowsPerPage={perPage}
-	bind:maxPage
+	{maxPage}
 	searchBarVisible={false}
-	on:filtersChange={handleFilterChange}
-	on:paginationChange={handlePaginationChange}
-	on:rowClick
-	on:sort={(e) => handleSortClick(e)}
+	onfiltersChange={handleFilterChange}
+	onpaginationChange={handlePaginationChange}
+	{onrowClick}
+	onsort={(e) => handleSortClick(e)}
 >
-	<div class="ml-auto" slot="filter-append">
-		<StandardButton style="primary" href="/profile/scoringSystems/create"
-			>+ Aggiungi sistema di punteggio</StandardButton
-		>
-	</div>
+	{#snippet filterAppendSnippet()}
+		<div class="ml-auto">
+			<StandardButton style="primary" href="/profile/scoringSystems/create"
+				>+ Aggiungi sistema di punteggio</StandardButton
+			>
+		</div>
+	{/snippet}
 
-	<div slot="custom" let:item let:header>
-		{#if header.value == 'public'}
-			<StandardCheckbox disabled id={"public-"+item.id} value={item.public}></StandardCheckbox>
-		{/if}
-	</div>
+	{#snippet customSnippet({ item, header })}
+		<div>
+			{#if header.value == 'public'}
+				<StandardCheckbox disabled id={'public-' + item.id} value={item.public}></StandardCheckbox>
+			{/if}
+		</div>
+	{/snippet}
 </PaginatedTable>

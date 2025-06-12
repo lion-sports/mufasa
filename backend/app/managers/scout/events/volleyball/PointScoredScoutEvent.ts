@@ -1,9 +1,8 @@
-import ScoutEvent, { SCOUT_EVENT_COLLECTION_NAME } from "../../ScoutEvent";
-import { Context, withTransaction } from "App/managers/base.manager";
-import Scout from "App/Models/Scout";
-import scoutsSocket from "../../scouts.socket";
+import ScoutEvent, { SCOUT_EVENT_COLLECTION_NAME, ScoutEventConstructorsParameters } from "../../ScoutEvent.js";
+import { Context, withTransaction } from "#app/managers/base.manager";
+import Scout from "#app/Models/Scout";
 import { incrementScore, type PointScoredScoutExtraProperties, type VolleyballPoints } from "lionn-common";
-import Mongo from "App/Services/Mongo";
+import Mongo from "#app/Services/Mongo";
 import lodash from 'lodash'
 
 export default class PointScoredScoutEvent extends ScoutEvent<
@@ -17,7 +16,7 @@ export default class PointScoredScoutEvent extends ScoutEvent<
 > {
   public type = 'pointScored' as const
 
-  constructor(params) {
+  constructor(params: ScoutEventConstructorsParameters<'pointScored', VolleyballPoints, PointScoredScoutExtraProperties>) {
     super({
       ...params
     })

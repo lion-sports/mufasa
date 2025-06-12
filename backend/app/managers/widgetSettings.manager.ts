@@ -1,12 +1,10 @@
-import { Context, withTransaction, withUser } from './base.manager'
-import WidgetSettings, { WidgetSettingStructure } from 'App/Models/WidgetSetting'
-import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import { ModelObject } from '@ioc:Adonis/Lucid/Orm'
-import FilterModifierApplier, { Modifier } from 'App/Services/FilterModifierApplier'
-import AuthorizationManager from './authorization.manager'
-import Widget from 'App/Models/Widget'
-import WidgetSetting from 'App/Models/WidgetSetting'
-
+import { Context, withTransaction, withUser } from './base.manager.js'
+import WidgetSettings, { WidgetSettingStructure } from '#app/Models/WidgetSetting'
+import FilterModifierApplier, { Modifier } from '#app/Services/FilterModifierApplier'
+import AuthorizationManager from './authorization.manager.js'
+import WidgetSetting from '#app/Models/WidgetSetting'
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import { ModelObject } from "@adonisjs/lucid/types/model";
 
 export default class WidgetSettingsManager {
   @withTransaction
@@ -143,17 +141,14 @@ export default class WidgetSettingsManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'set',
-        resource: 'widgetSetting',
-        entities: {
+        ability: 'widgetSetting_set',
+        data: {
           widget: {
             id: params.data.widget.id
           }
         }
       },
-      context: {
-        trx
-      }
+      context: params.context
     })
 
     let widgetSetting = await WidgetSettings.updateOrCreate({

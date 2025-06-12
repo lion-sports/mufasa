@@ -1,9 +1,9 @@
-import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import EventSession from 'App/Models/EventSession'
-import { ModelObject } from '@ioc:Adonis/Lucid/Orm';
-import { Context, withTransaction, withUser } from './base.manager';
-import User from 'App/Models/User';
-import { cuid } from '@ioc:Adonis/Core/Helpers'
+import EventSession from '#app/Models/EventSession'
+import { Context, withTransaction, withUser } from './base.manager.js';
+import User from '#app/Models/User';
+import { cuid } from '@adonisjs/core/helpers'
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import { ModelObject } from "@adonisjs/lucid/types/model";
 
 export type CreateParams = {
   data: {

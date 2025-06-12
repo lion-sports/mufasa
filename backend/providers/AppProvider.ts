@@ -1,55 +1,24 @@
-import { ApplicationContract } from '@ioc:Adonis/Core/Application'
-import { string } from '@ioc:Adonis/Core/Helpers'
-import { SimplePaginatorMetaKeys } from '@ioc:Adonis/Lucid/Database'
-import { LucidModel } from '@ioc:Adonis/Lucid/Orm'
-import FipavBot from 'App/Telegram/fipav.bot'
+import FipavBot from '#app/Telegram/fipav.bot'
 import TelegramBot from 'node-telegram-bot-api'
+import { ApplicationService } from "@adonisjs/core/types";
+import scoutSocket from '#app/managers/scout/scouts.socket';
+import { AuthorizationHelpers } from '#app/managers/authorization.manager';
 
 export default class AppProvider {
-  constructor(protected app: ApplicationContract) {}
+  constructor(protected app: ApplicationService) {}
 
   public register() {
     // Register your own bindings
   }
 
   public async boot() {
-    // IoC container is ready
-    const { default: Env } = await import('@ioc:Adonis/Core/Env')
-    const { default: Application } = await import('@ioc:Adonis/Core/Application')
-
-    if(Application.environment == 'web') {
-      const token = Env.get('TELEGRAM_FIPAV_BOT_TOKEN')
-      const publicUrl = Env.get('PUBLIC_URL')
-  
-      if(!!publicUrl && !!token) {
-        const { default: Route } = await import('@ioc:Adonis/Core/Route')
-  
-        let fipavBot = new FipavBot({
-          token,
-          webHookUrl: `${publicUrl}/bot${token}`
-        })
-  
-        Route.post(`/bot${token}`, ({ request, response }) => {
-          // @ts-ignore
-          let update: TelegramBot.Update = request.body()
-  
-          fipavBot.bot.processUpdate(update)
-          response.send(200)
-        })
-      } else if(!!token) {
-        new FipavBot({ token })
-      } else {
-        console.warn('missing telegram bot token')
-      }
-    }
-
   }
 
   public async ready() {
-    if (this.app.environment === 'web' || this.app.environment === 'test') {
-      let { default: Ws } = await import('../app/Services/Ws')
-      let { default: scoutSocket } = await import('App/managers/scout/scouts.socket')
-      let { AuthorizationHelpers } = await import('App/managers/authorization.manager')
+    if (this.app.getEnvironment() === 'web' || this.app.getEnvironment() === 'test') {
+      let { default: Ws } = await import('../app/Services/Ws.js')
+      // let { default: scoutSocket } = await import('app/managers/scout/scouts.socket.js')
+      // let { AuthorizationHelpers } = await import('app/managers/authorization.manager.js')
 
       Ws.boot()
 
@@ -119,42 +88,33 @@ export default class AppProvider {
         }
 
       })
-    }
 
-    const Db = this.app.container.use('Adonis/Lucid/Database')
-    const Orm = this.app.container.use('Adonis/Lucid/Orm')
+      const { default: Env } = await import('#start/env')
 
-    class CamelCaseNameStrategy extends Orm.SnakeCaseNamingStrategy {
-      public tableName(model: LucidModel) {
-        return string.pluralize(string.snakeCase(model.name))
-      }
+      const token = Env.get('TELEGRAM_FIPAV_BOT_TOKEN')
+      const publicUrl = Env.get('PUBLIC_URL')
 
-      public columnName(_model: LucidModel, attributeName: string): string {
-        return string.camelCase(attributeName)
-      }
+      if (!!publicUrl && !!token) {
+        const { default: Route } = await import('@adonisjs/core/services/router')
 
-      public serializedName(_model: LucidModel, attributeName: string): string {
-        return string.camelCase(attributeName)
-      }
+        let fipavBot = new FipavBot({
+          token,
+          webHookUrl: `${publicUrl}/bot${token}`
+        })
 
-      paginationMetaKeys(): SimplePaginatorMetaKeys {
-        return {
-          total: 'total',
-          perPage: 'perPage',
-          currentPage: 'currentPage',
-          lastPage: 'lastPage',
-          firstPage: 'firstPage',
-          firstPageUrl: 'firstPageUrl',
-          lastPageUrl: 'lastPageUrl',
-          nextPageUrl: 'nextPageUrl',
-          previousPageUrl: 'previousPageUrl',
-        }
+        Route.post(`/bot${token}`, ({ request, response }) => {
+          // @ts-ignore
+          let update: TelegramBot.Update = request.body()
+
+          fipavBot.bot.processUpdate(update)
+          response.send(200)
+        })
+      } else if (!!token) {
+        new FipavBot({ token })
+      } else {
+        console.warn('missing telegram bot token')
       }
     }
-    
-    // Orm.ModelPaginator.namingStrategy = new CamelCaseNameStrategy()
-    // Orm.BaseModel.namingStrategy = new CamelCaseNameStrategy()
-    Db.SimplePaginator.namingStrategy = new CamelCaseNameStrategy()
   }
 
   public async shutdown() {

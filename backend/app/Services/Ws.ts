@@ -1,11 +1,10 @@
 import { Server } from 'socket.io'
-import AdonisServer from '@ioc:Adonis/Core/Server'
-import Redis from '@ioc:Adonis/Addons/Redis'
-import { createHash } from 'crypto'
-import { base64 } from '@poppinss/utils/build/helpers'
-import Database from '@ioc:Adonis/Lucid/Database';
-import User from 'App/Models/User';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import server from '@adonisjs/core/services/server'
+import redis from '@adonisjs/redis/services/main'
+import { Secret } from '@adonisjs/core/helpers'
+import User from '#app/Models/User';
+import { DefaultEventsMap } from 'node_modules/socket.io/dist/typed-events.js'
+import db from '@adonisjs/lucid/services/db';
 
 class Ws {
   public io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, { user: User }>
@@ -18,7 +17,7 @@ class Ws {
 
     this.booted = true
 
-    this.io = new Server(AdonisServer.instance!, {
+    this.io = new Server(server.getNodeServer(), {
       cors: {
         origin: '*',
       },
@@ -27,54 +26,47 @@ class Ws {
 
     this.io.use(async (socket, next) => {
       let token: string | undefined = socket.handshake.auth.token
-      if (!token) {
+      if(!token) {
+        next(new Error('token not present'))
+        return
+      }
+      
+      let accessToken = await User.accessTokens.verify(new Secret(token))
+      if(!accessToken) {
         next(new Error('token not present'))
         return
       }
 
-      let parts = token.split('.')
+      const users = await db.query()
+        .from('users')
+        .whereIn('id', b => {
+          b
+            .select('tokenable_id')
+            .from('auth_access_tokens')
+            .where('id', accessToken.identifier.toString())
+        })
 
-      if (parts.length !== 2) {
-        next(new Error('token not valid'))
-        return
-      }
-
-      const tokenId = base64.urlDecode(parts[0], undefined, true)
-      if (!tokenId) {
-        next(new Error('token not valid'))
-        return
-      }
-
-      if (parts[1].length !== 60) {
-        next(new Error('token not valid'))
-        return
-      }
-
-      let tokenValue: string = createHash('sha256').update(parts[1]).digest('hex')
-
-      let tokenRow = await Database.query().from('api_tokens').where('id', tokenId).first()
-
-      if (!tokenRow || tokenRow.token !== tokenValue) {
-        next(new Error('not authorized'))
+      if (users.length == 0) {
+        next(new Error('user not found'))
         return
       }
 
       socket.data = {
         ...(socket.data || {}),
-        user: await User.query().where('id', tokenRow.userId).firstOrFail()
+        user: await User.query().where('id', users[0].id).firstOrFail()
       }
 
       next()
     })
 
-    Redis.subscribe('socket:emit', (data) => {
+    redis.subscribe('socket:emit', (data) => {
       let parsedData = JSON.parse(data)
       this.io.emit(parsedData.event, parsedData.data)
     })
   }
 
   emit(event: string, data: any) {
-    Redis.publish(
+    redis.publish(
       `socket:emit`,
       JSON.stringify({
         event: event,
@@ -92,3 +84,6 @@ class Ws {
 }
 
 export default new Ws()
+
+
+

@@ -1,5 +1,5 @@
 {
-  "extends": "adonis-preset-ts/tsconfig.json",
+  "extends": "@adonisjs/tsconfig/tsconfig.app.json",
   "include": [
     "**/*"
   ],
@@ -9,33 +9,55 @@
   ],
   "compilerOptions": {
     "outDir": "build",
-    "rootDir": "./",
+    "rootDir": ".",
     "sourceMap": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "isolatedModules": false,
     "paths": {
-      "App/*": [
-        "./app/*"
+      "#controllers/*": [
+        "./app/Controllers/*.js"
       ],
-      "Config/*": [
-        "./config/*"
+      "#exceptions/*": [
+        "./app/Exceptions/*.js"
       ],
-      "Contracts/*": [
-        "./contracts/*"
+      "#models/*": [
+        "./app/Models/*.js"
       ],
-      "Database/*": [
-        "./database/*"
+      "#services/*": [
+        "./app/Services/*.js"
+      ],
+      "#listeners/*": [
+        "./app/listeners/*.js"
+      ],
+      "#events/*": [
+        "./app/events/*.js"
+      ],
+      "#middleware/*": [
+        "./app/Middleware/*.js"
+      ],
+      "#validators/*": [
+        "./app/Validators/*.js"
+      ],
+      "#start/*": [
+        "./start/*.js"
+      ],
+      "#config/*": [
+        "./config/*.js"
+      ],
+      "#app/*": [
+        "./app/*.js"
+      ],
+      "#database/*": [
+        "./database/*.js"
+      ],
+      "#contracts/*": [
+        "./contracts/*.js"
       ]
     },
-    "types": [
-      "@adonisjs/core",
-      "@adonisjs/repl",
-      "@japa/preset-adonis/build/adonis-typings",
-      "@adonisjs/auth",
-      "@adonisjs/lucid",
-      "@adonisjs/ally",
-      "@adonisjs/redis"
-    ]
+    "types": [],
+    // "strict": true,
+    "strictPropertyInitialization": false
   }
 }

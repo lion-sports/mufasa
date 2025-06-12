@@ -1,17 +1,26 @@
-import Dashboard from 'App/Models/Dashboard'
-import { Context, ListParams, withTransaction, withUser } from './base.manager'
-import User from 'App/Models/User'
-import { ModelObject } from '@ioc:Adonis/Lucid/Orm'
-import { validator } from '@ioc:Adonis/Core/Validator'
-import { CreateDashboardValidator, UpdateDashboardValidator } from 'App/Validators/dashboards'
-import WidgetManager from './widget.manager'
-import { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import FilterModifierApplier from 'App/Services/FilterModifierApplier'
+import Dashboard from '#app/Models/Dashboard'
+import { type Context, withTransaction, withUser } from './base.manager.js'
+import User from '#app/Models/User'
+import { validator } from '@adonisjs/validator'
+import { CreateDashboardValidator, UpdateDashboardValidator } from '#app/Validators/dashboards/index'
+import WidgetManager from './widget.manager.js'
+import FilterModifierApplier, { Modifier } from '#app/Services/FilterModifierApplier'
+import { ModelObject } from "@adonisjs/lucid/types/model";
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export default class DashboardManager {
   @withTransaction
   @withUser
-  public async list(params: ListParams): Promise<{ data: ModelObject[]; meta: any }> {
+  public async list(params: {
+      data: {
+        page: number
+        perPage: number
+        filtersBuilder?: {
+          modifiers: Modifier[]
+        }
+      }
+      context?: Context
+    }): Promise<{ data: ModelObject[]; meta: any }> {
     let trx = params.context?.trx
     let user = params.context?.user as User
 
@@ -29,11 +38,7 @@ export default class DashboardManager {
       filtersApplier.applyModifiers(query, params.data.filtersBuilder.modifiers)
     }
 
-    if (!!params.data.order) {
-      query.orderBy(params.data.order)
-    } else {
-      query.orderBy('createdAt')
-    }
+    query.orderBy('createdAt')
 
     const results = await query.paginate(params.data.page, params.data.perPage)
 

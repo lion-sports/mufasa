@@ -1,8 +1,19 @@
 <script lang="ts">
-	export let subtitle: string = '',
-		marginBottom: string = '',
-		marginTop: string = '',
-		paddingTop: string = ''
+	interface Props {
+		subtitle?: string
+		marginBottom?: string
+		marginTop?: string
+		paddingTop?: string
+		children?: import('svelte').Snippet
+	}
+
+	let {
+		subtitle = '',
+		marginBottom = '',
+		marginTop = '',
+		paddingTop = '',
+		children
+	}: Props = $props()
 </script>
 
 <div
@@ -12,7 +23,7 @@
 	style:padding-top={paddingTop}
 	style:margin-bottom={marginBottom}
 >
-	<slot>
+	{#if children}{@render children()}{:else}
 		{subtitle}
-	</slot>
+	{/if}
 </div>

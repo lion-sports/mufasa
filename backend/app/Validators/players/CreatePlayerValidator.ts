@@ -1,9 +1,10 @@
-import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { ROLES } from 'App/Models/Teammate'
+import { schema, rules } from '@adonisjs/validator'
+import type { HttpContext } from '@adonisjs/core/http'
+import { ROLES } from '#app/Models/Teammate'
+import { CustomMessages } from "@adonisjs/validator/types";
 
 export default class CreatePlayerValidator {
-  constructor(protected ctx?: HttpContextContract) { }
+  constructor(protected ctx?: HttpContext) { }
 
   public schema = schema.create({
     scoutId: schema.number.optional(),

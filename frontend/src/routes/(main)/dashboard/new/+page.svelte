@@ -6,14 +6,14 @@
 	import type { Widget } from '$lib/services/dashboards/dashboard.service'
 	import DashboardService from '$lib/services/dashboards/dashboard.service'
 
-	export let data
+	let { data } = $props()
 
-	let someRowSlotEmpty: boolean = false,
-		widgets: Widget[] = [],
-		dashboardName: string = 'New dashboard',
-		loadingSave: boolean = false
+	let someRowSlotEmpty: boolean = $state(false),
+		widgets: Widget[] = $state([]),
+		dashboardName: string = $state('New dashboard'),
+		loadingSave: boolean = $state(false)
 
-	$: valid = !someRowSlotEmpty && widgets.length > 0 && !!dashboardName
+	let valid = $derived(!someRowSlotEmpty && widgets.length > 0 && !!dashboardName)
 
 	async function saveDashboard() {
 		loadingSave = true
@@ -31,14 +31,14 @@
 </script>
 
 <PageTitle title="New dashboard" prependVisible>
-	<svelte:fragment slot="title">
+	{#snippet titleSnippet()}
 		<div class="flex justify-between items-center mobile-wrap gap-2">
 			<input
 				type="text"
 				class="border-none bg-transparent outline-none
-				focus:bg-[rgb(var(--global-color-primary-500),.2)] rounded-md px-3
-				w-full
-				"
+					focus:bg-[rgb(var(--global-color-primary-500),.2)] rounded-md px-3
+					w-full
+					"
 				bind:value={dashboardName}
 			/>
 			<StandardButton
@@ -52,7 +52,7 @@
 				Save
 			</StandardButton>
 		</div>
-	</svelte:fragment>
+	{/snippet}
 </PageTitle>
 
 <div class="mt-4">

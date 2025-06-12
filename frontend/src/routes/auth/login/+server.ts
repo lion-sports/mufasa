@@ -1,4 +1,4 @@
-import { error, json, redirect } from '@sveltejs/kit'
+import { error, json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
 import AuthService from '$lib/services/auth/auth.service'
 
@@ -9,16 +9,10 @@ export const POST = (async ({ request, cookies, fetch }) => {
 	let response
 	try {
 		response = await service.authenticateApi({
-			data: {
-				email,
-				password,
-				generateRefreshToken
-			}
+			data: { email, password, generateRefreshToken }
 		})
 	} catch (err: any) {
-		throw error(500, {
-			message: err.message
-		})
+		throw error(500, { message: err.errors?.[0]?.message })
 	}
 
 	return json(response)

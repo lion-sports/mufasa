@@ -1,6 +1,6 @@
-import { CamelCaseBaseModel } from './CamelCaseBaseModel'
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime } from 'luxon'
-import { column } from '@ioc:Adonis/Lucid/Orm'
+import { column } from '@adonisjs/lucid/orm'
 
 export default class Frequency extends CamelCaseBaseModel {
   @column({ isPrimary: true })

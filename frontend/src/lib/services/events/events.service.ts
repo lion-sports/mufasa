@@ -15,7 +15,7 @@ export type Event = {
 	teamId: number
 	team: Team
 	convocations: Convocation[]
-  scouts: Scout[]
+	scouts: Scout[]
 	createdAt: Date
 	updatedAt: Date
 	createdBy: User
@@ -31,19 +31,21 @@ export default class EventsService extends FetchBasedService {
 			}
 		}
 	}): Promise<Event[]> {
-    let teamParameter = !!params.filters.team ? {
-      id: params.filters.team?.id
-    } : undefined
+		let teamParameter = !!params.filters.team
+			? {
+					id: params.filters.team?.id
+				}
+			: undefined
 
 		let response = await this.client.get({
 			url: '/events',
 			params: {
-        filters: {
-          from: params.filters.from,
-          to: params.filters.to,
-          team: teamParameter
-        }
-      }
+				filters: {
+					from: params.filters.from,
+					to: params.filters.to,
+					team: teamParameter
+				}
+			}
 		})
 
 		return response.map((el: any) => {
@@ -105,7 +107,12 @@ export default class EventsService extends FetchBasedService {
 		return response
 	}
 
-	public async update(params: { id: number; name?: string }): Promise<Event> {
+	public async update(params: {
+		id: number
+		name?: string
+		start?: Date
+		end?: Date
+	}): Promise<Event> {
 		let response = await this.client.put({
 			url: '/events/' + params.id,
 			body: params

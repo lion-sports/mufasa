@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type Chip = {
 		label: string
 		value: number | string
@@ -6,8 +6,12 @@
 </script>
 
 <script lang="ts">
-	export let chips: Chip[] = [],
-		value: Chip[] = []
+	interface Props {
+		chips?: Chip[]
+		value?: Chip[]
+	}
+
+	let { chips = $bindable([]), value = $bindable([]) }: Props = $props()
 
 	function toggleSelection(chip: Chip) {
 		if (!value) value = []
@@ -27,7 +31,7 @@
 			class="chip"
 			class:selected={value.map((el) => el.value).includes(chip.value)}
 			class:unselected={!value.map((el) => el.value).includes(chip.value)}
-			on:click={() => toggleSelection(chip)}>{chip.label}</button
+			onclick={() => toggleSelection(chip)}>{chip.label}</button
 		>
 	{/each}
 </div>

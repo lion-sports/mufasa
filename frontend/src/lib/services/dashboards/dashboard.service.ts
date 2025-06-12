@@ -25,7 +25,7 @@ export type Widget<Data = any> = {
 	top: number
 	options?: any // TODO deprecate the property, use widget settings instead
 	data?: Data
-  widgetSetting?: WidgetSetting
+	widgetSetting?: WidgetSetting
 }
 
 export type PaginatedDashboard = {
@@ -141,9 +141,9 @@ export default class DashboardService extends FetchBasedService {
 				token?: string
 				fetch: typeof fetch
 				user?: User
-        widget?: (Omit<Widget, 'id'> & { id: string | number }),
-        scoutId?: number,
-        sets?: number[]
+				widget?: Omit<Widget, 'id'> & { id: string | number }
+				scoutId?: number
+				sets?: number[]
 			},
 			widgetId?: number
 		) => Promise<any>
@@ -164,155 +164,156 @@ export default class DashboardService extends FetchBasedService {
 				fetchData: async (params) => {
 					return ['placeholder']
 				}
-      }, {
-        name: 'VolleyballDistribution',
-        label: 'Volleyball distribution',
-        availableSizes: [
-          [2, 2],
-          [2, 3],
-          [2, 4],
-          [3, 2],
-        ],
-        fetchData: async (params) => {
-          let settings = params.widget?.widgetSetting?.settings
-          let team: TeamFilter = 'both'
-          if (
-            !!settings && settings.widget == 'VolleyballDistribution' && !!settings.team
-          ) team = settings.team
+			},
+			{
+				name: 'VolleyballDistribution',
+				label: 'Volleyball distribution',
+				availableSizes: [
+					[2, 2],
+					[2, 3],
+					[2, 4],
+					[3, 2]
+				],
+				fetchData: async (params) => {
+					let settings = params.widget?.widgetSetting?.settings
+					let team: TeamFilter = 'both'
+					if (!!settings && settings.widget == 'VolleyballDistribution' && !!settings.team)
+						team = settings.team
 
-          let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
-          let results = await widgetService.loadDistribution({
-            scoutId: params.scoutId,
-            sets: params.sets,
-            team
-          })
-          return results
-        }
-      }, {
-        name: 'VolleyballServeSummary',
-        label: 'Volleyball Serve Summary',
-        availableSizes: [
-          [2, 2],
-          [2, 3],
-          [2, 4],
-          [3, 2],
-        ],
-        fetchData: async (params) => {
-          let settings = params.widget?.widgetSetting?.settings
-          let team: TeamFilter = 'both'
-          if (
-            !!settings && settings.widget == 'VolleyballServeSummary' && !!settings.team
-          ) team = settings.team
+					let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
+					let results = await widgetService.loadDistribution({
+						scoutId: params.scoutId,
+						sets: params.sets,
+						team
+					})
+					return results
+				}
+			},
+			{
+				name: 'VolleyballServeSummary',
+				label: 'Volleyball Serve Summary',
+				availableSizes: [
+					[2, 2],
+					[2, 3],
+					[2, 4],
+					[3, 2]
+				],
+				fetchData: async (params) => {
+					let settings = params.widget?.widgetSetting?.settings
+					let team: TeamFilter = 'both'
+					if (!!settings && settings.widget == 'VolleyballServeSummary' && !!settings.team)
+						team = settings.team
 
-          let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
-          let results = await widgetService.loadServeSummary({
-            scoutId: params.scoutId,
-            sets: params.sets,
-            team
-          })
-          return results
-        }
-      }, {
-        name: 'VolleyballBlockSummary',
-        label: 'Volleyball Block Summary',
-        availableSizes: [
-          [2, 2],
-          [2, 3],
-          [2, 4],
-          [3, 2],
-        ],
-        fetchData: async (params) => {
-          let settings = params.widget?.widgetSetting?.settings
-          let team: TeamFilter = 'both'
-          if (
-            !!settings && settings.widget == 'VolleyballBlockSummary' && !!settings.team
-          ) team = settings.team
+					let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
+					let results = await widgetService.loadServeSummary({
+						scoutId: params.scoutId,
+						sets: params.sets,
+						team
+					})
+					return results
+				}
+			},
+			{
+				name: 'VolleyballBlockSummary',
+				label: 'Volleyball Block Summary',
+				availableSizes: [
+					[2, 2],
+					[2, 3],
+					[2, 4],
+					[3, 2]
+				],
+				fetchData: async (params) => {
+					let settings = params.widget?.widgetSetting?.settings
+					let team: TeamFilter = 'both'
+					if (!!settings && settings.widget == 'VolleyballBlockSummary' && !!settings.team)
+						team = settings.team
 
-          let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
-          let results = await widgetService.loadBlockSummary({
-            scoutId: params.scoutId,
-            sets: params.sets,
-            team
-          })
-          return results
-        }
-      }, {
-        name: 'VolleyballReceiveSummary',
-        label: 'Volleyball Receive Summary',
-        availableSizes: [
-          [2, 2],
-          [2, 3],
-          [2, 4],
-          [3, 2],
-        ],
-        fetchData: async (params) => {
-          let settings = params.widget?.widgetSetting?.settings
-          let team: TeamFilter = 'both'
-          if (
-            !!settings && settings.widget == 'VolleyballReceiveSummary' && !!settings.team
-          ) team = settings.team
+					let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
+					let results = await widgetService.loadBlockSummary({
+						scoutId: params.scoutId,
+						sets: params.sets,
+						team
+					})
+					return results
+				}
+			},
+			{
+				name: 'VolleyballReceiveSummary',
+				label: 'Volleyball Receive Summary',
+				availableSizes: [
+					[2, 2],
+					[2, 3],
+					[2, 4],
+					[3, 2]
+				],
+				fetchData: async (params) => {
+					let settings = params.widget?.widgetSetting?.settings
+					let team: TeamFilter = 'both'
+					if (!!settings && settings.widget == 'VolleyballReceiveSummary' && !!settings.team)
+						team = settings.team
 
-          let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
-          let results = await widgetService.loadReceiveSummary({
-            scoutId: params.scoutId,
-            sets: params.sets,
-            team
-          })
-          return results
-        }
-      }, {
-        name: 'VolleyballPointsHistory',
-        label: 'Volleyball Points History',
-        availableSizes: [
-          [2, 2],
-          [2, 3],
-          [2, 4],
-          [3, 2],
-        ],
-        fetchData: async (params) => {
-          let scoutAnalysisService = new ScoutAnalysisService({ fetch: params.fetch, token: params.token })
-          let points = await scoutAnalysisService.pointsHistory({
-            scoutId: params.scoutId,
-            sets: params.sets
-          })
-          return {
-            points
-          }
-        }
-      }, {
-        name: 'VolleyballTrend',
-        label: 'Volleyball Trend',
-        availableSizes: [
-          [2, 2],
-          [2, 3],
-          [2, 4],
-          [3, 2],
-        ],
-        fetchData: async (params) => {
-          let settings = params.widget?.widgetSetting?.settings
-          let team: TeamFilter = 'both'
-          if (
-            !!settings && settings.widget == 'VolleyballTrend' && !!settings.team
-          ) team = settings.team
+					let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
+					let results = await widgetService.loadReceiveSummary({
+						scoutId: params.scoutId,
+						sets: params.sets,
+						team
+					})
+					return results
+				}
+			},
+			{
+				name: 'VolleyballPointsHistory',
+				label: 'Volleyball Points History',
+				availableSizes: [
+					[2, 2],
+					[2, 3],
+					[2, 4],
+					[3, 2]
+				],
+				fetchData: async (params) => {
+					let scoutAnalysisService = new ScoutAnalysisService({
+						fetch: params.fetch,
+						token: params.token
+					})
+					let points = await scoutAnalysisService.pointsHistory({
+						scoutId: params.scoutId,
+						sets: params.sets
+					})
+					return {
+						points
+					}
+				}
+			},
+			{
+				name: 'VolleyballTrend',
+				label: 'Volleyball Trend',
+				availableSizes: [
+					[2, 2],
+					[2, 3],
+					[2, 4],
+					[3, 2]
+				],
+				fetchData: async (params) => {
+					let settings = params.widget?.widgetSetting?.settings
+					let team: TeamFilter = 'both'
+					if (!!settings && settings.widget == 'VolleyballTrend' && !!settings.team)
+						team = settings.team
 
-          let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
-          let results = await widgetService.loadTrend({
-            scoutId: params.scoutId,
-            sets: params.sets,
-            team,
-            window: settings?.widget == 'VolleyballTrend' ? settings.window : undefined,
-            type: settings?.widget == 'VolleyballTrend' ? settings.type : undefined
-          })
-          return results
-        }
-      }
-    ]
+					let widgetService = new WidgetsService({ fetch: params.fetch, token: params.token })
+					let results = await widgetService.loadTrend({
+						scoutId: params.scoutId,
+						sets: params.sets,
+						team,
+						window: settings?.widget == 'VolleyballTrend' ? settings.window : undefined,
+						type: settings?.widget == 'VolleyballTrend' ? settings.type : undefined
+					})
+					return results
+				}
+			}
+		]
 	}
 
-	public canManageWidget(params: {
-		user?: User
-		logicalOperator?: 'and' | 'or'
-	}): boolean {
+	public canManageWidget(params: { user?: User; logicalOperator?: 'and' | 'or' }): boolean {
 		if (!params.user) return false
 
 		return true

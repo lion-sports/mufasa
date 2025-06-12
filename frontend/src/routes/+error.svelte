@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { Icon } from '@likable-hair/svelte';
+	import { Icon } from '@likable-hair/svelte'
 	import { page } from '$app/stores'
 	import '../app.css'
 
 	let mapper: Record<number, string> = {
-		404: 'We have not found what you\'re looking for 😥',
-		401: 'you don\'t have permissions to access this page',
+		404: "We have not found what you're looking for 😥",
+		401: "you don't have permissions to access this page",
 		500: 'Something went wrong'
 	}
 
-	$: message = mapper[$page.status]
+	let message = $derived(mapper[$page.status])
 </script>
 
 <div
@@ -22,9 +22,9 @@
 >
 	<div class="status">{$page.status}</div>
 	<div class="message">{message}</div>
-  {#if $page.error?.message}
-    <div class="text-small mb-4">{$page.error?.message}</div>
-  {/if}
+	{#if $page.error?.message}
+		<div class="text-small mb-4">{$page.error?.message}</div>
+	{/if}
 	<div>
 		<a href="/">
 			<span style:font-size="1.5rem" style:color="rgb(var(--global-color-light-primary-300))"
@@ -35,9 +35,9 @@
 </div>
 
 <style>
-  :global(body) {
-    background-color: rgb(var(--global-color-background-100));
-  }
+	:global(body) {
+		background-color: rgb(var(--global-color-background-100));
+	}
 
 	.status {
 		font-weight: 700;

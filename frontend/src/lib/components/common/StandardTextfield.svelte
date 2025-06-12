@@ -1,24 +1,46 @@
 <script lang="ts">
 	import { SimpleTextField, Icon } from '@likable-hair/svelte'
+	import { type ComponentProps } from 'svelte'
 
-	let clazz: {
-		container?: string
-		row?: string
-		input?: string
-	} = {}
-	export { clazz as class }
+	interface Props {
+		class?: {
+			container?: string
+			row?: string
+			input?: string
+		}
+		placeholder?: string
+		value?: string | number | undefined
+		type?: 'text' | 'number' | 'password' | 'time'
+		error?: boolean
+		disabled?: boolean
+		readonly?: boolean
+		valueRequired?: boolean
+		appendIcon?: string | undefined
+		appendInnerIcon?: string | undefined
+		prependInner?: import('svelte').Snippet
+		appendInner?: import('svelte').Snippet
+	}
 
-	export let placeholder: string = '',
-		value: string | number = '',
-		type: 'text' | 'number' | 'password' | 'time' = 'text',
-		error: boolean = false,
-		disabled: boolean = false,
-		readonly: boolean = false,
-		valueRequired: boolean = false,
-		appendIcon: string | undefined = undefined,
-		appendInnerIcon: string | undefined = undefined
+	let {
+		class: clazz = {},
+		placeholder = '',
+		value = $bindable(undefined),
+		type = 'text',
+		error = false,
+		disabled = false,
+		readonly = false,
+		valueRequired = false,
+		appendIcon = undefined,
+		appendInnerIcon = undefined,
+		prependInner,
+		appendInner,
+		...rest
+	}: Props & ComponentProps<typeof SimpleTextField> = $props()
 
-	$: localError = (valueRequired && value?.toString().length == 0) || error
+	let localError = $derived((valueRequired && value?.toString().length == 0) || error)
+
+	const prependInner_render = $derived(prependInner)
+	const appendInner_render = $derived(appendInner)
 </script>
 
 <SimpleTextField
@@ -29,19 +51,19 @@
 	{readonly}
 	{appendIcon}
 	{appendInnerIcon}
-	on:input
-	on:focus
+	{...rest}
 	class={clazz}
+	--simple-textfield-height="40px"
 	--simple-textfield-border={localError
 		? '1px solid rgb(var(--global-color-error-600))'
 		: undefined}
 >
-	<svelte:fragment slot="prepend-inner">
-		<slot name="prepend-inner" />
-	</svelte:fragment>
-	<slot name="append-inner" slot="append-inner">
-		{#if !!appendInnerIcon}
+	{#snippet prependInnerSnippet()}
+		{@render prependInner_render?.()}
+	{/snippet}
+	{#snippet appendInnerSnippet()}
+		{#if appendInner_render}{@render appendInner_render()}{:else if !!appendInnerIcon}
 			<Icon name={appendInnerIcon} />
 		{/if}
-	</slot>
+	{/snippet}
 </SimpleTextField>

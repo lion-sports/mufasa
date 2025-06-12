@@ -1,24 +1,40 @@
-<script lang="ts">
+<script lang="ts" generics="Data">
 	import { AsyncAutocomplete } from '@likable-hair/svelte'
 	import type { ComponentProps } from 'svelte'
 
-	export let values: ComponentProps<AsyncAutocomplete>['values'] = [],
-    items: ComponentProps<AsyncAutocomplete>['items'] = [],
-		searcher: ComponentProps<AsyncAutocomplete>['searcher'],
-		placeholder: string = 'Keep writing ...',
-		multiple: boolean = false,
-		mobileDrawer: boolean = false,
-    disabled: boolean = false
+	type AutocompleteProps = ComponentProps<typeof AsyncAutocomplete<Data>>
+
+	interface Props {
+		values?: AutocompleteProps['values']
+		items?: AutocompleteProps['items']
+		searcher: AutocompleteProps['searcher']
+		onchange?: AutocompleteProps['onchange']
+		placeholder?: string
+		multiple?: boolean
+		mobileDrawer?: boolean
+		disabled?: boolean
+	}
+
+	let {
+		values = $bindable(),
+		items = $bindable([]),
+		searcher = $bindable(),
+		placeholder = $bindable('Keep writing ...'),
+		multiple = $bindable(false),
+		mobileDrawer = $bindable(false),
+		disabled = $bindable(false),
+		onchange
+	}: Props = $props()
 </script>
 
 <AsyncAutocomplete
-	bind:values
-  bind:items
-	bind:searcher
-	bind:mobileDrawer
-	bind:multiple
-	bind:placeholder
-  bind:disabled
-	on:change
+	{values}
+	{multiple}
+	{disabled}
+	{items}
+	{placeholder}
+	{mobileDrawer}
+	{searcher}
+	{onchange}
 	--autocomplete-min-height="44px"
 />

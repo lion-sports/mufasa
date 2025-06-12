@@ -1,33 +1,32 @@
-import GroupsManager from 'App/managers/groups.manager'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import GroupsManager from '#app/managers/groups.manager'
+import type { HttpContext } from '@adonisjs/core/http'
 
 export default class GroupsController {
-  public async index({ params, request }: HttpContextContract) {
+  public async index({ params, request }: HttpContext) {
     const manager = new GroupsManager()
     return await manager.list({
       data: {
         page: request.input('page'),
         perPage: request.input('perPage'),
-        team: {
-          id: params.teamId
-        }
+        filtersBuilder: request.input('filtersBuilder')
       }
     })
   }
 
-  public async store({ request }: HttpContextContract) {
+  public async store({ request }: HttpContext) {
     const manager = new GroupsManager()
     return await manager.create({
       data: {
-        name: request.body().name,
-        team: request.body().team,
+        name: request.input('name'),
+        team: request.input('team'),
+        club: request.input('club'),
         cans: request.input('cans'),
         convocable: request.input('convocable')
       }
     })
   }
 
-  public async show({ params }: HttpContextContract) {
+  public async show({ params }: HttpContext) {
     const manager = new GroupsManager()
     return await manager.get({
       data: {
@@ -36,7 +35,7 @@ export default class GroupsController {
     })
   }
 
-  public async update({ request, params }: HttpContextContract) {
+  public async update({ request, params }: HttpContext) {
     const manager = new GroupsManager()
     return await manager.update({
       data: {
@@ -48,7 +47,7 @@ export default class GroupsController {
     })
   }
 
-  public async destroy({ params }: HttpContextContract) {
+  public async destroy({ params }: HttpContext) {
     const manager = new GroupsManager()
     return await manager.destroy({
       data: {

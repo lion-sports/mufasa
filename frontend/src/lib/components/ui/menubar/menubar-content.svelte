@@ -1,18 +1,33 @@
 <script lang="ts">
-	import { Menubar as MenubarPrimitive } from "bits-ui";
-	import { cn, flyAndScale } from "$lib/utils.js";
+	import { Menubar as MenubarPrimitive } from 'bits-ui'
+	import { cn, flyAndScale } from '$lib/utils.js'
 
-	type $$Props = MenubarPrimitive.ContentProps;
-	type $$Events = MenubarPrimitive.ContentEvents;
+	type $$Props = MenubarPrimitive.ContentProps
+	type $$Events = MenubarPrimitive.ContentEvents
 
-	let className: $$Props["class"] = undefined;
-	export let sideOffset: $$Props["sideOffset"] = 8;
-	export let alignOffset: $$Props["alignOffset"] = -4;
-	export let align: $$Props["align"] = "start";
-	export let side: $$Props["side"] = "bottom";
-	export let transition: $$Props["transition"] = flyAndScale;
-	export let transitionConfig: $$Props["transitionConfig"] = undefined;
-	export { className as class };
+	interface Props {
+		class?: $$Props['class']
+		sideOffset?: $$Props['sideOffset']
+		alignOffset?: $$Props['alignOffset']
+		align?: $$Props['align']
+		side?: $$Props['side']
+		transition?: $$Props['transition']
+		transitionConfig?: $$Props['transitionConfig']
+		children?: import('svelte').Snippet
+		[key: string]: any
+	}
+
+	let {
+		class: className = undefined,
+		sideOffset = 8,
+		alignOffset = -4,
+		align = 'start',
+		side = 'bottom',
+		transition = flyAndScale,
+		transitionConfig = undefined,
+		children,
+		...rest
+	}: Props = $props()
 </script>
 
 <MenubarPrimitive.Content
@@ -23,11 +38,11 @@
 	{alignOffset}
 	{side}
 	class={cn(
-		"z-50 min-w-[12rem] rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none",
+		'z-50 min-w-[12rem] rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none',
 		className
 	)}
-	{...$$restProps}
+	{...rest}
 	on:keydown
 >
-	<slot />
+	{@render children?.()}
 </MenubarPrimitive.Content>

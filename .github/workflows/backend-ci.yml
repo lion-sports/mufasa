@@ -7,6 +7,7 @@ on:
     tags:
       - "v*"
     paths:
+      - .github/backend-ci.yml
       - backend/**
       - common/**
 
@@ -59,6 +60,7 @@ jobs:
           - 5432:5432
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: test
       mongo:
         image: mongo:7
         ports:
@@ -100,6 +102,7 @@ jobs:
           HOST: 0.0.0.0
           PORT: 3333
           APP_KEY: ${{github.sha}}
+          APP_NAME: mufasa
           DRIVE_DISK: local
           NODE_ENV: production
           ADMIN_USER_SEED_PASSWORD: mufasa
@@ -109,6 +112,7 @@ jobs:
           PG_HOST: localhost
           PG_PORT: 5432
           PG_USER: postgres
+          PG_DB_NAME: test
           MONGO_URL: mongodb://localhost:27017
           MONGO_DB: test
           REDIS_HOST: localhost
@@ -124,6 +128,12 @@ jobs:
           GOOGLE_IOS_FRONTEND_CALLBACK_URL: mufasa://authorization
           PUBLIC_URL: http://localhost:3333
           TELEGRAM_FIPAV_BOT_TOKEN: FIPAVBotToken
+          SMTP_HOST: smtp.gmail.com
+          SMTP_PORT: 587
+          SMTP_USERNAME: pippo
+          SMTP_PASSWORD: baudo
+          TEST_EMAIL: pippo.baudo@likablehair.it
+          LOG_INTERNAL_SERVER_ERRORS: true
 
   docker:
     runs-on: ubuntu-latest

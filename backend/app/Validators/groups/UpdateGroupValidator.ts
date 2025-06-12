@@ -1,16 +1,9 @@
-import { schema, rules, CustomMessages } from '@ioc:Adonis/Core/Validator'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import vine from '@vinejs/vine'
 
-export default class UpdateGroupValidator {
-  constructor(protected ctx?: HttpContextContract) { }
-
-  public schema = schema.create({
-    id: schema.number(),
-    name: schema.string.nullableAndOptional([
-      rules.maxLength(255)
-    ]),
-    cans: schema.object.optional().anyMembers()
+export const updateGroupValidator = vine.compile(
+  vine.object({
+    id: vine.number(),
+    name: vine.string().maxLength(255).optional(),
+    cans: vine.object({}).allowUnknownProperties()
   })
-
-  public messages: CustomMessages = {}
-}
+)

@@ -3,17 +3,21 @@ import type { Cookies } from '@sveltejs/kit'
 import { browser } from '$app/environment'
 import JsCookies from 'js-cookie'
 import user from '$lib/stores/auth/user'
-import { DateTime, Duration } from 'luxon'
-import { get, writable } from 'svelte/store'
+import { DateTime } from 'luxon'
+import { get } from 'svelte/store'
 import phantom from '$lib/stores/provider/phantom'
+import type { UserSetting } from '../userSettings/usersSettings.service'
+import type { Sport } from 'lionn-common'
 
 export type User = {
 	id: number
 	firstname: string
 	lastname: string
+	fullname: string
 	email: string
 	system: boolean
 	solanaPublicKey: string
+	userSetting: UserSetting
 	avatarUrl?: string
 	createdAt: Date
 	updatedAt: Date
@@ -49,8 +53,14 @@ export type SignupParams = {
 		email: string
 		password: string
 		firstname: string
-		lastname: string,
+		lastname: string
+		birthday?: Date
 		solanaPublicKey?: string
+		clubName: string
+		completeClubName: string
+		clubSport?: Sport
+		invitationToken?: string
+		collaborators?: string[]
 	}
 	context?: {}
 }
@@ -84,27 +94,31 @@ export default class AuthService extends FetchBasedService {
 	}
 
 	async signup(params: SignupParams) {
-		if (browser) {
-			const response = await this.client.post({
-				url: '/auth/signup',
-				body: {
-					email: params.data.email,
-					password: params.data.password,
-					firstname: params.data.firstname,
-					lastname: params.data.lastname,
-					solanaPublicKey: params.data.solanaPublicKey
-				}
-			})
+		const response = await this.client.post({
+			url: '/auth/signup',
+			body: {
+				email: params.data.email,
+				password: params.data.password,
+				firstname: params.data.firstname,
+				birthday: params.data.birthday,
+				lastname: params.data.lastname,
+				solanaPublicKey: params.data.solanaPublicKey,
+				clubName: params.data.clubName,
+				completeClubName: params.data.completeClubName,
+				clubSport: params.data.clubSport,
+				invitationToken: params.data.invitationToken,
+				collaborators: params.data.collaborators
+			}
+		})
 
-			return response
-		}
+		return response
 	}
 
 	async authenticateApi(params: AuthenticateApiParams) {
 		const response: {
 			type: 'bearer'
 			token: string
-			expires_at: Date
+			expiresAt: Date
 			userId: number
 			refreshToken: string
 			refreshTokenExpiration: Date
@@ -118,12 +132,12 @@ export default class AuthService extends FetchBasedService {
 				}
 			})
 			.then((r) => {
-				r.expires_at = new Date(r.expires_at)
+				r.expiresAt = new Date(r.expiresAt)
 				r.refreshTokenExpiration = new Date(r.refreshTokenExpiration)
 				return r
 			})
 
-		const tokenExpiresIn = DateTime.fromJSDate(response.expires_at).diffNow('seconds')
+		const tokenExpiresIn = DateTime.fromJSDate(response.expiresAt).diffNow('seconds')
 		this.cookies?.set(this.cookieName, response.token, {
 			path: '/',
 			httpOnly: false,
@@ -224,8 +238,10 @@ export default class AuthService extends FetchBasedService {
 			email: response.email,
 			firstname: response.firstname,
 			lastname: response.lastname,
+			fullname: response.fullname,
 			solanaPublicKey: response.solanaPublicKey,
 			system: response.system,
+			userSetting: response.userSetting,
 			avatarUrl: response.avatarUrl,
 			createdAt: new Date(response.createdAt),
 			updatedAt: new Date(response.updatedAt)
@@ -254,7 +270,6 @@ export default class AuthService extends FetchBasedService {
 		user.set(undefined)
 	}
 
-
 	async loginWithMetamask() {
 		if (window.ethereum) {
 			console.log('pippo')
@@ -264,51 +279,49 @@ export default class AuthService extends FetchBasedService {
 				.catch((error: any) => {
 					console.log(error.code)
 					if (error.code === 4001) {
-						alert('Please connect to MetaMask.');
-						return;
+						alert('Please connect to MetaMask.')
+						return
 					} else {
-						console.error(error);
-						return;
+						console.error(error)
+						return
 					}
-				});
-				console.log(accounts)
-
+				})
+			console.log(accounts)
 
 			if (accounts.length > 0) {
-				let expired_at: Date = new Date();
+				let expired_at: Date = new Date()
 				JsCookies.set(this.cookieWalletAddress, accounts[0], {
 					expires: expired_at.setDate(expired_at.getDate() + 1),
 					sameSite: 'strict'
-				});
-
+				})
 
 				return {
 					data: {
 						address: accounts[0],
 						name: ''
 					}
-				};
+				}
 			} else {
-				alert('No accounts found');
+				alert('No accounts found')
 				return {
 					data: {
 						address: '',
 						name: ''
 					}
-				};
+				}
 			}
 		} else {
-			alert('No ethereum wallet found');
+			alert('No ethereum wallet found')
 			return {
 				data: {
 					address: '',
 					name: ''
 				}
-			};
+			}
 		}
 	}
 
-	async connectPhantom(){
+	async connectPhantom() {
 		try {
 			await get(phantom)?.connect()
 		} catch (err) {
@@ -316,12 +329,22 @@ export default class AuthService extends FetchBasedService {
 		}
 	}
 
-	async disconnectPhantom(){
+	async disconnectPhantom() {
 		try {
 			await get(phantom)?.disconnect()
 		} catch (err) {
 			console.error('connect ERROR:', err)
 		}
 	}
-	
+
+	async verifySignup(params: { token: string }): Promise<User> {
+		const response = await this.client.post({
+			url: '/auth/verifySignup',
+			body: {
+				token: params.token
+			}
+		})
+
+		return response
+	}
 }

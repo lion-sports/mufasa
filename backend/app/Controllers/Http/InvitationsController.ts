@@ -1,12 +1,13 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import InvitationsManager from 'App/managers/invitations.manager'
+import type { HttpContext } from '@adonisjs/core/http'
+import InvitationsManager from '#app/managers/invitations.manager'
 
 export default class InvitationsController {
-  public async inviteUser({ request }: HttpContextContract) {
+  public async inviteUser({ request }: HttpContext) {
     const manager = new InvitationsManager()
 
     const user = request.input('user')
     const team = request.input('team')
+    const club = request.input('club')
     const group = request.input('group')
 
     return await manager.inviteUser({
@@ -15,20 +16,49 @@ export default class InvitationsController {
           email: user.email
         },
         team: {
-          id: team.id
+          id: team?.id
+        },
+        club: {
+          id: club?.id
         },
         group: group
       }
     })
   }
 
-  public async list({ }: HttpContextContract) {
+  public async inviteUserByUrl({ request }: HttpContext) {
     const manager = new InvitationsManager()
 
-    return await manager.getUserInvitations()
+    const team = request.input('team')
+    const club = request.input('club')
+    const group = request.input('group')
+
+    return await manager.inviteUserByUrl({
+      data: {
+        team: {
+          id: team?.id
+        },
+        club: {
+          id: club?.id
+        },
+        group: group
+      }
+    })
   }
 
-  public async accept({ request }: HttpContextContract) {
+  public async list({ request }: HttpContext) {
+    const manager = new InvitationsManager()
+
+    return await manager.list({
+      data: {
+        page: request.input('page'),
+        perPage: request.input('perPage'),
+        filtersBuilder: request.input('filtersBuilder')
+      }
+    })
+  }
+
+  public async accept({ request }: HttpContext) {
     const manager = new InvitationsManager()
 
     const invitation = request.input('invitation')
@@ -40,7 +70,7 @@ export default class InvitationsController {
     })
   }
 
-  public async reject({ request }: HttpContextContract) {
+  public async reject({ request }: HttpContext) {
     const manager = new InvitationsManager()
 
     const invitation = request.input('invitation')
@@ -52,7 +82,7 @@ export default class InvitationsController {
     })
   }
 
-  public async discard({ request }: HttpContextContract) {
+  public async discard({ request }: HttpContext) {
     const manager = new InvitationsManager()
 
     const invitation = request.input('invitation')

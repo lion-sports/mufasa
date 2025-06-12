@@ -1,8 +1,8 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import WidgetSettingsManager from 'App/managers/widgetSettings.manager'
+import type { HttpContext } from '@adonisjs/core/http'
+import WidgetSettingsManager from '#app/managers/widgetSettings.manager'
 
 export default class WidgetSettingsController {
-  public async set({ request }: HttpContextContract) {
+  public async set({ request }: HttpContext) {
     let widgetId = request.input('widgetId')
     let settings = request.input('settings')
 

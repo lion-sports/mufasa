@@ -1,8 +1,12 @@
 <script lang="ts">
-	export let progress: number = 0
+	interface Props {
+		progress?: number
+	}
 
-  // x : 109.9 = progress : 100
-  $: dashoffset = 109.9 * (100 - progress) / 100
+	let { progress = 0 }: Props = $props()
+
+	// x : 109.9 = progress : 100
+	let dashoffset = $derived((109.9 * (100 - progress)) / 100)
 </script>
 
 <svg
@@ -20,8 +24,8 @@
 		r="17.5"
 		stroke="black"
 		stroke-width="10"
-    stroke-dasharray="109.9"
-    stroke-dashoffset={dashoffset}
+		stroke-dasharray="109.9"
+		stroke-dashoffset={dashoffset}
 	/>
 </svg>
 
@@ -29,7 +33,7 @@
 	.svg {
 		height: var(--circular-progress-indicator-height, 20px);
 		width: var(--circular-progress-indicator-width, 20px);
-    transform: rotate(-90deg);
+		transform: rotate(-90deg);
 	}
 
 	.MuiCircularProgress-circle {

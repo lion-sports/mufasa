@@ -1,349 +1,249 @@
-<script lang="ts" context="module">
-	import type { Team, Teammate } from '$lib/services/teams/teams.service'
-	import type { Event } from '$lib/services/events/events.service'
-</script>
-
 <script lang="ts">
+	import { run } from 'svelte/legacy'
+
+	import './EventsCalendar.css'
+	import Calendar from '@event-calendar/core'
+	import TimeGrid from '@event-calendar/time-grid'
+	import DayGrid from '@event-calendar/day-grid'
+	import Interaction from '@event-calendar/interaction'
 	import { DateTime } from 'luxon'
-	import { onMount } from 'svelte'
+	import type { Team } from '@/lib/services/teams/teams.service'
+	import type { Event } from '@/lib/services/events/events.service'
+	import { theme } from '@likable-hair/svelte'
+	import EventsService from '@/lib/services/events/events.service'
 	import { goto } from '$app/navigation'
-
 	import qs from 'qs'
-	import { Button, Calendar, Icon, MediaQuery } from '@likable-hair/svelte'
-	import { createEventDispatcher } from 'svelte'
 
-	let dispatch = createEventDispatcher<{
-		nextMonth: {
-			month: number
-			year: number
+	interface Props {
+		team?: Team | undefined
+		selectedDate?: Date | undefined
+		events: Event[]
+		visibleMonth?: number
+		visibleYear?: number
+		canCreate?: boolean
+	}
+
+	let {
+		team = $bindable(),
+		selectedDate = $bindable(),
+		events = $bindable(),
+		visibleMonth = $bindable(DateTime.now().get('month') - 1),
+		visibleYear = $bindable(DateTime.now().get('year')),
+		canCreate = false
+	}: Props = $props()
+
+	let eventCalendar: Calendar | undefined = $state()
+	let plugins = [TimeGrid, DayGrid, Interaction]
+	let selectedView: string = $state('dayGridMonth')
+
+	run(() => {
+		if (!!visibleMonth && !!visibleYear && !!eventCalendar) {
+			eventCalendar.setOption(
+				'date',
+				DateTime.fromObject({ month: visibleMonth + 1, year: visibleYear })
+					.startOf('month')
+					.toJSDate()
+			)
 		}
-		previousMonth: {
-			month: number
-			year: number
-		}
-	}>()
-
-	export let team: Team | undefined,
-		teammate: Teammate | undefined = undefined,
-		selectedDate: Date = new Date(),
-		selectedEvents: Event[] = [],
-		events: Event[],
-		visibleMonth: number = DateTime.now().get('month') - 1,
-		visibleYear: number = DateTime.now().get('year'),
-    canCreate: boolean = false
-
-	let dayGroupedEvents: {
-		[key: string]: Event[] | undefined
-	} = {}
-
-	onMount(() => {
-		groupEventByDate()
 	})
 
-	function groupEventByDate() {
-		dayGroupedEvents = {}
+	let options: Calendar.Options = $derived({
+		view: selectedView,
+		events: [],
+		datesSet: (info: Calendar.DatesSetInfo) => {
+			// TODO set the cache to the current view
+		},
+		eventDrop: async (info: Calendar.EventDropInfo) => {
+			let originalEvent = info.event.extendedProps.originalEvent as Event
+			let service = new EventsService({ fetch })
+			await service.update({
+				id: originalEvent.id as number,
+				start: info.event.start,
+				end: info.event.end
+			})
 
-		if (!!events && events.length > 0) {
-			for (let i = 0; i < events.length; i += 1) {
-				let dayKey = DateTime.fromJSDate(events[i].start).toFormat('yyyyMMdd')
-				if (!dayGroupedEvents[dayKey]) dayGroupedEvents[dayKey] = []
-				dayGroupedEvents[dayKey]?.push(events[i])
+			let eventIndex = events.findIndex((e) => e.id === originalEvent.id)
+			if (eventIndex !== -1) {
+				events[eventIndex].start = info.event.start
+				events[eventIndex].end = info.event.end
+			}
+		},
+		eventResize: async (info: Calendar.EventResizeInfo) => {
+			let originalEvent = info.event.extendedProps.originalEvent as Event
+			let service = new EventsService({ fetch })
+			await service.update({
+				id: originalEvent.id as number,
+				start: info.event.start,
+				end: info.event.end
+			})
+
+			let eventIndex = events.findIndex((e) => e.id === originalEvent.id)
+			if (eventIndex !== -1) {
+				events[eventIndex].start = info.event.start
+				events[eventIndex].end = info.event.end
+			}
+		},
+		eventSources: [
+			{
+				events: (
+					fetchInfo: Calendar.FetchInfo,
+					success: (events: Array<Calendar.Event>) => void,
+					failure: (errorInfo: object) => void
+				) => {
+					let eventService = new EventsService({ fetch })
+					eventService
+						.list({
+							filters: {
+								from: fetchInfo.start,
+								to: fetchInfo.end,
+								team: team
+							}
+						})
+						.then((listEvents) => {
+							success(
+								listEvents.map((e) => {
+									return {
+										id: e.id,
+										start: e.start,
+										end: e.end,
+										resourceIds: e.convocations.map((e) => e.teammateId),
+										allDay: false,
+										title: e.name,
+										editable: true,
+										startEditable: true,
+										durationEditable: true,
+										display: 'auto' as const,
+										backgroundColor: undefined,
+										textColor: undefined,
+										classNames: [],
+										styles: [],
+										extendedProps: {
+											originalEvent: e
+										}
+									}
+								})
+							)
+						})
+						.catch((err) => failure(err))
+				}
+			}
+		],
+		eventAllUpdated: (info: { view: Calendar.View }) => {
+			if (!!eventCalendar)
+				events = eventCalendar.getEvents().map((e) => e.extendedProps.originalEvent) as any
+		},
+		editable: true,
+		height: 'calc(100vh - 260px)',
+		eventContent: (info: Calendar.EventContentInfo) => {
+			return info.event.title
+		},
+		customButtons: {
+			dayGridMonth: {
+				active: selectedView == 'dayGridMonth',
+				text: 'Mese',
+				click: () => {
+					selectedView = 'dayGridMonth'
+				}
+			},
+			timeGridWeek: {
+				active: selectedView == 'timeGridWeek',
+				text: 'Settimana',
+				click: () => {
+					selectedView = 'timeGridWeek'
+					selectedDate = undefined
+
+					setTimeout(() => {
+						var scrollers = document.querySelectorAll('.ec-time-grid.ec-week-view .ec-days')
+
+						var scrollerDivs = Array.prototype.filter.call(scrollers, function (testElement) {
+							return testElement.nodeName === 'DIV'
+						})
+
+						function scrollAll(scrollLeft: any) {
+							scrollerDivs.forEach(function (element, index, array) {
+								element.scrollLeft = scrollLeft
+							})
+						}
+
+						scrollerDivs.forEach(function (element, index, array) {
+							element.addEventListener('scroll', function (e: any) {
+								scrollAll(e.target.scrollLeft)
+							})
+						})
+					}, 1000)
+				}
+			}
+		},
+		headerToolbar: {
+			start: 'title',
+			center: '',
+			end: 'dayGridMonth,timeGridWeek today prev,next'
+		},
+		titleFormat: (start: Date, end: Date) => {
+			let startLuxonDate = DateTime.fromJSDate(start).setLocale('it-IT')
+			let endLuxonDate = DateTime.fromJSDate(end).setLocale('it-IT')
+			if (selectedView === 'timeGridWeek') {
+				let startYear = startLuxonDate.toFormat('yyyy')
+				let endYear = endLuxonDate.toFormat('yyyy')
+				let startMonth = startLuxonDate.toFormat('LLLL')
+				let endMonth = endLuxonDate.toFormat('LLLL')
+				let startDate = startLuxonDate.toFormat('dd')
+				let endDate = endLuxonDate.toFormat('dd')
+
+				if (startYear === endYear) {
+					if (endMonth == startMonth) {
+						return {
+							html: `<div style="font-size: 1.3rem">${startDate} - ${endDate} ${startMonth} ${startYear}</div>`
+						}
+					} else {
+						return {
+							html: `<div style="font-size: 1.3rem">${startDate} ${startMonth} - ${endDate} ${endMonth} ${startYear}</div>`
+						}
+					}
+				} else {
+					return {
+						html: `<div style="font-size: 1.3rem">${startDate} ${startMonth} ${startYear} - ${endDate} ${endMonth} ${endYear}</div>`
+					}
+				}
+			} else {
+				let monthName = startLuxonDate.toFormat('LLLL')
+				let fullYear = startLuxonDate.toFormat('yyyy')
+				return { html: `<div style="font-size: 1.3rem">${monthName} ${fullYear}</div>` }
+			}
+		},
+		highlightedDates: !!selectedDate ? [selectedDate] : [],
+		dateClick: (info: Calendar.DateClickInfo) => {
+			if (info.view.type !== 'timeGridWeek') {
+				selectedDate = info.date
+			}
+		},
+		eventClick: (info: Calendar.EventClickInfo) => {
+			if (!!team && !!info.event.extendedProps.originalEvent) {
+				goto(`/teams/${team.id}/events/${info.event.id}`)
+			} else {
+				let originalEvent: Event = info.event.extendedProps.originalEvent as Event
+				goto(`/teams/${originalEvent.teamId}/events/${originalEvent.id}`)
+			}
+		},
+		views: {
+			timeGridWeek: {
+				pointer: true
+			},
+			dayGridMonth: {
+				pointer: true
+			}
+		},
+		dayMaxEvents: true,
+		nowIndicator: true,
+		selectable: canCreate,
+		select: (info: Calendar.SelectInfo) => {
+			if (!!team) {
+				goto(`/teams/${team.id}/events/new?${qs.stringify({ start: info.start, end: info.end })}`)
 			}
 		}
-	}
-
-	$: monthName = DateTime.now()
-		.set({
-			month: parseInt(visibleMonth.toString()) + 1,
-			year: visibleYear
-		})
-		.setLocale('it')
-		.toLocaleString({
-			month: 'long',
-			year: 'numeric'
-		})
-
-	function nextMonth() {
-		if (visibleMonth == 11) {
-			visibleMonth = 0
-			visibleYear += 1
-		} else {
-			visibleMonth += 1
-		}
-
-		dispatch('nextMonth', {
-      month: visibleMonth,
-      year: visibleYear
-    })
-	}
-
-	function previousMonth() {
-		if (visibleMonth == 0) {
-			visibleMonth = 11
-			visibleYear -= 1
-		} else {
-			visibleMonth -= 1
-		}
-
-		dispatch('previousMonth', {
-      month: visibleMonth,
-      year: visibleYear
-    })
-	}
-
-	function handleDayClick(dayStat: {
-    dayOfMonth: number,
-    month: number,
-    year: number
-  }) {
-		let selection = DateTime.now().set({
-			day: dayStat.dayOfMonth,
-			month: dayStat.month + 1,
-			year: dayStat.year
-		})
-		selectedDate = selection.toJSDate()
-	}
-
-	function handlePlusClick(dayStat: {
-    dayOfMonth: number,
-    month: number,
-    year: number
-  }) {
-		if (!!team) {
-			let date = DateTime.now()
-				.set({
-					day: dayStat.dayOfMonth,
-					month: dayStat.month + 1,
-					year: dayStat.year
-				})
-				.toJSDate()
-
-			goto(`/teams/${team.id}/events/new?${qs.stringify({ start: date })}`)
-		}
-	}
-
-	function isGreaterThan(array: any[] | undefined, num: number) {
-		if (!!array) return array.length > num
-		else return false
-	}
-
-	function isConvocated(event: Event): boolean {
-		return !!teammate && event.convocations.some((c) => !!teammate && c.teammateId == teammate.id)
-	}
-
-	$: if (!!events) groupEventByDate()
-	$: {
-		if (!!selectedDate) {
-			let key = DateTime.now()
-				.set({
-					day: selectedDate.getDate(),
-					month: selectedDate.getMonth() + 1,
-					year: selectedDate.getFullYear()
-				})
-				.toFormat('yyyyMMdd')
-
-			selectedEvents = dayGroupedEvents[key] || []
-		}
-	}
+	})
 </script>
 
-<MediaQuery let:mAndDown>
-	<div style:height="auto" style:width="100%">
-		{#if mAndDown}
-			<div class="month-switcher">
-				<Icon name="mdi-chevron-left" click on:click={previousMonth} />
-				<div>
-					{monthName}
-					<slot name="options" />
-				</div>
-				<Icon name="mdi-chevron-right" click on:click={nextMonth} />
-			</div>
-		{:else}
-			<div class="month-switcher">
-				<Icon name="mdi-chevron-left" click on:click={previousMonth} />
-				<Icon name="mdi-chevron-right" click on:click={nextMonth} />
-				<div class="month-name">
-					{monthName}
-				</div>
-				<div>
-					<slot name="options" />
-				</div>
-				<slot name="header-append" />
-			</div>
-		{/if}
-		<Calendar
-			bind:visibleMonth
-			bind:visibleYear
-			bind:selectedDate
-			locale="it"
-			--calendar-height={mAndDown ? '200px' : 'auto'}
-			--calendar-grid-gap="0px"
-		>
-			<div
-				slot="day"
-				let:dayStat
-				let:selected
-				class="day-slot"
-				style:border-color="rgb(var(--global-color-background-300))"
-				on:click={() => handleDayClick(dayStat)}
-				on:keypress={() => handleDayClick(dayStat)}
-        role="presentation"
-			>
-				{#if !mAndDown}
-					<div>
-						{#each dayGroupedEvents[DateTime.now()
-								.set({ day: dayStat.dayOfMonth, month: dayStat.month + 1, year: dayStat.year })
-								.toFormat('yyyyMMdd')]?.slice(0, 2) || [] as event}
-							<div style:position="relative">
-								<div
-									class="event-post"
-									style:background-color="rgb(var(--global-color-primary-700))"
-									style:color="rgb(var(--global-color-grey-50))"
-								>
-									<div style:white-space="nowrap" style:font-weight="800" style:max-width="100px">{event.name}</div>
-									<div style:font-size="0.8rem" style:font-weight="300">{event.team.name}</div>
-								</div>
-							</div>
-						{/each}
-						{#if isGreaterThan(dayGroupedEvents[DateTime.now()
-									.set({ day: dayStat.dayOfMonth, month: dayStat.month + 1, year: dayStat.year })
-									.toFormat('yyyyMMdd')], 2)}
-							<div style:margin-left="5px" style:font-size=".8rem">and more</div>
-						{/if}
-					</div>
-					{#if canCreate && !!team}
-						<div class="add-new">
-							<Button
-								buttonType="icon"
-								on:click={() => handlePlusClick(dayStat)}
-								--button-padding="0px 4px"
-								--button-border-radius="4px"
-							>
-								<Icon
-									name="mdi-plus"
-									--icon-size="10px"
-									--icon-color="rgb(var(--global-color-background-900))"
-								/>
-							</Button>
-						</div>
-					{/if}
-				{:else if isGreaterThan(dayGroupedEvents[DateTime.now()
-							.set({ day: dayStat.dayOfMonth, month: dayStat.month + 1, year: dayStat.year })
-							.toFormat('yyyyMMdd')], 0)}
-					<div class="dot" />
-				{/if}
-				<div
-					class="day-of-month"
-					style:color={selected
-						? 'rgb(var(--global-color-primary-500))'
-						: 'rgb(var(--global-color-contrast-900))'}
-				>
-					{dayStat.dayOfMonth}
-				</div>
-			</div>
-		</Calendar>
-	</div>
-</MediaQuery>
-
-<style>
-	@media (max-width: 1024px) {
-		.month-switcher {
-			justify-content: space-between;
-			margin-bottom: 10px;
-			margin-top: 10px;
-		}
-
-		.day-slot {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			position: relative;
-		}
-
-		.dot {
-			background-color: rgb(var(--global-color-primary-500));
-			height: 4px;
-			width: 4px;
-			border-radius: 50%;
-			top: 27px;
-			position: absolute;
-		}
-
-		.day-of-month {
-			border-radius: 50%;
-			height: 30px;
-			width: 30px;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-		}
-	}
-
-	@media (min-width: 1025px) {
-		.month-switcher {
-			justify-content: left;
-			margin-bottom: 20px;
-			margin-top: 20px;
-		}
-
-		.day-slot {
-			border: 1px solid;
-			height: 130px;
-			position: relative;
-		}
-
-		.day-of-month {
-			position: absolute;
-			right: 5px;
-			bottom: 5px;
-		}
-	}
-
-	.day-slot:hover .add-new {
-		display: block !important;
-	}
-
-	.add-new {
-		display: none;
-		position: absolute;
-		left: 5px;
-		bottom: 5px;
-		border-radius: 5px;
-	}
-
-	.month-switcher {
-		display: flex;
-		gap: 20px;
-	}
-
-	.month-name {
-		font-size: 1.5rem;
-		min-width: 200px;
-		text-align: center;
-	}
-
-	.event-post::before {
-		content: '';
-		position: absolute;
-		left: 5px;
-		top: 0px;
-		bottom: 0px;
-		width: 3px;
-		border-radius: 2px 2px 0px 0px;
-		background-color: rgb(var(--global-color-primary-200));
-	}
-
-	.event-post {
-		font-size: 0.8rem;
-		word-break: keep-all;
-		margin: 5px;
-		padding-top: 4px;
-		padding-bottom: 4px;
-		padding-right: 4px;
-		padding-left: 8px;
-		text-overflow: clip;
-		overflow: hidden;
-		border-radius: 3px;
-    line-height: 14px;
-	}
-</style>
+<div class:ec-dark={$theme.dark}>
+	<Calendar bind:this={eventCalendar} {plugins} {options} />
+</div>

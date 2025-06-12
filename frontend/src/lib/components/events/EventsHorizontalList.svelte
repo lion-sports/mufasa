@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { Event } from '$lib/services/events/events.service'
 </script>
 
@@ -8,10 +8,21 @@
 	import qs from 'qs'
 	import { Icon } from '@likable-hair/svelte'
 
-	export let events: Event[] = [],
-		team: { id: number } | undefined = undefined,
-		precompiledDate: DateTime | undefined = undefined,
-    canCreate: boolean = false
+	interface Props {
+		events?: Event[]
+		team?: { id: number } | undefined
+		precompiledDate?: DateTime | undefined
+		canCreate?: boolean
+		noData?: import('svelte').Snippet
+	}
+
+	let {
+		events = [],
+		team = undefined,
+		precompiledDate = undefined,
+		canCreate = false,
+		noData
+	}: Props = $props()
 
 	function formattedTime(event: Event) {
 		let fromTime: string = DateTime.fromJSDate(event.start)
@@ -41,39 +52,39 @@
 		}
 	}
 
-	$: sortedEvents = !!events
-		? events.sort((a, b) => {
-				return DateTime.fromJSDate(new Date(a.start)).diff(DateTime.fromJSDate(new Date(b.start)))
-					.milliseconds
-		})
-		: []
+	let sortedEvents = $derived(
+		!!events
+			? events.sort((a, b) => {
+					return DateTime.fromJSDate(new Date(a.start)).diff(DateTime.fromJSDate(new Date(b.start)))
+						.milliseconds
+				})
+			: []
+	)
 </script>
 
 <div class="events-container">
 	{#if events.length > 0}
 		{#each sortedEvents as event}
-			<button class="event-post" on:click={() => handleEventClick(event)} class:clickable={true}>
-        <div class="event-post-band"></div>
+			<button class="event-post" onclick={() => handleEventClick(event)} class:clickable={true}>
+				<div class="event-post-band"></div>
 				<div class="title">{event.name}</div>
-        <div class="team">{event.team.name}</div>
+				<div class="team">{event.team.name}</div>
 				<div class="time">{formattedTime(event)}</div>
 				{#if !!event.description}
 					<div class="description" style:white-space="pre-wrap">{event.description}</div>
 				{/if}
-        <div class="event-post-cta">
-          <Icon name="mdi-arrow-right" --icon-size="24px"></Icon>
-        </div>
-      </button>
+				<div class="event-post-cta">
+					<Icon name="mdi-arrow-right" --icon-size="24px"></Icon>
+				</div>
+			</button>
 		{/each}
 		{#if !!team && canCreate}
 			<div class="plus-container">
-				<Icon name="mdi-plus" click on:click={handlePlusClick} />
+				<Icon name="mdi-plus" onclick={handlePlusClick} />
 			</div>
 		{/if}
-	{:else}
-		<slot name="no-data">
-			<div class="no-data">Nessun evento</div>
-		</slot>
+	{:else if noData}{@render noData()}{:else}
+		<div class="no-data">Nessun evento</div>
 	{/if}
 </div>
 
@@ -82,7 +93,7 @@
 		display: flex;
 		flex-wrap: nowrap;
 		gap: 10px;
-    overflow-x: auto;
+		overflow-x: auto;
 	}
 
 	.event-post {
@@ -92,52 +103,52 @@
 		padding-left: 20px;
 		padding-right: 10px;
 		padding-bottom: 5px;
-    position: relative;
-    text-align: left;
-    transition: all .2s cubic-bezier(0.23, 1, 0.320, 1);
+		position: relative;
+		text-align: left;
+		transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
 	}
 
-  .event-post:hover {
-    background-color: rgb(var(--global-color-background-400));
-  }
+	.event-post:hover {
+		background-color: rgb(var(--global-color-background-400));
+	}
 
-  @media (min-width: 768px) {
-    .event-post {
-      min-width: 240px;
-    }
+	@media (min-width: 768px) {
+		.event-post {
+			min-width: 240px;
+		}
 
-    .event-post:hover {
-      min-width: 260px;
-    }
-  }
+		.event-post:hover {
+			min-width: 260px;
+		}
+	}
 
-  @media (max-width: 767.98px) {
-    .event-post {
-      min-width: 90%;
-      scroll-snap-align: start;
-    }
+	@media (max-width: 767.98px) {
+		.event-post {
+			min-width: 90%;
+			scroll-snap-align: start;
+		}
 
-    .events-container {
-      scroll-snap-type: x mandatory;
-      width: 100%;
-    }
-  }
+		.events-container {
+			scroll-snap-type: x mandatory;
+			width: 100%;
+		}
+	}
 
-  .event-post-band {
-    position: absolute;
-    top: 0px;
-    bottom: 0px;
-    width: 10px;
-    left: 0px;
-    border-radius: 5px 0px 0px 5px;
-    background-color: rgb(var(--global-color-primary-500));
-  }
+	.event-post-band {
+		position: absolute;
+		top: 0px;
+		bottom: 0px;
+		width: 10px;
+		left: 0px;
+		border-radius: 5px 0px 0px 5px;
+		background-color: rgb(var(--global-color-primary-500));
+	}
 
-  .event-post-cta {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-  }
+	.event-post-cta {
+		position: absolute;
+		bottom: 8px;
+		right: 8px;
+	}
 
 	.clickable {
 		cursor: pointer;
@@ -150,7 +161,7 @@
 		margin-bottom: 5px;
 	}
 
-  .team {
+	.team {
 		font-size: 0.8rem;
 		font-weight: 500;
 	}

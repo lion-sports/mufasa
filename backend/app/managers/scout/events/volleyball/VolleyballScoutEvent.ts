@@ -1,14 +1,14 @@
-import BlockScoutEvent from "./BlockScoutEvent";
-import LiberoSubstitutionScoutEvent from "./LiberoSubstitutionScoutEvent";
-import ManualPhaseScoutEvent from "./ManualPhaseScoutEvent";
-import PlayerInPositionScoutEvent from "./PlayerInPositionScoutEvent";
-import PlayerSubstitutionScoutEvent from "./PlayerSubstitutionScoutEvent";
-import PointScoredScoutEvent from "./PointScoredScoutEvent";
-import ReceiveScoutEvent from "./ReceiveScoutEvent";
-import ServeScoutEvent from "./ServeScoutEvent";
-import SpikeScoutEvent from "./SpikeScoutEvent";
-import TeamRotationScoutEvent from "./TeamRotationScoutEvent";
-import TimeoutScoutEvent from "./TimeoutScoutEvent";
+import BlockScoutEvent from "./BlockScoutEvent.js";
+import LiberoSubstitutionScoutEvent from "./LiberoSubstitutionScoutEvent.js";
+import ManualPhaseScoutEvent from "./ManualPhaseScoutEvent.js";
+import PlayerInPositionScoutEvent from "./PlayerInPositionScoutEvent.js";
+import PlayerSubstitutionScoutEvent from "./PlayerSubstitutionScoutEvent.js";
+import PointScoredScoutEvent from "./PointScoredScoutEvent.js";
+import ReceiveScoutEvent from "./ReceiveScoutEvent.js";
+import ServeScoutEvent from "./ServeScoutEvent.js";
+import SpikeScoutEvent from "./SpikeScoutEvent.js";
+import TeamRotationScoutEvent from "./TeamRotationScoutEvent.js";
+import TimeoutScoutEvent from "./TimeoutScoutEvent.js";
 import type { VolleyballScoutEventType } from 'lionn-common'
 
 export const TYPE_TO_VOLLEYBALL_SCOUT_EVENT: {

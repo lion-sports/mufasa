@@ -1,9 +1,9 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import ScoutAnalysisManager from 'App/managers/scout/analysis/scoutAnalysis.manager'
-import WidgetManager from 'App/managers/widget.manager'
+import type { HttpContext } from '@adonisjs/core/http'
+import ScoutAnalysisManager from '#app/managers/scout/analysis/scoutAnalysis.manager'
+import WidgetManager from '#app/managers/widget.manager'
 
 export default class WidgetsController {
-  public async show({ params }: HttpContextContract) {
+  public async show({ params }: HttpContext) {
     let id = params.id
 
     let manager = new WidgetManager()
@@ -14,7 +14,7 @@ export default class WidgetsController {
     })
   }
 
-  public async loadDistribution({ request }: HttpContextContract) {
+  public async loadDistribution({ request }: HttpContext) {
     let scoutId = request.input('scoutId')
     let sets = request.input('sets')
     let team = request.input('team')
@@ -86,7 +86,7 @@ export default class WidgetsController {
     }
   }
 
-  public async loadServeSummary({ request }: HttpContextContract) {
+  public async loadServeSummary({ request }: HttpContext) {
     let scoutId = request.input('scoutId')
     let sets = request.input('sets')
     let team = request.input('team')
@@ -129,7 +129,7 @@ export default class WidgetsController {
     }
   }
 
-  public async loadBlockSummary({ request }: HttpContextContract) {
+  public async loadBlockSummary({ request }: HttpContext) {
     let scoutId = request.input('scoutId')
     let sets = request.input('sets')
     let team = request.input('team')
@@ -173,7 +173,7 @@ export default class WidgetsController {
   }
 
 
-  public async loadReceiveSummary({ request }: HttpContextContract) {
+  public async loadReceiveSummary({ request }: HttpContext) {
     let scoutId = request.input('scoutId')
     let sets = request.input('sets')
     let team = request.input('team')
@@ -216,7 +216,7 @@ export default class WidgetsController {
     }
   }
 
-  public async loadTrend({ request }: HttpContextContract) {
+  public async loadTrend({ request }: HttpContext) {
     let scoutId = request.input('scoutId')
     let sets = request.input('sets')
     let team = request.input('team')
@@ -240,7 +240,7 @@ export default class WidgetsController {
 
     if(!!type && type.length >= 0) {
       for(let i = 0; i < type.length; i += 1) {
-        let currentType = type[i]
+        let currentType = type[i] as keyof typeof trendForType
         trendForType[currentType] = await manager.trend({
           data: {
             scoutId,

@@ -1,12 +1,13 @@
-import User from 'App/Models/User';
-import Teammate, { Role } from 'App/Models/Teammate';
-import Database, { TransactionClientContract } from '@ioc:Adonis/Lucid/Database'
-import { UpdateTeammateValidator } from 'App/Validators/teammates'
-import { validator } from "@ioc:Adonis/Core/Validator"
-import AuthorizationManager from './authorization.manager'
-import Team from 'App/Models/Team';
-import { Context, withTransaction, withUser } from './base.manager';
-import Player from 'App/Models/Player';
+import User from '#app/Models/User';
+import Teammate, { Role } from '#app/Models/Teammate';
+import db from '@adonisjs/lucid/services/db'
+import { UpdateTeammateValidator } from '#app/Validators/teammates/index'
+import { validator } from "@adonisjs/validator"
+import AuthorizationManager from './authorization.manager.js'
+import Team from '#app/Models/Team';
+import { Context, withTransaction, withUser } from './base.manager.js';
+import Player from '#app/Models/Player';
+import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export type AbsencesForTeammates = {
   team: {
@@ -26,9 +27,6 @@ export type AbsencesForTeammates = {
 }[]
 
 export default class TeammatesManager {
-  constructor() {
-  }
-
   @withTransaction
   @withUser
   public async update(params: {
@@ -54,9 +52,8 @@ export default class TeammatesManager {
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
-        action: 'update',
-        resource: 'teammate',
-        entities: {
+        ability: 'teammate_update',
+        data: {
           teammate: {
             id: params.data.id
           }
@@ -105,7 +102,7 @@ export default class TeammatesManager {
 
     if(teams.length === 0) return finalResults
 
-    let results = await Database.rawQuery<{
+    let results = await db.rawQuery<{
       rows: {
         userId: number
         teammateId: number

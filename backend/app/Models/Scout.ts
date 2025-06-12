@@ -1,14 +1,14 @@
-import { CamelCaseBaseModel } from './CamelCaseBaseModel'
+import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import { DateTime } from 'luxon'
-import { belongsTo, BelongsTo, hasMany, HasMany, column, hasOne, HasOne } from '@ioc:Adonis/Lucid/Orm'
-import Event from 'App/Models/Event'
-import Player from './Player'
-import ScoringSystem from './ScoringSystem'
-import ScoutInfo from './ScoutInfo'
-import type { VolleyballScoutStash } from 'lionn-common'
-
-export const SPORTS = ['volleyball', 'basketball'] as const
-export type Sport = typeof SPORTS[number]
+import { belongsTo, hasMany, column, hasOne } from '@adonisjs/lucid/orm'
+import Event from '#app/Models/Event'
+import Player from './Player.js'
+import ScoringSystem from './ScoringSystem.js'
+import ScoutInfo from './ScoutInfo.js'
+import type { Sport, VolleyballScoutStash } from 'lionn-common'
+import { type BelongsTo } from "@adonisjs/lucid/types/relations";
+import { type HasMany } from "@adonisjs/lucid/types/relations";
+import { type HasOne } from "@adonisjs/lucid/types/relations";
 
 export default class Scout extends CamelCaseBaseModel {
   @column({ isPrimary: true })

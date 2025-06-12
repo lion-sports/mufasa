@@ -10,22 +10,22 @@ export const load = (async ({ parent, fetch, params, depends }) => {
 	let teamsService = new TeamsService({ fetch, token: parentData.token })
 	let team = await teamsService.show({ id: Number(params.teamId) })
 
-  let currentTeammate = team.teammates.find((teammate) => {
-    return parentData.user && teammate.userId == parentData.user.id
-  })
+	let currentTeammate = team.teammates.find((teammate) => {
+		return parentData.user && teammate.userId == parentData.user.id
+	})
 
-  if(!currentTeammate) throw error(500, 'could not find current teammate')
+	if (!currentTeammate) throw error(500, 'could not find current teammate')
 
-  const isOwner = !!team.ownerId && team.ownerId == currentTeammate.user.id
+	const isOwner = !!team.ownerId && team.ownerId == currentTeammate.user.id
 
-  let groupedPermissions = GroupsService.getGroupedPermissions({
-    owner: isOwner,
-    group: currentTeammate.group
-  })
+	let groupedPermissions = GroupsService.getGroupedPermissions({
+		owner: isOwner,
+		group: currentTeammate.group
+	})
 
 	return {
 		team,
-    groupedPermissions,
-    isOwner
+		groupedPermissions,
+		isOwner
 	}
 }) satisfies LayoutLoad

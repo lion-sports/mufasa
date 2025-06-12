@@ -4,9 +4,18 @@
 	import TeamsCalendarWithSidebar from '$lib/components/teams/TeamsCalendarWithSidebar.svelte'
 	import type { PageData } from './$types'
 
-	export let data: PageData
+	interface Props {
+		data: PageData
+	}
+
+	let { data }: Props = $props()
 </script>
 
-{#if !!$team}
-	<TeamsCalendarWithSidebar team={$team} teammate={$teammate} events={data.events} canCreate={data.groupedPermissions.event.create} />
+{#if $team}
+	<TeamsCalendarWithSidebar
+		team={$team}
+		teammate={$teammate}
+		events={data.events}
+		canCreate={data.groupedPermissions.event.create}
+	/>
 {/if}

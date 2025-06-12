@@ -24,5 +24,8 @@ export default defineConfig({
       public: resolve(__dirname, '/public/'),
     },
   },
-  plugins: [dts()],
+  plugins: [dts({
+    rollupTypes: true,
+    copyDtsFiles: true
+  })],
 });

@@ -1,16 +1,21 @@
 <script lang="ts">
-	import { Menubar as MenubarPrimitive } from "bits-ui";
-	import { cn } from "$lib/utils.js";
+	import { Menubar as MenubarPrimitive } from 'bits-ui'
+	import { cn } from '$lib/utils.js'
 
-	type $$Props = MenubarPrimitive.Props;
+	type $$Props = MenubarPrimitive.Props
 
-	let className: $$Props["class"] = undefined;
-	export { className as class };
+	interface Props {
+		class?: $$Props['class']
+		children?: import('svelte').Snippet
+		[key: string]: any
+	}
+
+	let { class: className = undefined, children, ...rest }: Props = $props()
 </script>
 
 <MenubarPrimitive.Root
-	class={cn("flex h-10 items-center space-x-1 rounded-md border bg-background p-1", className)}
-	{...$$restProps}
+	class={cn('flex h-10 items-center space-x-1 rounded-md border bg-background p-1', className)}
+	{...rest}
 >
-	<slot />
+	{@render children?.()}
 </MenubarPrimitive.Root>

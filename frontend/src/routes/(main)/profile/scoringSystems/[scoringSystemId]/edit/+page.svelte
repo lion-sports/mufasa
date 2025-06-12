@@ -1,49 +1,50 @@
 <script lang="ts">
-  import type { PageData } from './$types';
-  import ScoringSystemForm from '$lib/components/scoringSystems/ScoringSystemForm.svelte';
+	import type { PageData } from './$types'
+	import ScoringSystemForm from '$lib/components/scoringSystems/ScoringSystemForm.svelte'
 	import PageTitle from '$lib/components/common/PageTitle.svelte'
 	import type { ComponentProps } from 'svelte'
 	import ConfirmOrCancelButtons from '$lib/components/common/ConfirmOrCancelButtons.svelte'
-  import ScoringSystemsService, { type ScoringSystem } from '$lib/services/scoringSystems/scoringSystems.service';
+	import ScoringSystemsService, {
+		type ScoringSystem
+	} from '$lib/services/scoringSystems/scoringSystems.service'
 	import { goto } from '$app/navigation'
 
-  function isScoringSystemValid(
-    ss: DeepPartial<ScoringSystem>
-  ): ss is Parameters<ScoringSystemsService['update']>[0] {
-    return !!ss.id
-  }
+	function isScoringSystemValid(
+		ss: DeepPartial<ScoringSystem>
+	): ss is Parameters<ScoringSystemsService['update']>[0] {
+		return !!ss.id
+	}
 
-  export let data: PageData;
+	interface Props {
+		data: PageData
+	}
 
-  let formValid: boolean = false,
-      loadingSave: boolean = false
+	let { data = $bindable() }: Props = $props()
 
-  async function handleSubmit() {
-    loadingSave = true
+	let formValid: boolean = $state(false),
+		loadingSave: boolean = $state(false)
 
-    if(isScoringSystemValid(data.scoringSystem)) {
-      let service = new ScoringSystemsService({ fetch })
-      await service.update(data.scoringSystem)
-    }
+	async function handleSubmit() {
+		loadingSave = true
 
-    loadingSave = false
-    goto('/profile/scoringSystems')
-  }
+		if (isScoringSystemValid(data.scoringSystem)) {
+			let service = new ScoringSystemsService({ fetch })
+			await service.update(data.scoringSystem)
+		}
+
+		loadingSave = false
+		goto('/profile/scoringSystems')
+	}
 </script>
 
-<PageTitle
-  title={data.scoringSystem.name || "Modifica sistema di punteggio"}
-  prependVisible
+<PageTitle title={data.scoringSystem.name || 'Modifica sistema di punteggio'} prependVisible
 ></PageTitle>
 
-<ScoringSystemForm
-  bind:scoringSystem={data.scoringSystem}
-  bind:formValid
-></ScoringSystemForm>
+<ScoringSystemForm bind:scoringSystem={data.scoringSystem} bind:formValid></ScoringSystemForm>
 
 <ConfirmOrCancelButtons
-  confirmDisable={!formValid}
-  confirmText="Salva"
-  on:confirm-click={handleSubmit}
-  loading={loadingSave}
+	confirmDisable={!formValid}
+	confirmText="Salva"
+	on:confirm-click={handleSubmit}
+	loading={loadingSave}
 ></ConfirmOrCancelButtons>
