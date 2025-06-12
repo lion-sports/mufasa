@@ -118,7 +118,7 @@ services:
     ports:
       - mode: host
         target: 27017
-        published: 27018
+        published: 27019
     env_file:
       - mongo/.env.mongo
     volumes:
