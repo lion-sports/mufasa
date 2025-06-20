@@ -63,6 +63,8 @@ export default class UserSettingsManager {
         settings: {
           [validatedData.key]: validatedData.value
         }
+      }, {
+        client: trx
       })
     }
 

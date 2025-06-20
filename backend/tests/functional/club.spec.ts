@@ -29,7 +29,8 @@ test.group('Club', (group) => {
         name: 'some name',
         completeName: 'Some Complete Name',
         bio: 'A brief bio about the club',
-        sport: 'volleyball'
+        sport: 'volleyball',
+        public: true
       })
       .loginAs(loggedInUser)
 
@@ -40,6 +41,7 @@ test.group('Club', (group) => {
     assert.equal(club.completeName, 'Some Complete Name', 'should return the correct complete name')
     assert.equal(club.bio, 'A brief bio about the club', 'should return the correct bio')
     assert.equal(club.sport, 'volleyball', 'should return the correct sport')
+    assert.equal(club.public, true, 'should be public')
   })
 
   test('update existing club', async ({ client }) => {
@@ -54,7 +56,8 @@ test.group('Club', (group) => {
         name: 'UpdatedName',
         completeName: 'Updated Complete Name',
         bio: 'Updated bio about the club',
-        sport: 'volleyball'
+        sport: 'volleyball',
+        public: true
       })
       .loginAs(loggedInUser)
 
@@ -65,6 +68,7 @@ test.group('Club', (group) => {
     assert.equal(club.completeName, 'Updated Complete Name', 'should update the complete name')
     assert.equal(club.bio, 'Updated bio about the club', 'should update the bio')
     assert.equal(club.sport, 'volleyball', 'should update the sport')
+    assert.equal(club.public, true, 'should be public')
   })
 
   test('get a club', async ({ client }) => {
@@ -77,5 +81,43 @@ test.group('Club', (group) => {
     response.assertAgainstApiSpec()
     const club = response.body()
     assert.equal(newClub.id, club.id, 'should return the correct club')
+  })
+
+  test('get a public list of clubs', async ({ client }) => {
+    const publicClub = await ClubFactory.merge({ ownerId: loggedInUser.id, public: true }).create()
+    const privateClub = await ClubFactory.merge({ ownerId: loggedInUser.id, public: false }).create()
+
+    await publicClub.related('members').create({ userId: loggedInUser.id })
+    await privateClub.related('members').create({ userId: loggedInUser.id })
+
+    const response = await client.get('/public/clubs/list')
+
+    response.assertAgainstApiSpec()
+    const clubs = response.body().data
+
+    assert.isArray(clubs, 'should return an array of clubs')
+    assert.isTrue(clubs.some((club: any) => club.id === publicClub.id), 'should include the public club')
+    assert.isFalse(clubs.some((club: any) => club.id === privateClub.id), 'should not include the private club')
+  })
+
+  test('get a public club by name', async ({ client }) => {
+    const clubName = 'UniquePublicClubName'
+    const publicClub = await ClubFactory.merge({
+      ownerId: loggedInUser.id,
+      public: true,
+      name: clubName
+    }).create()
+
+    await publicClub.related('members').create({ userId: loggedInUser.id })
+
+    const response = await client
+      .get('/public/clubs/getByName')
+      .qs({ name: clubName })
+
+    response.assertAgainstApiSpec()
+    const club = response.body()
+    assert.exists(club, 'should return a club')
+    assert.equal(club.name, clubName, 'should return the correct club by name')
+    assert.isTrue(club.public, 'should be a public club')
   })
 })

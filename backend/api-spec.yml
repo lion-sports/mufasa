@@ -391,6 +391,9 @@ components:
           nullable: true
         sport:
           type: string
+        public:
+          type: boolean
+          nullable: true
         logoMediaId:
           type: integer
           nullable: true
@@ -428,6 +431,71 @@ components:
         updatedAt:
           type: string
           format: date-time
+    ClubSetting:
+      type: object
+      properties:
+        id:
+          type: integer
+        clubId:
+          type: integer
+        setting:
+          type: object
+          additionalProperties:
+            type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Place:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        userId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+        placeId:
+          type: integer
+        createdByUserId:
+          type: integer
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        place:
+          $ref: '#/components/schemas/Place'
+        createdByUser:
+          $ref: '#/components/schemas/User'
 
 paths:
   /auth/login:
@@ -1514,6 +1582,48 @@ paths:
       responses:
         '200':
           description: The requested user setting value.
+  /clubSettings/set:
+    post:
+      summary: Set a club setting.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clubId:
+                  type: number
+                key:
+                  type: string
+                  enum:
+                    - bookingsActive
+                    - bookingsConfirmationRequired
+                value:
+                  type: boolean
+                  nullable: true
+      responses:
+        '200':
+          description: The updated club setting.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClubSetting'
+  /clubSettings/get:
+    get:
+      summary: Get a club setting.
+      parameters:
+        - in: query
+          name: key
+          required: true
+          schema:
+            type: string
+            enum:
+              - bookingsActive
+              - bookingsConfirmationRequired
+      responses:
+        '200':
+          description: The requested club setting value.
   /eventSessions/{eventSessionId}/addEvents:
     post:
       summary: Attach events to an event session.
@@ -1603,3 +1713,168 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventSession'
+  /places:
+    post:
+      summary: Create a new place.
+      responses:
+        '200':
+          description: The new place.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place'
+    get:
+      summary: Returns a list of places.
+      responses:
+        '200':
+          description: The places visible to my user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Place'
+  /places/{placeId}:
+    get:
+      summary: Returns a certain place.
+      responses:
+        '200':
+          description: The place.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place'
+    put:
+      summary: Update a place.
+      responses:
+        '200':
+          description: The place updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Place'
+    delete:
+      summary: Delete a place.
+      responses:
+        '200':
+          description: No response.
+  /bookings:
+    get:
+      summary: Returns a list of bookings.
+      responses:
+        '200':
+          description: The bookings visible to my user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking'
+        '401':
+          description: Unauthorized
+  /bookings/request:
+    post:
+      summary: Request a new booking.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                placeId:
+                  type: integer
+                from:
+                  type: string
+                  format: date-time
+                to:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: The new booking.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  booking:
+                    $ref: '#/components/schemas/Booking'
+        '401':
+          description: Unauthorized
+  /bookings/{id}:
+    get:
+      summary: Returns a certain booking.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The booking.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '401':
+          description: Unauthorized
+  /bookings/{id}/confirm:
+    post:
+      summary: Confirm a booking.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The confirmed booking.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  booking:
+                    $ref: '#/components/schemas/Booking'
+        '401':
+          description: Unauthorized
+  /public/clubs/list:
+    get:
+      summary: Returns a list of public clubs.
+      responses:
+        '200':
+          description: The clubs that are public.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Club'
+  /public/clubs/getByName:
+    get:
+      summary: Returns a certain club by name.
+      responses:
+        '200':
+          description: The club.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Club'

@@ -42,7 +42,10 @@ const SolanaController = () => import('#controllers/Http/SolanaController')
 const TeammatesController = () => import('#controllers/Http/TeammatesController')
 const MediaController = () => import('#controllers/Http/MediaController')
 const ClubsController = () => import('#controllers/Http/ClubsController')
+const PlacesController = () => import('#controllers/Http/PlacesController')
 const UserSettingsController = () => import('#controllers/Http/UserSettingsController')
+const ClubSettingsController = () => import('#controllers/Http/ClubSettingsController')
+const BookingsController = () => import('#controllers/Http/BookingsController')
 
 router.post('/auth/login', [AuthController, 'login'])
 router.post('/auth/verifySignup', [AuthController, 'verifySignup'])
@@ -232,16 +235,39 @@ router.resource('dashboards', DashboardController)
 router.group(() => {
   router.get('/mine', [ClubsController, 'mine'])
   router.post('/:id/uploadMedia', [ClubsController, 'uploadMedia'])
-  router.get('/media/:id/downloadThumbnail', [ClubsController, 'downloadThumbnail'])
-  router.get('/media/:id/download', [ClubsController, 'downloadMedia'])
-  router.get('/media/:id/show', [ClubsController, 'showMedia'])
 })
   .use(middleware.auth({
     guards: ['api']
   }))
   .prefix('/clubs')
 
+router.group(() => {
+  router.get('/media/:id/downloadThumbnail', [ClubsController, 'downloadThumbnail'])
+  router.get('/media/:id/download', [ClubsController, 'downloadMedia'])
+  router.get('/media/:id/show', [ClubsController, 'showMedia'])
+}).prefix('/clubs')
+
 router.resource('clubs', ClubsController)
+  .only(['index', 'store', 'update', 'show', 'destroy'])
+  .middleware(
+    '*', middleware.auth({
+      guards: ['api']
+    })
+  )
+
+
+router.group(() => {
+  router.post('/:id/uploadMedia', [PlacesController, 'uploadMedia'])
+  router.get('/media/:id/downloadThumbnail', [PlacesController, 'downloadThumbnail'])
+  router.get('/media/:id/download', [PlacesController, 'downloadMedia'])
+  router.get('/media/:id/show', [PlacesController, 'showMedia'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/places')
+
+router.resource('places', PlacesController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
   .middleware(
     '*', middleware.auth({
@@ -280,6 +306,16 @@ router.group(() => {
   }))
   .prefix('/userSettings')
 
+
+router.group(() => {
+  router.post('/set', [ClubSettingsController, 'set'])
+  router.get('/get', [ClubSettingsController, 'get'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/clubSettings')
+
 router.group(() => {
   router.post('/:id/confirm', [ConvocationsController, 'confirm'])
   router.post('/:id/deny', [ConvocationsController, 'deny'])
@@ -292,3 +328,22 @@ router.group(() => {
 router.post('/solana/reward', [SolanaController, 'reward']).use(middleware.auth({
   guards: ['api']
 }))
+
+router.group(() => {
+  router.get('/', [BookingsController, 'index'])
+  router.post('/request', [BookingsController, 'request'])
+  router.get('/:id', [BookingsController, 'show'])
+  router.post('/:id/confirm', [BookingsController, 'confirm'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/bookings')
+
+
+router.group(() => {
+  router.group(() => {
+    router.get('/list', [ClubsController, 'publicList'])
+    router.get('/getByName', [ClubsController, 'getByName'])
+  }).prefix('clubs')
+}).prefix('public')

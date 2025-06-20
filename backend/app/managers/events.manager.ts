@@ -433,7 +433,7 @@ export default class EventsManager {
     })
 
     // check if event exists and belongs to user teams
-    const event = await Event.query()
+    const event = await Event.query({ client: trx })
       .where('events.id', params.data.id)
       .whereHas('team', (teamBuilder) => {
         teamBuilder.whereHas('teammateUsers', (tuBuilder) => {
