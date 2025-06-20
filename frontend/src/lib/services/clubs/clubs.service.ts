@@ -7,6 +7,7 @@ import type { Member } from '../members/members.service'
 import type { Group } from '../groups/groups.service'
 import type { Team } from '../teams/teams.service'
 import type { ClubSetting } from '../clubSettings/clubSettings.service'
+import type { Place } from '../places/places.service'
 
 export type Club = {
 	id: number
@@ -24,6 +25,7 @@ export type Club = {
   members?: Member[]
   groups?: Group[]
   teams?: Team[]
+  places?: Place[]
   setting?: ClubSetting
 	createdAt: Date
 	updatedAt: Date
@@ -123,7 +125,7 @@ export default class ClubsService extends FetchBasedService {
 
   public async getByName(params: { name: string }): Promise<Club> {
     let response = await this.client.get({
-      url: '/public/clubs/getByName',
+      url: '/clubs/getByName',
       params: {
         name: params.name
       }

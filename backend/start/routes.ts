@@ -245,7 +245,11 @@ router.group(() => {
   router.get('/media/:id/downloadThumbnail', [ClubsController, 'downloadThumbnail'])
   router.get('/media/:id/download', [ClubsController, 'downloadMedia'])
   router.get('/media/:id/show', [ClubsController, 'showMedia'])
-}).prefix('/clubs')
+  router.get('/publicList', [ClubsController, 'publicList'])
+  router.get('/getByName', [ClubsController, 'getByName'])
+})
+  .use(middleware.silentAuth())
+  .prefix('/clubs')
 
 router.resource('clubs', ClubsController)
   .only(['index', 'store', 'update', 'show', 'destroy'])
@@ -330,20 +334,17 @@ router.post('/solana/reward', [SolanaController, 'reward']).use(middleware.auth(
 }))
 
 router.group(() => {
-  router.get('/', [BookingsController, 'index'])
   router.post('/request', [BookingsController, 'request'])
-  router.get('/:id', [BookingsController, 'show'])
   router.post('/:id/confirm', [BookingsController, 'confirm'])
+  router.put('/:id', [BookingsController, 'update'])
+  router.delete('/:id', [BookingsController, 'destroy'])
 })
   .use(middleware.auth({
     guards: ['api']
   }))
   .prefix('/bookings')
 
-
 router.group(() => {
-  router.group(() => {
-    router.get('/list', [ClubsController, 'publicList'])
-    router.get('/getByName', [ClubsController, 'getByName'])
-  }).prefix('clubs')
-}).prefix('public')
+  router.get('/', [BookingsController, 'index'])
+  router.get('/:id', [BookingsController, 'show'])
+}).use(middleware.silentAuth()).prefix('/bookings')

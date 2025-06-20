@@ -7,11 +7,11 @@ import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { ModelObject, type ModelPaginatorContract } from '@adonisjs/lucid/types/model'
 import Booking from '#models/Booking'
 import { DateTime } from 'luxon'
-import { requestBookingValidator } from '#validators/bookings/CreateBookingValidator'
+import { requestBookingValidator, updateBookingValidator } from '#validators/bookings_validator'
+import Club from '#models/Club'
 
 export default class BookingsManager {
   @withTransaction
-  @withUser
   public async list(params: {
     data: {
       page: number
@@ -22,10 +22,11 @@ export default class BookingsManager {
     }
     context?: Context
   }): Promise<{ data: ModelObject[]; meta: ModelPaginatorContract<Booking> }> {
-    let user = params.context?.user as User
+    let user = params.context?.user
     let trx = params.context?.trx as TransactionClientContract
 
     let query = Booking.query({ client: trx })
+      .preload('place')
 
     if (!!params.data.filtersBuilder?.modifiers) {
       let filtersApplier = new FilterModifierApplier()
@@ -48,6 +49,76 @@ export default class BookingsManager {
     let results = await query.paginate(params.data.page, params.data.perPage)
 
     return results.toJSON()
+  }
+
+  @withTransaction
+  @withUser
+  public async update(params: {
+    data: {
+      id: number
+      placeId: number
+      from: DateTime
+      to: DateTime
+    }
+    context?: Context
+  }): Promise<Booking> {
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
+
+    let validatedData = await updateBookingValidator.validate(params.data)
+
+    let booking = await Booking.query({ client: trx })
+      .where('id', validatedData.id)
+      .firstOrFail()
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        ability: 'booking_update',
+        data: {
+          booking: { id: booking.id }
+        },
+      },
+      context: params.context
+    })
+
+    booking.merge({
+      ...validatedData,
+      from: !!validatedData.from ? DateTime.fromJSDate(validatedData.from) : undefined,
+      to: !!validatedData.to ? DateTime.fromJSDate(validatedData.to) : undefined
+    })
+    await booking.save()
+
+    return booking
+  }
+
+  @withTransaction
+  @withUser
+  public async destroy(params: {
+    data: {
+      id: number
+    }
+    context?: Context
+  }): Promise<void> {
+    let user = params.context?.user as User
+    let trx = params.context?.trx as TransactionClientContract
+
+    let booking = await Booking.query({ client: trx })
+      .where('id', params.data.id)
+      .firstOrFail()
+
+    await AuthorizationManager.canOrFail({
+      data: {
+        actor: user,
+        ability: 'booking_update',
+        data: {
+          booking: { id: booking.id }
+        },
+      },
+      context: params.context
+    })
+
+    await booking.delete()
   }
 
   @withTransaction
@@ -135,31 +206,45 @@ export default class BookingsManager {
   }
 
   @withTransaction
-  @withUser
   public async get(params: {
     data: {
       id: number
     }
     context?: Context
   }): Promise<Booking> {
-    let user = params.context?.user as User
+    let user = params.context?.user
     let trx = params.context?.trx as TransactionClientContract
 
     let booking = await Booking.query({ client: trx })
       .where('id', params.data.id)
       .firstOrFail()
 
-    await AuthorizationManager.canOrFail({
-      data: {
-        actor: user,
-        ability: 'booking_view',
+    if(!!user) {
+      await AuthorizationManager.canOrFail({
         data: {
-          booking
+          actor: user,
+          ability: 'booking_view',
+          data: {
+            booking
+          },
         },
-      },
-      context: params.context
-    })
-
-    return booking
+        context: params.context
+      })
+  
+      return booking
+    } else {
+      let bookingClub = await Club.query({ client: trx })
+        .whereHas('places', b => {
+          b.whereHas('bookings', b => {
+            b.where('id', params.data.id)
+          })
+        })
+        .firstOrFail()
+      
+      if(!bookingClub.public)
+        throw new Error('club is not public')
+      
+      return booking
+    }
   }
 }

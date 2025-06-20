@@ -356,6 +356,8 @@ export default class ClubsManager {
         })
         .preload('teammates')
       })
+      .preload('setting')
+      .preload('places')
       .preload('groups')
       .firstOrFail()
 

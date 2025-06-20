@@ -21,10 +21,6 @@
     let service = new PlacesMediaService({ fetch })
     return await service.getBlob(params)
   }
-
-  $effect(() => {
-    console.log($state.snapshot(placeState.place))
-  })
 </script>
 
 <div class="@container">

@@ -90,7 +90,7 @@ test.group('Club', (group) => {
     await publicClub.related('members').create({ userId: loggedInUser.id })
     await privateClub.related('members').create({ userId: loggedInUser.id })
 
-    const response = await client.get('/public/clubs/list')
+    const response = await client.get('/clubs/publicList')
 
     response.assertAgainstApiSpec()
     const clubs = response.body().data
@@ -111,7 +111,7 @@ test.group('Club', (group) => {
     await publicClub.related('members').create({ userId: loggedInUser.id })
 
     const response = await client
-      .get('/public/clubs/getByName')
+      .get('/clubs/getByName')
       .qs({ name: clubName })
 
     response.assertAgainstApiSpec()

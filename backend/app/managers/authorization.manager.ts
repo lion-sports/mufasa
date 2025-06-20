@@ -70,6 +70,7 @@ export type GroupedPermissions<Type = boolean> = {
   booking: {
     request: Type,
     confirm: Type,
+    update: Type,
     view: Type
   },
   scout: {
@@ -176,6 +177,9 @@ export type AbilityData = {
     club: Pick<Club, 'id'>
   },
   'booking_view': {
+    booking: Pick<Booking, 'id'>
+  },
+  'booking_update': {
     booking: Pick<Booking, 'id'>
   },
   'event_create': {
@@ -738,6 +742,22 @@ const AUTHORIZATION_CALLBACKS: {
       context
     })
   },
+  booking_update: async ({ data, context }) => {
+    let booking = await Booking.query({ client: context?.trx })
+      .where('id', data.data.booking.id)
+      .preload('place')
+      .firstOrFail()
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: data.actor,
+        club: { id: booking.place.clubId },
+        resource: 'booking',
+        action: 'update'
+      },
+      context
+    })
+  },
   booking_request: async ({ data, context }) => {
     return await AuthorizationHelpers.userCanInClub({
       data: {
@@ -1094,22 +1114,25 @@ export class AuthorizationHelpers {
     params: {
       data: {
         query: ModelQueryBuilderContract<typeof Place> | RelationSubQueryBuilderContract<typeof Place> | HasManyQueryBuilderContract<typeof Place, any>,
-        user: { id: number }
+        user?: { id: number }
       },
       context?: Context
     },
   ): ModelQueryBuilderContract<typeof Place> | RelationSubQueryBuilderContract<typeof Place> | HasManyQueryBuilderContract<typeof Place, any> {
     return params.data.query.where(placeBuilder => {
       placeBuilder.whereHas('club', b => {
-        return this.userCanInClubQuery({
-          data: {
-            user: params.data.user,
-            resource: 'place',
-            action: 'view',
-            query: b
-          },
-          context: params.context
-        })
+        if(!!params.data.user) {
+          this.userCanInClubQuery({
+            data: {
+              user: params.data.user,
+              resource: 'place',
+              action: 'view',
+              query: b
+            },
+            context: params.context
+          })
+        }
+        b.orWhere('public', true)
       })
     })
   }

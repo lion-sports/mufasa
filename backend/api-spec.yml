@@ -1830,6 +1830,20 @@ paths:
                 $ref: '#/components/schemas/Booking'
         '401':
           description: Unauthorized
+    put:
+      summary: Update a booking.
+      responses:
+        '200':
+          description: The booking updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+    delete:
+      summary: Delete a booking.
+      responses:
+        '200':
+          description: No response.
   /bookings/{id}/confirm:
     post:
       summary: Confirm a booking.
@@ -1851,7 +1865,7 @@ paths:
                     $ref: '#/components/schemas/Booking'
         '401':
           description: Unauthorized
-  /public/clubs/list:
+  /clubs/publicList:
     get:
       summary: Returns a list of public clubs.
       responses:
@@ -1868,7 +1882,7 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Club'
-  /public/clubs/getByName:
+  /clubs/getByName:
     get:
       summary: Returns a certain club by name.
       responses:

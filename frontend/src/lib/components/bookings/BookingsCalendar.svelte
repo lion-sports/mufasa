@@ -1,32 +1,29 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy'
-
-	import './EventsCalendar.css'
+	import './BookingsCalendar.css'
 	import Calendar from '@event-calendar/core'
 	import TimeGrid from '@event-calendar/time-grid'
 	import DayGrid from '@event-calendar/day-grid'
 	import Interaction from '@event-calendar/interaction'
 	import { DateTime } from 'luxon'
-	import type { Team } from '@/lib/services/teams/teams.service'
-	import type { Event } from '@/lib/services/events/events.service'
-	import { theme } from '@likable-hair/svelte'
-	import EventsService from '@/lib/services/events/events.service'
+	import { FilterBuilder, theme } from '@likable-hair/svelte'
 	import { goto } from '$app/navigation'
 	import qs from 'qs'
+	import BookingService, { type Booking } from '@/lib/services/bookings/bookings.service'
+	import type { Club } from '@/lib/services/clubs/clubs.service'
 
 	interface Props {
-		team?: Team | undefined
 		selectedDate?: Date | undefined
-		events: Event[]
+		bookings: Booking[]
+    club: Club
 		visibleMonth?: number
 		visibleYear?: number
 		canCreate?: boolean
 	}
 
 	let {
-		team = $bindable(),
+		club = $bindable(),
 		selectedDate = $bindable(),
-		events = $bindable(),
+		bookings = $bindable(),
 		visibleMonth = $bindable(DateTime.now().get('month') - 1),
 		visibleYear = $bindable(DateTime.now().get('year')),
 		canCreate = false
@@ -36,8 +33,8 @@
 	let plugins = [TimeGrid, DayGrid, Interaction]
 	let selectedView: string = $state('dayGridMonth')
 
-	run(() => {
-		if (!!visibleMonth && !!visibleYear && !!eventCalendar) {
+  $effect(() => {
+    if (!!visibleMonth && !!visibleYear && !!eventCalendar) {
 			eventCalendar.setOption(
 				'date',
 				DateTime.fromObject({ month: visibleMonth + 1, year: visibleYear })
@@ -45,7 +42,7 @@
 					.toJSDate()
 			)
 		}
-	})
+  })
 
 	let options: Calendar.Options = $derived({
 		view: selectedView,
@@ -56,35 +53,36 @@
 			// TODO set the cache to the current view
 		},
 		eventDrop: async (info: Calendar.EventDropInfo) => {
-			let originalEvent = info.event.extendedProps.originalEvent as Event
-			let service = new EventsService({ fetch })
+			let originalBooking = info.event.extendedProps.originalBooking as Booking
+			let service = new BookingService({ fetch })
+
 			await service.update({
-				id: originalEvent.id as number,
-				start: info.event.start,
-				end: info.event.end
+				id: originalBooking.id,
+				from: info.event.start,
+				to: info.event.end
 			})
 
-			let eventIndex = events.findIndex((e) => e.id === originalEvent.id)
-			if (eventIndex !== -1) {
-				events[eventIndex].start = info.event.start
-				events[eventIndex].end = info.event.end
+			let bookingIndex = bookings.findIndex((e) => e.id === originalBooking.id)
+			if (bookingIndex !== -1) {
+				bookings[bookingIndex].from = info.event.start
+				bookings[bookingIndex].to = info.event.end
 			}
 		},
-		eventResize: async (info: Calendar.EventResizeInfo) => {
-			let originalEvent = info.event.extendedProps.originalEvent as Event
-			let service = new EventsService({ fetch })
-			await service.update({
-				id: originalEvent.id as number,
-				start: info.event.start,
-				end: info.event.end
-			})
+    eventResize: async (info: Calendar.EventResizeInfo) => {
+      let originalBooking = info.event.extendedProps.originalBooking as Booking
+      let service = new BookingService({ fetch })
+      await service.update({
+        id: originalBooking.id,
+        from: info.event.start,
+        to: info.event.end
+      })
 
-			let eventIndex = events.findIndex((e) => e.id === originalEvent.id)
-			if (eventIndex !== -1) {
-				events[eventIndex].start = info.event.start
-				events[eventIndex].end = info.event.end
-			}
-		},
+      let bookingIndex = bookings.findIndex((b) => b.id === originalBooking.id)
+      if (bookingIndex !== -1) {
+        bookings[bookingIndex].from = info.event.start
+        bookings[bookingIndex].to = info.event.end
+      }
+    },
 		eventSources: [
 			{
 				events: (
@@ -92,25 +90,27 @@
 					success: (events: Array<Calendar.Event>) => void,
 					failure: (errorInfo: object) => void
 				) => {
-					let eventService = new EventsService({ fetch })
-					eventService
+          let builder = new FilterBuilder()
+          builder.where('from', '>=',  fetchInfo.start)
+            .where('from', '<=', fetchInfo.end)
+
+					let bookingService = new BookingService({ fetch })
+					bookingService
 						.list({
-							filters: {
-								from: fetchInfo.start,
-								to: fetchInfo.end,
-								team: team
-							}
+							page: 1,
+              perPage: 500,
+              filtersBuilder: builder
 						})
-						.then((listEvents) => {
+						.then((paginatedBookings) => {
 							success(
-								listEvents.map((e) => {
+								paginatedBookings.data.map((e) => {
 									return {
 										id: e.id,
-										start: e.start,
-										end: e.end,
-										resourceIds: e.convocations.map((e) => e.teammateId),
+										start: e.from,
+										end: e.to,
+										resourceIds: [e.placeId],
 										allDay: false,
-										title: e.name,
+										title: e.place.name,
 										editable: true,
 										startEditable: true,
 										durationEditable: true,
@@ -120,7 +120,7 @@
 										classNames: [],
 										styles: [],
 										extendedProps: {
-											originalEvent: e
+											originalBooking: e
 										}
 									}
 								})
@@ -132,7 +132,7 @@
 		],
 		eventAllUpdated: (info: { view: Calendar.View }) => {
 			if (!!eventCalendar)
-				events = eventCalendar.getEvents().map((e) => e.extendedProps.originalEvent) as any
+				bookings = eventCalendar.getEvents().map((e) => e.extendedProps.originalBooking) as any
 		},
 		editable: true,
 		height: 'calc(100vh - 260px)',
@@ -220,11 +220,8 @@
 			}
 		},
 		eventClick: (info: Calendar.EventClickInfo) => {
-			if (!!team && !!info.event.extendedProps.originalEvent) {
-				goto(`/teams/${team.id}/events/${info.event.id}`)
-			} else {
-				let originalEvent: Event = info.event.extendedProps.originalEvent as Event
-				goto(`/teams/${originalEvent.teamId}/events/${originalEvent.id}`)
+			if (!!club && !!info.event.extendedProps.originalBooking) {
+				goto(`/clubs/${club.id}/bookings/${info.event.id}`)
 			}
 		},
 		views: {
@@ -239,8 +236,8 @@
 		nowIndicator: true,
 		selectable: canCreate,
 		select: (info: Calendar.SelectInfo) => {
-			if (!!team) {
-				goto(`/teams/${team.id}/events/new?${qs.stringify({ start: info.start, end: info.end })}`)
+			if (!!club) {
+				goto(`/clubs/${club.id}/bookings/new?${qs.stringify({ start: info.start, end: info.end })}`)
 			}
 		}
 	})

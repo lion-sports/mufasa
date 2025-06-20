@@ -3,6 +3,7 @@
   import type { PageData } from './$types';
   import { Switch } from '@likable-hair/svelte';
 	import { addErrorToast, addSuccessToast } from '@/lib/components/ui/sonner'
+	import { invalidate } from '$app/navigation'
 
   let { data }: { data: PageData } = $props();
 
@@ -17,6 +18,7 @@
 
     try {
       await service.set({ clubId: data.club.id, key: 'bookingsActive', value: e.detail.value })
+      await reloadClub()
       showSuccessToast()
     } catch(e) {
       showErrorToast()
@@ -32,10 +34,15 @@
 
     try {
       await service.set({ clubId: data.club.id, key: 'bookingsActive', value: e.detail.value })
+      await reloadClub()
       showSuccessToast()
     } catch(e) {
       showErrorToast()
     }
+  }
+
+  async function reloadClub() {
+    await invalidate('club:detail')
   }
 
   function showSuccessToast() {
