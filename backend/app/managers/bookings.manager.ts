@@ -154,7 +154,7 @@ export default class BookingsManager {
       context: params.context
     })
 
-    let bookingsConfirmationRequired = place.club.setting.settings.bookingsConfirmationRequired
+    let bookingsConfirmationRequired = place.club.setting?.settings?.bookingsConfirmationRequired || false
 
     let booking = await Booking.create({
       placeId: place.id,
