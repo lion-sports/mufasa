@@ -1,5 +1,5 @@
-import { test } from '@japa/runner'
 import { assert } from 'chai'
+import { test } from '@japa/runner'
 import { BookingFactory, ClubFactory, PlaceFactory, UserFactory } from '#database/factories/index'
 import User from '#models/User'
 import Place from '#models/Place'
@@ -34,6 +34,7 @@ test.group('Booking', (group) => {
   test('request new booking', async ({ client }) => {
     const from = new Date(Date.now() + 3600 * 1000).toISOString()
     const to = new Date(Date.now() + 2 * 3600 * 1000).toISOString()
+
     const response = await client
       .post('/bookings/request')
       .json({

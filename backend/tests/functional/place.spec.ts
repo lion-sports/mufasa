@@ -41,7 +41,7 @@ test.group('Place', (group) => {
   })
 
   test('update existing place', async ({ client }) => {
-    const newPlace = await PlaceFactory.create()
+    const newPlace = await PlaceFactory.merge({ clubId: club.id }).create()
     const response = await client
       .put('/places/' + newPlace.id)
       .json({
@@ -56,7 +56,7 @@ test.group('Place', (group) => {
   })
 
   test('get a place', async ({ client }) => {
-    const newPlace = await PlaceFactory.create()
+    const newPlace = await PlaceFactory.merge({ clubId: club.id }).create()
     const response = await client.get('/places/' + newPlace.id).loginAs(loggedInUser)
 
     response.assertAgainstApiSpec()
