@@ -1,13 +1,16 @@
 import { DateTime } from 'luxon'
-import { belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import { belongsTo, column, hasMany, hasManyThrough, hasOne } from '@adonisjs/lucid/orm'
 import { CamelCaseBaseModel } from './CamelCaseBaseModel.js'
 import type { Sport } from 'lionn-common'
 import Media from './Media.js'
-import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo, HasMany, HasManyThrough, HasOne } from '@adonisjs/lucid/types/relations'
 import User from './User.js'
 import Group from './Group.js'
 import Member from './Member.js'
 import Team from './Team.js'
+import Place from './Place.js'
+import ClubSetting from './ClubSetting.js'
+import Booking from './Booking.js'
 
 export default class Club extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -24,6 +27,9 @@ export default class Club extends CamelCaseBaseModel {
 
   @column()
   public sport: Sport
+
+  @column()
+  public public: boolean
 
   @column()
   public logoMediaId: number | null
@@ -54,6 +60,9 @@ export default class Club extends CamelCaseBaseModel {
   })
   public groups: HasMany<typeof Group>
 
+  @hasManyThrough([() => Booking, () => Place])
+  public bookings: HasManyThrough<typeof Booking>
+
   @hasMany(() => Team, {
     foreignKey: 'clubId'
   })
@@ -63,6 +72,16 @@ export default class Club extends CamelCaseBaseModel {
     foreignKey: 'clubId'
   })
   public members: HasMany<typeof Member>
+
+  @hasMany(() => Place, {
+    foreignKey: 'clubId'
+  })
+  public places: HasMany<typeof Place>
+
+  @hasOne(() => ClubSetting, {
+    foreignKey: 'clubId',
+  })
+  declare setting: HasOne<typeof ClubSetting>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

@@ -50,6 +50,8 @@
 	let options: Calendar.Options = $derived({
 		view: selectedView,
 		events: [],
+    locale: 'IT-it',
+    firstDay: 1,
 		datesSet: (info: Calendar.DatesSetInfo) => {
 			// TODO set the cache to the current view
 		},

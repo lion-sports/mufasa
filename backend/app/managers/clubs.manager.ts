@@ -95,13 +95,44 @@ export default class ClubsManager {
   }
 
   @withTransaction
+  public async publicList(params: {
+    data: {
+      page: number
+      perPage: number
+      filtersBuilder?: {
+        modifiers: Modifier[]
+      }
+    }
+    context?: Context
+  }): Promise<{ data: ModelObject[]; meta: any }> {
+    let trx = params.context?.trx as TransactionClientContract
+
+    let query = Club.query({ client: trx })
+
+    if (!!params.data.filtersBuilder?.modifiers) {
+      let filtersApplier = new FilterModifierApplier()
+      filtersApplier.applyModifiers(query, params.data.filtersBuilder?.modifiers)
+    }
+
+    query.where('public', true)
+
+    if (!params.data.page) params.data.page = 1
+    if (!params.data.perPage) params.data.perPage = 100
+
+    let results = await query.paginate(params.data.page, params.data.perPage)
+
+    return results.toJSON()
+  }
+
+  @withTransaction
   @withUser
   public async create(params: {
     data: {
       name: string,
       completeName: string
       bio?: string
-      sport?: Sport
+      sport?: Sport,
+      public?: boolean
     }
     context?: Context
   }): Promise<Club> {
@@ -139,6 +170,7 @@ export default class ClubsManager {
       completeName?: string
       bio?: string
       sport?: Sport
+      public?: boolean
     }
     context?: Context
   }): Promise<Club> {
@@ -324,10 +356,67 @@ export default class ClubsManager {
         })
         .preload('teammates')
       })
+      .preload('setting')
+      .preload('places')
       .preload('groups')
       .firstOrFail()
 
     return club
+  }
+
+  @withTransaction
+  public async getByName(params: {
+    data: {
+      name: string
+    }
+    context?: Context
+  }): Promise<Club> {
+    let trx = params.context?.trx as TransactionClientContract
+    let user = params.context?.user
+
+    if(!!user) {
+      let club = await Club.query({ client: trx })
+        .where('name', params.data.name)
+        .preload('owner')
+        .preload('members', b => b.preload('group').preload('user'))
+        .preload('groups')
+        .preload('places')
+        .firstOrFail()
+
+      let canViewTeams = await AuthorizationManager.can({
+        data: {
+          actor: user,
+          ability: 'team_view',
+          data: {
+            club: { id: club.id }
+          },
+        },
+        context: params.context
+      })
+
+      await club.load('teams', b => {
+        b.if(!canViewTeams, b => {
+          return AuthorizationHelpers.viewableTeamsQuery({
+            data: {
+              query: b,
+              user
+            },
+            context: params.context
+          })
+        })
+        .preload('teammates')
+      })
+
+      return club
+    } else {
+      return await Club.query({ client: trx })
+        .where('name', params.data.name)
+        .where('public', true)
+        .preload('owner')
+        .preload('members', b => b.preload('group').preload('user'))
+        .preload('places')
+        .firstOrFail()
+    }
   }
 
   @withTransaction

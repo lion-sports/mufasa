@@ -12,8 +12,8 @@ export default class UpdateEventValidator {
     name: schema.string.nullableAndOptional([
       rules.maxLength(255)
     ]),
+    eventStatusId: schema.number.nullableAndOptional(),
     description: schema.string.nullableAndOptional(),
-    status: schema.enum.nullableAndOptional(['confirmed', 'notConfirmed']),
     updateAllFrequency: schema.boolean.nullableAndOptional()
   })
 

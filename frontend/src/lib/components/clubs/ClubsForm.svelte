@@ -7,7 +7,7 @@
 	import type { ClubState } from "@/lib/services/clubs/clubs.svelte"
 	import MediaImageUpload from "../media/MediaImageUpload.svelte"
 	import ClubsMediaService from "@/lib/services/media/clubsMedia.service"
-
+	import LabelAndCheckbox from "../common/LabelAndCheckbox.svelte"
 
   type Props = {
     clubState: ClubState
@@ -88,6 +88,14 @@
       <SportAutocomplete
         bind:sport={clubState.club.sport}
       ></SportAutocomplete>
+    </div>
+    <div class="pt-4">
+      <LabelAndCheckbox
+        label="Pubblico"
+        bind:value={clubState.club.public}
+        id="public"
+      ></LabelAndCheckbox>
+      <div class="text-xs opacity-40 mt-1 ml-[32px]">Seleziona per rendere visualizzabile il tuo club a tutti</div>
     </div>
     <div>
       <div class="font-medium mt-4 mb-2 ml-2">Bio</div>

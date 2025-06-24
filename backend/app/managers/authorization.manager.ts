@@ -13,6 +13,9 @@ import Scout from "#models/Scout";
 import ScoringSystem from "#models/ScoringSystem";
 import Convocation from "#models/Convocation";
 import Widget from "#models/Widget";
+import EventSession from "#models/EventSession";
+import Place from "#models/Place";
+import Booking from "#models/Booking";
 
 export type GroupedPermissions<Type = boolean> = {
   team: {
@@ -28,6 +31,9 @@ export type GroupedPermissions<Type = boolean> = {
     destroy: Type
     view: Type,
     invite: Type
+  },
+  clubSettings: {
+    set: Type
   },
   teammate: {
     update: Type,
@@ -54,6 +60,18 @@ export type GroupedPermissions<Type = boolean> = {
     update: Type,
     view: Type,
     destroy: Type,
+  },
+  place: {
+    create: Type,
+    update: Type,
+    view: Type,
+    destroy: Type,
+  },
+  booking: {
+    request: Type,
+    confirm: Type,
+    update: Type,
+    view: Type
   },
   scout: {
     manage: Type,
@@ -110,6 +128,9 @@ export type AbilityData = {
   'club_invite': {
     club: Pick<Club, 'id'>
   },
+  'clubSetting_set': {
+    club: Pick<Club, 'id'>
+  },
   'teammate_update': {
     team: Pick<Team, 'id'>
   } | {
@@ -136,7 +157,31 @@ export type AbilityData = {
   }
   'group_view': {
     group: Pick<Group, 'id'>
+  },
+  'place_create': {
+    club: Pick<Club, 'id'>
   }
+  'place_update': {
+    place: Pick<Place, 'id'>
+  }
+  'place_destroy': {
+    place: Pick<Place, 'id'>
+  }
+  'place_view': {
+    place: Pick<Place, 'id'>
+  },
+  'booking_request': {
+    club: Pick<Club, 'id'>
+  },
+  'booking_confirm': {
+    club: Pick<Club, 'id'>
+  },
+  'booking_view': {
+    booking: Pick<Booking, 'id'>
+  },
+  'booking_update': {
+    booking: Pick<Booking, 'id'>
+  },
   'event_create': {
     team: Pick<Team, 'id'>
   },
@@ -311,11 +356,12 @@ const AUTHORIZATION_CALLBACKS: {
     const clubs = await Club.query({ client: context?.trx })
       .where(b => {
         b.whereHas('owner', b => b.where('users.id', data.actor.id))
-        .orWhereHas('members', b => b.where('userId', data.actor.id))
-        .orWhereHas('teams', b => {
-          b.whereHas('teammates', b => b.where('userId', data.actor.id))
-            .orWhere('ownerId', data.actor.id)
-        })
+          .orWhereHas('members', b => b.where('userId', data.actor.id))
+          .orWhereHas('teams', b => {
+            b.whereHas('teammates', b => b.where('userId', data.actor.id))
+              .orWhere('ownerId', data.actor.id)
+          })
+          .orWhere('public', true)
       })
       .where('id', data.data.club.id)
 
@@ -328,6 +374,17 @@ const AUTHORIZATION_CALLBACKS: {
         club: { id: data.data.club.id },
         resource: 'club',
         action: 'invite'
+      },
+      context
+    })
+  },
+  clubSetting_set: async ({ data, context }) => {
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: data.actor,
+        club: { id: data.data.club.id },
+        resource: 'clubSettings',
+        action: 'set'
       },
       context
     })
@@ -604,6 +661,121 @@ const AUTHORIZATION_CALLBACKS: {
         team: { id: shirt.teammate.teamId },
         action: 'destroy',
         resource: 'shirt'
+      },
+      context
+    })
+  },
+  place_create: async ({ data, context }) => {
+    let club = await Club.query({
+      client: context?.trx
+    }).where('id', data.data.club?.id)
+      .firstOrFail()
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: data.actor,
+        club: { id: club.id },
+        action: 'create',
+        resource: 'place'
+      },
+      context
+    })
+  },
+  place_update: async ({ data, context }) => {
+    let place = await Place.query({ client: context?.trx })
+      .where('id', data.data.place.id)
+      .firstOrFail()
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: data.actor,
+        club: { id: place.clubId },
+        action: 'update',
+        resource: 'place'
+      },
+      context
+    })
+  },
+  place_view: async ({ data, context }) => {
+    let place = await Place.query({ client: context?.trx })
+      .where('id', data.data.place.id)
+      .firstOrFail()
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: data.actor,
+        club: { id: place.clubId },
+        action: 'view',
+        resource: 'place'
+      },
+      context
+    })
+  },
+  place_destroy: async ({ data, context }) => {
+    let place = await Place.query({ client: context?.trx })
+      .where('id', data.data.place.id)
+      .firstOrFail()
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: data.actor,
+        club: { id: place.clubId },
+        action: 'destroy',
+        resource: 'place'
+      },
+      context
+    })
+  },
+  booking_view: async ({ data, context }) => {
+    let booking = await Booking.query({ client: context?.trx })
+      .where('id', data.data.booking.id)
+      .preload('place')
+      .firstOrFail()
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: data.actor,
+        club: { id: booking.place.clubId },
+        resource: 'booking',
+        action: 'view'
+      },
+      context
+    })
+  },
+  booking_update: async ({ data, context }) => {
+    let booking = await Booking.query({ client: context?.trx })
+      .where('id', data.data.booking.id)
+      .preload('place')
+      .firstOrFail()
+
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: data.actor,
+        club: { id: booking.place.clubId },
+        resource: 'booking',
+        action: 'update'
+      },
+      context
+    })
+  },
+  booking_request: async ({ data, context }) => {
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: data.actor,
+        club: { id: data.data.club.id },
+        resource: 'booking',
+        action: 'request'
+      },
+      context
+    })
+  },
+  booking_confirm: async ({ data, context }) => {
+    return await AuthorizationHelpers.userCanInClub({
+      data: {
+        user: data.actor,
+        club: { id: data.data.club.id },
+        resource: 'booking',
+        action: 'confirm'
       },
       context
     })
@@ -911,5 +1083,57 @@ export class AuthorizationHelpers {
     }).where('users.id', params.data.user.id)
 
     return userHasGroup.length != 0
+  }
+
+  public static viewableEventSessionsQuery(
+    params: {
+      data: {
+        query: ModelQueryBuilderContract<typeof EventSession> | RelationSubQueryBuilderContract<typeof EventSession> | HasManyQueryBuilderContract<typeof EventSession, any>,
+        user: { id: number }
+      },
+      context?: Context
+    },
+  ): ModelQueryBuilderContract<typeof EventSession> | RelationSubQueryBuilderContract<typeof EventSession> | HasManyQueryBuilderContract<typeof EventSession, any> {
+    return params.data.query.where(eventSessionBuilder => {
+      eventSessionBuilder.where('ownedByUserId', params.data.user.id)
+        .orWhere(b => {
+          b.whereHas('team', b => {
+              return this.viewableTeamsQuery({
+                data: {
+                  query: b,
+                  user: params.data.user
+                },
+                context: params.context
+              })
+            })
+        })
+    })
+  }
+
+  public static viewablePlacesQuery(
+    params: {
+      data: {
+        query: ModelQueryBuilderContract<typeof Place> | RelationSubQueryBuilderContract<typeof Place> | HasManyQueryBuilderContract<typeof Place, any>,
+        user?: { id: number }
+      },
+      context?: Context
+    },
+  ): ModelQueryBuilderContract<typeof Place> | RelationSubQueryBuilderContract<typeof Place> | HasManyQueryBuilderContract<typeof Place, any> {
+    return params.data.query.where(placeBuilder => {
+      placeBuilder.whereHas('club', b => {
+        if(!!params.data.user) {
+          this.userCanInClubQuery({
+            data: {
+              user: params.data.user,
+              resource: 'place',
+              action: 'view',
+              query: b
+            },
+            context: params.context
+          })
+        }
+        b.orWhere('public', true)
+      })
+    })
   }
 }
