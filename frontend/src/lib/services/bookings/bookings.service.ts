@@ -3,7 +3,7 @@ import type { FilterBuilder } from '@likable-hair/svelte'
 import type { User } from '../auth/auth.service'
 import type { Place } from '../places/places.service'
 
-export const BOOKING_STATUSES = ['requested', 'confirmed'] as const
+export const BOOKING_STATUSES = ['requested', 'confirmed', 'rejected'] as const
 export type BookingStatus = typeof BOOKING_STATUSES[number]
 
 export type Booking = {
@@ -35,7 +35,7 @@ export default class BookingService extends FetchBasedService {
 			params: {
 				page: params.page,
         perPage: params.perPage,
-        filtersBuilder: params.filtersBuilder
+        filtersBuilder: params.filtersBuilder?.toJson()
 			}
 		})
 
@@ -51,6 +51,17 @@ export default class BookingService extends FetchBasedService {
     let response = await this.client.delete({
       url: '/bookings/' + params.id
     })
+
+    return response
+  }
+
+  public async get(params: { id: number }): Promise<Booking> {
+    let response = await this.client.get({
+      url: '/bookings/' + params.id
+    })
+
+    response.from = new Date(response.from)
+    response.to = new Date(response.to)
 
     return response
   }

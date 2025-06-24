@@ -3,6 +3,7 @@
   import type { PageData } from './$types';
   import BookingsCalendar from '@/lib/components/bookings/BookingsCalendar.svelte';
 	import { Icon } from '@likable-hair/svelte'
+	import { goto } from '$app/navigation'
 
   let { data }: { data: PageData } = $props();
 </script>
@@ -20,5 +21,9 @@
 
 <BookingsCalendar
   club={data.club}
+  places={data.club.places}
   bookings={data.paginatedBookings.data}
+  bookingClick={({ booking }) => {
+		goto(`/clubs/${data.club.id}/bookings/${booking.id}/edit`)
+  }}
 ></BookingsCalendar>

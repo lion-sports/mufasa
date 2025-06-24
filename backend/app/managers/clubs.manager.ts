@@ -380,6 +380,7 @@ export default class ClubsManager {
         .preload('owner')
         .preload('members', b => b.preload('group').preload('user'))
         .preload('groups')
+        .preload('places')
         .firstOrFail()
 
       let canViewTeams = await AuthorizationManager.can({
@@ -413,6 +414,7 @@ export default class ClubsManager {
         .where('public', true)
         .preload('owner')
         .preload('members', b => b.preload('group').preload('user'))
+        .preload('places')
         .firstOrFail()
     }
   }

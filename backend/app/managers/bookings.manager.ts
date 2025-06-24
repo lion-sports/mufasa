@@ -27,7 +27,7 @@ export default class BookingsManager {
 
     let query = Booking.query({ client: trx })
       .preload('place')
-
+      
     if (!!params.data.filtersBuilder?.modifiers) {
       let filtersApplier = new FilterModifierApplier()
       filtersApplier.applyModifiers(query, params.data.filtersBuilder?.modifiers)
@@ -140,6 +140,7 @@ export default class BookingsManager {
 
     let place = await Place.query({ client: trx })
       .where('id', validatedData.placeId)
+      .preload('club', b => b.preload('setting'))
       .firstOrFail()
 
     await AuthorizationManager.canOrFail({
@@ -153,12 +154,14 @@ export default class BookingsManager {
       context: params.context
     })
 
+    let bookingsConfirmationRequired = place.club.setting.settings.bookingsConfirmationRequired
+
     let booking = await Booking.create({
       placeId: place.id,
       createdByUserId: user.id,
       from: DateTime.fromJSDate(validatedData.from),
       to: DateTime.fromJSDate(validatedData.to),
-      status: 'requested'
+      status: bookingsConfirmationRequired ? 'requested' : 'confirmed'
     })
 
     return {
@@ -217,6 +220,7 @@ export default class BookingsManager {
 
     let booking = await Booking.query({ client: trx })
       .where('id', params.data.id)
+      .preload('place')
       .firstOrFail()
 
     if(!!user) {

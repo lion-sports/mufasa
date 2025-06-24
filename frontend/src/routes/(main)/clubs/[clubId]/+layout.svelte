@@ -55,7 +55,8 @@
   let headerHidden = $derived(
 		page.url.pathname.endsWith('/places/create') ||
 		/\/places\/\d+\/edit$/.test(page.url.pathname) ||
-    page.url.pathname.endsWith('/bookings/new')
+    page.url.pathname.endsWith('/bookings/new') ||
+    /\/bookings\/\d+\/edit$/.test(page.url.pathname)
 	)
 
 </script>

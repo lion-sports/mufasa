@@ -1,14 +1,6 @@
-import ClubsService from '@/lib/services/clubs/clubs.service';
+import { redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
-export const load = (async ({ fetch, params }) => {
-  let service = new ClubsService({ fetch })
-
-  let club = await service.getByName({
-    name: params.clubName
-  })
-
-  return {
-    club
-  };
+export const load = (async ({ params }) => {
+  throw redirect(302, `/public/clubs/${params.clubName}/general`)
 }) satisfies PageLoad;

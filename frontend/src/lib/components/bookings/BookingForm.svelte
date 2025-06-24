@@ -23,6 +23,7 @@
       DateTime.fromJSDate(bookingState.booking.from).toFormat('HH:mm') : 
       undefined
   })
+
   let formattedTo: string | undefined = $derived.by(() => {
     return !!bookingState.booking.to ? 
       DateTime.fromJSDate(bookingState.booking.to).toFormat('HH:mm') : 
