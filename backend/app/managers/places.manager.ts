@@ -118,6 +118,7 @@ export default class PlacesManager {
       .where('id', params.data.id)
       .firstOrFail()
 
+    console.log('zio porco bastardo', user.toJSON())
     await AuthorizationManager.canOrFail({
       data: {
         actor: user,
@@ -128,6 +129,7 @@ export default class PlacesManager {
       },
       context: params.context
     })
+    console.log('zio porco bastardo posso')
 
     place.merge({
       ...validatedData

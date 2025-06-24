@@ -936,6 +936,7 @@ export default class AuthorizationManager {
     context?: Context
   }): Promise<boolean> {
     let results = await AuthorizationManager.can(params)
+    if(!results) throw new Error(`cannot perform operation: ${params.data.ability}`)
     return results
   }
 }
@@ -1082,6 +1083,8 @@ export class AuthorizationHelpers {
         })
     }).where('users.id', params.data.user.id)
 
+
+    console.log(userHasGroup.length != 0)
     return userHasGroup.length != 0
   }
 
