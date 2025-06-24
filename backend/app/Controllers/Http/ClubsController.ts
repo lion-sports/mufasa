@@ -185,6 +185,7 @@ export default class ClubsController {
 
       return mediaInfo.buffer
     } catch (e) {
+      console.log(e)
       if (e.code === 'E_CANNOT_READ_FILE') {
         response.status(404)
       } else throw e
@@ -193,22 +194,25 @@ export default class ClubsController {
 
   public async downloadThumbnail({ request, params, response, auth }: HttpContext) {
     const manager = new MediaManager()
-    if (!auth.user) throw new Error('user is not defined')
 
     let club = await Club.query()
       .where('logoMediaId', params.id)
       .orWhere('headerMediaId', params.id)
       .firstOrFail()
 
-    await AuthorizationManager.canOrFail({
-      data: {
-        actor: auth.user,
-        ability: 'club_view',
+    if (!!auth.user) {
+      await AuthorizationManager.canOrFail({
         data: {
-          club
-        },
-      }
-    })
+          actor: auth.user,
+          ability: 'club_view',
+          data: {
+            club
+          },
+        }
+      })
+    } else if (!auth.user && !club.public) {
+      throw new Error('cannot view image')
+    }
 
     try {
       let mediaInfo = await manager.downloadThumbnail({
