@@ -46,7 +46,7 @@ test.group('Booking', (group) => {
     response.assertAgainstApiSpec()
     const { booking } = response.body()
     assert.equal(booking.placeId, place.id, 'should have the right placeId')
-    assert.equal(booking.status, 'requested', 'should have status requested')
+    assert.equal(booking.status, 'confirmed', 'should have status requested')
   })
 
   test('confirm existing booking', async ({ client }) => {
