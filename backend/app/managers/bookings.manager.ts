@@ -148,7 +148,7 @@ export default class BookingsManager {
         actor: user,
         ability: 'booking_request',
         data: {
-          club: { id: place.clubId }
+          club: place.club
         },
       },
       context: params.context

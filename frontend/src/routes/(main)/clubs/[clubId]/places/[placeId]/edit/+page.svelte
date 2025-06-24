@@ -27,7 +27,7 @@
         ...placeState.validatedPlace,
       })
 
-      if(!!placeState.validatedPlace.cover) {
+      if(!!placeState.place.cover?.[0]) {
         await service.uploadMedia({
           placeId: createdPlace.id,
           cover: placeState.place.cover?.[0]

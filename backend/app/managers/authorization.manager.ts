@@ -936,6 +936,7 @@ export default class AuthorizationManager {
     context?: Context
   }): Promise<boolean> {
     let results = await AuthorizationManager.can(params)
+    if(!results) throw new Error(`cannot perform operation: ${params.data.ability}`)
     return results
   }
 }
@@ -954,19 +955,20 @@ export class AuthorizationHelpers {
   ): Promise<boolean> {
     const userHasGroup = await User.query({
       client: params.context?.trx
-    }).whereHas('teams', (builder) => {
-      builder
-        .where('teams.id', params.data.team.id)
-        .where(teamsBuilder => {
-          teamsBuilder
-            .whereHas('groups', groupsBuilder => {
-              groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
-                resource: params.data.resource,
-                action: params.data.action.toString()
+    }).where((b) => {
+      b.orWhereHas('teams', (builder) => {
+        builder
+          .where('teams.id', params.data.team.id)
+          .where(teamsBuilder => {
+            teamsBuilder
+              .whereHas('groups', groupsBuilder => {
+                groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
+                  resource: params.data.resource,
+                  action: params.data.action.toString()
+                })
               })
-            })
-            .orWhere('ownerId', params.data.user.id)
-        })
+          })
+      }).orWhereHas('ownedTeams', b => b.where('teams.id', params.data.team.id))
     }).where('users.id', params.data.user.id)
 
     return userHasGroup.length != 0
@@ -1038,7 +1040,7 @@ export class AuthorizationHelpers {
   ): ModelQueryBuilderContract<typeof Team> | RelationSubQueryBuilderContract<typeof Team> | HasManyQueryBuilderContract<typeof Team, any>{
     return params.data.query.where(teamsBuilder => {
         teamsBuilder.where(b => {
-          b.whereHas('owner', b => b.where('users.id', params.data.user.id))
+          b.orWhereHas('owner', b => b.where('users.id', params.data.user.id))
             .orWhereHas('teammates', b => b.where('userId', params.data.user.id))
             .orWhereHas('club', b => {
               return AuthorizationHelpers.userCanInClubQuery({
@@ -1067,19 +1069,20 @@ export class AuthorizationHelpers {
   ): Promise<boolean> {
     const userHasGroup = await User.query({
       client: params.context?.trx
-    }).whereHas('clubs', (builder) => {
-      builder
-        .where('clubs.id', params.data.club.id)
-        .where(builder => {
-          builder
-            .whereHas('groups', groupsBuilder => {
-              groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
-                resource: params.data.resource,
-                action: params.data.action.toString()
+    }).where(b => {
+      b.whereHas('clubs', (builder) => {
+        builder
+          .where('clubs.id', params.data.club.id)
+          .where(builder => {
+            builder
+              .whereHas('groups', groupsBuilder => {
+                groupsBuilder.whereRaw("cast(groups.cans->:resource->>:action as BOOLEAN) = true", {
+                  resource: params.data.resource,
+                  action: params.data.action.toString()
+                })
               })
-            })
-            .orWhere('ownerId', params.data.user.id)
-        })
+          })
+      }).orWhereHas('ownedClubs', b => b.where('clubs.id', params.data.club.id))
     }).where('users.id', params.data.user.id)
 
     return userHasGroup.length != 0
