@@ -2,13 +2,13 @@ name: frontend-ci
 
 on:
   workflow_dispatch:
-  push:
-    branches: ["master", "testing"]
-    tags:
-      - "v*"
-    paths:
-      - .github/frontend-ci.yml
-      - frontend/**
+#   push:
+#     branches: ["master", "testing"]
+#     tags:
+#       - "v*"
+#     paths:
+#       - .github/frontend-ci.yml
+#       - frontend/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

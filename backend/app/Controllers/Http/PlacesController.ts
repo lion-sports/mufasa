@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import env from '#start/env'
 import PlacesManager from '#app/managers/places.manager'
 import app from '@adonisjs/core/services/app'
 import { cuid } from '@adonisjs/core/helpers'
@@ -89,7 +90,7 @@ export default class PlacesController {
           from: {
             path: path.join(coverTmpPath, cover.clientName),
           },
-          driveName: 'local',
+          driveName: env.get('DRIVE_DISK', 'local'),
         } : undefined,
       }
     })
