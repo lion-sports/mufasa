@@ -10,6 +10,7 @@ import { type HasMany } from "@adonisjs/lucid/types/relations";
 import { type ManyToMany } from "@adonisjs/lucid/types/relations";
 import Club from './Club.js';
 import { Sport } from 'lionn-common';
+import EventStatus from './EventStatus.js';
 
 export default class Team extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -41,6 +42,11 @@ export default class Team extends CamelCaseBaseModel {
     foreignKey: 'teamId'
   })
   public invitations: HasMany<typeof Invitation>
+
+  @hasMany(() => EventStatus, {
+    foreignKey: 'teamId'
+  })
+  public eventStatuses: HasMany<typeof EventStatus>
 
   @column()
   public ownerId: number

@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy'
-
 	import { Button } from '@likable-hair/svelte'
 	import { createEventDispatcher } from 'svelte'
 	import { CircularLoader } from '@likable-hair/svelte'

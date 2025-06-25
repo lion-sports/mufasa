@@ -1,42 +1,34 @@
 <script lang="ts">
 	import { Icon } from '@likable-hair/svelte'
   import type { LayoutData } from './$types';
-	import MediaImage from '@/lib/components/media/MediaImage.svelte'
-	import ClubsMediaService from '@/lib/services/media/clubsMedia.service'
-	import PageTitle from '@/lib/components/common/PageTitle.svelte'
 	import StandardTabSwitcher from '@/lib/components/common/StandardTabSwitcher.svelte'
 	import type { ComponentProps } from 'svelte'
 	import { page } from '$app/state'
 	import { goto } from '$app/navigation'
 	import { SPORT_ICON } from '@/lib/services/sport'
+	import ClubHeader from '@/lib/components/clubs/ClubHeader.svelte'
 
   let { data, children }: { 
     data: LayoutData,
     children?: import('svelte').Snippet
   } = $props();
 
-  async function fetchBlob({
-    mediaId, 
-    thumbnail
-  }: {
-    mediaId: number,
-    thumbnail: boolean
-  }) {
-    let mediaService = new ClubsMediaService({ fetch })
-    if(thumbnail) {
-      return await mediaService.getThumbnailBlob({ mediaId })
-    } else {
-      return await mediaService.getBlob({ mediaId })
-    }
-  }
-
-  let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = [
+  let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = $derived.by(() => {
+    let tabs: ComponentProps<typeof StandardTabSwitcher>['tabs'] = [
       { name: 'general', icon: 'mdi-card-account-details', label: 'Generale'},
       { name: 'members', icon: 'mdi-account-multiple', label: 'Membri'},
       { name: 'teams', icon: SPORT_ICON[data.club.sport || 'none'], label: 'Teams'},
       { name: 'invitations', icon: 'mdi-email', label: 'Inviti'},
-      { name: 'settings', icon: 'mdi-cog', label: 'Impostazioni'}
-    ],
+      { name: 'places', icon: 'mdi-map-marker', label: 'Campi e palestre'},
+    ]
+
+    if(data.club.setting?.settings.bookingsActive) {
+      tabs.push({ name: 'bookings', icon: 'mdi-ticket-confirmation', label: 'Prenotazioni' })
+    }
+
+    tabs.push({ name: 'settings', icon: 'mdi-cog', label: 'Impostazioni'})
+    return tabs
+  }),
     selectedTab: ComponentProps<typeof StandardTabSwitcher>['selected'] = $derived.by(() => {
       let selectedTab = 'general'
       let baseUrl = `/clubs/${data.club.id}`
@@ -44,7 +36,9 @@
       else if(page.url.pathname.startsWith(`${baseUrl}/members`)) selectedTab = 'members'
       else if(page.url.pathname.startsWith(`${baseUrl}/settings`)) selectedTab = 'settings'
       else if(page.url.pathname.startsWith(`${baseUrl}/teams`)) selectedTab = 'teams'
+      else if(page.url.pathname.startsWith(`${baseUrl}/bookings`)) selectedTab = 'bookings'
       else if(page.url.pathname.startsWith(`${baseUrl}/invitations`)) selectedTab = 'invitations'
+      else if(page.url.pathname.startsWith(`${baseUrl}/places`)) selectedTab = 'places'
       return selectedTab
     })
 
@@ -53,56 +47,38 @@
     else if(e.detail.tab.name == 'members') goto((`/clubs/${data.club.id}/members`))
     else if(e.detail.tab.name == 'settings') goto((`/clubs/${data.club.id}/settings`))
     else if(e.detail.tab.name == 'teams') goto((`/clubs/${data.club.id}/teams`))
+    else if(e.detail.tab.name == 'bookings') goto((`/clubs/${data.club.id}/bookings`))
     else if(e.detail.tab.name == 'invitations') goto((`/clubs/${data.club.id}/invitations`))
+    else if(e.detail.tab.name == 'places') goto((`/clubs/${data.club.id}/places`))
   }
+
+  let headerHidden = $derived(
+		page.url.pathname.endsWith('/places/create') ||
+		/\/places\/\d+\/edit$/.test(page.url.pathname) ||
+    page.url.pathname.endsWith('/bookings/new') ||
+    /\/bookings\/\d+\/edit$/.test(page.url.pathname)
+	)
 
 </script>
 
-<div class="rounded h-[40vh] header-image bg-[rgb(var(--global-color-background-300))] flex justify-center items-center overflow-hidden">
-  {#if !!data.club.headerMediaId}
-    <MediaImage
-      mediaId={data.club.headerMediaId}
-      --media-image-width="100%"
-      --media-image-height="100%"
-      {fetchBlob}
-    ></MediaImage>
-  {/if}
-</div>
-<div class="mt-[-132px] w-full">
-  <div class="flex items-center md:items-start md:justify-start md:pl-12 w-full gap-[24px] md:gap-[64px] flex-col md:flex-row">
-    <div class="h-[300px] w-[300px] dark:bg-[rgb(var(--global-color-primary-700))] bg-[rgb(var(--global-color-primary-400))] rounded-full overflow-hidden">
-      {#if !!data.club.logoMediaId}
-        <MediaImage
-          mediaId={data.club.logoMediaId}
-          --media-image-width="100%"
-          --media-image-height="100%"
-          {fetchBlob}
-        ></MediaImage>
-      {:else}
-        <div class="w-full h-full flex justify-center items-center">
-          <Icon name="mdi-domain" --icon-size="80px" --icon-color="rgb(var(--global-color-primary-foreground))"></Icon>
-        </div>
-      {/if}
-    </div>
-    <div class="md:mt-[148px] flex-grow md:w-auto w-full">
-      <PageTitle
-        title={data.club.completeName}
-        subtitle={"@" + data.club.name}
-        prependVisible
-        prependRoute="/clubs"
-      >
-        {#snippet append()}
-          <div class="flex mr-4">
-            {#if data.groupedPermissions.club.update}
-              <a href={`/clubs/${data.club.id}/edit`}>
-                <Icon name="mdi-pencil"></Icon>
-              </a>
-            {/if}
-          </div>
-        {/snippet}
-      </PageTitle>
-    </div>
-	</div>
+{#if headerHidden}
+  <div class="mt-2">
+    {@render children?.()}
+  </div>
+{:else}
+  <ClubHeader
+    club={data.club}
+  >
+    {#snippet append()}
+      <div class="flex mr-4">
+        {#if data.groupedPermissions.club.update}
+          <a href={`/clubs/${data.club.id}/edit`}>
+            <Icon name="mdi-pencil"></Icon>
+          </a>
+        {/if}
+      </div>
+    {/snippet}
+  </ClubHeader>
   <div class="mt-2">
     <StandardTabSwitcher
       {tabs}
@@ -113,4 +89,4 @@
   <div class="mt-2">
     {@render children?.()}
   </div>
-</div>
+{/if}

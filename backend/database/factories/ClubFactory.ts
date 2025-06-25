@@ -7,7 +7,8 @@ export default Factory.define(Club, ({ faker }) => {
     completeName: faker.company.name(),
     bio: faker.lorem.paragraph(3),
     sport: 'volleyball' as const,
-    logoMediaId: null
+    logoMediaId: null,
+    public: false
   }
 })
   .build()

@@ -1,9 +1,12 @@
 import User from '#app/Models/User';
+import Event from './Event.js';
 import { DateTime } from 'luxon'
-import { column, beforeCreate, belongsTo } from '@adonisjs/lucid/orm'
-import { cuid } from '@adonisjs/core/helpers'
+import { column, belongsTo, manyToMany, hasOne } from '@adonisjs/lucid/orm'
 import { CamelCaseBaseModel } from './CamelCaseBaseModel.js';
-import { type BelongsTo } from "@adonisjs/lucid/types/relations";
+import { type HasOne, type BelongsTo, type ManyToMany } from "@adonisjs/lucid/types/relations";
+import Team from './Team.js';
+import AggregationStrategy from './AggregationStrategy.js';
+import EventStatus from './EventStatus.js';
 
 export default class EventSession extends CamelCaseBaseModel {
   @column({ isPrimary: true })
@@ -23,10 +26,35 @@ export default class EventSession extends CamelCaseBaseModel {
   })
   public ownedBy: BelongsTo<typeof User>
 
-  @beforeCreate()
-  public static async generateUid(eventSession: EventSession) {
-    eventSession.uid = cuid()
-  }
+  @column()
+  public teamId: number
+
+  @belongsTo(() => Team, {
+    foreignKey: 'teamId'
+  })
+  public team: BelongsTo<typeof Team>
+
+  @column()
+  public eventStatusId: number
+
+  @belongsTo(() => EventStatus, {
+    foreignKey: 'eventStatusId'
+  })
+  public eventStatus: BelongsTo<typeof EventStatus>
+
+  @hasOne(() => AggregationStrategy, {
+    foreignKey: 'eventSessionId'
+  })
+  public aggregationStrategy: HasOne<typeof AggregationStrategy>
+
+  @manyToMany(() => Event, {
+    pivotTable: 'event_sessions_events',
+    localKey: 'id',
+    pivotForeignKey: 'eventSessionId',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'eventId',
+  })
+  public events: ManyToMany<typeof Event>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime

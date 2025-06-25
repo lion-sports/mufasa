@@ -11,16 +11,23 @@ export type TeamDisabledFields = {
   [Key in keyof Team]?: boolean
 }
 
+export type TeamHiddenFields = {
+  [Key in keyof Team]?: boolean
+}
+
 export class TeamState {
   public team: Partial<Team> = $state({})
   public disabledFields: TeamDisabledFields = $state({})
+  public hiddenFields: TeamHiddenFields = $state({})
 
   constructor(params?: {
     team?: Partial<Team>,
     disabledFields?: TeamDisabledFields
+    hiddenFields?: TeamHiddenFields
   }) {
     this.team = params?.team || {}
     this.disabledFields = params?.disabledFields || {}
+    this.hiddenFields = params?.hiddenFields || {}
   }
 
   public validatedTeam: Omit<Team, 'id' | 'ownerId' | 'owner' | 'createdAt' | 'updatedAt' | 'teammates'> | undefined = $derived.by(() => {

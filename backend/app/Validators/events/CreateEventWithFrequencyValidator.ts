@@ -13,7 +13,6 @@ export default class CreateWithFrequencyEventValidator {
         rules.maxLength(255)
       ]),
       description: schema.string.nullableAndOptional(),
-      status: schema.enum.nullableAndOptional(['confirmed', 'notConfirmed']),
       team: schema.object().members({
         id: schema.number()
       })

@@ -109,24 +109,28 @@
 </script>
 
 <div style:padding style:margin style:width style:height>
-	<div class="grid grid-cols-1 md:grid-cols-2 duration-infos">
+	<div class="grid grid-cols-1 md:grid-cols-2 duration-infos gap-2">
 		<div>
 			<div class="mb-2">Inizio</div>
-			<div>
-				<StandardDatepicker placeholder="Inizio" bind:value={event.start} />
-			</div>
-			<div>
-				<StandardTimePicker value={startTime} name="startTime" oninput={handleStartTimeChange} />
-			</div>
+      <div class="flex gap-2">
+        <div class="grow">
+          <StandardDatepicker placeholder="Inizio" bind:value={event.start} --simple-textfield-width="100%" />
+        </div>
+        <div>
+          <StandardTimePicker value={startTime} name="startTime" oninput={handleStartTimeChange} />
+        </div>
+      </div>
 		</div>
 		<div>
 			<div class="mb-2">Fine</div>
-			<div>
-				<StandardDatepicker placeholder="Fine" bind:value={event.end} />
-			</div>
-			<div>
-				<StandardTimePicker value={endTime} name="endTime" oninput={handleEndTimeChange} />
-			</div>
+      <div class="flex gap-2">
+        <div class="grow">
+          <StandardDatepicker placeholder="Fine" bind:value={event.end} --simple-textfield-width="100%" />
+        </div>
+        <div>
+          <StandardTimePicker value={endTime} name="endTime" oninput={handleEndTimeChange} />
+        </div>
+      </div>
 		</div>
 	</div>
 	<div class="w-full">
@@ -161,12 +165,5 @@
 </div>
 
 <style>
-	@media (max-width: 768px) {
-		.duration-infos {
-			--simple-textfield-width: 100%;
-		}
-	}
 
-	@media (min-width: 769px) {
-	}
 </style>

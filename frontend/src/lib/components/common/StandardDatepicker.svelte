@@ -18,5 +18,6 @@
 	bind:selectedDate={value}
 	{placeholder}
 	--simple-text-field-width="fit-content"
+  --simple-textfield-height="40px"
 	{...rest}
 />

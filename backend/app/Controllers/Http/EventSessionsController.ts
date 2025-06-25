@@ -18,6 +18,9 @@ export default class EventSessionsController {
     return await manager.create({
       data: {
         name: request.input('name'),
+        teamId: request.input('teamId'),
+        eventStatusId: request.input('eventStatusId'),
+        aggregationStrategy: request.input('aggregationStrategy')
       }
     })
   }
@@ -37,6 +40,8 @@ export default class EventSessionsController {
       data: {
         id: params.id,
         name: request.input('name'),
+        eventStatusId: request.input('eventStatusId'),
+        aggregationStrategy: request.input('aggregationStrategy')
       }
     })
   }
@@ -46,6 +51,42 @@ export default class EventSessionsController {
     return await manager.destroy({
       data: {
         id: params.id,
+      }
+    })
+  }
+
+  public async addEvents({ params, request }: HttpContext) {
+    const manager = new EventSessionsManager()
+    return await manager.addEvents({
+      data: {
+        eventSession: {
+          id: params.id
+        },
+        events: request.input('events')
+      }
+    })
+  }
+
+  public async removeEvents({ params, request }: HttpContext) {
+    const manager = new EventSessionsManager()
+    return await manager.removeEvents({
+      data: {
+        eventSession: {
+          id: params.id
+        },
+        events: request.input('events')
+      }
+    })
+  }
+
+  public async setEvents({ params, request }: HttpContext) {
+    const manager = new EventSessionsManager()
+    return await manager.setEvents({
+      data: {
+        eventSession: {
+          id: params.id
+        },
+        events: request.input('events')
       }
     })
   }
