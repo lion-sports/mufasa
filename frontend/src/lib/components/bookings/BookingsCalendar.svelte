@@ -109,7 +109,7 @@
 										end: e.to,
 										resourceIds: [e.placeId],
 										allDay: false,
-										title: e.notes + ' - ' + e.place.name,
+										title: [e.notes, e.place.name].filter(e => !!e).join('-'),
 										editable: canUpdate,
 										startEditable: canUpdate,
 										durationEditable: canUpdate,
