@@ -5,6 +5,8 @@
 	import StandardTimePicker from "../common/StandardTimePicker.svelte"
 	import { DateTime } from "luxon"
 	import PlacesAutocomplete from "../places/PlacesAutocomplete.svelte"
+	import StandardTextarea from "../common/StandardTextarea.svelte"
+	import LabelAndTextarea from "../common/LabelAndTextarea.svelte"
 
   type Props = {
     bookingState: BookingState,
@@ -42,6 +44,14 @@
 				minute: stringValue.split(':')[1]
 			})
 			.toJSDate()
+
+    let fromToDiff = !!bookingState.booking.to ? 
+      DateTime.fromJSDate(bookingState.booking.from).diff(DateTime.fromJSDate(bookingState.booking.to)).get('milliseconds') :
+      undefined
+    if(!bookingState.booking.to || (fromToDiff !== undefined && fromToDiff > 0))
+      bookingState.booking.to = DateTime.fromJSDate(bookingState.booking.from)
+        .plus({ hour: 1.5 })
+        .toJSDate()
   }
 
   function handleToTimeChange(e: Event) {
@@ -86,7 +96,25 @@
         <div class="mb-2">Inizio</div>
         <div class="flex gap-2">
           <div class="grow">
-            <StandardDatepicker placeholder="Inizio" bind:value={bookingState.booking.from} --simple-textfield-width="100%" />
+            <StandardDatepicker 
+              placeholder="Inizio" 
+              bind:value={bookingState.booking.from} 
+              --simple-textfield-width="100%" 
+              oninput={(e) => {
+                if(!!bookingState.booking.from && !bookingState.booking.to) {
+                  bookingState.booking.to = DateTime.fromJSDate(bookingState.booking.from)
+                    .plus({ hour: 1.5 })
+                    .toJSDate()
+                }
+              }}
+              ondayClick={(e) => {
+                if(!!bookingState.booking.from && !bookingState.booking.to) {
+                  bookingState.booking.to = DateTime.fromJSDate(bookingState.booking.from)
+                    .plus({ hour: 1.5 })
+                    .toJSDate()
+                }
+              }}
+            />
           </div>
           <div>
             <StandardTimePicker value={formattedFrom} name="from-time" oninput={handleFromTimeChange} />
@@ -112,6 +140,15 @@
         values={!!bookingState.booking.place ? [ bookingState.booking.place ] : undefined}
         onchange={handleSelectPlace}
       ></PlacesAutocomplete>
+    </div>
+    <div>
+      <div class="font-bold">Note</div>
+      <textarea 
+        class="rounded w-full bg-[rgb(var(--global-color-background-200))] outline-none px-2 py-1"
+        placeholder="Scrivi una nota ..."
+        rows="10" 
+        bind:value={bookingState.booking.notes}
+      ></textarea>
     </div>
   </div>
 </div>

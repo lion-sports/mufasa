@@ -10,6 +10,7 @@ export type Booking = {
 	id: number
   from: Date
 	to: Date
+  notes?: string
 	createdByUserId: number
 	createdByUser: User
   status: BookingStatus
@@ -70,6 +71,7 @@ export default class BookingService extends FetchBasedService {
     placeId: number
     from: Date
     to: Date
+    notes?: string
   }): Promise<Booking> {
     let response = await this.client.post({
       url: '/bookings/request',
@@ -84,6 +86,7 @@ export default class BookingService extends FetchBasedService {
     placeId?: number
     from?: Date
     to?: Date
+    notes?: string
   }): Promise<Booking> {
     let response = await this.client.put({
       url: '/bookings/' + params.id,
@@ -91,5 +94,25 @@ export default class BookingService extends FetchBasedService {
     })
 
     return response
+  }
+
+  public static getBookingColor(booking: Booking): {
+    background: string,
+    foreground: string
+  } {
+    const colors = [
+      { background: '#c7eaff', foreground: '#222' }, // light sky blue
+      { background: '#b3ffd9', foreground: '#222' }, // mint
+      { background: '#d1d8ff', foreground: '#222' }, // periwinkle
+      { background: '#b3e6ff', foreground: '#222' }, // pale blue
+      { background: '#b3fff6', foreground: '#222' }, // aqua
+      { background: '#c7fff6', foreground: '#222' }, // pale turquoise
+      { background: '#d1fff2', foreground: '#222' }, // light teal
+      { background: '#b3f0ff', foreground: '#222' }, // ice blue
+      { background: '#d1f7ff', foreground: '#222' }, // powder blue
+      { background: '#b3e6f7', foreground: '#222' }  // pale cyan
+    ]
+
+    return colors[booking.placeId % colors.length]
   }
 }

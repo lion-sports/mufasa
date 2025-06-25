@@ -27,6 +27,7 @@ export default class BookingsManager {
 
     let query = Booking.query({ client: trx })
       .preload('place')
+      .orderBy('from')
       
     if (!!params.data.filtersBuilder?.modifiers) {
       let filtersApplier = new FilterModifierApplier()
@@ -56,9 +57,10 @@ export default class BookingsManager {
   public async update(params: {
     data: {
       id: number
-      placeId: number
-      from: DateTime
-      to: DateTime
+      placeId?: number
+      from?: DateTime
+      to?: DateTime
+      notes?: string
     }
     context?: Context
   }): Promise<Booking> {
@@ -128,6 +130,7 @@ export default class BookingsManager {
       placeId: number
       from: DateTime
       to: DateTime
+      notes?: string
     }
     context?: Context
   }): Promise<{
@@ -157,6 +160,7 @@ export default class BookingsManager {
     let bookingsConfirmationRequired = place.club.setting?.settings?.bookingsConfirmationRequired || false
 
     let booking = await Booking.create({
+      ...validatedData,
       placeId: place.id,
       createdByUserId: user.id,
       from: DateTime.fromJSDate(validatedData.from),

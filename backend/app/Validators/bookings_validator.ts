@@ -5,6 +5,7 @@ export const requestBookingValidator = vine.compile(
     placeId: vine.number(),
     from: vine.date({ formats: { utc: true } }),
     to: vine.date({ formats: { utc: true } }),
+    notes: vine.string().optional()
   })
 )
 
@@ -14,5 +15,6 @@ export const updateBookingValidator = vine.compile(
     placeId: vine.number().optional(),
     from: vine.date({ formats: { utc: true } }).optional(),
     to: vine.date({ formats: { utc: true } }).optional(),
+    notes: vine.string().optional()
   })
 )

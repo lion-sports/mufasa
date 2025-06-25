@@ -40,7 +40,8 @@ test.group('Booking', (group) => {
       .json({
         placeId: place.id,
         from,
-        to
+        to,
+        notes: 'Prova di una nota'
       })
       .loginAs(loggedInUser)
 
@@ -48,6 +49,33 @@ test.group('Booking', (group) => {
     const { booking } = response.body()
     assert.equal(booking.placeId, place.id, 'should have the right placeId')
     assert.equal(booking.status, 'confirmed', 'should have status requested')
+    assert.equal(booking.notes, 'Prova di una nota', 'should have set the notes')
+  })
+
+  test('update an existing booking', async ({ client }) => {
+    let booking = await BookingFactory.create()
+    await booking.related('place').associate(place)
+    await booking.related('createdByUser').associate(loggedInUser)
+
+    const newNotes = 'Updated notes for the booking'
+    const newFrom = new Date(Date.now() + 3 * 3600 * 1000)
+    const newTo = new Date(Date.now() + 4 * 3600 * 1000)
+
+    const response = await client
+      .put(`/bookings/${booking.id}`)
+      .json({
+        notes: newNotes,
+        from: newFrom,
+        to: newTo
+      })
+      .loginAs(loggedInUser)
+
+    response.assertAgainstApiSpec()
+    const updatedBooking = response.body()
+    assert.equal(updatedBooking.id, booking.id, 'should update the correct booking')
+    assert.equal(updatedBooking.notes, newNotes, 'should update the notes')
+    assert.equal(new Date(updatedBooking.from).getTime(), newFrom.getTime(), 'should update the from date')
+    assert.equal(new Date(updatedBooking.to).getTime(), newTo.getTime(), 'should update the to date')
   })
 
   test('confirm existing booking', async ({ client }) => {

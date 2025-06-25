@@ -37,6 +37,9 @@ export default class Booking extends CamelCaseBaseModel {
   @column()
   public status: BookingStatus
 
+  @column()
+  public notes: string
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
