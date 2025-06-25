@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import env from '#start/env'
 import ClubsManager from '#app/managers/clubs.manager'
 import app from '@adonisjs/core/services/app'
 import { cuid } from '@adonisjs/core/helpers'
@@ -136,14 +137,14 @@ export default class ClubsController {
           from: {
             path: path.join(logoTmpPath, logo.clientName),
           },
-          driveName: 'local',
+          driveName: env.get('DRIVE_DISK', 'local'),
         } : undefined,
         header: !!header ? {
           extension: header.extname || '',
           from: {
             path: path.join(headerTmpPath, header.clientName),
           },
-          driveName: 'local',
+          driveName: env.get('DRIVE_DISK', 'local'),
         } : undefined,
       },
     })
