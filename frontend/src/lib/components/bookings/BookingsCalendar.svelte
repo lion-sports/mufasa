@@ -11,6 +11,7 @@
 
 	interface Props {
 		selectedDate?: Date | undefined
+    selectedView?: string
 		bookings: Booking[]
     club: Club,
     places?: Place[],
@@ -18,24 +19,26 @@
 		visibleYear?: number
 		canCreate?: boolean
     canUpdate?: boolean
-    bookingClick?: (params: { booking: Booking }) => void
+    bookingClick?: (params: { booking: Booking }) => void,
+    dateClick?: (params: { info: Calendar.DateClickInfo }) => void
 	}
 
 	let {
 		club = $bindable(),
     places = [],
 		selectedDate = $bindable(),
+    selectedView = $bindable('dayGridMonth'),
 		bookings = $bindable(),
 		visibleMonth = $bindable(DateTime.now().get('month') - 1),
 		visibleYear = $bindable(DateTime.now().get('year')),
 		canCreate = false,
     canUpdate = true,
-    bookingClick
+    bookingClick,
+    dateClick
 	}: Props = $props()
   
   let eventCalendar: any = $state()
 	let plugins = [TimeGrid, DayGrid, Interaction, ResourceTimeline]
-	let selectedView: string = $state('dayGridMonth')
 
   let visibleDate = $derived(DateTime.fromObject({ month: visibleMonth + 1, year: visibleYear })
     .startOf('month')
@@ -106,13 +109,13 @@
 										end: e.to,
 										resourceIds: [e.placeId],
 										allDay: false,
-										title: e.place.name,
+										title: e.notes + ' - ' + e.place.name,
 										editable: canUpdate,
 										startEditable: canUpdate,
 										durationEditable: canUpdate,
 										display: 'auto' as const,
-										backgroundColor: undefined,
-										textColor: undefined,
+										backgroundColor: BookingService.getBookingColor(e).background,
+										textColor: BookingService.getBookingColor(e).foreground,
 										classNames: [],
 										styles: [],
 										extendedProps: {
@@ -221,6 +224,8 @@
 			if (info.view.type !== 'timeGridWeek' && info.view.type !== 'resourceTimelineWeek') {
 				selectedDate = info.date
 			}
+
+      if(!!dateClick) dateClick({ info })
 		},
 		eventClick: (info: Calendar.EventClickInfo) => {
       if(!!info.event.extendedProps.originalBooking) {

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import StandardButton from '@/lib/components/common/StandardButton.svelte'
   import type { PageData } from './$types';
-  import BookingsCalendar from '@/lib/components/bookings/BookingsCalendar.svelte';
 	import { Icon } from '@likable-hair/svelte'
 	import { goto } from '$app/navigation'
+	import BookingsCalendarWithSidebar from '@/lib/components/bookings/BookingsCalendarWithSidebar.svelte'
 
   let { data }: { data: PageData } = $props();
 </script>
@@ -19,11 +19,11 @@
   </StandardButton>
 </div>
 
-<BookingsCalendar
+<BookingsCalendarWithSidebar
   club={data.club}
   places={data.club.places}
   bookings={data.paginatedBookings.data}
   bookingClick={({ booking }) => {
 		goto(`/clubs/${data.club.id}/bookings/${booking.id}/edit`)
   }}
-></BookingsCalendar>
+></BookingsCalendarWithSidebar>

@@ -25,6 +25,7 @@ export default class BookingsController {
         placeId: request.input('placeId'),
         from: request.input('from'),
         to: request.input('to'),
+        notes: request.input('notes'),
       },
     })
   }
@@ -51,6 +52,7 @@ export default class BookingsController {
         placeId: request.input('placeId'),
         from: request.input('from'),
         to: request.input('to'),
+        notes: request.input('notes')
       }
     })
   }

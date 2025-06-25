@@ -30,6 +30,7 @@ export class BookingState {
         from: this.booking.from,
         to: this.booking.to,
         placeId: this.booking.placeId,
+        notes: this.booking.notes
       }
     } else return undefined
   })
