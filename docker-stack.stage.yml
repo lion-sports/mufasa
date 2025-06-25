@@ -1,0 +1,69 @@
+version: '3.8'
+
+networks:
+  public:
+    name: public
+    external: true
+  common_services:
+    name: common_services
+    external: true
+  app:
+
+volumes:
+  redis_data:
+    name: mufasa_redis_data
+  mongo_data:
+  mongo_dump:
+
+services:
+  backend:
+    image: cr.likablehair.it/mufasa_backend:testing
+    depends_on:
+      - redis
+    env_file:
+      - backend/.env
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        order: start-first
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.mufasa-api.rule=Host(`api-lionsport.likablehair.it`)
+        - traefik.http.services.mufasa-api.loadbalancer.server.port=3333
+        - traefik.http.routers.mufasa-api.entrypoints=websecure
+    networks:
+      - public
+      - common_services
+      - app
+
+  frontend:
+    image: cr.likablehair.it/mufasa_frontend:testing
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://0.0.0.0:3000']
+    env_file:
+      - frontend/.env
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        order: start-first
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.mufasa.rule=Host(`lionsport.likablehair.it`)
+        - traefik.http.services.mufasa.loadbalancer.server.port=3000
+        - traefik.http.routers.mufasa.entrypoints=websecure
+    networks:
+      - public
+      - common_services
+      - app
+
+  redis:
+    image: redis:7.2.4-alpine
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - TZ=Europe/Rome
+    volumes:
+      - redis_data:/data
+    networks:
+      - app

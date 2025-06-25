@@ -1,0 +1,346 @@
+name: staging-ci-cd
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["testing"]
+    tags:
+      - "v*"
+
+jobs:
+  be-build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "./**/package-lock.json"
+
+      - name: Install common dependencies
+        run: cd common; npm ci
+
+      - name: Build common
+        run: cd common; npm run build --if-present
+
+      - name: Install breeze dependencies
+        run: cd breeze; npm ci
+
+      - name: Build breeze
+        run: cd breeze; npm run build --if-present
+
+      - name: Install backend dependencies
+        run: cd backend; npm ci
+
+      - name: Build backend
+        run: cd backend; npm run build --if-present
+
+  be-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+
+      mongo:
+        image: mongo:7
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "./backend/package-lock.json"
+
+      - name: Install common dependencies
+        run: cd common; npm ci
+
+      - name: Build common
+        run: cd common; npm run build --if-present
+
+      - name: Install breeze dependencies
+        run: cd breeze; npm ci
+
+      - name: Build breeze
+        run: cd breeze; npm run build --if-present
+
+      - name: Install backend dependencies
+        run: cd backend; npm ci
+
+      - name: Run tests
+        run: cd backend; node ace test
+        env:
+          HOST: 0.0.0.0
+          PORT: 3333
+          APP_KEY: OMu5MZtp6zHCzPSrF6TOedRCNSh2_3sF
+          APP_NAME: mufasa
+          DRIVE_DISK: local
+          NODE_ENV: production
+          ADMIN_USER_SEED_PASSWORD: mufasa
+          FRONTEND_URL: http://locahost:3333
+          SESSION_DRIVER: cookie
+          MAILGUN_API_KEY: mailgun-api-key
+          MAILGUN_DOMAIN: mailgun-domain
+          DB_CONNECTION: pg
+          PG_HOST: postgres
+          PG_PORT: 5432
+          PG_USER: postgres
+          PG_DB_NAME: template1
+          MONGO_URL: mongodb://mongo:27017
+          MONGO_DB: test
+          REDIS_HOST: redis
+          REDIS_PORT: 6379
+          BULL_REDIS_HOST: redis
+          BULL_REDIS_PORT: 6379
+          TEST_EMAIL: system@likablehair.it
+          SMTP_HOST: smtp.mailgun.org
+          SMTP_PORT: 587
+          REDIS_CONNECTION: local
+
+  be-docker:
+    runs-on: ubuntu-latest
+    needs: [be-build, be-test]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to container registry
+        uses: docker/login-action@v2
+        with:
+          registry: cr.likablehair.it
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Get repository name
+        run: |
+          REPO_NAME=$(echo "${{ gitea.repository }}" | cut -d'/' -f2)
+          echo "REPO_NAME=$REPO_NAME" >> $GITEA_ENV
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            cr.likablehair.it/${{env.REPO_NAME}}_backend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          file: backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  fe-build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "./**/package-lock.json"
+
+      - name: Install common dependencies
+        run: cd common; npm ci
+
+      - name: Build common
+        run: cd common; npm run build --if-present
+
+      - name: Install frontend dependencies
+        run: cd frontend; npm ci
+
+      - name: Build frontend
+        run: cd frontend; npm run build --if-present
+
+  fe-docker:
+    runs-on: ubuntu-latest
+    needs: [build]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to container registry
+        uses: docker/login-action@v2
+        with:
+          registry: cr.likablehair.it
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Get repository name
+        run: |
+          REPO_NAME=$(echo "${{ gitea.repository }}" | cut -d'/' -f2)
+          echo "REPO_NAME=$REPO_NAME" >> $GITEA_ENV
+      - name: Docker meta frontend
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            cr.likablehair.it/${{ env.REPO_NAME }}_frontend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          file: frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [
+      be-build, 
+      be-test, 
+      be-docker,
+      fe-build,
+      fe-docker
+    ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get repository name
+        run: |
+          REPO_NAME=$(echo "${{ gitea.repository }}" | cut -d'/' -f2)
+          echo "REPO_NAME=$REPO_NAME" >> $GITEA_ENV
+
+      - name: Populate backend .env file with Infisical
+        uses: https://gitea.likablehair.it/Likablehair/infisical-secrets-action@v1.0.8
+        with:
+          domain: https://infisical.likablehair.it
+          client-id: ${{ secrets.INFISICAL_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.INFISICAL_IDENTITY_CLIENT_SECRET }}
+          env-slug: staging
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          secret-path: /backend/
+          export-type: "file"
+          file-output-path: "/backend/.env"
+
+      - name: Populate frontend .env file with Infisical
+        uses: https://gitea.likablehair.it/Likablehair/infisical-secrets-action@v1.0.8
+        with:
+          domain: https://infisical.likablehair.it
+          client-id: ${{ secrets.INFISICAL_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.INFISICAL_IDENTITY_CLIENT_SECRET }}
+          env-slug: staging
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          secret-path: /frontend/
+          export-type: "file"
+          file-output-path: "/frontend/.env"
+
+      - name: Deploy stack to swarm
+        uses: kitconcept/docker-stack-deploy@v1.0.1
+        with:
+          registry: "cr.likablehair.it"
+          username: ${{ secrets.REGISTRY_USERNAME  }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          remote_host: ${{ secrets.STAGE_REMOTE_HOST }}
+          remote_user: lh
+          remote_port: 24842
+          remote_private_key: ${{ secrets.STAGE_REMOTE_PRIVATE_KEY }}
+          stack_file: "./docker-stack.stage.yml"
+          stack_name: ${{ env.REPO_NAME }}_test
+
+  alerts:
+    runs-on: ubuntu-latest
+    needs: [
+      be-build, 
+      be-test, 
+      be-docker,
+      fe-build,
+      fe-docker,
+      deploy
+    ]
+    #if: ${{ always() && contains(needs.*.result, 'failure') }}
+    if: always()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get email
+        id: userRequest
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: https://gitea.likablehair.it/api/v1/users/${{ gitea.actor }}?token=${{ secrets.USERS_API_TOKEN_MURASAKI }}
+          method: "GET"
+          customHeaders: '{"Content-Type": "application/json"}'
+
+      - name: Send mail
+        uses: https://github.com/dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          to: ${{ fromJson(steps.userRequest.outputs.response).email }}
+          from: Gitea <gitea@hostname>
+          subject: ${{ gitea.repository }} ${{gitea.workflow}} ${{ (needs.be-build.result == 'failure' || needs.be-test.result == 'failure' || needs.be-docker.result == 'failure' || needs.fe-build.result == 'failure' || needs.fe-docker.result == 'failure' || needs.deploy.result == 'failure') && 'failed' || 'succeeded' }}
+          priority: high
+          convert_markdown: true
+          html_body: |
+            ### Backend Build:
+            - Status: ${{ needs.be-build.result == 'failure' && 'failure ❗' || 'success! ✅' }}
+            ### Backend Test:
+            - Status: ${{ needs.be-test.result == 'failure' && 'failure ❗' || 'success! ✅' }}
+            ### Backend Image Build:
+            - Status: ${{ needs.be-docker.result == 'failure' && 'failure ❗' || 'success! ✅' }}
+
+            ### Frontend Build:
+            - Status: ${{ needs.fe-build.result == 'failure' && 'failure ❗' || 'success! ✅' }}
+            ### Frontend Image Build:
+            - Status: ${{ needs.fe-docker.result == 'failure' && 'failure ❗' || 'success! ✅' }}
+
+            ### Deploy:
+            - Status: ${{ needs.deploy.result == 'failure' && 'failure ❗' || 'success! ✅' }}
+
+            ${{ github.repository }}: [${{ github.ref }}@${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/actions)
+
+permissions:
+  contents: read
