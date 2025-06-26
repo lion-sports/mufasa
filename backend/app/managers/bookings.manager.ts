@@ -49,7 +49,15 @@ export default class BookingsManager {
 
     let results = await query.paginate(params.data.page, params.data.perPage)
 
-    return results.toJSON()
+    if(!!user) {
+      return results.toJSON()
+    } else {
+      return results.serialize({
+        fields: {
+          omit: ['notes']
+        }
+      })
+    }
   }
 
   @withTransaction

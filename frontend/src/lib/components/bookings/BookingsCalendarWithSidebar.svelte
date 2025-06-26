@@ -44,6 +44,7 @@
             bind:selectedDate
             bind:selectedView
             bind:bookings
+            availableViews={[]}
             {...restProps}
           ></BookingsCalendar>
         </div>
@@ -80,7 +81,9 @@
                     {DateTime.fromJSDate(booking.to).toFormat("HH:mm")}
                   </div>
                   <div class="text-xl font-semibold">{booking.place.name}</div>
-                  <div class="whitespace-pre-line break-all">{booking.notes}</div>
+                  {#if restProps.canUpdate && !!booking.notes}            
+                    <div class="whitespace-pre-line break-all">{booking.notes}</div>
+                  {/if}
                 </button>
               {/each}
             {:else}
