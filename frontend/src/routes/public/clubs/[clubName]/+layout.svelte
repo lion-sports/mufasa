@@ -33,7 +33,7 @@
   <StandardTabSwitcher
     tabs={[
       { name: 'general', icon: 'mdi-card-account-details', label: 'Generale'},
-      { name: 'bookings', icon: 'mdi-ticket-confirmation', label: 'Prenotazioni' }
+      { name: 'bookings', icon: 'mdi-ticket-confirmation', label: 'Disponibilità campi' }
     ]}
     selected={selectedTab}
     ontabClick={handleTabClick}

@@ -23,7 +23,7 @@
     ]
 
     if(data.club.setting?.settings.bookingsActive) {
-      tabs.push({ name: 'bookings', icon: 'mdi-ticket-confirmation', label: 'Prenotazioni' })
+      tabs.push({ name: 'bookings', icon: 'mdi-ticket-confirmation', label: 'Disponibilità campi' })
     }
 
     tabs.push({ name: 'settings', icon: 'mdi-cog', label: 'Impostazioni'})
