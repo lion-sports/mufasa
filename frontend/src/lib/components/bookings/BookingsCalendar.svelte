@@ -12,6 +12,7 @@
 	interface Props {
 		selectedDate?: Date | undefined
     selectedView?: string
+    availableViews?: string[]
 		bookings: Booking[]
     club: Club,
     places?: Place[],
@@ -28,6 +29,7 @@
     places = [],
 		selectedDate = $bindable(),
     selectedView = $bindable('dayGridMonth'),
+    availableViews = ['dayGridMonth','timeGridWeek','resourceTimelineWeek'],
 		bookings = $bindable(),
 		visibleMonth = $bindable(DateTime.now().get('month') - 1),
 		visibleYear = $bindable(DateTime.now().get('year')),
@@ -109,7 +111,7 @@
 										end: e.to,
 										resourceIds: [e.placeId],
 										allDay: false,
-										title: e.notes + ' - ' + e.place.name,
+										title: [canUpdate ? e.notes : '', e.place.name].filter(e => !!e).join('-'),
 										editable: canUpdate,
 										startEditable: canUpdate,
 										durationEditable: canUpdate,
@@ -185,7 +187,7 @@
 		headerToolbar: {
 			start: 'title',
 			center: '',
-			end: 'dayGridMonth,timeGridWeek,resourceTimelineWeek today prev,next'
+			end: `${availableViews.join(',')} today prev,next`
 		},
 		titleFormat: (start: Date, end: Date) => {
 			let startLuxonDate = DateTime.fromJSDate(start).setLocale('it-IT')
