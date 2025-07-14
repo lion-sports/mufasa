@@ -273,8 +273,31 @@ jobs:
           export-type: "file"
           file-output-path: "/frontend/.env"
 
+      - name: Issue SSH key
+        uses: https://gitea.likablehair.it/Likablehair/infisical-ssh-action@v1.0.0
+        with:
+          domain: https://infisical.likablehair.it
+          client-id: ${{ secrets.INFISICAL_IDENTITY_CLIENT_ID }}
+          client-secret: ${{ secrets.INFISICAL_IDENTITY_CLIENT_SECRET }}
+          certificate-template-id: ${{ vars.STAGE_INFISICAL_SSH_CERTIFICATE_TEMPLATE_ID }}
+          principals: "lh"
+          file-output-path: "/.ssh/"
+
+      - name: Save SSH key
+        id: ssh-key
+        run: |
+          SSH_KEY=$(cat "$GITHUB_WORKSPACE/.ssh/id_rsa")
+          echo "SSH_KEY<<EOF" >> $GITEA_OUTPUT
+          echo "$SSH_KEY" >> $GITEA_OUTPUT
+          echo "EOF" >> $GITEA_OUTPUT
+
+          SSH_CERT=$(cat "$GITHUB_WORKSPACE/.ssh/id_rsa-cert.pub")
+          echo "SSH_CERT<<EOF" >> $GITEA_OUTPUT
+          echo "$SSH_CERT" >> $GITEA_OUTPUT
+          echo "EOF" >> $GITEA_OUTPUT
+
       - name: Deploy stack to swarm
-        uses: kitconcept/docker-stack-deploy@v1.0.1
+        uses: https://gitea.likablehair.it/Likablehair/docker-stack-deploy@v1.0.0
         with:
           registry: "cr.likablehair.it"
           username: ${{ secrets.REGISTRY_USERNAME  }}
@@ -282,7 +305,9 @@ jobs:
           remote_host: ${{ secrets.STAGE_REMOTE_HOST }}
           remote_user: lh
           remote_port: 24842
-          remote_private_key: ${{ secrets.STAGE_REMOTE_PRIVATE_KEY }}
+          with_cert: true
+          remote_private_key: ${{ steps.ssh-key.outputs.SSH_KEY }}
+          remote_private_key_cert: ${{ steps.ssh-key.outputs.SSH_CERT }}
           stack_file: "./docker-stack.stage.yml"
           stack_name: ${{ env.REPO_NAME }}_test
 

@@ -59,14 +59,16 @@
         disabled={teamState.disabledFields.notes}
       ></TipTapEditor>
     </div>
-    <div>
-      <div class="font-medium mt-4 mb-2 ml-2">Club</div>
-      <ClubsAutocomplete
-        {clubs}
-        values={!!teamState.team.club ? [ teamState.team.club ] : undefined}
-        onchange={handleSelectClub}
-        disabled={teamState.disabledFields.clubId}
-      ></ClubsAutocomplete>
-    </div>
+    {#if !teamState.hiddenFields.clubId}
+      <div>
+        <div class="font-medium mt-4 mb-2 ml-2">Club</div>
+        <ClubsAutocomplete
+          {clubs}
+          values={!!teamState.team.club ? [ teamState.team.club ] : undefined}
+          onchange={handleSelectClub}
+          disabled={teamState.disabledFields.clubId}
+        ></ClubsAutocomplete>
+      </div>
+    {/if}
   </div>
 </div>

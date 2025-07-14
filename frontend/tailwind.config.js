@@ -64,6 +64,9 @@ const config = {
           css: {
             color: 'inherit',
             maxWidth: 'auto',
+            a: {
+              color: 'rgb(var(--global-color-primary-400))'
+            },
             p: {
               marginTop: '4px',
               marginBottom: '0px'

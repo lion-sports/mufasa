@@ -4,6 +4,7 @@
 	import StarterKit from '@tiptap/starter-kit'
 	import Placeholder from '@tiptap/extension-placeholder'
 	import TextAlign from '@tiptap/extension-text-align'
+  import Link from '@tiptap/extension-link'
 	import { ActivableButton, Icon, IconsDropdown } from '@likable-hair/svelte'
 	import type { Transaction } from '@tiptap/pm/state'
 
@@ -44,7 +45,11 @@
 				}),
 				TextAlign.configure({
 					types: ['heading', 'paragraph']
-				})
+				}),
+        Link.configure({
+          openOnClick: false,
+          defaultProtocol: 'https',
+        }),
 			],
 			editorProps: {
 				attributes: {
@@ -104,6 +109,35 @@
 	let textAlignValues: ComponentProps<typeof IconsDropdown>['values'] = [
 		{ value: 'align-left', icon: 'mdi-format-align-left' }
 	]
+
+  function setLink() {
+    if(!editor) return
+
+    const previousUrl = editor.getAttributes('link').href
+    const url = window.prompt('URL', previousUrl)
+
+    if (url === null) {
+      return
+    }
+
+    if (url === '') {
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange('link')
+        .unsetLink()
+        .run()
+
+      return
+    }
+
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange('link')
+      .setLink({ href: url })
+      .run()
+  }
 
 	$: if (!!editor) {
 		editor.setOptions({
@@ -169,6 +203,16 @@
 				}}
 			>
 				<Icon name="mdi-format-italic" />
+			</ActivableButton>
+      <ActivableButton
+				onclick={setLink}
+				active={editor.isActive('link')}
+				--button-padding="2px 6px"
+				buttonProps={{
+					disabled: disabled
+				}}
+			>
+				<Icon name="mdi-link" />
 			</ActivableButton>
 			<IconsDropdown
 				--button-width="auto"

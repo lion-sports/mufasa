@@ -1,0 +1,9 @@
+.ec-time-grid.ec-week-view {
+	.ec-day {
+		min-width: 144px;
+	}
+
+	.ec-days {
+		overflow: auto;
+	}
+}

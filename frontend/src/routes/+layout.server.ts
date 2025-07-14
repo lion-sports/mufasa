@@ -11,7 +11,8 @@ export const load = (async ({ fetch, cookies, url, depends }) => {
 		url.pathname != '/auth/login' &&
 		url.pathname != '/auth/confirmSignup' &&
 		url.pathname != '/auth/signup' &&
-		url.pathname != '/auth/google/callback'
+		url.pathname != '/auth/google/callback' &&
+    !url.pathname.startsWith('/public')
 	) {
 		try {
 			try {

@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import env from '#start/env'
 import ClubsManager from '#app/managers/clubs.manager'
 import app from '@adonisjs/core/services/app'
 import { cuid } from '@adonisjs/core/helpers'
@@ -32,6 +33,18 @@ export default class ClubsController {
     })
   }
 
+  public async publicList({ request }: HttpContext) {
+    const manager = new ClubsManager()
+
+    return await manager.publicList({
+      data: {
+        page: request.input('page'),
+        perPage: request.input('perPage'),
+        filtersBuilder: request.input('filtersBuilder'),
+      },
+    })
+  }
+
   public async store({ request }: HttpContext) {
     const manager = new ClubsManager()
 
@@ -40,18 +53,32 @@ export default class ClubsController {
         name: request.input('name'),
         completeName: request.input('completeName'),
         bio: request.input('bio'),
-        sport: request.input('sport')
+        sport: request.input('sport'),
+        public: request.input('public')
       },
     })
   }
 
-  public async show({ params }: HttpContext) {
+  public async show({ params, auth }: HttpContext) {
     const manager = new ClubsManager()
 
     return await manager.get({
       data: {
         id: params.id,
+      }
+    })
+  }
+
+  public async getByName({ request, auth }: HttpContext) {
+    const manager = new ClubsManager()
+
+    return await manager.getByName({
+      data: {
+        name: request.input('name'),
       },
+      context: {
+        user: auth.user
+      }
     })
   }
 
@@ -64,7 +91,8 @@ export default class ClubsController {
         name: request.input('name'),
         completeName: request.input('completeName'),
         bio: request.input('bio'),
-        sport: request.input('sport')
+        sport: request.input('sport'),
+        public: request.input('public')
       },
     })
   }
@@ -109,14 +137,14 @@ export default class ClubsController {
           from: {
             path: path.join(logoTmpPath, logo.clientName),
           },
-          driveName: 'local',
+          driveName: env.get('DRIVE_DISK', 'local'),
         } : undefined,
         header: !!header ? {
           extension: header.extname || '',
           from: {
             path: path.join(headerTmpPath, header.clientName),
           },
-          driveName: 'local',
+          driveName: env.get('DRIVE_DISK', 'local'),
         } : undefined,
       },
     })
@@ -124,22 +152,25 @@ export default class ClubsController {
 
   public async downloadMedia({ request, params, response, auth }: HttpContext) {
     const manager = new MediaManager()
-    if (!auth.user) throw new Error('user is not defined')
 
     let club = await Club.query()
       .where('logoMediaId', params.id)
       .orWhere('headerMediaId', params.id)
       .firstOrFail()
 
-    await AuthorizationManager.canOrFail({
-      data: {
-        ability: 'club_view',
+    if(!!auth.user) {
+      await AuthorizationManager.canOrFail({
         data: {
-          club
-        },
-        actor: auth.user
-      }
-    })
+          ability: 'club_view',
+          data: {
+            club
+          },
+          actor: auth.user
+        }
+      })
+    } else if(!auth.user && !club.public) {
+      throw new Error('cannot view image')
+    }
 
     try {
       let mediaInfo = await manager.download({
@@ -155,6 +186,7 @@ export default class ClubsController {
 
       return mediaInfo.buffer
     } catch (e) {
+      console.log(e)
       if (e.code === 'E_CANNOT_READ_FILE') {
         response.status(404)
       } else throw e
@@ -163,22 +195,25 @@ export default class ClubsController {
 
   public async downloadThumbnail({ request, params, response, auth }: HttpContext) {
     const manager = new MediaManager()
-    if (!auth.user) throw new Error('user is not defined')
 
     let club = await Club.query()
       .where('logoMediaId', params.id)
       .orWhere('headerMediaId', params.id)
       .firstOrFail()
 
-    await AuthorizationManager.canOrFail({
-      data: {
-        actor: auth.user,
-        ability: 'club_view',
+    if (!!auth.user) {
+      await AuthorizationManager.canOrFail({
         data: {
-          club
-        },
-      }
-    })
+          actor: auth.user,
+          ability: 'club_view',
+          data: {
+            club
+          },
+        }
+      })
+    } else if (!auth.user && !club.public) {
+      throw new Error('cannot view image')
+    }
 
     try {
       let mediaInfo = await manager.downloadThumbnail({

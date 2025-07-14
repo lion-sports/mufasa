@@ -2,14 +2,14 @@ name: backend-ci
 
 on:
   workflow_dispatch:
-  push:
-    branches: ["master", "testing"]
-    tags:
-      - "v*"
-    paths:
-      - .github/backend-ci.yml
-      - backend/**
-      - common/**
+#   push:
+#     branches: ["master", "testing"]
+#     tags:
+#       - "v*"
+#     paths:
+#       - .github/backend-ci.yml
+#       - backend/**
+#       - common/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

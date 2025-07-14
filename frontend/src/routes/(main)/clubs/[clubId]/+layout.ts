@@ -2,7 +2,8 @@ import ClubsService from '@/lib/services/clubs/clubs.service'
 import type { LayoutLoad } from './$types'
 import GroupsService from '@/lib/services/groups/groups.service'
 
-export const load = (async ({ params, parent, fetch }) => {
+export const load = (async ({ params, parent, fetch, depends }) => {
+  depends('club:detail')
 	let parentData = await parent()
 
 	let service = new ClubsService({ fetch, token: parentData.token })

@@ -1,17 +1,7 @@
 import { DateTime } from 'luxon'
 import { FetchBasedService } from '../common/fetchBased.service'
 import { browser } from '$app/environment'
-
-export type Media = {
-	id: number
-	uid: string
-	filename: string
-	size: number
-	driveName: string
-	lastRequested: DateTime
-	createdAt: DateTime
-	updatedAt: DateTime
-}
+import type { Media } from './media.service'
 
 export default class ClubsMediaService extends FetchBasedService {
 	public async getBlob(params: { mediaId: number }): Promise<Blob | undefined> {

@@ -12,7 +12,7 @@ export default class CreateEventValidator {
       rules.maxLength(255)
     ]),
     description: schema.string.nullableAndOptional(),
-    status: schema.enum.nullableAndOptional(['confirmed', 'notConfirmed']),
+    eventStatusId: schema.number.nullableAndOptional(),
     team: schema.object().members({
       id: schema.number()
     }),
