@@ -40,11 +40,7 @@ test.group('{{{modelName}}}', (group) => {
 
     response.assertAgainstApiSpec()
     const {{{singularReference}}} = response.body()
-    assert.hasAllKeys(
-      {{{singularReference}}},
-      ['id', 'name', 'createdAt', 'updatedAt'],
-      'should have all keys'
-    )
+    assert.equal({{{singularReference}}}.name, 'some name', 'should have the right name')
   })
 
   test('update existing {{{singularReference}}}', async ({ client }) => {

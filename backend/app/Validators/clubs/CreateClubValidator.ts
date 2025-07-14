@@ -7,5 +7,6 @@ export const createClubValidator = vine.compile(
     completeName: vine.string().maxLength(255),
     bio: vine.string().nullable().optional(),
     sport: vine.enum(SPORTS).nullable().optional(),
+    public: vine.boolean().optional()
   })
 )

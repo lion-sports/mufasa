@@ -2,10 +2,7 @@
 	import { run } from 'svelte/legacy'
 
 	import './EventsCalendar.css'
-	import Calendar from '@event-calendar/core'
-	import TimeGrid from '@event-calendar/time-grid'
-	import DayGrid from '@event-calendar/day-grid'
-	import Interaction from '@event-calendar/interaction'
+	import { Calendar, TimeGrid, DayGrid, Interaction } from '@event-calendar/core'
 	import { DateTime } from 'luxon'
 	import type { Team } from '@/lib/services/teams/teams.service'
 	import type { Event } from '@/lib/services/events/events.service'
@@ -32,7 +29,7 @@
 		canCreate = false
 	}: Props = $props()
 
-	let eventCalendar: Calendar | undefined = $state()
+	let eventCalendar: any = $state()
 	let plugins = [TimeGrid, DayGrid, Interaction]
 	let selectedView: string = $state('dayGridMonth')
 
@@ -50,6 +47,8 @@
 	let options: Calendar.Options = $derived({
 		view: selectedView,
 		events: [],
+    locale: 'IT-it',
+    firstDay: 1,
 		datesSet: (info: Calendar.DatesSetInfo) => {
 			// TODO set the cache to the current view
 		},
@@ -130,7 +129,7 @@
 		],
 		eventAllUpdated: (info: { view: Calendar.View }) => {
 			if (!!eventCalendar)
-				events = eventCalendar.getEvents().map((e) => e.extendedProps.originalEvent) as any
+				events = eventCalendar.getEvents().map((e: any) => e.extendedProps.originalEvent)
 		},
 		editable: true,
 		height: 'calc(100vh - 260px)',

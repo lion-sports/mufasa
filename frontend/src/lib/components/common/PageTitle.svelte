@@ -13,6 +13,7 @@
 		titleSnippet?: import('svelte').Snippet
 		append?: import('svelte').Snippet,
     titleClass?: string
+    subtitleClass?: string
 	}
 
 	let {
@@ -23,6 +24,7 @@
 		prependVisible = false,
 		prependRoute = undefined,
     titleClass = 'text-4xl font-bold',
+    subtitleClass = 'text-base font-normal',
 		prepend,
 		titleSnippet,
 		append,
@@ -50,10 +52,10 @@
 	<div style:display="flex" style:align-items="center">
 		<div style:font-weight="700" style:font-size="22pt">
 			{#if titleSnippet}{@render titleSnippet()}{:else}
-				<div class="mt-2 mb-1 {titleClass} title">
+				<div class="mt-2 mb-1 {titleClass}">
 					{title}
 				</div>
-				<div class="mb-4 text-base font-normal">
+				<div class="mb-4 {subtitleClass}">
 					{subtitle}
 				</div>
 			{/if}

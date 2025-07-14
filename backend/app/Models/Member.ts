@@ -26,16 +26,17 @@ export default class Member extends CamelCaseBaseModel {
   @column()
   public clubId: number
 
+  @belongsTo(() => Club, {
+    foreignKey: 'clubId'
+  })
+  public club: BelongsTo<typeof Club>
+  
   @computed()
   get fullname() {
     if(!!this.alias) return this.alias
     else if(!!this.user) return `${this.user.firstname} ${this.user.lastname}`
   }
 
-  @belongsTo(() => Club, {
-    foreignKey: 'clubId'
-  })
-  public club: BelongsTo<typeof Club>
 
   @column()
   public groupId: number

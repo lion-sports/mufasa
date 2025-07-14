@@ -25,11 +25,13 @@
         ...clubState.validatedClub
       })
 
-      await service.uploadMedia({
-        clubId: data.club.id,
-        header: clubState.club.header?.[0],
-        logo: clubState.club.logo?.[0]
-      })
+      if(!!clubState.club.header?.[0] || !!clubState.club.logo?.[0]) {
+        await service.uploadMedia({
+          clubId: data.club.id,
+          header: clubState.club.header?.[0],
+          logo: clubState.club.logo?.[0]
+        })
+      }
 
       goto('/clubs/' + data.club.id)
     } catch(err) {
