@@ -32,6 +32,7 @@ services:
         - traefik.http.routers.mufasa-api.rule=Host(`api-lionsport.likablehair.it`)
         - traefik.http.services.mufasa-api.loadbalancer.server.port=3333
         - traefik.http.routers.mufasa-api.entrypoints=websecure
+        - traefik.http.routers.mufasa-api.middlewares=lh-ipallowlist
     networks:
       - public
       - common_services
@@ -53,6 +54,7 @@ services:
         - traefik.http.routers.mufasa.rule=Host(`lionsport.likablehair.it`)
         - traefik.http.services.mufasa.loadbalancer.server.port=3000
         - traefik.http.routers.mufasa.entrypoints=websecure
+        - traefik.http.routers.mufasa.middlewares=lh-ipallowlist
     networks:
       - public
       - common_services
