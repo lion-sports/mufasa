@@ -25,21 +25,25 @@
 		signupLoading = true
 
 		const service = new AuthService({ fetch })
+		const signupData: any = {
+			email: signupState.signup.email!,
+			password: signupState.signup.password!,
+			firstname: signupState.signup.firstname!,
+			lastname: signupState.signup.lastname!,
+			birthday: signupState.signup.birthday,
+			invitationToken: data?.token
+		}
+
+		// Only include club data if it's provided
+		if (signupState.signup.clubName && signupState.signup.clubCompleteName) {
+			signupData.clubName = signupState.signup.clubName
+			signupData.completeClubName = signupState.signup.clubCompleteName
+			signupData.clubSport = signupState.signup.clubSport
+			signupData.collaborators = signupState.signup.collaborators
+		}
+
 		service
-			.signup({
-				data: {
-					email: signupState.signup.email!,
-					password: signupState.signup.password!,
-					firstname: signupState.signup.firstname!,
-					lastname: signupState.signup.lastname!,
-					birthday: signupState.signup.birthday,
-					clubName: signupState.signup.clubName!,
-					completeClubName: signupState.signup.clubCompleteName!,
-					clubSport: signupState.signup.clubSport,
-					collaborators: signupState.signup.collaborators,
-					invitationToken: data?.token
-				}
-			})
+			.signup({ data: signupData })
 			.then(() => (signupState.step = 'confirmation'))
 			.catch((err) =>
 				addErrorToast({
@@ -179,7 +183,7 @@
 								>
 									<div class="flex items-center gap-1">
 										<span class="underline underline-offset-2"
-											>{signupState.step.includes('invite') ? 'Next / Skip' : 'Next'}</span
+											>{signupState.step.includes('invite') || signupState.step === 'club' ? 'Next / Skip' : 'Next'}</span
 										>
 										<Icon name="mdi-arrow-right" />
 									</div>

@@ -33,7 +33,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   S3_BUCKET: Env.schema.string.optionalWhen(process.env.DRIVE_DISK != 's3'),
   S3_ENDPOINT: Env.schema.string.optionalWhen(process.env.DRIVE_DISK != 's3'),
   LOG_INTERNAL_SERVER_ERRORS: Env.schema.boolean.optional(),
-
+  CONFIRMATION_EMAIL_URL: Env.schema.string(),
   /*
   |----------------------------------------------------------
   | Variables for configuring the mail package

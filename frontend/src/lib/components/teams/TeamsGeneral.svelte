@@ -17,7 +17,7 @@
 		<tr class="field-row">
 			<td class="field-name">Note</td>
 			<td>
-				<div style:white-space="pre-wrap">{team.notes}</div>
+				<div class="prose">{@html team.notes}</div>
 			</td>
 		</tr>
 		<tr class="field-row">

@@ -45,7 +45,7 @@ export const STEP_LABELS: {
 
 export type SignupFormStep = (typeof SIGNUP_FORM_STEPS)[number]
 
-export const SIGNUP_FORM_SKIPPABLE_STEPS: SignupFormStep[] = ['inviteEmail', 'review']
+export const SIGNUP_FORM_SKIPPABLE_STEPS: SignupFormStep[] = ['club', 'inviteEmail', 'review']
 
 export const FIELDS_FOR_STEPS: {
 	[Key in SignupFormStep]?: (keyof SignupData)[]
@@ -133,29 +133,34 @@ export class SignupState {
 				message: 'Devi accettare i termini e le condizioni per poter procedere'
 			}
 
-		if (!this.signup.clubName) {
-			validationData.clubName = {
-				error: true,
-				message: 'Il nome è obbligatorio e deve essere univoco'
+		// Club validation - only required if user has started filling club data
+		const isClubRequired = !!(this.signup.clubName || this.signup.clubCompleteName || this.signup.clubSport)
+
+		if (isClubRequired) {
+			if (!this.signup.clubName) {
+				validationData.clubName = {
+					error: true,
+					message: 'Il nome è obbligatorio e deve essere univoco'
+				}
+			} else if (!/^[a-zA-Z0-9_.]+$/.test(this.signup.clubName)) {
+				validationData.clubName = {
+					error: true,
+					message: 'Il nome del club può contenere solo lettere, numeri, underscore e punti'
+				}
 			}
-		} else if (!/^[a-zA-Z0-9_.]+$/.test(this.signup.clubName)) {
-			validationData.clubName = {
-				error: true,
-				message: 'Il nome del club può contenere solo lettere, numeri, underscore e punti'
-			}
+
+			if (!this.signup.clubCompleteName)
+				validationData.clubCompleteName = {
+					error: true,
+					message: 'Il nome completo è obbligatorio'
+				}
+
+			if (!this.signup.clubSport)
+				validationData.clubSport = {
+					error: true,
+					message: 'Lo sport è obbligatorio'
+				}
 		}
-
-		if (!this.signup.clubCompleteName)
-			validationData.clubCompleteName = {
-				error: true,
-				message: 'Il nome completo è obbligatorio'
-			}
-
-		if (!this.signup.clubSport)
-			validationData.clubSport = {
-				error: true,
-				message: 'Lo sport è obbligatorio'
-			}
 
 		return validationData
 	})
@@ -178,7 +183,7 @@ export class SignupState {
 	} = $derived.by(() => {
 		let credentialsValid = true
 		let clubDataValid = true
-		for (const [key, value] of Object.entries(this.validationData)) {
+		for (const [key] of Object.entries(this.validationData)) {
 			let field = key as keyof SignupData
 			if (FIELDS_FOR_STEPS.credentials?.includes(field)) {
 				credentialsValid = credentialsValid && !this.validationData[field]?.error
@@ -189,9 +194,13 @@ export class SignupState {
 			}
 		}
 
+		// Club step is valid if either all club fields are valid OR if no club data is provided (skipped)
+		const hasClubData = !!(this.signup.clubName || this.signup.clubCompleteName || this.signup.clubSport)
+		const clubStepValid = hasClubData ? clubDataValid : true
+
 		return {
 			credentials: credentialsValid,
-			club: clubDataValid,
+			club: clubStepValid,
 			inviteEmail: true,
 			review: true,
 			confirmation: true

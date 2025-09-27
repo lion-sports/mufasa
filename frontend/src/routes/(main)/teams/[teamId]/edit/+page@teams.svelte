@@ -30,7 +30,10 @@
 		loading = true
 
 		let service = new TeamService({ fetch })
-		service.update(data.team).then(() => {
+		service.update({
+      id: data.team.id,
+      ...teamState.team
+    }).then(() => {
 			loading = false
 			window.history.back()
 		})
