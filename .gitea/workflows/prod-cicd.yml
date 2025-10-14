@@ -326,7 +326,7 @@ jobs:
           echo "EOF" >> $GITEA_OUTPUT
 
       - name: Deploy stack to swarm
-        uses: https://gitea.likablehair.it/Likablehair/docker-stack-deploy@v1.0.0
+        uses: https://gitea.likablehair.it/Likablehair/docker-stack-deploy@v1.1.0
         with:
           registry: "cr.likablehair.it"
           username: ${{ secrets.REGISTRY_USERNAME  }}
