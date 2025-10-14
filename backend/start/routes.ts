@@ -46,6 +46,7 @@ const PlacesController = () => import('#controllers/Http/PlacesController')
 const UserSettingsController = () => import('#controllers/Http/UserSettingsController')
 const ClubSettingsController = () => import('#controllers/Http/ClubSettingsController')
 const BookingsController = () => import('#controllers/Http/BookingsController')
+const NotificationsController = () => import('#controllers/Http/NotificationsController')
 
 router.post('/auth/login', [AuthController, 'login'])
 router.post('/auth/verifySignup', [AuthController, 'verifySignup'])
@@ -348,3 +349,14 @@ router.group(() => {
   router.get('/', [BookingsController, 'index'])
   router.get('/:id', [BookingsController, 'show'])
 }).use(middleware.silentAuth()).prefix('/bookings')
+
+router.group(() => {
+  router.get('/list', [NotificationsController, 'list'])
+  router.post('/markAsRead', [NotificationsController, 'markAsRead'])
+  router.post('/markAllAsRead', [NotificationsController, 'markAllAsRead'])
+  router.get('/unreadCount', [NotificationsController, 'getUnreadCount'])
+})
+  .use(middleware.auth({
+    guards: ['api']
+  }))
+  .prefix('/notifications')

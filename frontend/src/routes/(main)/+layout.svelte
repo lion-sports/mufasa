@@ -35,6 +35,7 @@
 		if (event.detail.option.name == 'teams') goto('/teams')
 		else if (event.detail.option.name == 'calendar') goto('/calendar')
     else if (event.detail.option.name == 'clubs') goto('/clubs')
+    else if (event.detail.option.name == 'inbox') goto('/inbox')
 		else if (event.detail.option.name == 'home') goto('/')
 
     drawerOpened = false
@@ -60,6 +61,11 @@
 			name: 'calendar',
 			label: 'Calendario',
 			icon: 'mdi-calendar'
+		},
+		{
+			name: 'inbox',
+			label: 'Inbox',
+			icon: 'mdi-email'
 		}
 	])
 
@@ -71,6 +77,8 @@
       selectedMenu = 'calendar'
     else if (page.url.pathname.startsWith('/clubs'))
       selectedMenu = 'clubs'
+    else if (page.url.pathname.startsWith('/inbox'))
+      selectedMenu = 'inbox'
 		else selectedMenu = 'home'
     return selectedMenu
   })

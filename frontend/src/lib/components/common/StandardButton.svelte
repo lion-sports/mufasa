@@ -88,7 +88,7 @@
 		{loading}
 		{disabled}
 		class="!box-border {clazz || ''}"
-		--button-padding="10px 20px 10px 20px"
+		--button-default-padding="10px 20px 10px 20px"
 		--button-background-color={backgroundColor}
 		--button-hover-background-color={activeColor}
 		--button-active-background-color={activeColor}

@@ -17,6 +17,7 @@ import env from '#start/env'
 import { DateTime } from 'luxon'
 import InvitationMail from '#app/mails/InvitationMail'
 import mail from '@adonisjs/mail/services/main'
+import NotificationsManager from './notifications.manager.js'
 
 export default class InvitationsManager {
   @withTransaction
@@ -202,6 +203,22 @@ export default class InvitationsManager {
     if (!!invitation.clubId) await invitation.load('club')
     if (!!invitation.groupId) await invitation.load('group')
 
+    // Create notification if invited user exists
+    if (!!invitedUser) {
+      const notificationsManager = new NotificationsManager()
+      await notificationsManager.createInvitationNotification({
+        data: {
+          userId: invitedUser.id,
+          invitationId: invitation.id,
+          invitedByUserId: user.id,
+          teamId: invitation.teamId,
+          clubId: invitation.clubId,
+          groupId: invitation.groupId
+        },
+        context: params.context
+      })
+    }
+
     return invitation
   }
 
@@ -310,6 +327,23 @@ export default class InvitationsManager {
     if (!!invitation.invitedByUserId) await invitation.load('invitedBy')
     if (!!invitation.teamId) await invitation.load('team')
     if (!!invitation.groupId) await invitation.load('group')
+
+    // Create notification if invited user exists
+    if (!!invitedUser) {
+      const notificationsManager = new NotificationsManager()
+      await notificationsManager.createInvitationNotification({
+        data: {
+          userId: invitedUser.id,
+          invitationId: invitation.id,
+          invitedByUserId: user.id,
+          teamId: invitation.teamId,
+          clubId: invitation.clubId,
+          groupId: invitation.groupId
+        },
+        context: params.context
+      })
+    }
+
     return invitation
   }
 
@@ -418,6 +452,23 @@ export default class InvitationsManager {
     if (!!invitation.invitedByUserId) await invitation.load('invitedBy')
     if (!!invitation.clubId) await invitation.load('club')
     if (!!invitation.groupId) await invitation.load('group')
+
+    // Create notification if invited user exists
+    if (!!invitedUser) {
+      const notificationsManager = new NotificationsManager()
+      await notificationsManager.createInvitationNotification({
+        data: {
+          userId: invitedUser.id,
+          invitationId: invitation.id,
+          invitedByUserId: user.id,
+          teamId: invitation.teamId,
+          clubId: invitation.clubId,
+          groupId: invitation.groupId
+        },
+        context: params.context
+      })
+    }
+
     return invitation
   }
 
