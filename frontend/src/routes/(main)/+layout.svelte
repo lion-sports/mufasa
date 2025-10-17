@@ -95,6 +95,7 @@
 		<UnstableDividedSideBarLayout
 			{options}
 			bind:drawerOpened
+      onmenuSelect={handleMenuClick}
 			expandOn="hover"
       --unstable-divided-side-bar-layout-content-padding="16px"
 		>
@@ -119,19 +120,6 @@
 					collapsed={!sidebarExpanded && !hamburgerVisible}
 				/>
 			{/snippet}
-      {#snippet menuSnippet({ sidebarExpanded, hamburgerVisible })}
-        <div class="ml-4 mt-4 mr-2">
-          <HierarchyMenu
-            {options}
-            iconsOnly={!sidebarExpanded && !hamburgerVisible}
-            selected={selectedMenu}
-            --icon-size="20px"
-            --hierarchy-menu-element-selected-background-color="rgb(var(--global-color-primary-500))"
-            --hierarchy-menu-element-selected-color="white"
-            onoptionClick={handleMenuClick}
-          />
-        </div>
-      {/snippet}
 			{#snippet userSnippet({ sidebarExpanded, hamburgerVisible })}
 				<div style:display="flex" style:flex-direction="column" style:height="100%">
 					<div style:flex-grow="1"></div>

@@ -5,12 +5,14 @@ import type { Team } from '$lib/services/teams/teams.service'
 import type { Group } from '$lib/services/groups/groups.service'
 import { FilterBuilder } from '@likable-hair/svelte'
 
+export type InvitationStatus = 'pending' | 'rejected' | 'accepted' | 'discarded'
+
 export type Invitation = {
 	id: number
 	invitedBy: User
 	invitedUser?: User
 	invitedEmail: string
-	status: 'pending' | 'rejected' | 'accepted' | 'discarded'
+  status: InvitationStatus
 	team: Team
 	group?: Group
   createdAt: Date

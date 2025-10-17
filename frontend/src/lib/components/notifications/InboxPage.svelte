@@ -81,19 +81,20 @@
 	}
 </script>
 
-<div class="inbox-container">
-	<div class="inbox-header">
-		<h1>Inbox</h1>
-		<div class="header-actions">
+<div class="max-w-3xl mx-auto p-4 md:p-6">
+	<div class="flex flex-col md:flex-row items-start md:justify-between md:items-center mb-6 flex-wrap gap-4">
+		<div class="flex items-center gap-3 flex-wrap w-full md:w-auto justify-between md:justify-start">
 			{#if unreadCount > 0}
-				<span class="unread-badge">
+				<span class="px-3 py-1 rounded-2xl text-xs opacity-50">
 					{unreadCount} non {unreadCount === 1 ? 'letta' : 'lette'}
 				</span>
 			{/if}
 
 			<button
-				class="filter-button"
-				class:active={showUnreadOnly}
+				class="bg-transparent border border-[rgb(var(--global-color-gray-300))] text-[rgb(var(--global-color-gray-600))] px-4 py-2 rounded cursor-pointer transition-all duration-200 ease-in-out hover:bg-[rgb(var(--global-color-gray-50))]"
+				class:!bg-[rgb(var(--global-color-primary-500))]={showUnreadOnly}
+				class:!text-white={showUnreadOnly}
+				class:!border-[rgb(var(--global-color-primary-500))]={showUnreadOnly}
 				onclick={toggleUnreadFilter}
 			>
 				{showUnreadOnly ? 'Mostra tutte' : 'Solo non lette'}
@@ -108,27 +109,27 @@
 	</div>
 
 	{#if error}
-		<div class="error-message">
+		<div class="bg-[rgb(var(--global-color-red-50))] text-[rgb(var(--global-color-red-700))] p-3 rounded mb-4">
 			{error}
 		</div>
 	{/if}
 
 	{#if loading}
-		<div class="loading-container">
+		<div class="text-center py-12 text-[rgb(var(--global-color-gray-500))]">
 			<p>Caricamento notifiche...</p>
 		</div>
 	{:else if notifications.length === 0}
-		<div class="empty-state">
-			<div class="empty-icon">📭</div>
-			<h2>Nessuna notifica</h2>
-			<p>
+		<div class="text-center py-12 px-6 text-[rgb(var(--global-color-gray-500))]">
+			<div class="text-6xl mb-4">📭</div>
+			<h2 class="m-0 mb-2 text-[rgb(var(--global-color-gray-700))]">Nessuna notifica</h2>
+			<p class="m-0">
 				{showUnreadOnly
 					? 'Non hai notifiche non lette'
 					: 'Non hai ancora ricevuto notifiche'}
 			</p>
 		</div>
 	{:else}
-		<div class="notifications-list">
+		<div class="mb-6">
 			{#each notifications as notification (notification._id)}
 				<NotificationItem
 					{notification}
@@ -139,21 +140,21 @@
 		</div>
 
 		{#if totalPages > 1}
-			<div class="pagination">
+			<div class="flex justify-center items-center gap-4 py-4">
 				<button
-					class="pagination-button"
+					class="bg-transparent border border-[rgb(var(--global-color-gray-300))] text-[rgb(var(--global-color-gray-600))] px-4 py-2 rounded cursor-pointer transition-all duration-200 ease-in-out hover:bg-[rgb(var(--global-color-gray-50))] disabled:hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
 					disabled={currentPage === 1}
 					onclick={() => goToPage(currentPage - 1)}
 				>
 					Precedente
 				</button>
 
-				<span class="page-info">
+				<span class="text-[rgb(var(--global-color-gray-600))] text-sm">
 					Pagina {currentPage} di {totalPages}
 				</span>
 
 				<button
-					class="pagination-button"
+					class="bg-transparent border border-[rgb(var(--global-color-gray-300))] text-[rgb(var(--global-color-gray-600))] px-4 py-2 rounded cursor-pointer transition-all duration-200 ease-in-out hover:bg-[rgb(var(--global-color-gray-50))] disabled:hover:bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
 					disabled={currentPage === totalPages}
 					onclick={() => goToPage(currentPage + 1)}
 				>
@@ -163,147 +164,3 @@
 		{/if}
 	{/if}
 </div>
-
-<style>
-	.inbox-container {
-		max-width: 800px;
-		margin: 0 auto;
-		padding: 24px;
-	}
-
-	.inbox-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 24px;
-		flex-wrap: wrap;
-		gap: 16px;
-	}
-
-	.inbox-header h1 {
-		margin: 0;
-		color: rgb(var(--global-color-gray-800));
-	}
-
-	.header-actions {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		flex-wrap: wrap;
-	}
-
-	.unread-badge {
-		background-color: rgb(var(--global-color-primary-500));
-		color: white;
-		padding: 4px 12px;
-		border-radius: 16px;
-		font-size: 0.875rem;
-		font-weight: 600;
-	}
-
-	.filter-button {
-		background: none;
-		border: 1px solid rgb(var(--global-color-gray-300));
-		color: rgb(var(--global-color-gray-600));
-		padding: 8px 16px;
-		border-radius: 4px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-	.filter-button:hover {
-		background-color: rgb(var(--global-color-gray-50));
-	}
-
-	.filter-button.active {
-		background-color: rgb(var(--global-color-primary-500));
-		color: white;
-		border-color: rgb(var(--global-color-primary-500));
-	}
-
-	.error-message {
-		background-color: rgb(var(--global-color-red-50));
-		color: rgb(var(--global-color-red-700));
-		padding: 12px;
-		border-radius: 4px;
-		margin-bottom: 16px;
-	}
-
-	.loading-container {
-		text-align: center;
-		padding: 48px;
-		color: rgb(var(--global-color-gray-500));
-	}
-
-	.empty-state {
-		text-align: center;
-		padding: 48px 24px;
-		color: rgb(var(--global-color-gray-500));
-	}
-
-	.empty-icon {
-		font-size: 4rem;
-		margin-bottom: 16px;
-	}
-
-	.empty-state h2 {
-		margin: 0 0 8px 0;
-		color: rgb(var(--global-color-gray-700));
-	}
-
-	.empty-state p {
-		margin: 0;
-	}
-
-	.notifications-list {
-		margin-bottom: 24px;
-	}
-
-	.pagination {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 16px;
-		padding: 16px 0;
-	}
-
-	.pagination-button {
-		background: none;
-		border: 1px solid rgb(var(--global-color-gray-300));
-		color: rgb(var(--global-color-gray-600));
-		padding: 8px 16px;
-		border-radius: 4px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-
-	.pagination-button:hover:not(:disabled) {
-		background-color: rgb(var(--global-color-gray-50));
-	}
-
-	.pagination-button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.page-info {
-		color: rgb(var(--global-color-gray-600));
-		font-size: 0.875rem;
-	}
-
-	@media (max-width: 768px) {
-		.inbox-container {
-			padding: 16px;
-		}
-
-		.inbox-header {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-
-		.header-actions {
-			width: 100%;
-			justify-content: space-between;
-		}
-	}
-</style>

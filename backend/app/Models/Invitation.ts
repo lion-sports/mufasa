@@ -7,6 +7,8 @@ import Group from '#app/Models/Group'
 import { type BelongsTo } from "@adonisjs/lucid/types/relations";
 import Club from './Club.js'
 
+export type InvitationStatus = 'pending' | 'rejected' | 'accepted' | 'discarded'
+
 export default class Invitation extends CamelCaseBaseModel {
   @column({ isPrimary: true })
   public id: number
@@ -52,7 +54,7 @@ export default class Invitation extends CamelCaseBaseModel {
   public group: BelongsTo<typeof Group>
 
   @column()
-  public status: 'pending' | 'rejected' | 'accepted' | 'discarded'
+  public status: InvitationStatus
 
   @column()
   public invitedEmail: string

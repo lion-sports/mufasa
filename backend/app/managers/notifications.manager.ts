@@ -2,6 +2,7 @@ import { Context, withTransaction, withUser } from './base.manager.js'
 import User from '#app/Models/User'
 import Mongo from '#services/Mongo'
 import { ObjectId } from 'mongodb'
+import { InvitationStatus } from '#models/Invitation'
 
 export type NotificationType = 'invitation'
 
@@ -12,6 +13,7 @@ export type NotificationInfo = {
     teamId?: number
     clubId?: number
     groupId?: number
+    status?: InvitationStatus
   }
 }
 
@@ -25,7 +27,7 @@ export type Notification = {
 }
 
 export default class NotificationsManager {
-  private collectionName = 'notifications'
+  public collectionName = 'notifications'
 
   @withTransaction
   @withUser

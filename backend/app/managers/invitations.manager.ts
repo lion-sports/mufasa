@@ -18,6 +18,7 @@ import { DateTime } from 'luxon'
 import InvitationMail from '#app/mails/InvitationMail'
 import mail from '@adonisjs/mail/services/main'
 import NotificationsManager from './notifications.manager.js'
+import Mongo from '#services/Mongo'
 
 export default class InvitationsManager {
   @withTransaction
@@ -617,6 +618,21 @@ export default class InvitationsManager {
       })
     }
 
+    // change status of the active notifications
+    // TODO make better way to mark the notification of the invitation as accepted
+    await Mongo.init()
+    const collection = Mongo.db.collection(new NotificationsManager().collectionName)
+    await collection.updateMany(
+      {
+        userId: user.id,
+        type: 'invitation',
+        'info.invitation.id': invitation.id
+      },
+      {
+        $set: { 'info.invitation.status': 'accepted' }
+      }
+    )
+
     return results
   }
 
@@ -653,7 +669,24 @@ export default class InvitationsManager {
     })
 
     invitation.status = 'rejected'
-    return await invitation.save()
+    await invitation.save()
+
+    // change status of the active notifications
+    // TODO make better way to mark the notification of the invitation as accepted
+    await Mongo.init()
+    const collection = Mongo.db.collection(new NotificationsManager().collectionName)
+    await collection.updateMany(
+      {
+        userId: user.id,
+        type: 'invitation',
+        'info.invitation.id': invitation.id
+      },
+      {
+        $set: { 'info.invitation.status': 'accepted' }
+      }
+    )
+
+    return invitation
   }
 
   @withTransaction

@@ -1,8 +1,5 @@
 import { FetchBasedService } from '$lib/services/common/fetchBased.service'
-import type { User } from '../auth/auth.service'
-import type { Team } from '../teams/teams.service'
-import type { Club } from '../clubs/clubs.service'
-import type { Group } from '../groups/groups.service'
+import type { InvitationStatus } from '../invitations/invitations.service'
 
 export type NotificationType = 'invitation'
 
@@ -13,6 +10,7 @@ export type NotificationInfo = {
     teamId?: number
     clubId?: number
     groupId?: number
+    status?: InvitationStatus
   }
 }
 

@@ -1,8 +1,11 @@
 <script lang="ts">
+  // Implement a logic similar to the widget of the dashboard, using the svelte:component element
 	import NotificationsService from '$lib/services/notifications/notifications.service'
 	import InvitationsService from '$lib/services/invitations/invitations.service'
 	import StandardButton from '$lib/components/common/StandardButton.svelte'
 	import type { Notification } from '$lib/services/notifications/notifications.service'
+	import { addErrorToast } from '../ui/sonner'
+	import { CircularLoader } from '@likable-hair/svelte'
 
 	interface Props {
 		notification: Notification
@@ -11,6 +14,9 @@
 	}
 
 	let { notification, onmarkAsRead, oninvitationAction }: Props = $props()
+
+  let loadingAcceptInvitation: boolean = $state(false),
+    loadingRejectInvitation: boolean = $state(false)
 
 	async function handleMarkAsRead() {
 		if (!notification.read) {
@@ -25,15 +31,32 @@
 		if (notification.type === 'invitation' && notification.info.invitation) {
 			let invitationsService = new InvitationsService({ fetch })
 
-			if (action === 'accept') {
-				await invitationsService.acceptInvitation({
-					invitation: { id: notification.info.invitation.id }
-				})
-			} else {
-				await invitationsService.rejectInvitation({
-					invitation: { id: notification.info.invitation.id }
-				})
-			}
+      try {
+        if (action === 'accept') {
+          loadingAcceptInvitation = true
+          await invitationsService.acceptInvitation({
+            invitation: { id: notification.info.invitation.id }
+          })
+        } else {
+          let confirmed = confirm('Sei sicuro di voler rifiutare l\'invito al team?')
+          if(!confirmed) return
+
+          loadingRejectInvitation = true
+          await invitationsService.rejectInvitation({
+            invitation: { id: notification.info.invitation.id }
+          })
+        }
+      } catch(e: any) {
+        addErrorToast({
+          title: 'Errore',
+          options: {
+            description: e
+          }
+        })
+      }
+
+      loadingAcceptInvitation = false
+      loadingRejectInvitation = false
 
 			oninvitationAction?.(notification, action)
 			await handleMarkAsRead()
@@ -58,7 +81,6 @@
 	onclick={handleMarkAsRead}
 	role="presentation"
 >
-	<!-- Left Icon -->
 	<div class="mr-3 md:mr-4 flex-shrink-0">
 		{#if notification.type === 'invitation'}
 			<div class="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-[rgb(var(--global-color-background-200))] text-[rgb(var(--global-color-contrast-600))]">
@@ -66,8 +88,6 @@
 			</div>
 		{/if}
 	</div>
-
-	<!-- Main Content -->
 	<div class="flex-1 min-w-0">
 		<div class="flex items-center gap-2 mb-1">
 			{#if notification.type === 'invitation'}
@@ -80,9 +100,19 @@
 
 		<div class="mb-2">
 			{#if notification.type === 'invitation' && notification.info.invitation}
-				<p class="text-sm leading-relaxed m-0 text-[rgb(var(--global-color-contrast-700))]">
-					Hai ricevuto un invito per unirti a una squadra o club.
-				</p>
+        {#if !notification.info.invitation.status || notification.info.invitation.status == 'pending'}
+          <p class="text-sm leading-relaxed m-0 text-[rgb(var(--global-color-contrast-700))]">
+            Hai ricevuto un invito per unirti a una squadra o club.
+          </p>
+        {:else}
+          <p class="text-sm leading-relaxed m-0 text-[rgb(var(--global-color-contrast-700))]">
+            Invito {#if notification.info.invitation.status === 'accepted'}
+              accettato.
+            {:else if notification.info.invitation.status === 'rejected'}
+              rifiutato.
+            {/if}
+          </p>
+        {/if}
 			{/if}
 		</div>
 
@@ -90,10 +120,8 @@
 			{formatDate(notification.firedAt)}
 		</div>
 	</div>
-
-	<!-- Right Actions -->
 	<div class="ml-3 md:ml-4 flex-shrink-0 flex items-center">
-		{#if notification.type === 'invitation' && notification.info.invitation}
+		{#if notification.type === 'invitation' && notification.info.invitation && (!notification.info.invitation.status || notification.info.invitation.status == 'pending')}
 			<div class="flex flex-col sm:flex-row gap-1.5 sm:gap-2 items-center">
 				<button
 					class="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors bg-transparent text-[rgb(var(--global-color-contrast-600))] border border-[rgb(var(--global-color-background-300))] hover:bg-[rgb(var(--global-color-background-200))] hover:text-[rgb(var(--global-color-contrast-800))]"
@@ -102,12 +130,20 @@
 						handleInvitationAction('reject');
 					}}
 				>
-					Rifiuta
+          {#if loadingRejectInvitation}
+            <CircularLoader 
+              --circular-loader-width="24px"
+              --circular-loader-height="24px"
+            ></CircularLoader>
+          {:else}
+            Rifiuta
+          {/if}
 				</button>
 				<StandardButton
 					on:click={() => handleInvitationAction('accept')}
           --button-padding="4px 8px"
           --button-border-radius="4px"
+          loading={loadingAcceptInvitation}
 				>
           <div class="font-medium">Accetta</div>
 				</StandardButton>
