@@ -46,7 +46,6 @@ services:
         - traefik.http.routers.mufasa-api.rule=Host(`api.lionn.xyz`)
         - traefik.http.services.mufasa-api.loadbalancer.server.port=3333
         - traefik.http.routers.mufasa-api.entrypoints=websecure
-        - traefik.http.routers.mufasa-api.middlewares=crowdsec
     networks:
       - public
       - redis
@@ -69,7 +68,6 @@ services:
         - traefik.http.routers.mufasa.rule=Host(`app.lionn.xyz`)
         - traefik.http.services.mufasa.loadbalancer.server.port=3000
         - traefik.http.routers.mufasa.entrypoints=websecure
-        - traefik.http.routers.mufasa.middlewares=crowdsec
     networks:
       - public
 
